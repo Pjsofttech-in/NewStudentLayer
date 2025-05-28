@@ -1,0 +1,78 @@
+package Layer.NewStudentManagement.ServiceImpl;
+
+import Layer.NewStudentManagement.Entity.StudentDivision;
+import Layer.NewStudentManagement.Repository.DivisionRepository;
+import Layer.NewStudentManagement.Service.DivisionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class DivisionServiceImpl implements DivisionService
+{
+    @Autowired
+    private StaffService staffService;
+
+    @Autowired
+    private DivisionRepository divisionRepository;
+
+    @Override
+    public StudentDivision createDivision(String role, String email, StudentDivision division)
+    {
+        if(!staffService.hasPermission(role,email,"Post"))
+        {
+            throw new RuntimeException("You don't have permission to create division");
+        }
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        division.setBranchCode(branchCode);
+        division.setRole(role);
+        division.setCreatedByEmail(email);
+        return divisionRepository.save(division);
+    }
+    @Override
+    public StudentDivision getDivisionById(Long id,String role,String email)
+    {
+        if(!staffService.hasPermission(role,email,"Get"))
+        {
+            throw new RuntimeException("You don't have permission to get division");
+        }
+        StudentDivision division = divisionRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("Division not found"));
+        return division;
+    }
+
+    @Override
+    public StudentDivision updateDivision(Long id,String role,String email,StudentDivision division)
+    {
+        if(!staffService.hasPermission(role,email,"Put"))
+        {
+            throw new RuntimeException("You don't have permission to update division");
+        }
+        StudentDivision existingDivision = divisionRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("Division not found"));
+        existingDivision.setDivision(division.getDivision());
+        return divisionRepository.save(existingDivision);
+    }
+
+    @Override
+    public void deleteDivisionById(Long id,String role,String email)
+    {
+        if(!staffService.hasPermission(role,email,"Delete"))
+        {
+            throw new RuntimeException("You don't have permission to delete division");
+        }
+        divisionRepository.deleteById(id);
+    }
+
+    @Override
+    public List<StudentDivision> getAllDivision(String role, String email)
+    {
+        if(!staffService.hasPermission(role,email,"Get"))
+        {
+            throw new RuntimeException("You don't have permission to get division");
+        }
+        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+        return divisionRepository.findAllByBranchCode(branchCode);
+    }
+}
