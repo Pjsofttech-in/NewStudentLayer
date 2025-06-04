@@ -1,6 +1,5 @@
-package Layer.NewStudentManagement.Entity;
+package Layer.NewStudentManagement.DTO;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,11 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class StudentDocument
+public class StudentDocumentDTO
 {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String studentPhoto;
     private String aadharcardPhoto;
@@ -26,9 +22,7 @@ public class StudentDocument
     private String birthCertificatePhoto;
     private String disabilityCertificate;
     private String studentSignPhoto;
+    private Long studentId;
 
-    @OneToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private StudentEntity student;
 
 }

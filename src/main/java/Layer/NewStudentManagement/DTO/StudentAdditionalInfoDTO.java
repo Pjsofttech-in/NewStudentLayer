@@ -1,6 +1,5 @@
-package Layer.NewStudentManagement.Entity;
+package Layer.NewStudentManagement.DTO;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,17 +7,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class StudentAdditionalInfo
+@AllArgsConstructor
+public class StudentAdditionalInfoDTO
 {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long domicileNumber;
     private boolean handicap;
-//    private String handicapCertificate;
     private boolean earthquake;
     private Long earthquakeNumber;
     private boolean projectDifferentiated;
@@ -30,10 +25,5 @@ public class StudentAdditionalInfo
     private String incomeRanges;
     private String specialPercentage;
     private String disabilityType;
-    private boolean isTcGenrated = true;
-
-    @OneToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private StudentEntity student;
-
+    private boolean isTcGenrated;
 }

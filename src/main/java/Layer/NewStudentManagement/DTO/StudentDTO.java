@@ -1,25 +1,21 @@
-package Layer.NewStudentManagement.Entity;
+package Layer.NewStudentManagement.DTO;
 
-import jakarta.persistence.*;
+import Layer.NewStudentManagement.Entity.StudentDocument;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class StudentEntity
+public class StudentDTO
 {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
     private String fullName;
@@ -51,30 +47,17 @@ public class StudentEntity
     private String streamName;
     private String groupName;
     private String semister;
-//    private String university;
-//    private String board;
 
     @Email
     private String createdByEmail;
     private String role;
     private String branchCode;
 
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
-    private StudentAddress address;
-
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private List<StudentEducation> educationList;
-
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
-    private StudentAdditionalInfo additionalInfo;
-
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
-    private StudentReligion religion;
-
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
-    private StudentSports sports;
-
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
-    private StudentDocument documents;
+    private StudentAddressDTO address;
+    private List<StudentEducationDTO> educationList;
+    private StudentAdditionalInfoDTO additionalInfo;
+    private StudentReligionDTO religion;
+    private StudentSportsDTO sports;
+    private StudentDocumentDTO documents;
 
 }

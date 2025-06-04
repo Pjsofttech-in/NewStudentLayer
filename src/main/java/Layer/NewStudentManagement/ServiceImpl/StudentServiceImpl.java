@@ -1,0 +1,379 @@
+package Layer.NewStudentManagement.ServiceImpl;
+
+import Layer.NewStudentManagement.DTO.StudentDTO;
+import Layer.NewStudentManagement.DTO.StudentDocumentDTO;
+import Layer.NewStudentManagement.DTO.StudentRequest;
+import Layer.NewStudentManagement.DTO.StudentResponseDTO;
+import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Mapper.StudentMapper;
+import Layer.NewStudentManagement.Repository.*;
+import Layer.NewStudentManagement.Service.S3Service;
+import Layer.NewStudentManagement.Service.StudentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class StudentServiceImpl implements StudentService
+{
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private AddressRepository addressRepo;
+    @Autowired
+    private EducationRepository educationRepo;
+    @Autowired
+    private AdditionalInfoRepository additionalInfoRepo;
+    @Autowired
+    private ReligionRepository religionRepo;
+    @Autowired
+    private SportsRepository sportsRepo;
+    @Autowired
+    private StaffService staffService;
+    @Autowired
+    private StudentMapper studentMapper;
+    @Autowired
+    private S3Service s3Service;
+    @Autowired
+    private DocumentRepository documentRepository;
+
+
+    @Override
+    public StudentEntity saveStudent(String role, String email, StudentRequest request)
+    {
+        if (!staffService.hasPermission(role, email, "Post")) {
+        throw new RuntimeException("You don't have permission to save student");
+    }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        StudentEntity student = request.getStudent();
+        student.setEnrollmentDate(LocalDate.now());
+        student.setRole(role);
+        student.setBranchCode(branchCode);
+        student.setCreatedByEmail(email);
+
+        StudentEntity savedStudent = studentRepository.save(student);
+
+        StudentAddress address = request.getAddress();
+        address.setStudent(savedStudent);
+        addressRepo.save(address);
+
+        List<StudentEducation> educationList = request.getEducationList();
+        for (StudentEducation education : educationList) {
+            education.setStudent(savedStudent);
+            educationRepo.save(education);
+        }
+
+        StudentAdditionalInfo additionalInfo = request.getAdditionalInfo();
+        additionalInfo.setStudent(savedStudent);
+        additionalInfoRepo.save(additionalInfo);
+
+        StudentReligion religion = request.getReligion();
+        religion.setStudent(savedStudent);
+        religionRepo.save(religion);
+
+        StudentSports sports = request.getSports();
+        sports.setStudent(savedStudent);
+        sportsRepo.save(sports);
+
+
+        return savedStudent;
+
+    }
+
+    @Override
+    public StudentDTO getStudentById(Long id, String role, String email)
+    {
+        if (!staffService.hasPermission(role, email, "Get")) {
+        throw new RuntimeException("You don't have permission to view student");
+    }
+
+        StudentEntity student = studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
+
+        return studentMapper.toStudentDTO(student);
+
+    }
+    @Override
+    public StudentResponseDTO updateStudent(Long studentId, String role, String email, StudentRequest request) {
+        if (!staffService.hasPermission(role, email, "Put")) {
+            throw new RuntimeException("You don't have permission to update student");
+        }
+
+        StudentEntity existingStudent = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        StudentEntity newData = request.getStudent();
+        if (newData != null) {
+            updateStudentFields(existingStudent, newData);
+        }
+
+        existingStudent.setId(studentId);
+        existingStudent.setRole(role);
+        existingStudent.setBranchCode(existingStudent.getBranchCode());
+        existingStudent.setCreatedByEmail(existingStudent.getCreatedByEmail());
+
+        StudentEntity savedStudent = studentRepository.save(existingStudent);
+
+        Optional.ofNullable(request.getAddress()).ifPresent(address -> {
+            address.setStudent(savedStudent);
+            addressRepo.save(address);
+        });
+
+        Optional.ofNullable(request.getEducationList()).ifPresent(list -> {
+            list.forEach(edu -> {
+                edu.setStudent(savedStudent);
+                educationRepo.save(edu);
+            });
+        });
+
+        Optional.ofNullable(request.getAdditionalInfo()).ifPresent(info -> {
+            info.setStudent(savedStudent);
+            additionalInfoRepo.save(info);
+        });
+
+        Optional.ofNullable(request.getReligion()).ifPresent(religion -> {
+            religion.setStudent(savedStudent);
+            religionRepo.save(religion);
+        });
+
+        Optional.ofNullable(request.getSports()).ifPresent(sports -> {
+            sports.setStudent(savedStudent);
+            sportsRepo.save(sports);
+        });
+
+        return mapToDTO(savedStudent);
+    }
+
+    @Override
+    public void deleteStudentById(Long id, String role, String email) {
+        if (!staffService.hasPermission(role, email, "Delete")) {
+            throw new RuntimeException("You don't have permission to delete student");
+        }
+
+        StudentEntity student = studentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
+        studentRepository.delete(student);
+    }
+
+    @Override
+    public List<StudentResponseDTO> getAllStudent(String role, String email) {
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to get students");
+        }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        List<StudentEntity> students = studentRepository.findAllByBranchCode(branchCode);
+
+        return students.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public StudentDocumentDTO uploadStudentDocuments(
+            Long studentId, String role, String email,
+            MultipartFile studentPhoto, MultipartFile aadharcardPhoto, MultipartFile pancardPhoto,
+            MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto,
+            MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
+            MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate,
+            MultipartFile studentSignPhoto) {
+
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        StudentDocument doc = new StudentDocument();
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        if (studentPhoto != null)
+            doc.setStudentPhoto(s3Service.uploadFile(studentPhoto, branchCode, "studentPhoto"));
+        if (aadharcardPhoto != null)
+            doc.setAadharcardPhoto(s3Service.uploadFile(aadharcardPhoto, branchCode, "aadharcardPhoto"));
+        if (pancardPhoto != null)
+            doc.setPancardPhoto(s3Service.uploadFile(pancardPhoto, branchCode, "pancardPhoto"));
+        if (casteValidationPhoto != null)
+            doc.setCasteValidationPhoto(s3Service.uploadFile(casteValidationPhoto, branchCode, "casteValidationPhoto"));
+        if (casteCertificatePhoto != null)
+            doc.setCasteCertificatePhoto(s3Service.uploadFile(casteCertificatePhoto, branchCode, "casteCertificatePhoto"));
+        if (leavingCertificatePhoto != null)
+            doc.setLeavingCertificatePhoto(s3Service.uploadFile(leavingCertificatePhoto, branchCode, "leavingCertificatePhoto"));
+        if (domicilePhoto != null)
+            doc.setDomicilePhoto(s3Service.uploadFile(domicilePhoto, branchCode, "domicilePhoto"));
+        if (birthCertificatePhoto != null)
+            doc.setBirthCertificatePhoto(s3Service.uploadFile(birthCertificatePhoto, branchCode, "birthCertificatePhoto"));
+        if (disabilityCertificate != null)
+            doc.setDisabilityCertificate(s3Service.uploadFile(disabilityCertificate, branchCode, "disabilityCertificate"));
+        if (studentSignPhoto != null)
+            doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode, "studentSignPhoto"));
+
+        doc.setStudent(student); // set the required reference
+
+        StudentDocument saved = documentRepository.save(doc);
+
+        // Convert to DTO
+        StudentDocumentDTO dto = new StudentDocumentDTO();
+        dto.setId(saved.getId());
+        dto.setStudentPhoto(saved.getStudentPhoto());
+        dto.setAadharcardPhoto(saved.getAadharcardPhoto());
+        dto.setPancardPhoto(saved.getPancardPhoto());
+        dto.setCasteValidationPhoto(saved.getCasteValidationPhoto());
+        dto.setCasteCertificatePhoto(saved.getCasteCertificatePhoto());
+        dto.setLeavingCertificatePhoto(saved.getLeavingCertificatePhoto());
+        dto.setDomicilePhoto(saved.getDomicilePhoto());
+        dto.setBirthCertificatePhoto(saved.getBirthCertificatePhoto());
+        dto.setDisabilityCertificate(saved.getDisabilityCertificate());
+        dto.setStudentSignPhoto(saved.getStudentSignPhoto());
+        dto.setStudentId(saved.getStudent().getId());
+
+        return dto;
+    }
+
+
+
+    private void updateStudentFields(StudentEntity existing, StudentEntity incoming) {
+        if (incoming.getTitle() != null) existing.setTitle(incoming.getTitle());
+        if (incoming.getFullName() != null) existing.setFullName(incoming.getFullName());
+        if (incoming.getGender() != null) existing.setGender(incoming.getGender());
+        if (incoming.getBloodGroup() != null) existing.setBloodGroup(incoming.getBloodGroup());
+        if (incoming.getMotherTongue() != null) existing.setMotherTongue(incoming.getMotherTongue());
+        if (incoming.getMaritalStatus() != null) existing.setMaritalStatus(incoming.getMaritalStatus());
+        if (incoming.getContact() != null && !"null".equals(incoming.getContact())) existing.setContact(incoming.getContact());
+        if (incoming.getAge() != null) existing.setAge(incoming.getAge());
+        if (incoming.getEmail() != null) existing.setEmail(incoming.getEmail());
+        if (incoming.getDateOfBirth() != null) existing.setDateOfBirth(incoming.getDateOfBirth());
+        if (incoming.getBirthPlace() != null) existing.setBirthPlace(incoming.getBirthPlace());
+        if (incoming.getBirthCountry() != null) existing.setBirthCountry(incoming.getBirthCountry());
+        if (incoming.getPancardNumber() != null) existing.setPancardNumber(incoming.getPancardNumber());
+        if (incoming.getAadharNumber() != null) existing.setAadharNumber(incoming.getAadharNumber());
+        if (incoming.getRollNo() != null) existing.setRollNo(incoming.getRollNo());
+        if (incoming.getStandard() != null) existing.setStandard(incoming.getStandard());
+        if (incoming.getAcademicYear() != null) existing.setAcademicYear(incoming.getAcademicYear());
+        if (incoming.getUdiseNo() != null) existing.setUdiseNo(incoming.getUdiseNo());
+        if (incoming.getApaarId() != null) existing.setApaarId(incoming.getApaarId());
+        if (incoming.getMediumName() != null) existing.setMediumName(incoming.getMediumName());
+        if (incoming.getEnrollmentDate() != null) existing.setEnrollmentDate(incoming.getEnrollmentDate());
+        if (incoming.getApprovalDate() != null) existing.setApprovalDate(incoming.getApprovalDate());
+        if (incoming.getStatus() != null) existing.setStatus(incoming.getStatus());
+        if (incoming.getApplyFor() != null) existing.setApplyFor(incoming.getApplyFor());
+        if (incoming.getStreamName() != null) existing.setStreamName(incoming.getStreamName());
+        if (incoming.getGroupName() != null) existing.setGroupName(incoming.getGroupName());
+        if (incoming.getSemister() != null) existing.setSemister(incoming.getSemister());
+    }
+
+
+    public StudentResponseDTO mapToDTO(StudentEntity student) {
+        StudentResponseDTO dto = new StudentResponseDTO();
+
+        dto.setId(student.getId());
+        dto.setTitle(student.getTitle());
+        dto.setFullName(student.getFullName());
+        dto.setGender(student.getGender());
+        dto.setBloodGroup(student.getBloodGroup());
+        dto.setMotherTongue(student.getMotherTongue());
+        dto.setMaritalStatus(student.getMaritalStatus());
+        dto.setContact(String.valueOf(student.getContact())); // Convert Long to String for pattern validation
+        dto.setAge(student.getAge());
+        dto.setEmail(student.getEmail());
+        dto.setDateOfBirth(student.getDateOfBirth());
+        dto.setBirthPlace(student.getBirthPlace());
+        dto.setBirthCountry(student.getBirthCountry());
+        dto.setPancardNumber(student.getPancardNumber());
+        dto.setAadharNumber(student.getAadharNumber());
+        dto.setRollNo(student.getRollNo());
+        dto.setStandard(student.getStandard());
+        dto.setAcademicYear(student.getAcademicYear());
+        dto.setUdiseNo(student.getUdiseNo());
+        dto.setApaarId(student.getApaarId());
+        dto.setMediumName(student.getMediumName());
+        dto.setEnrollmentDate(student.getEnrollmentDate());
+        dto.setApprovalDate(student.getApprovalDate());
+        dto.setStatus(student.getStatus());
+        dto.setApplyFor(student.getApplyFor());
+        dto.setStreamName(student.getStreamName());
+        dto.setGroupName(student.getGroupName());
+        dto.setSemister(student.getSemister());
+        dto.setCreatedByEmail(student.getCreatedByEmail());
+        dto.setRole(student.getRole());
+        dto.setBranchCode(student.getBranchCode());
+
+        return dto;
+    }
+
+    @Override
+    public StudentDocumentDTO updateStudentDocuments(Long studentId, String role, String email,
+                                                     MultipartFile studentPhoto,
+                                                     MultipartFile aadharcardPhoto,
+                                                     MultipartFile pancardPhoto,
+                                                     MultipartFile casteValidationPhoto,
+                                                     MultipartFile casteCertificatePhoto,
+                                                     MultipartFile leavingCertificatePhoto,
+                                                     MultipartFile domicilePhoto,
+                                                     MultipartFile birthCertificatePhoto,
+                                                     MultipartFile disabilityCertificate,
+                                                     MultipartFile studentSignPhoto) {
+
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        StudentDocument doc = documentRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new RuntimeException("StudentDocument not found"));
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        if (studentPhoto != null && !studentPhoto.isEmpty())
+            doc.setStudentPhoto(s3Service.uploadFile(studentPhoto, branchCode, "studentPhoto"));
+
+        if (aadharcardPhoto != null && !aadharcardPhoto.isEmpty())
+            doc.setAadharcardPhoto(s3Service.uploadFile(aadharcardPhoto, branchCode, "aadharcardPhoto"));
+
+        if (pancardPhoto != null && !pancardPhoto.isEmpty())
+            doc.setPancardPhoto(s3Service.uploadFile(pancardPhoto, branchCode, "pancardPhoto"));
+
+        if (casteValidationPhoto != null && !casteValidationPhoto.isEmpty())
+            doc.setCasteValidationPhoto(s3Service.uploadFile(casteValidationPhoto, branchCode, "casteValidationPhoto"));
+
+        if (casteCertificatePhoto != null && !casteCertificatePhoto.isEmpty())
+            doc.setCasteCertificatePhoto(s3Service.uploadFile(casteCertificatePhoto, branchCode, "casteCertificatePhoto"));
+
+        if (leavingCertificatePhoto != null && !leavingCertificatePhoto.isEmpty())
+            doc.setLeavingCertificatePhoto(s3Service.uploadFile(leavingCertificatePhoto, branchCode, "leavingCertificatePhoto"));
+
+        if (domicilePhoto != null && !domicilePhoto.isEmpty())
+            doc.setDomicilePhoto(s3Service.uploadFile(domicilePhoto, branchCode, "domicilePhoto"));
+
+        if (birthCertificatePhoto != null && !birthCertificatePhoto.isEmpty())
+            doc.setBirthCertificatePhoto(s3Service.uploadFile(birthCertificatePhoto, branchCode, "birthCertificatePhoto"));
+
+        if (disabilityCertificate != null && !disabilityCertificate.isEmpty())
+            doc.setDisabilityCertificate(s3Service.uploadFile(disabilityCertificate, branchCode, "disabilityCertificate"));
+
+        if (studentSignPhoto != null && !studentSignPhoto.isEmpty())
+            doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode, "studentSignPhoto"));
+
+        StudentDocument saved = documentRepository.save(doc);
+
+        StudentDocumentDTO dto = new StudentDocumentDTO();
+        dto.setId(saved.getId());
+        dto.setStudentId(student.getId());
+        dto.setStudentPhoto(saved.getStudentPhoto());
+        dto.setAadharcardPhoto(saved.getAadharcardPhoto());
+        dto.setPancardPhoto(saved.getPancardPhoto());
+        dto.setCasteValidationPhoto(saved.getCasteValidationPhoto());
+        dto.setCasteCertificatePhoto(saved.getCasteCertificatePhoto());
+        dto.setLeavingCertificatePhoto(saved.getLeavingCertificatePhoto());
+        dto.setDomicilePhoto(saved.getDomicilePhoto());
+        dto.setBirthCertificatePhoto(saved.getBirthCertificatePhoto());
+        dto.setDisabilityCertificate(saved.getDisabilityCertificate());
+        dto.setStudentSignPhoto(saved.getStudentSignPhoto());
+
+        return dto;
+    }
+
+
+
+}

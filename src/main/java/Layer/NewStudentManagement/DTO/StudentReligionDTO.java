@@ -1,6 +1,5 @@
-package Layer.NewStudentManagement.Entity;
+package Layer.NewStudentManagement.DTO;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,14 +7,10 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class StudentReligion
+@AllArgsConstructor
+public class StudentReligionDTO
 {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String religion;
     private boolean minority;
@@ -25,9 +20,4 @@ public class StudentReligion
     private Boolean casteValidation;
     private String casteValidationNumber;
     private String subCaste;
-
-    @OneToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private StudentEntity student;
-
 }

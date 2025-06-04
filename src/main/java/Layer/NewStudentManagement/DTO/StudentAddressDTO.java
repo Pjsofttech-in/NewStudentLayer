@@ -1,7 +1,6 @@
-package Layer.NewStudentManagement.Entity;
+package Layer.NewStudentManagement.DTO;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,15 +8,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class StudentAddress
+@AllArgsConstructor
+public class StudentAddressDTO
 {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String permanentAddress;
     private String plandmark;
     private String pDistrict;
@@ -37,12 +32,6 @@ public class StudentAddress
     private String motherName;
     private String fatherProfession;
     private String fathersName;
-    @Pattern(regexp = "^[0-9]{10}$", message = "Mobile number must be 10 digits")
     private String fathersContact;
-    @Pattern(regexp = "^[0-9]{10}$", message = "Mobile number must be 10 digits")
     private String whatsappNumber;
-
-    @OneToOne
-    @JoinColumn(name = "student_id", nullable = false)
-    private StudentEntity student;
 }
