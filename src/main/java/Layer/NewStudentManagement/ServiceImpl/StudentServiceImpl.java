@@ -43,15 +43,18 @@ public class StudentServiceImpl implements StudentService
     private DocumentRepository documentRepository;
 
 
+    private void checkPermission(String role, String email, String action) {
+        if (!staffService.hasPermission(role, email, action)) {
+            throw new RuntimeException("You don't have permission to " + action.toLowerCase() + " student");
+        }
+    }
+
+
     @Override
     public StudentEntity saveStudent(String role, String email, StudentRequest request)
     {
-        if (!staffService.hasPermission(role, email, "Post")) {
-        throw new RuntimeException("You don't have permission to save student");
-    }
-
+       checkPermission(role,email,"Post");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-
         StudentEntity student = request.getStudent();
         student.setEnrollmentDate(LocalDate.now());
         student.setRole(role);
@@ -90,10 +93,7 @@ public class StudentServiceImpl implements StudentService
     @Override
     public StudentDTO getStudentById(Long id, String role, String email)
     {
-        if (!staffService.hasPermission(role, email, "Get")) {
-        throw new RuntimeException("You don't have permission to view student");
-    }
-
+        checkPermission(role,email,"Get");
         StudentEntity student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
 
@@ -102,28 +102,18 @@ public class StudentServiceImpl implements StudentService
     }
     @Override
     public StudentResponseDTO updateStudent(Long studentId, String role, String email, StudentRequest request) {
-        if (!staffService.hasPermission(role, email, "Put")) {
-            throw new RuntimeException("You don't have permission to update student");
-        }
+        checkPermission(role, email, "Put");
 
-        StudentEntity existingStudent = studentRepository.findById(studentId)
+        StudentEntity existing = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
-        StudentEntity newData = request.getStudent();
-        if (newData != null) {
-            updateStudentFields(existingStudent, newData);
-        }
+        updateStudentFields(existing, request.getStudent());
 
-        existingStudent.setId(studentId);
-        existingStudent.setRole(role);
-        existingStudent.setBranchCode(existingStudent.getBranchCode());
-        existingStudent.setCreatedByEmail(existingStudent.getCreatedByEmail());
+        StudentEntity savedStudent = studentRepository.save(existing);
 
-        StudentEntity savedStudent = studentRepository.save(existingStudent);
-
-        Optional.ofNullable(request.getAddress()).ifPresent(address -> {
-            address.setStudent(savedStudent);
-            addressRepo.save(address);
+        Optional.ofNullable(request.getAddress()).ifPresent(addr -> {
+            addr.setStudent(savedStudent);
+            addressRepo.save(addr);
         });
 
         Optional.ofNullable(request.getEducationList()).ifPresent(list -> {
@@ -138,14 +128,14 @@ public class StudentServiceImpl implements StudentService
             additionalInfoRepo.save(info);
         });
 
-        Optional.ofNullable(request.getReligion()).ifPresent(religion -> {
-            religion.setStudent(savedStudent);
-            religionRepo.save(religion);
+        Optional.ofNullable(request.getReligion()).ifPresent(rel -> {
+            rel.setStudent(savedStudent);
+            religionRepo.save(rel);
         });
 
-        Optional.ofNullable(request.getSports()).ifPresent(sports -> {
-            sports.setStudent(savedStudent);
-            sportsRepo.save(sports);
+        Optional.ofNullable(request.getSports()).ifPresent(sport -> {
+            sport.setStudent(savedStudent);
+            sportsRepo.save(sport);
         });
 
         return mapToDTO(savedStudent);
@@ -153,10 +143,7 @@ public class StudentServiceImpl implements StudentService
 
     @Override
     public void deleteStudentById(Long id, String role, String email) {
-        if (!staffService.hasPermission(role, email, "Delete")) {
-            throw new RuntimeException("You don't have permission to delete student");
-        }
-
+        checkPermission(role,email,"Delete");
         StudentEntity student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
         studentRepository.delete(student);
@@ -164,10 +151,7 @@ public class StudentServiceImpl implements StudentService
 
     @Override
     public List<StudentResponseDTO> getAllStudent(String role, String email) {
-        if (!staffService.hasPermission(role, email, "GET")) {
-            throw new RuntimeException("You don't have permission to get students");
-        }
-
+        checkPermission(role,email,"Get");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         List<StudentEntity> students = studentRepository.findAllByBranchCode(branchCode);
 
@@ -182,8 +166,9 @@ public class StudentServiceImpl implements StudentService
             MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto,
             MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
             MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate,
-            MultipartFile studentSignPhoto) {
-
+            MultipartFile studentSignPhoto)
+    {
+        checkPermission(role,email,"Put");
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
@@ -211,11 +196,10 @@ public class StudentServiceImpl implements StudentService
         if (studentSignPhoto != null)
             doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode, "studentSignPhoto"));
 
-        doc.setStudent(student); // set the required reference
+        doc.setStudent(student);
 
         StudentDocument saved = documentRepository.save(doc);
 
-        // Convert to DTO
         StudentDocumentDTO dto = new StudentDocumentDTO();
         dto.setId(saved.getId());
         dto.setStudentPhoto(saved.getStudentPhoto());
@@ -233,6 +217,16 @@ public class StudentServiceImpl implements StudentService
         return dto;
     }
 
+    @Override
+    public List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email ,String medium, String standard)
+    {
+        checkPermission(role,email,"Get");
+        List<StudentEntity> students = studentRepository.findByMediumAndStandard(medium,standard);
+
+        return students.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
 
 
     private void updateStudentFields(StudentEntity existing, StudentEntity incoming) {
@@ -374,6 +368,13 @@ public class StudentServiceImpl implements StudentService
         return dto;
     }
 
+    @Override
+    public List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email,Long classRoomId)
+    {
+        checkPermission(role,email,"Get");
+        List<StudentEntity> students = studentRepository.findByClassRoomId(classRoomId);
+        return students.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
 
 
 }

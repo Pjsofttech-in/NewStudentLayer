@@ -37,7 +37,7 @@ public class StudentEntity
     private String birthCountry;
     private String pancardNumber;
     private Long aadharNumber;
-    private Integer rollNo;
+    private Integer rollNo = 0;
     private String standard;
     @Column(length = 9)
     private String academicYear;
@@ -76,5 +76,9 @@ public class StudentEntity
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
     private StudentDocument documents;
+
+    @ManyToOne
+    @JoinColumn(name = "classroom_id")
+    private StudentClassRoom classRoom;
 
 }

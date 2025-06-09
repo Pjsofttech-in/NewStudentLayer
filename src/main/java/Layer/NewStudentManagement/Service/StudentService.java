@@ -23,14 +23,12 @@ public interface StudentService
                                               MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate, MultipartFile studentSignPhoto);
 
     StudentDocumentDTO updateStudentDocuments(Long studentId, String role, String email,
-                                              MultipartFile studentPhoto,
-                                              MultipartFile aadharcardPhoto,
-                                              MultipartFile pancardPhoto,
-                                              MultipartFile casteValidationPhoto,
-                                              MultipartFile casteCertificatePhoto,
-                                              MultipartFile leavingCertificatePhoto,
-                                              MultipartFile domicilePhoto,
-                                              MultipartFile birthCertificatePhoto,
-                                              MultipartFile disabilityCertificate,
-                                              MultipartFile studentSignPhoto);
+                                              MultipartFile studentPhoto, MultipartFile aadharcardPhoto, MultipartFile pancardPhoto,
+                                              MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto,
+                                              MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
+                                              MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate, MultipartFile studentSignPhoto);
+
+    List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email ,String medium, String standard);
+
+    List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email,Long classRoomId);
 }

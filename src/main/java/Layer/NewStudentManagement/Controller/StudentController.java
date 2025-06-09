@@ -117,6 +117,18 @@ public class StudentController
         return ResponseEntity.ok(updated);
     }
 
+    @GetMapping("/getStudentByMediumAndStandard")
+    public ResponseEntity<List<StudentResponseDTO>> getStudentByMediumAndStandard(@RequestParam String role, @RequestParam String email,
+                                                                                  @RequestParam String medium, @RequestParam String standard)
+    {
+        return ResponseEntity.ok(studentService.getStudentByMediumDivisionStandard(role, email,medium,standard));
+    }
+
+    @GetMapping("/getStudentByClassRoomId")
+    public ResponseEntity<List<StudentResponseDTO>> getStudentsByClassRoomId(@RequestParam String role, @RequestParam String email,@RequestParam Long classRoomId) {
+        List<StudentResponseDTO> students = studentService.getStudentsByClassRoomId(role , email,classRoomId);
+        return ResponseEntity.ok(students);
+    }
 
 
 }

@@ -1,14 +1,13 @@
 package Layer.NewStudentManagement.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,4 +24,8 @@ public class StudentDivision
     private String createdByEmail;
     private String role;
     private String branchCode;
+
+    @OneToMany(mappedBy = "division", cascade = CascadeType.ALL)
+    private List<StudentClassRoom> classRooms;
+
 }
