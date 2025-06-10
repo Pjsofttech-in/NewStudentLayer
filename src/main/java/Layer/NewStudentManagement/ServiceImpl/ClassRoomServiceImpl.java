@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,8 +52,10 @@ public class ClassRoomServiceImpl implements ClassRoomService
     @Autowired
     StudentRepository studentRepository;
 
+
     @Autowired
-    S3Client s3Client;
+    private S3Service s3Service;
+
 
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
@@ -189,7 +192,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
     }
 
     @Override
-    public String assignStudentsToClassroom(String role, String email, Long classroomId, List<Long> studentIds) {
+    public Map<Long, String> assignStudentsToClassroom(String role, String email, Long classroomId, List<Long> studentIds) {
         if (!staffService.hasPermission(role, email, "Post")) {
             throw new RuntimeException("You don't have permission to Assign Student To ClassRoom");
         }
@@ -202,7 +205,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
         int newRollNo = (maxRollNo != null) ? maxRollNo + 1 : 1;
 
         List<StudentEntity> students = studentRepository.findAllById(studentIds);
-
+        Map<Long, String> studentPhotoUrls = new HashMap<>();
         for (StudentEntity student : students) {
             student.setClassRoom(classroom);
             student.setRollNo(newRollNo);
@@ -211,27 +214,14 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
             if (document != null && document.getStudentPhoto() != null) {
                 try {
-                    String originalUrl = document.getStudentPhoto();
-                    String s3Prefix = "https://" + bucketName + ".s3.amazonaws.com/";
-                    if (!originalUrl.startsWith(s3Prefix)) {
-                        throw new RuntimeException("Invalid student photo URL for studentId: " + student.getId());
-                    }
 
-                    String sourceKey = originalUrl.substring(s3Prefix.length());
-
-                    String extension = sourceKey.substring(sourceKey.lastIndexOf("."));
-
-                    String destKey = branchCode + "/student_sys/attendance_faces/" + classroomId + "/" + newRollNo + extension;
-
-                    CopyObjectRequest copyReq = CopyObjectRequest.builder()
-                            .sourceBucket(bucketName)
-                            .sourceKey(sourceKey)
-                            .destinationBucket(bucketName)
-                            .destinationKey(destKey)
-                            .build();
-
-                    s3Client.copyObject(copyReq);
-
+                    String newPhotoUrl = s3Service.copyStudentPhotoToAttendanceFaces(
+                            document.getStudentPhoto(),
+                            branchCode,
+                            classroomId.toString(),
+                            String.valueOf(newRollNo)
+                    );
+                    studentPhotoUrls.put(student.getId(), newPhotoUrl);
                     // (Optional) Set new photo URL in document if needed
                     // document.setStudentPhoto(s3Prefix + destKey);
                     // studentDocumentRepository.save(document);
@@ -244,8 +234,9 @@ public class ClassRoomServiceImpl implements ClassRoomService
             newRollNo++;
         }
 
+
         studentRepository.saveAll(students);
-        return "Students assigned to classroom successfully.";
+        return studentPhotoUrls;
     }
 
     private StudentClassRoomResponseDTO mapToResponseDTO(StudentClassRoom classroom) {

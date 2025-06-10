@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
@@ -54,12 +56,12 @@ public class ClassRoomController
     }
 
     @PostMapping("/assignStudentToClassRoom")
-    public ResponseEntity<String> assignStudentsToClassroom(
+    public ResponseEntity<Map<Long, String>> assignStudentsToClassroom(
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam Long classroomId,
             @RequestParam List<Long> studentIds) {
-        String response = classRoomService.assignStudentsToClassroom(role,email,classroomId, studentIds);
+        Map<Long, String>  response = classRoomService.assignStudentsToClassroom(role,email,classroomId, studentIds);
         return ResponseEntity.ok(response);
     }
 

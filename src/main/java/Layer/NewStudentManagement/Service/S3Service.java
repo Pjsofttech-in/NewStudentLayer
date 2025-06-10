@@ -64,7 +64,7 @@ public class S3Service {
 
             String extension = sourceKey.substring(sourceKey.lastIndexOf("."));
 
-            String destKey = branchCode+"student_sys/attendance_faces/" + classRoomId +"/"+ rollNo + extension;
+            String destKey = branchCode+"/student_sys/attendance_faces/" + classRoomId +"/"+ rollNo + extension;
 
             CopyObjectRequest copyRequest = CopyObjectRequest.builder()
                     .sourceBucket(bucketName)

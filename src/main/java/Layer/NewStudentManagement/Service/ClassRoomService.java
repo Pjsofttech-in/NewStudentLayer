@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ClassRoomService
 {
@@ -14,7 +15,7 @@ public interface ClassRoomService
     StudentClassRoomResponseDTO getClassRoomById(Long id, String role, String email);
     void deleteClassRoomById(Long id, String role, String email);
     List<StudentClassRoomResponseDTO> getAllClassRoom(String role, String email);
-    String assignStudentsToClassroom(String role,String email,Long classroomId, List<Long> studentIds);
+    Map<Long, String> assignStudentsToClassroom(String role, String email, Long classroomId, List<Long> studentIds);
 
 
 }
