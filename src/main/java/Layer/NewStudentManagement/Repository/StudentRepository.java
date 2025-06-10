@@ -15,8 +15,8 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>
     @Query("SELECT s FROM StudentEntity s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentEntity> findAllByBranchCode(@Param("branchCode") String branchCode);
 
-    @Query("SELECT s FROM StudentEntity s WHERE s.mediumName = :medium AND s.standard = :standard ORDER BY s.id DESC")
-    List<StudentEntity> findByMediumAndStandard(@Param("medium") String medium, @Param("standard") String standard);
+    @Query("SELECT s FROM StudentEntity s WHERE s.mediumName = :medium AND s.standard = :standard AND s.academicYear=:year ORDER BY s.id DESC")
+    List<StudentEntity> findByMediumAndStandard(@Param("medium") String medium, @Param("standard") String standard, @Param("year") String year);
 
     @Query("SELECT s FROM StudentEntity s WHERE s.classRoom.id = :classRoomId")
     List<StudentEntity> findByClassRoomId(@Param("classRoomId") Long classRoomId);

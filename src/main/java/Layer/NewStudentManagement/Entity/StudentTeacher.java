@@ -1,11 +1,6 @@
 package Layer.NewStudentManagement.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,16 +29,16 @@ public class StudentTeacher
     private String role;
     private String branchCode;
 
-    @JsonIgnore
-    private String subjects;
 
-    @JsonProperty("subjects")
-    public List<String> getSubjectsAsList() {
-        if (subjects == null || subjects.isBlank()) return List.of();
-        return List.of(subjects.split("\\s*,\\s*"));
-    }
+    @ManyToMany
+    @JoinTable(
+            name = "student_teacher_subject",
+            joinColumns = @JoinColumn(name = "teacher_id"),
+            inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+    private List<StudentSubject> subjects;
 
-    public void setSubjectsFromNames(List<String> subjectNames) {
-        this.subjects = subjectNames != null ? String.join(",", subjectNames) : null;
-    }
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
+    private List<StudentClassRoomTeacherSubject> assignments;
+
 }

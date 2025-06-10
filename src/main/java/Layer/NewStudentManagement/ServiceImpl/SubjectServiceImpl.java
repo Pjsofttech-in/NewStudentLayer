@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.StudentSubjectDTO;
 import Layer.NewStudentManagement.Entity.StudentSubject;
 import Layer.NewStudentManagement.Repository.SubjectRepository;
 import Layer.NewStudentManagement.Service.SubjectService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SubjectServiceImpl implements SubjectService
@@ -34,7 +36,7 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public StudentSubject getSubjectById(Long id,String role,String email)
+    public StudentSubjectDTO getSubjectById(Long id,String role,String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
@@ -42,7 +44,7 @@ public class SubjectServiceImpl implements SubjectService
         }
         StudentSubject subject = subjectRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Subject not found"));
-        return subject;
+        return mapToSubjectDTO(subject);
 
     }
 
@@ -70,15 +72,29 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public List<StudentSubject> getAllSubject(String role, String email)
+    public List<StudentSubjectDTO> getAllSubject(String role, String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
             throw new RuntimeException("You don't have permission to get subject");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        return subjectRepository.findAllByBranchCode(branchCode);
+        List<StudentSubject> subjects = subjectRepository.findAllByBranchCode(branchCode);
+        return subjects.stream()
+                .map(this::mapToSubjectDTO)
+                .collect(Collectors.toList());
 
     }
+
+    private StudentSubjectDTO mapToSubjectDTO(StudentSubject subject) {
+        return new StudentSubjectDTO(
+                subject.getId(),
+                subject.getSubject(),
+                subject.getCreatedByEmail(),
+                subject.getRole(),
+                subject.getBranchCode()
+        );
+    }
+
 
 }

@@ -119,9 +119,10 @@ public class StudentController
 
     @GetMapping("/getStudentByMediumAndStandard")
     public ResponseEntity<List<StudentResponseDTO>> getStudentByMediumAndStandard(@RequestParam String role, @RequestParam String email,
-                                                                                  @RequestParam String medium, @RequestParam String standard)
+                                                                                  @RequestParam String medium, @RequestParam String standard,
+                                                                                  @RequestParam String year)
     {
-        return ResponseEntity.ok(studentService.getStudentByMediumDivisionStandard(role, email,medium,standard));
+        return ResponseEntity.ok(studentService.getStudentByMediumDivisionStandard(role, email,medium,standard,year));
     }
 
     @GetMapping("/getStudentByClassRoomId")

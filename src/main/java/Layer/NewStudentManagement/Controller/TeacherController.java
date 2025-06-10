@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.StudentTeacherDTO;
 import Layer.NewStudentManagement.DTO.TeacherRequestDTO;
 import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Security.LoginRequest;
@@ -20,20 +21,20 @@ public class TeacherController
     private TeacherService teacherService;
 
     @PostMapping("/createTeacher")
-    public ResponseEntity<StudentTeacher> createTeacher(
+    public ResponseEntity<StudentTeacherDTO> createTeacher(
             @RequestParam String role,
             @RequestParam String email,
             @RequestBody TeacherRequestDTO dto) {
 
-        StudentTeacher createdTeacher = teacherService.createTeacher(role, email, dto);
+        StudentTeacherDTO createdTeacher = teacherService.createTeacher(role, email, dto);
         return new ResponseEntity<>(createdTeacher, HttpStatus.CREATED);
     }
 
 
     @GetMapping("/getTeacherById/{id}")
-    public ResponseEntity<StudentTeacher> getTeacherById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
+    public ResponseEntity<StudentTeacherDTO> getTeacherById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
     {
-        StudentTeacher teacher = teacherService.getTeacherById(id,role,email);
+        StudentTeacherDTO teacher = teacherService.getTeacherById(id,role,email);
         return ResponseEntity.ok(teacher);
     }
 
@@ -52,9 +53,9 @@ public class TeacherController
     }
 
     @GetMapping("/getAllTeacher")
-    public ResponseEntity<Iterable<StudentTeacher>> getAllTeacher(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<StudentTeacherDTO>> getAllTeacher(@RequestParam String role, @RequestParam String email)
     {
-        Iterable<StudentTeacher> teachers = teacherService.getAllTeacher(role,email);
+        Iterable<StudentTeacherDTO> teachers = teacherService.getAllTeacher(role,email);
         return ResponseEntity.ok(teachers);
     }
 

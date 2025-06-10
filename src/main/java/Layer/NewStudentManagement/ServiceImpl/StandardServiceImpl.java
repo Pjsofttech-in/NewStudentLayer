@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.StandardDTO;
 import Layer.NewStudentManagement.Entity.StudentStandard;
 import Layer.NewStudentManagement.Repository.StandardRepository;
 import Layer.NewStudentManagement.Service.StandardService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StandardServiceImpl implements StandardService
@@ -35,14 +37,14 @@ public class StandardServiceImpl implements StandardService
     }
 
     @Override
-    public StudentStandard getStandardById(Long id,String role,String email){
+    public StandardDTO getStandardById(Long id, String role, String email){
         if(!staffService.hasPermission(role,email,"Get"))
         {
             throw new RuntimeException("You don't have permission to get standard");
         }
         StudentStandard standard = standardRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Standard not found"));
-        return standard;
+        return mapToStandardDTO(standard);
     }
 
     @Override
@@ -70,14 +72,28 @@ public class StandardServiceImpl implements StandardService
     }
 
     @Override
-    public List<StudentStandard> getAllStandard(String role, String email)
+    public List<StandardDTO> getAllStandard(String role, String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
             throw new RuntimeException("You don't have permission to get standard");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        return standardRepository.getAllStandardByBranchCode(branchCode);
+        List<StudentStandard> standards = standardRepository.getAllStandardByBranchCode(branchCode);
+        return standards.stream()
+            .map(this::mapToStandardDTO)
+            .collect(Collectors.toList());
+    }
+
+
+    private StandardDTO mapToStandardDTO(StudentStandard standard) {
+        return new StandardDTO(
+                standard.getSid(),
+                standard.getStandard(),
+                standard.getCreatedByEmail(),
+                standard.getRole(),
+                standard.getBranchCode()
+        );
     }
 
 

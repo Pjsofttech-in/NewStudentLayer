@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.StandardDTO;
 import Layer.NewStudentManagement.Entity.StudentStandard;
 import Layer.NewStudentManagement.Service.StandardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,16 +24,16 @@ public class StandardController
     }
 
     @GetMapping("/getAllStandard")
-    public ResponseEntity<Iterable<StudentStandard>> getAllStandard(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<StandardDTO>> getAllStandard(@RequestParam String role, @RequestParam String email)
     {
-        Iterable<StudentStandard> standards = standardService.getAllStandard(role,email);
+        Iterable<StandardDTO> standards = standardService.getAllStandard(role,email);
         return ResponseEntity.ok(standards);
     }
 
     @GetMapping("/getStandardById/{id}")
-    public ResponseEntity<StudentStandard> getStandardById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
+    public ResponseEntity<StandardDTO> getStandardById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
     {
-        StudentStandard standard = standardService.getStandardById(id,role,email);
+        StandardDTO standard = standardService.getStandardById(id,role,email);
         return ResponseEntity.ok(standard);
     }
 

@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.MediumDTO;
 import Layer.NewStudentManagement.Entity.StudentMedium;
 import Layer.NewStudentManagement.Service.MediumService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +23,16 @@ public class MediumController
     }
 
     @GetMapping("/getAllMedium")
-    public ResponseEntity<Iterable<StudentMedium>> getAllMedium(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<MediumDTO>> getAllMedium(@RequestParam String role, @RequestParam String email)
     {
-        Iterable<StudentMedium> mediums = mediumService.getAllMedium(role,email);
+        Iterable<MediumDTO> mediums = mediumService.getAllMedium(role,email);
         return ResponseEntity.ok(mediums);
     }
 
     @GetMapping("/getMediumById/{id}")
-    public ResponseEntity<StudentMedium> getMediumById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
+    public ResponseEntity<MediumDTO> getMediumById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
     {
-        StudentMedium medium = mediumService.getMediumById(id,role,email);
+        MediumDTO medium = mediumService.getMediumById(id,role,email);
         return ResponseEntity.ok(medium);
     }
 

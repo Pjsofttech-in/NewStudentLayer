@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.StudentSubjectDTO;
 import Layer.NewStudentManagement.Entity.StudentSubject;
 import Layer.NewStudentManagement.Service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,9 @@ public class SubjectController
     }
 
     @GetMapping("/getSubjectById/{id}")
-    public ResponseEntity<StudentSubject> getSubjectById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
+    public ResponseEntity<StudentSubjectDTO> getSubjectById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
     {
-        StudentSubject subject = subjectService.getSubjectById(id,role,email);
+        StudentSubjectDTO subject = subjectService.getSubjectById(id,role,email);
         return ResponseEntity.ok(subject);
     }
 
@@ -42,9 +43,9 @@ public class SubjectController
     }
 
     @GetMapping("/getAllSubject")
-    public ResponseEntity<Iterable<StudentSubject>> getAllSubject(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<StudentSubjectDTO>> getAllSubject(@RequestParam String role, @RequestParam String email)
     {
-        Iterable<StudentSubject> subjects = subjectService.getAllSubject(role,email);
+        Iterable<StudentSubjectDTO> subjects = subjectService.getAllSubject(role,email);
         return ResponseEntity.ok(subjects);
     }
 

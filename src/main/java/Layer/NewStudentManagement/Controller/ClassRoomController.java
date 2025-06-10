@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
 import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
 import Layer.NewStudentManagement.Service.ClassRoomService;
@@ -8,7 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+//@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
 public class ClassRoomController
 {
@@ -16,7 +18,7 @@ public class ClassRoomController
     ClassRoomService classRoomService;
 
     @PostMapping("/createClassRoom")
-    public ResponseEntity<StudentClassRoomResponseDTO> createClassRoom(@RequestParam String role, @RequestParam String email, @RequestBody StudentClassRoom classRoom)
+    public ResponseEntity<StudentClassRoomResponseDTO> createClassRoom(@RequestParam String role, @RequestParam String email, @RequestBody ClassRoomRequestDTO classRoom)
     {
         StudentClassRoomResponseDTO studentClassRoom = classRoomService.createClassRoom(role, email, classRoom);
         return ResponseEntity.ok(studentClassRoom);

@@ -218,10 +218,10 @@ public class StudentServiceImpl implements StudentService
     }
 
     @Override
-    public List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email ,String medium, String standard)
+    public List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email ,String medium, String standard, String year)
     {
         checkPermission(role,email,"Get");
-        List<StudentEntity> students = studentRepository.findByMediumAndStandard(medium,standard);
+        List<StudentEntity> students = studentRepository.findByMediumAndStandard(medium,standard,year);
 
         return students.stream()
                 .map(this::mapToDTO)

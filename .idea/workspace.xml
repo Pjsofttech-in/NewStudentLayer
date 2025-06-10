@@ -4,14 +4,43 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="classRoomLogic1">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="idea">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/ClassRoomRequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/MediumDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StandardDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDivisionDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentSubjectDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentTeacherDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/TeacherWithSubjectsDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentClassRoomTeacherSubject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/ClassRoomTeacherSubjectRepository.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/ClassRoomController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/ClassRoomController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/DivisionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/DivisionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/MediumController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/MediumController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/StandardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/StandardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/StudentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/StudentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/SubjectController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/SubjectController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/TeacherController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/TeacherController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentClassRoomResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentClassRoomResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentClassRoom.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentClassRoom.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentTeacher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentTeacher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/StudentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/StudentRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/ClassRoomService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/ClassRoomService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/DivisionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/DivisionService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/MediumService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/MediumService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/StandardService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/StandardService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/StudentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/SubjectService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/SubjectService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/TeacherService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/TeacherService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ClassRoomServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ClassRoomServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DivisionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DivisionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/MediumServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/MediumServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StandardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StandardServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SubjectServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SubjectServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/TeacherServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/TeacherServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -74,6 +103,11 @@
     &quot;settings.editor.selected.configurable&quot;: &quot;vcs.Subversion&quot;
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\hp\Desktop\New Backend With Layer\NewStudent" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration>C:\Users\hp\AppData\Roaming\Subversion</configuration>
@@ -110,7 +144,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749474382265</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="idea">
+      <option name="closed" value="true" />
+      <created>1749531026814</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1749531026814</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -128,6 +170,7 @@
     <MESSAGE value="student form" />
     <MESSAGE value="classRoomLogic" />
     <MESSAGE value="classRoomLogic1" />
-    <option name="LAST_COMMIT_MESSAGE" value="classRoomLogic1" />
+    <MESSAGE value="idea" />
+    <option name="LAST_COMMIT_MESSAGE" value="idea" />
   </component>
 </project>

@@ -22,7 +22,6 @@ public class StudentClassRoom
     private Long id;
     @Column(length = 9)
     private String year;
-    private String className;
 
     @Email
     private String createdByEmail;
@@ -44,6 +43,10 @@ public class StudentClassRoom
 
     @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
     private List<StudentEntity> students;
+
+
+    @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
+    private List<StudentClassRoomTeacherSubject> teacherSubjectAssignments;
 
 
 }

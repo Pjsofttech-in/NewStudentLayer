@@ -1,14 +1,17 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
 import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
-import Layer.NewStudentManagement.DTO.StudentDTO;
+import Layer.NewStudentManagement.DTO.TeacherWithSubjectsDTO;
 import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ClassRoomService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,15 @@ public class ClassRoomServiceImpl implements ClassRoomService
     StandardRepository standardRepository;
 
     @Autowired
+    TeacherRepository teacherRepository;
+
+    @Autowired
+    SubjectRepository subjectRepository;
+
+    @Autowired
+    ClassRoomTeacherSubjectRepository classRoomTeacherSubjectRepository;
+
+    @Autowired
     StaffService staffService;
 
     @Autowired
@@ -35,32 +47,61 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
 
     @Override
-    public StudentClassRoomResponseDTO createClassRoom(String role, String email, StudentClassRoom classRoom)
-    {
-        if(!staffService.hasPermission(role,email,"Post"))
-        {
+    @Transactional
+    public StudentClassRoomResponseDTO createClassRoom(String role, String email, ClassRoomRequestDTO dto) {
+        if (!staffService.hasPermission(role, email, "Post")) {
             throw new RuntimeException("You don't have permission to create ClassRoom");
         }
-        StudentMedium medium = mediumRepository.findById(classRoom.getMedium().getMid())
+
+        StudentMedium medium = mediumRepository.findById(dto.getMediumId())
                 .orElseThrow(() -> new RuntimeException("Medium not found"));
 
-        StudentDivision division = divisionRepository.findById(classRoom.getDivision().getDid())
+        StudentDivision division = divisionRepository.findById(dto.getDivisionId())
                 .orElseThrow(() -> new RuntimeException("Division not found"));
 
-        StudentStandard standard = standardRepository.findById(classRoom.getStandard().getSid())
+        StudentStandard standard = standardRepository.findById(dto.getStandardId())
                 .orElseThrow(() -> new RuntimeException("Standard not found"));
 
+        StudentClassRoom classRoom = new StudentClassRoom();
+        classRoom.setYear(dto.getYear());
         classRoom.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
         classRoom.setCreatedByEmail(email);
         classRoom.setRole(role);
         classRoom.setMedium(medium);
         classRoom.setDivision(division);
         classRoom.setStandard(standard);
-        StudentClassRoom saved = classRoomRepository.save(classRoom);
 
-        return mapToResponseDTO(saved);
+        StudentClassRoom savedClassRoom = classRoomRepository.save(classRoom);
 
+        for (Map.Entry<Long, List<Long>> entry : dto.getTeacherSubjectMap().entrySet()) {
+            Long teacherId = entry.getKey();
+            List<Long> subjectIds = entry.getValue();
+
+            StudentTeacher teacher = teacherRepository.findById(teacherId)
+                    .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+            List<StudentSubject> subjects = subjectRepository.findAllById(subjectIds);
+            List<String> assignedSubjectNames = teacher.getSubjects()
+                    .stream()
+                    .map(StudentSubject::getSubject)
+                    .collect(Collectors.toList());
+            for (StudentSubject subject : subjects) {
+                if (!assignedSubjectNames.contains(subject.getSubject())) {
+                    throw new RuntimeException("Subject " + subject.getSubject() + " not assigned to teacher " + teacher.getTeacherName());
+                }
+            }
+
+            StudentClassRoomTeacherSubject mapping = new StudentClassRoomTeacherSubject();
+            mapping.setClassRoom(savedClassRoom);
+            mapping.setTeacher(teacher);
+            mapping.setSubjects(subjects);
+
+            classRoomTeacherSubjectRepository.save(mapping);
+        }
+
+        return mapToResponseDTO(savedClassRoom);
     }
+
     @Override
     public StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, StudentClassRoom updateClassRoom) {
         if (!staffService.hasPermission(role, email, "Put")) {
@@ -72,10 +113,6 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
         if (updateClassRoom.getYear() != null) {
             existingClassRoom.setYear(updateClassRoom.getYear());
-        }
-
-        if (updateClassRoom.getClassName() != null) {
-            existingClassRoom.setClassName(updateClassRoom.getClassName());
         }
 
         if (updateClassRoom.getMedium() != null && updateClassRoom.getMedium().getMid() != null) {
@@ -163,19 +200,33 @@ public class ClassRoomServiceImpl implements ClassRoomService
         }
 
     private StudentClassRoomResponseDTO mapToResponseDTO(StudentClassRoom classroom) {
+        List<StudentClassRoomTeacherSubject> mappings =
+                classRoomTeacherSubjectRepository.findByClassRoomId(classroom.getId());
+
+        List<TeacherWithSubjectsDTO> teacherSubjectDTOs = mappings.stream().map(mapping -> {
+            TeacherWithSubjectsDTO dto = new TeacherWithSubjectsDTO();
+            dto.setTeacherId(mapping.getTeacher().getId());
+            dto.setTeacherName(mapping.getTeacher().getTeacherName());
+            dto.setTeacherEmail(mapping.getTeacher().getTeacherEmail());
+            dto.setSubjects(mapping.getSubjects().stream()
+                    .map(StudentSubject::getSubject)
+                    .collect(Collectors.toList()));
+            return dto;
+        }).collect(Collectors.toList());
+
         return new StudentClassRoomResponseDTO(
                 classroom.getId(),
                 classroom.getYear(),
-                classroom.getClassName(),
                 classroom.getMedium().getMedium(),
                 classroom.getDivision().getDivision(),
                 classroom.getStandard().getStandard(),
                 classroom.getBranchCode(),
                 classroom.getCreatedByEmail(),
-                classroom.getRole()
-
+                classroom.getRole(),
+                teacherSubjectDTOs
         );
     }
+
 
 
 }

@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.MediumDTO;
 import Layer.NewStudentManagement.Entity.StudentMedium;
 import Layer.NewStudentManagement.Repository.MediumRepository;
 import Layer.NewStudentManagement.Service.MediumService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MediumServiceImpl implements MediumService
@@ -33,7 +35,7 @@ public class MediumServiceImpl implements MediumService
     }
 
     @Override
-    public StudentMedium getMediumById(Long id,String role,String email)
+    public MediumDTO getMediumById(Long id, String role, String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
@@ -41,7 +43,7 @@ public class MediumServiceImpl implements MediumService
         }
         StudentMedium medium = mediumRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Medium not found"));
-        return medium;
+        return mapToMediumDTO(medium);
     }
 
     @Override
@@ -68,13 +70,27 @@ public class MediumServiceImpl implements MediumService
     }
 
     @Override
-    public List<StudentMedium> getAllMedium(String role, String email)
+    public List<MediumDTO> getAllMedium(String role, String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
             throw new RuntimeException("You don't have permission to get medium");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role,email);
-        return mediumRepository.findAllByBranchCode(branchCode);
+        List<StudentMedium> mediumList = mediumRepository.findAllByBranchCode(branchCode);
+        return mediumList.stream()
+                .map(this::mapToMediumDTO)
+                .collect(Collectors.toList());
     }
+
+    private MediumDTO mapToMediumDTO(StudentMedium medium) {
+        return new MediumDTO(
+                medium.getMid(),
+                medium.getMedium(),
+                medium.getCreatedByEmail(),
+                medium.getRole(),
+                medium.getBranchCode()
+        );
+    }
+
 }

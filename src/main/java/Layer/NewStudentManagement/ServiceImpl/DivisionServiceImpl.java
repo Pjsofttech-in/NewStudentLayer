@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.StudentDivisionDTO;
 import Layer.NewStudentManagement.Entity.StudentDivision;
 import Layer.NewStudentManagement.Repository.DivisionRepository;
 import Layer.NewStudentManagement.Service.DivisionService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DivisionServiceImpl implements DivisionService
@@ -31,7 +33,7 @@ public class DivisionServiceImpl implements DivisionService
         return divisionRepository.save(division);
     }
     @Override
-    public StudentDivision getDivisionById(Long id,String role,String email)
+    public StudentDivisionDTO getDivisionById(Long id, String role, String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
@@ -39,7 +41,7 @@ public class DivisionServiceImpl implements DivisionService
         }
         StudentDivision division = divisionRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Division not found"));
-        return division;
+        return mapToDivisionDTO(division);
     }
 
     @Override
@@ -66,13 +68,27 @@ public class DivisionServiceImpl implements DivisionService
     }
 
     @Override
-    public List<StudentDivision> getAllDivision(String role, String email)
+    public List<StudentDivisionDTO> getAllDivision(String role, String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
             throw new RuntimeException("You don't have permission to get division");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role,email);
-        return divisionRepository.findAllByBranchCode(branchCode);
+        List<StudentDivision> divisions = divisionRepository.findAllByBranchCode(branchCode);
+        return divisions.stream()
+                .map(this::mapToDivisionDTO)
+                .collect(Collectors.toList());
     }
+
+    private StudentDivisionDTO mapToDivisionDTO(StudentDivision division) {
+        return new StudentDivisionDTO(
+                division.getDid(),
+                division.getDivision(),
+                division.getCreatedByEmail(),
+                division.getRole(),
+                division.getBranchCode()
+        );
+    }
+
 }
