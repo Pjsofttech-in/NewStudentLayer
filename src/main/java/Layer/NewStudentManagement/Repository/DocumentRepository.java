@@ -13,4 +13,8 @@ public interface DocumentRepository extends JpaRepository<StudentDocument,Long>
 {
     @Query("SELECT sd FROM StudentDocument sd WHERE sd.student.id = :studentId")
     Optional<StudentDocument> findByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT sd FROM StudentDocument sd WHERE sd.student.id = :studentId")
+    StudentDocument findByStudent(@Param("studentId") Long studentId);
+
 }

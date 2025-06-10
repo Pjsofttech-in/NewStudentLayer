@@ -3,11 +3,16 @@ package Layer.NewStudentManagement.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -23,11 +28,11 @@ public class S3Service {
         this.s3Client = s3Client;
     }
 
-    public String uploadFile(MultipartFile file, String branchCode, String folderName) {
+    public String uploadFile(MultipartFile file, String branchCode) {
         try {
             String originalFileName = file.getOriginalFilename();
             String uniqueFileName = generateUniqueFileName(originalFileName);
-            String key = branchCode + "/student_sys/" + folderName + "/" + uniqueFileName;
+            String key = branchCode + "/student_sys/docs"+"/" + uniqueFileName;
 
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucketName)
@@ -47,4 +52,34 @@ public class S3Service {
         String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
         return Instant.now().getEpochSecond() + "_" + UUID.randomUUID() + extension;
     }
+
+    public String copyStudentPhotoToAttendanceFaces(String studentPhotoUrl,String branchCode, String classRoomId, String rollNo) {
+        try {
+            String s3Prefix = "https://" + bucketName + ".s3.amazonaws.com/";
+            if (!studentPhotoUrl.startsWith(s3Prefix)) {
+                throw new IllegalArgumentException("Invalid S3 photo URL.");
+            }
+
+            String sourceKey = studentPhotoUrl.substring(s3Prefix.length());
+
+            String extension = sourceKey.substring(sourceKey.lastIndexOf("."));
+
+            String destKey = branchCode+"student_sys/attendance_faces/" + classRoomId +"/"+ rollNo + extension;
+
+            CopyObjectRequest copyRequest = CopyObjectRequest.builder()
+                    .sourceBucket(bucketName)
+                    .sourceKey(sourceKey)
+                    .destinationBucket(bucketName)
+                    .destinationKey(destKey)
+                    .build();
+
+            s3Client.copyObject(copyRequest);
+
+            return s3Prefix + destKey;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to copy student photo to attendance_faces", e);
+        }
+    }
+
 }

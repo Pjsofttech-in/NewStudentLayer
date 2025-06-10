@@ -168,7 +168,7 @@ public class StudentServiceImpl implements StudentService
             MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate,
             MultipartFile studentSignPhoto)
     {
-        checkPermission(role,email,"Put");
+        checkPermission(role,email,"Post");
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
@@ -176,25 +176,25 @@ public class StudentServiceImpl implements StudentService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         if (studentPhoto != null)
-            doc.setStudentPhoto(s3Service.uploadFile(studentPhoto, branchCode, "studentPhoto"));
+            doc.setStudentPhoto(s3Service.uploadFile(studentPhoto, branchCode));
         if (aadharcardPhoto != null)
-            doc.setAadharcardPhoto(s3Service.uploadFile(aadharcardPhoto, branchCode, "aadharcardPhoto"));
+            doc.setAadharcardPhoto(s3Service.uploadFile(aadharcardPhoto, branchCode));
         if (pancardPhoto != null)
-            doc.setPancardPhoto(s3Service.uploadFile(pancardPhoto, branchCode, "pancardPhoto"));
+            doc.setPancardPhoto(s3Service.uploadFile(pancardPhoto, branchCode));
         if (casteValidationPhoto != null)
-            doc.setCasteValidationPhoto(s3Service.uploadFile(casteValidationPhoto, branchCode, "casteValidationPhoto"));
+            doc.setCasteValidationPhoto(s3Service.uploadFile(casteValidationPhoto, branchCode));
         if (casteCertificatePhoto != null)
-            doc.setCasteCertificatePhoto(s3Service.uploadFile(casteCertificatePhoto, branchCode, "casteCertificatePhoto"));
+            doc.setCasteCertificatePhoto(s3Service.uploadFile(casteCertificatePhoto, branchCode));
         if (leavingCertificatePhoto != null)
-            doc.setLeavingCertificatePhoto(s3Service.uploadFile(leavingCertificatePhoto, branchCode, "leavingCertificatePhoto"));
+            doc.setLeavingCertificatePhoto(s3Service.uploadFile(leavingCertificatePhoto, branchCode));
         if (domicilePhoto != null)
-            doc.setDomicilePhoto(s3Service.uploadFile(domicilePhoto, branchCode, "domicilePhoto"));
+            doc.setDomicilePhoto(s3Service.uploadFile(domicilePhoto, branchCode));
         if (birthCertificatePhoto != null)
-            doc.setBirthCertificatePhoto(s3Service.uploadFile(birthCertificatePhoto, branchCode, "birthCertificatePhoto"));
+            doc.setBirthCertificatePhoto(s3Service.uploadFile(birthCertificatePhoto, branchCode));
         if (disabilityCertificate != null)
-            doc.setDisabilityCertificate(s3Service.uploadFile(disabilityCertificate, branchCode, "disabilityCertificate"));
+            doc.setDisabilityCertificate(s3Service.uploadFile(disabilityCertificate, branchCode));
         if (studentSignPhoto != null)
-            doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode, "studentSignPhoto"));
+            doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode));
 
         doc.setStudent(student);
 
@@ -309,7 +309,9 @@ public class StudentServiceImpl implements StudentService
                                                      MultipartFile domicilePhoto,
                                                      MultipartFile birthCertificatePhoto,
                                                      MultipartFile disabilityCertificate,
-                                                     MultipartFile studentSignPhoto) {
+                                                     MultipartFile studentSignPhoto)
+    {
+        checkPermission(role,email,"Put");
 
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -320,34 +322,34 @@ public class StudentServiceImpl implements StudentService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         if (studentPhoto != null && !studentPhoto.isEmpty())
-            doc.setStudentPhoto(s3Service.uploadFile(studentPhoto, branchCode, "studentPhoto"));
+            doc.setStudentPhoto(s3Service.uploadFile(studentPhoto, branchCode));
 
         if (aadharcardPhoto != null && !aadharcardPhoto.isEmpty())
-            doc.setAadharcardPhoto(s3Service.uploadFile(aadharcardPhoto, branchCode, "aadharcardPhoto"));
+            doc.setAadharcardPhoto(s3Service.uploadFile(aadharcardPhoto, branchCode));
 
         if (pancardPhoto != null && !pancardPhoto.isEmpty())
-            doc.setPancardPhoto(s3Service.uploadFile(pancardPhoto, branchCode, "pancardPhoto"));
+            doc.setPancardPhoto(s3Service.uploadFile(pancardPhoto, branchCode));
 
         if (casteValidationPhoto != null && !casteValidationPhoto.isEmpty())
-            doc.setCasteValidationPhoto(s3Service.uploadFile(casteValidationPhoto, branchCode, "casteValidationPhoto"));
+            doc.setCasteValidationPhoto(s3Service.uploadFile(casteValidationPhoto, branchCode));
 
         if (casteCertificatePhoto != null && !casteCertificatePhoto.isEmpty())
-            doc.setCasteCertificatePhoto(s3Service.uploadFile(casteCertificatePhoto, branchCode, "casteCertificatePhoto"));
+            doc.setCasteCertificatePhoto(s3Service.uploadFile(casteCertificatePhoto, branchCode));
 
         if (leavingCertificatePhoto != null && !leavingCertificatePhoto.isEmpty())
-            doc.setLeavingCertificatePhoto(s3Service.uploadFile(leavingCertificatePhoto, branchCode, "leavingCertificatePhoto"));
+            doc.setLeavingCertificatePhoto(s3Service.uploadFile(leavingCertificatePhoto, branchCode));
 
         if (domicilePhoto != null && !domicilePhoto.isEmpty())
-            doc.setDomicilePhoto(s3Service.uploadFile(domicilePhoto, branchCode, "domicilePhoto"));
+            doc.setDomicilePhoto(s3Service.uploadFile(domicilePhoto, branchCode));
 
         if (birthCertificatePhoto != null && !birthCertificatePhoto.isEmpty())
-            doc.setBirthCertificatePhoto(s3Service.uploadFile(birthCertificatePhoto, branchCode, "birthCertificatePhoto"));
+            doc.setBirthCertificatePhoto(s3Service.uploadFile(birthCertificatePhoto, branchCode));
 
         if (disabilityCertificate != null && !disabilityCertificate.isEmpty())
-            doc.setDisabilityCertificate(s3Service.uploadFile(disabilityCertificate, branchCode, "disabilityCertificate"));
+            doc.setDisabilityCertificate(s3Service.uploadFile(disabilityCertificate, branchCode));
 
         if (studentSignPhoto != null && !studentSignPhoto.isEmpty())
-            doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode, "studentSignPhoto"));
+            doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode));
 
         StudentDocument saved = documentRepository.save(doc);
 
