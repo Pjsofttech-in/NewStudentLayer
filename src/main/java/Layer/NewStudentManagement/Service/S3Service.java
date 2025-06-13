@@ -7,6 +7,7 @@ import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.ByteArrayInputStream;
@@ -64,7 +65,7 @@ public class S3Service {
 
             String extension = sourceKey.substring(sourceKey.lastIndexOf("."));
 
-            String destKey = branchCode+"/student_sys/attendance_faces/" + classRoomId +"/"+ rollNo + extension;
+            String destKey = branchCode + "/student_sys/attendance_faces/" + classRoomId +"/"+ rollNo + extension;
 
             CopyObjectRequest copyRequest = CopyObjectRequest.builder()
                     .sourceBucket(bucketName)
@@ -81,5 +82,46 @@ public class S3Service {
             throw new RuntimeException("Failed to copy student photo to attendance_faces", e);
         }
     }
+
+    public void deleteFileFromUrl(String fileUrl) {
+        if (fileUrl == null || fileUrl.isBlank()) {
+            return; // Nothing to delete
+        }
+
+        try {
+            String fileKey = fileUrl.startsWith("https://")
+                    ? fileUrl.substring(fileUrl.indexOf(".com/") + 5)
+                    : fileUrl;
+
+            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileKey)
+                    .build();
+
+            s3Client.deleteObject(deleteRequest);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete file from S3", e);
+        }
+    }
+
+
+    public String uploadFileToExactPath(MultipartFile file, String key) {
+        try {
+            PutObjectRequest request = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
+            return "https://" + bucketName + ".s3.amazonaws.com/" + key;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to upload file to S3", e);
+        }
+    }
+
+
 
 }

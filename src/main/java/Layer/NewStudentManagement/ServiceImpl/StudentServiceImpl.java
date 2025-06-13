@@ -16,11 +16,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class StudentServiceImpl implements StudentService
-{
+public class StudentServiceImpl implements StudentService {
     @Autowired
     private StudentRepository studentRepository;
     @Autowired
@@ -51,9 +51,8 @@ public class StudentServiceImpl implements StudentService
 
 
     @Override
-    public StudentEntity saveStudent(String role, String email, StudentRequest request)
-    {
-       checkPermission(role,email,"Post");
+    public StudentEntity saveStudent(String role, String email, StudentRequest request) {
+        checkPermission(role, email, "Post");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         StudentEntity student = request.getStudent();
         student.setEnrollmentDate(LocalDate.now());
@@ -91,15 +90,15 @@ public class StudentServiceImpl implements StudentService
     }
 
     @Override
-    public StudentDTO getStudentById(Long id, String role, String email)
-    {
-        checkPermission(role,email,"Get");
+    public StudentDTO getStudentById(Long id, String role, String email) {
+        checkPermission(role, email, "Get");
         StudentEntity student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
 
         return studentMapper.toStudentDTO(student);
 
     }
+
     @Override
     public StudentResponseDTO updateStudent(Long studentId, String role, String email, StudentRequest request) {
         checkPermission(role, email, "Put");
@@ -143,7 +142,7 @@ public class StudentServiceImpl implements StudentService
 
     @Override
     public void deleteStudentById(Long id, String role, String email) {
-        checkPermission(role,email,"Delete");
+        checkPermission(role, email, "Delete");
         StudentEntity student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
         studentRepository.delete(student);
@@ -151,7 +150,7 @@ public class StudentServiceImpl implements StudentService
 
     @Override
     public List<StudentResponseDTO> getAllStudent(String role, String email) {
-        checkPermission(role,email,"Get");
+        checkPermission(role, email, "Get");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         List<StudentEntity> students = studentRepository.findAllByBranchCode(branchCode);
 
@@ -166,9 +165,8 @@ public class StudentServiceImpl implements StudentService
             MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto,
             MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
             MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate,
-            MultipartFile studentSignPhoto)
-    {
-        checkPermission(role,email,"Post");
+            MultipartFile studentSignPhoto) {
+        checkPermission(role, email, "Post");
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
@@ -218,10 +216,9 @@ public class StudentServiceImpl implements StudentService
     }
 
     @Override
-    public List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email ,String medium, String standard, String year)
-    {
-        checkPermission(role,email,"Get");
-        List<StudentEntity> students = studentRepository.findByMediumAndStandard(medium,standard,year);
+    public List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email, String medium, String standard, String year) {
+        checkPermission(role, email, "Get");
+        List<StudentEntity> students = studentRepository.findByMediumAndStandard(medium, standard, year);
 
         return students.stream()
                 .map(this::mapToDTO)
@@ -236,7 +233,8 @@ public class StudentServiceImpl implements StudentService
         if (incoming.getBloodGroup() != null) existing.setBloodGroup(incoming.getBloodGroup());
         if (incoming.getMotherTongue() != null) existing.setMotherTongue(incoming.getMotherTongue());
         if (incoming.getMaritalStatus() != null) existing.setMaritalStatus(incoming.getMaritalStatus());
-        if (incoming.getContact() != null && !"null".equals(incoming.getContact())) existing.setContact(incoming.getContact());
+        if (incoming.getContact() != null && !"null".equals(incoming.getContact()))
+            existing.setContact(incoming.getContact());
         if (incoming.getAge() != null) existing.setAge(incoming.getAge());
         if (incoming.getEmail() != null) existing.setEmail(incoming.getEmail());
         if (incoming.getDateOfBirth() != null) existing.setDateOfBirth(incoming.getDateOfBirth());
@@ -309,9 +307,8 @@ public class StudentServiceImpl implements StudentService
                                                      MultipartFile domicilePhoto,
                                                      MultipartFile birthCertificatePhoto,
                                                      MultipartFile disabilityCertificate,
-                                                     MultipartFile studentSignPhoto)
-    {
-        checkPermission(role,email,"Put");
+                                                     MultipartFile studentSignPhoto) {
+        checkPermission(role, email, "Put");
 
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -321,35 +318,72 @@ public class StudentServiceImpl implements StudentService
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        if (studentPhoto != null && !studentPhoto.isEmpty())
-            doc.setStudentPhoto(s3Service.uploadFile(studentPhoto, branchCode));
+        // Student Photo Upload Logic
+        if (studentPhoto != null && !studentPhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getStudentPhoto());
+            String uploadedUrl;
 
-        if (aadharcardPhoto != null && !aadharcardPhoto.isEmpty())
+            if (student.getClassRoom() != null && student.getRollNo() != null) {
+                String originalFilename = studentPhoto.getOriginalFilename();
+                String extension = originalFilename != null && originalFilename.contains(".")
+                        ? originalFilename.substring(originalFilename.lastIndexOf('.'))
+                        : "";
+
+                String photoPath = branchCode + "/student_sys/attendance_faces/"
+                        + student.getClassRoom().getId() + "/" + student.getRollNo() + extension;
+
+                uploadedUrl = s3Service.uploadFileToExactPath(studentPhoto, photoPath);
+            } else {
+                uploadedUrl = s3Service.uploadFile(studentPhoto, branchCode);
+            }
+
+            doc.setStudentPhoto(uploadedUrl);
+        }
+
+        if (aadharcardPhoto != null && !aadharcardPhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getAadharcardPhoto());
             doc.setAadharcardPhoto(s3Service.uploadFile(aadharcardPhoto, branchCode));
+        }
 
-        if (pancardPhoto != null && !pancardPhoto.isEmpty())
+        if (pancardPhoto != null && !pancardPhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getPancardPhoto());
             doc.setPancardPhoto(s3Service.uploadFile(pancardPhoto, branchCode));
+        }
 
-        if (casteValidationPhoto != null && !casteValidationPhoto.isEmpty())
+        if (casteValidationPhoto != null && !casteValidationPhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getCasteValidationPhoto());
             doc.setCasteValidationPhoto(s3Service.uploadFile(casteValidationPhoto, branchCode));
+        }
 
-        if (casteCertificatePhoto != null && !casteCertificatePhoto.isEmpty())
+        if (casteCertificatePhoto != null && !casteCertificatePhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getCasteCertificatePhoto());
             doc.setCasteCertificatePhoto(s3Service.uploadFile(casteCertificatePhoto, branchCode));
+        }
 
-        if (leavingCertificatePhoto != null && !leavingCertificatePhoto.isEmpty())
+        if (leavingCertificatePhoto != null && !leavingCertificatePhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getLeavingCertificatePhoto());
             doc.setLeavingCertificatePhoto(s3Service.uploadFile(leavingCertificatePhoto, branchCode));
+        }
 
-        if (domicilePhoto != null && !domicilePhoto.isEmpty())
+        if (domicilePhoto != null && !domicilePhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getDomicilePhoto());
             doc.setDomicilePhoto(s3Service.uploadFile(domicilePhoto, branchCode));
+        }
 
-        if (birthCertificatePhoto != null && !birthCertificatePhoto.isEmpty())
+        if (birthCertificatePhoto != null && !birthCertificatePhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getBirthCertificatePhoto());
             doc.setBirthCertificatePhoto(s3Service.uploadFile(birthCertificatePhoto, branchCode));
+        }
 
-        if (disabilityCertificate != null && !disabilityCertificate.isEmpty())
+        if (disabilityCertificate != null && !disabilityCertificate.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getDisabilityCertificate());
             doc.setDisabilityCertificate(s3Service.uploadFile(disabilityCertificate, branchCode));
+        }
 
-        if (studentSignPhoto != null && !studentSignPhoto.isEmpty())
+        if (studentSignPhoto != null && !studentSignPhoto.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getStudentSignPhoto());
             doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode));
+        }
 
         StudentDocument saved = documentRepository.save(doc);
 
@@ -369,6 +403,7 @@ public class StudentServiceImpl implements StudentService
 
         return dto;
     }
+
 
     @Override
     public List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email,Long classRoomId)
