@@ -33,7 +33,7 @@ public class S3Service {
         try {
             String originalFileName = file.getOriginalFilename();
             String uniqueFileName = generateUniqueFileName(originalFileName);
-            String key = branchCode + "/student_sys/docs"+"/" + uniqueFileName;
+            String key = branchCode + "/student-sys/docs"+"/" + uniqueFileName;
 
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucketName)
@@ -65,7 +65,7 @@ public class S3Service {
 
             String extension = sourceKey.substring(sourceKey.lastIndexOf("."));
 
-            String destKey = branchCode + "/student_sys/attendance_faces/" + classRoomId +"/"+ rollNo + extension;
+            String destKey = branchCode + "/student-sys/attendance_faces/" + classRoomId +"/"+ rollNo + extension;
 
             CopyObjectRequest copyRequest = CopyObjectRequest.builder()
                     .sourceBucket(bucketName)
