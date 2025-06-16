@@ -2,6 +2,8 @@ package Layer.NewStudentManagement.Mapper;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -9,6 +11,7 @@ import java.util.stream.Collectors;
 @Component
 public class StudentMapper
 {
+
         public StudentDTO toStudentDTO(StudentEntity student) {
             if (student == null) return null;
 
@@ -42,6 +45,7 @@ public class StudentMapper
             dto.setStreamName(student.getStreamName());
             dto.setGroupName(student.getGroupName());
             dto.setSemister(student.getSemister());
+            dto.setPassword(student.getPassword());
             dto.setCreatedByEmail(student.getCreatedByEmail());
             dto.setRole(student.getRole());
             dto.setBranchCode(student.getBranchCode());
@@ -79,6 +83,7 @@ public class StudentMapper
             dto.setPcountry(address.getPcountry());
             dto.setPcity(address.getPcity());
             dto.setPState(address.getPState());
+            dto.setState(address.getState());
             dto.setPpincode(address.getPpincode());
             dto.setAddress(address.getAddress());
             dto.setCountry(address.getCountry());

@@ -47,6 +47,7 @@ public class StudentDTO
     private String streamName;
     private String groupName;
     private String semister;
+    private String password;
 
     @Email
     private String createdByEmail;

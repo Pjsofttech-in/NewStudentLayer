@@ -25,6 +25,7 @@ public class StudentAddress
     private String pcountry;
     private String pcity;
     private String pState;
+    private String state;
     private int ppincode;
     private String address;
     private String country;

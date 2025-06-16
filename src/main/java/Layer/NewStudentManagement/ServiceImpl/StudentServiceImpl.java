@@ -10,6 +10,7 @@ import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +42,9 @@ public class StudentServiceImpl implements StudentService {
     private S3Service s3Service;
     @Autowired
     private DocumentRepository documentRepository;
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
 
 
     private void checkPermission(String role, String email, String action) {
@@ -56,6 +60,7 @@ public class StudentServiceImpl implements StudentService {
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         StudentEntity student = request.getStudent();
         student.setEnrollmentDate(LocalDate.now());
+        student.setPassword(passwordEncoder.encode(student.getPassword()));
         student.setRole(role);
         student.setBranchCode(branchCode);
         student.setCreatedByEmail(email);

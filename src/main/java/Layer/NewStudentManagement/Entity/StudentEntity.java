@@ -51,6 +51,7 @@ public class StudentEntity
     private String streamName;
     private String groupName;
     private String semister;
+    private String password;
 //    private String university;
 //    private String board;
 
