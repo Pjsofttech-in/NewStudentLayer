@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.AttendanceCountDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
 import Layer.NewStudentManagement.Entity.StudentAttendance;
 import Layer.NewStudentManagement.Service.AttendanceService;
@@ -76,6 +77,18 @@ public class AttendanceController
                 classroomId, filterDTO, timeFrame, customStartDate, customEndDate, pageable);
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/cardCountForAttendace")
+    public ResponseEntity<AttendanceCountDTO> getAttendanceCount(
+            @RequestParam Long classroomId,
+            @RequestParam String timeFrame,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customStartDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customEndDate) {
+        return ResponseEntity.ok(attendanceService.getAttendanceCountByTimeFrame(classroomId,timeFrame,customStartDate,customEndDate));
+    }
+
+
+
 
 
 }

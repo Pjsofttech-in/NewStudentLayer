@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.Service;
 
 
+import Layer.NewStudentManagement.DTO.AttendanceCountDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
 import Layer.NewStudentManagement.Entity.StudentAttendance;
 import org.springframework.data.domain.Page;
@@ -22,5 +23,7 @@ public interface AttendanceService
 
     Page<StudentAttendance> getFilteredAttendance(Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
             LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) ;
+
+    AttendanceCountDTO getAttendanceCountByTimeFrame(Long classroomId, String timeFrame,LocalDate customStartDate, LocalDate customEndDate);
 
 }

@@ -1,4 +1,5 @@
 package Layer.NewStudentManagement.ServiceImpl;
+import Layer.NewStudentManagement.DTO.AttendanceCountDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
 import Layer.NewStudentManagement.Entity.StudentAttendance;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
@@ -291,6 +292,44 @@ public class AttendanceServiceImpl implements AttendanceService {
                 filter, classroomId, timeFrame, customStartDate, customEndDate
         );
         return attendanceRepository.findAll(spec, pageable);
+    }
+
+
+    @Override
+    public AttendanceCountDTO getAttendanceCountByTimeFrame(Long classroomId, String timeFrame,
+                                                            LocalDate customStartDate, LocalDate customEndDate) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate;
+
+        switch (timeFrame.toLowerCase()) {
+            case "today" -> {
+                startDate = endDate;
+            }
+            case "7days" -> {
+                startDate = endDate.minusDays(6); // Includes today
+            }
+            case "30days" -> {
+                startDate = endDate.minusDays(29);
+            }
+            case "365days" -> {
+                startDate = endDate.minusDays(364);
+            }
+            case "custom" -> {
+                if (customStartDate == null || customEndDate == null) {
+                    throw new IllegalArgumentException("Custom range requires both start and end dates.");
+                }
+                startDate = customStartDate;
+                endDate = customEndDate;
+            }
+            default -> throw new IllegalArgumentException("Invalid timeFrame. Use 'today', '7days', '30days', '365days', or 'custom'.");
+        }
+
+        List<Integer> presentRollNos = attendanceRepository.findDistinctRollNosByDateRange(classroomId, startDate, endDate);
+        Long totalStudents = studentRepository.countByClassroomId(classroomId);
+        Long presentCount = (long) presentRollNos.size();
+        Long absentCount = totalStudents - presentCount;
+
+        return new AttendanceCountDTO(totalStudents, presentCount, absentCount);
     }
 
 

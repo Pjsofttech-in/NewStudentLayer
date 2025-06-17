@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -29,5 +30,11 @@ public interface AttendanceRepository extends JpaRepository<StudentAttendance,Lo
                                                                   @Param("date") LocalDate date,
                                                                   @Param("classroomId") Long classroomId);
 
+    @Query("SELECT sa.rollNo FROM StudentAttendance sa WHERE sa.classroomId = :classroomId AND sa.date = :date")
+    List<Integer> findPresentRollNos(@Param("classroomId") Long classroomId, @Param("date") LocalDate date);
+
+    @Query("SELECT DISTINCT sa.rollNo FROM StudentAttendance sa WHERE sa.classroomId = :classroomId AND sa.date BETWEEN :startDate AND :endDate")
+    List<Integer> findDistinctRollNosByDateRange(
+            @Param("classroomId") Long classroomId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
 }
