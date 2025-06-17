@@ -1,18 +1,20 @@
 package Layer.NewStudentManagement.Controller;
 
-import Layer.NewStudentManagement.DTO.StudentDTO;
-import Layer.NewStudentManagement.DTO.StudentDocumentDTO;
-import Layer.NewStudentManagement.DTO.StudentRequest;
-import Layer.NewStudentManagement.DTO.StudentResponseDTO;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentDocument;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:3000")
@@ -40,12 +42,24 @@ public class StudentController
         return ResponseEntity.ok(studentService.getStudentById(id, role, email));
     }
 
-    @GetMapping("/getAllStudents")
-    public ResponseEntity<List<StudentResponseDTO>> getAllStudents(@RequestParam String role,
-                                                              @RequestParam String email) {
-        return ResponseEntity.ok(studentService.getAllStudent(role, email));
-
+    @PostMapping("/getAllStudents")
+    public ResponseEntity<Page<StudentResponseDTO>> getFilteredStudents(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false) String timeFrame,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customStart,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customEnd,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestBody(required = false) StudentFilterDTO filterDTO
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<StudentResponseDTO> students = studentService.getAllStudent(
+                role, email, filterDTO, timeFrame, customStart, customEnd, pageable
+        );
+        return ResponseEntity.ok(students);
     }
+
 
     @PutMapping("/updateStudent/{id}")
     public ResponseEntity<StudentResponseDTO> updateStudent(@PathVariable Long id,

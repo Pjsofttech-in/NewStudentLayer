@@ -1,15 +1,16 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.DTO.StudentDTO;
-import Layer.NewStudentManagement.DTO.StudentDocumentDTO;
-import Layer.NewStudentManagement.DTO.StudentRequest;
-import Layer.NewStudentManagement.DTO.StudentResponseDTO;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Mapper.StudentMapper;
+import Layer.NewStudentManagement.Pagination.StudentSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -154,15 +155,17 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<StudentResponseDTO> getAllStudent(String role, String email) {
-        checkPermission(role, email, "Get");
+    public Page<StudentResponseDTO> getAllStudent(String role, String email, StudentFilterDTO filter,
+                                                  String timeFrame, LocalDate customStart, LocalDate customEnd,
+                                                  Pageable pageable) {
+        checkPermission(role, email, "Post");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        List<StudentEntity> students = studentRepository.findAllByBranchCode(branchCode);
 
-        return students.stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+        Specification<StudentEntity> spec = StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd);
+
+        return studentRepository.findAll(spec, pageable).map(this::mapToDTO);
     }
+
 
     public StudentDocumentDTO uploadStudentDocuments(
             Long studentId, String role, String email,
