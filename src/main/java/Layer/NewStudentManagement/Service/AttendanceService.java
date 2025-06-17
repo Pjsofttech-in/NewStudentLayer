@@ -1,11 +1,26 @@
 package Layer.NewStudentManagement.Service;
 
+
+import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
+import Layer.NewStudentManagement.Entity.StudentAttendance;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
 
 public interface AttendanceService
 {
-    String markAttendance(MultipartFile image, String systemName, String branchCode, String classroomId) throws IOException;
+
+    String markStudentsAttendance(List<Integer> rollNos, Long classroomId);
+
+    String logoutStudents(List<Integer> rollNos, Long classroomId);
+    String markAttendanceFromFace(MultipartFile imagePath, String branchCode, String classroomId);
+
+    String logoutStudentFromFace(MultipartFile image, String branchCode, String classroomId);
+
+    Page<StudentAttendance> getFilteredAttendance(Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
+            LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) ;
 
 }

@@ -20,15 +20,17 @@ public class StudentAttendance
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String rollNo;
+    private int rollNo;
 
-    private String branch;
+    private String branchCode;
 
-    private String classroomId;
+    private Long classroomId;
+
+    private String studentName;
 
     private String systemName;
 
-    private LocalDate attendanceDate;
+    private LocalDate date;
 
     private LocalTime loginTime;
 

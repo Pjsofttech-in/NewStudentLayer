@@ -26,5 +26,12 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     @Query("SELECT MAX(s.rollNo) FROM StudentEntity s WHERE s.classRoom.id = :classRoomId")
     Integer findMaxRollNoByClassRoomId(@Param("classRoomId") Long classRoomId);
 
+    @Query("SELECT s FROM StudentEntity s WHERE s.classRoom.id = :classRoomId AND s.rollNo IN :rollNos")
+    List<StudentEntity> findByClassRoomIdAndRollNos(@Param("classRoomId") Long classRoomId, @Param("rollNos") List<Integer> rollNos);
+
+    @Query("SELECT s FROM StudentEntity s WHERE s.classRoom.id = :classRoomId AND s.rollNo = :rollNo")
+    Optional<StudentEntity> findByClassRoomIdAndRollNo(@Param("classRoomId") Long classRoomId, @Param("rollNo") Integer rollNo);
+
+
 
 }

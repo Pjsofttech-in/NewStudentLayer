@@ -1,13 +1,20 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
+import Layer.NewStudentManagement.Entity.StudentAttendance;
 import Layer.NewStudentManagement.Service.AttendanceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
+import java.util.List;
+
 @RestController
 public class AttendanceController
 {
@@ -15,20 +22,60 @@ public class AttendanceController
     @Autowired
     AttendanceService attendanceService;
 
-    @PostMapping("/markStudentAttenndance")
-    public ResponseEntity<String> markAttendance(
-            @RequestParam("image") MultipartFile image,
-            @RequestParam(value = "branch_code") String branchCode,
-            @RequestParam(value = "classroomId", required = false) String classroomId,
-            @RequestParam(value = "system_name", defaultValue = "student-sys") String systemName
+
+    @PostMapping("/markStudentAttendanceByTeacher")
+    public ResponseEntity<String> markStudentAttendance(
+            @RequestParam List<Integer> rollNos,
+            @RequestParam Long classroomId
     ) {
-        try {
-            String message = attendanceService.markAttendance(image, systemName, branchCode, classroomId);
-            return ResponseEntity.ok(message);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error: " + e.getMessage());
-        }
+        String result = attendanceService.markStudentsAttendance(rollNos, classroomId);
+        return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/logoutStudentByTeacher")
+    public ResponseEntity<String> logoutStudents(
+            @RequestParam List<Integer> rollNos,
+            @RequestParam Long classroomId
+    ) {
+        String result = attendanceService.logoutStudents(rollNos, classroomId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/markStudentAttenndance")
+    public ResponseEntity<String> markAttendanceFromFace(
+            @RequestParam("image") MultipartFile image,
+            @RequestParam("branchCode") String branchCode,
+            @RequestParam("classroomId") String classroomId
+    ) {
+        String result = attendanceService.markAttendanceFromFace(image, branchCode, classroomId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/studentLogoutByFace")
+    public ResponseEntity<String> logoutStudentFromFace(
+            @RequestParam("image") MultipartFile image,
+            @RequestParam("branchCode") String branchCode,
+            @RequestParam("classroomId") String classroomId
+    ) {
+        String result = attendanceService.logoutStudentFromFace(image, branchCode, classroomId);
+        return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/getAttendaceByClassroom")
+    public ResponseEntity<Page<StudentAttendance>> filterAttendance(
+            @RequestParam Long classroomId,
+            @RequestParam(required = false) String timeFrame,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customStartDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customEndDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestBody(required = false) StudentAttendanceFilterDTO filterDTO) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<StudentAttendance> result = attendanceService.getFilteredAttendance(
+                classroomId, filterDTO, timeFrame, customStartDate, customEndDate, pageable);
+        return ResponseEntity.ok(result);
+    }
+
 
 }
