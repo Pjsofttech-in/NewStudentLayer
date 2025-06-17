@@ -61,7 +61,7 @@ public class StudentSpecification {
                     case "today":
                         predicates.add(cb.equal(root.get("enrollmentDate"), today));
                         break;
-                    case "last7days":
+                    case "7days":
                         predicates.add(cb.between(root.get("enrollmentDate"), today.minusDays(6), today));
                         break;
                     case "30days":
