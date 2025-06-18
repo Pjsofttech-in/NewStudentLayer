@@ -260,6 +260,8 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 classroom.getMedium().getMediumName(),
                 classroom.getDivision().getDivision(),
                 classroom.getStandard().getStandardName(),
+                classroom.getStartTime(),
+                classroom.getEndTime(),
                 classroom.getBranchCode(),
                 classroom.getCreatedByEmail(),
                 classroom.getRole(),

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @AllArgsConstructor
@@ -15,6 +16,8 @@ public class StudentClassRoomResponseDTO {
     private String medium;
     private String division;
     private String standard;
+    private LocalTime startTime;
+    private LocalTime endTime;
     private String branchCode;
     private String email;
     private String role;
