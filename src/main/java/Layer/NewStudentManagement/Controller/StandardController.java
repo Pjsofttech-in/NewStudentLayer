@@ -45,9 +45,9 @@ public class StandardController
     }
 
     @PutMapping("/updateStandard/{id}")
-    public ResponseEntity<StudentStandard> updateStandard(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentStandard standard)
+    public ResponseEntity<StandardDTO> updateStandard(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StandardDTO standard)
     {
-        StudentStandard updatedStandard = standardService.updateStandard(id,role,email,standard);
+        StandardDTO updatedStandard = standardService.updateStandard(id,role,email,standard);
         return ResponseEntity.ok(updatedStandard);
     }
 

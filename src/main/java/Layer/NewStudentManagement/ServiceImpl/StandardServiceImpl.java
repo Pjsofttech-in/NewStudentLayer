@@ -48,18 +48,21 @@ public class StandardServiceImpl implements StandardService
     }
 
     @Override
-    public StudentStandard updateStandard(Long id,String role,String email,StudentStandard standard)
-    {
-        if(!staffService.hasPermission(role,email,"Put"))
-        {
+    public StandardDTO updateStandard(Long id, String role, String email, StandardDTO standardDTO) {
+        if (!staffService.hasPermission(role, email, "Put")) {
             throw new RuntimeException("You don't have permission to update standard");
         }
-        StudentStandard existingStandard = standardRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Standard not found"));
-        existingStandard.setStandardName(standard.getStandardName());
-        return standardRepository.save(existingStandard);
 
+        StudentStandard existingStandard = standardRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Standard not found"));
+
+        existingStandard.setStandardName(standardDTO.getStandardName());
+
+        StudentStandard updatedStandard = standardRepository.save(existingStandard);
+
+        return mapToStandardDTO(updatedStandard);
     }
+
 
     @Override
     public void deleteStandardById(Long id,String role,String email)

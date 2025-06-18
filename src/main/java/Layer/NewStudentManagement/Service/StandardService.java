@@ -9,7 +9,7 @@ public interface StandardService
 {
     StudentStandard createStandard(String role,String email,StudentStandard standard);
     StandardDTO getStandardById(Long id, String role, String email);
-    StudentStandard updateStandard(Long id,String role,String email,StudentStandard standard);
+    StandardDTO updateStandard(Long id, String role, String email, StandardDTO standardDTO);
     void deleteStandardById(Long id,String role,String email);
     List<StandardDTO> getAllStandard(String role, String email);
 }

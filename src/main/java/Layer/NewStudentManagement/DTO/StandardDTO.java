@@ -12,7 +12,7 @@ import lombok.Setter;
 public class StandardDTO
 {
     private Long id;
-    private String standard;
+    private String standardName;
     private String createdByEmail;
     private String role;
     private String branchCode;
