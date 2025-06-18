@@ -31,6 +31,7 @@ public class StudentAttendanceSpecification {
                 if (filter.getStatus() != null) {
                     predicates.add(cb.equal(cb.lower(root.get("status")), filter.getStatus().toLowerCase()));
                 }
+
             }
 
             LocalDate today = LocalDate.now();

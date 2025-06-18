@@ -21,4 +21,8 @@ public class StudentFilterDTO
     private String streamName;
     private String groupName;
     private String semister;
+    private Boolean earthquake;
+    private Boolean minority;
+    private String castCategory;
+    private Boolean handicap;
 }

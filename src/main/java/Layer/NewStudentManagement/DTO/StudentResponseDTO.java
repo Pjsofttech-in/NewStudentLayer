@@ -48,6 +48,10 @@ public class StudentResponseDTO {
     private Long standardId;
     private Long mediumId;
     private String institutionType;
+    private boolean earthquake;
+    private boolean minority;
+    private String castCategory;
+    private boolean handicap;
 
     @Email
     private String createdByEmail;

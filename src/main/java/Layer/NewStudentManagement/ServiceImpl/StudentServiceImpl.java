@@ -351,6 +351,15 @@ public class StudentServiceImpl implements StudentService {
         dto.setCreatedByEmail(student.getCreatedByEmail());
         dto.setRole(student.getRole());
         dto.setBranchCode(student.getBranchCode());
+        if (student.getAdditionalInfo() != null) {
+            dto.setEarthquake(student.getAdditionalInfo().isEarthquake());
+            dto.setHandicap(student.getAdditionalInfo().isHandicap());
+        }
+
+        if (student.getReligion() != null) {
+            dto.setCastCategory(student.getReligion().getCastCategory());
+            dto.setMinority(student.getReligion().isMinority());
+        }
 
         return dto;
     }

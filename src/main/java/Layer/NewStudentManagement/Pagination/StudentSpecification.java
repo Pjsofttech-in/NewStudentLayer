@@ -1,7 +1,11 @@
 package Layer.NewStudentManagement.Pagination;
 
 import Layer.NewStudentManagement.DTO.StudentFilterDTO;
+import Layer.NewStudentManagement.Entity.StudentAdditionalInfo;
 import Layer.NewStudentManagement.Entity.StudentEntity;
+import Layer.NewStudentManagement.Entity.StudentReligion;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -18,7 +22,12 @@ public class StudentSpecification {
                                                      LocalDate customEnd) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
             predicates.add(cb.equal(root.get("branchCode"), branchCode));
+
+            // Joins to related tables
+            Join<StudentEntity, StudentAdditionalInfo> additionalInfoJoin = root.join("additionalInfo", JoinType.LEFT);
+            Join<StudentEntity, StudentReligion> religionJoin = root.join("religion", JoinType.LEFT);
 
             if (filter != null) {
                 if (filter.getFullName() != null) {
@@ -27,7 +36,6 @@ public class StudentSpecification {
                 if (filter.getGender() != null) {
                     predicates.add(cb.equal(root.get("gender"), filter.getGender()));
                 }
-
                 if (filter.getMotherTongue() != null) {
                     predicates.add(cb.equal(root.get("motherTongue"), filter.getMotherTongue()));
                 }
@@ -52,9 +60,22 @@ public class StudentSpecification {
                 if (filter.getSemister() != null) {
                     predicates.add(cb.equal(root.get("semister"), filter.getSemister()));
                 }
+
+                if (filter.getCastCategory() != null) {
+                    predicates.add(cb.equal(religionJoin.get("castCategory"), filter.getCastCategory()));
+                }
+                if (filter.getMinority() != null) {
+                    predicates.add(cb.equal(religionJoin.get("minority"), filter.getMinority()));
+                }
+
+                if (filter.getEarthquake() != null) {
+                    predicates.add(cb.equal(additionalInfoJoin.get("earthquake"), filter.getEarthquake()));
+                }
+                if (filter.getHandicap() != null) {
+                    predicates.add(cb.equal(additionalInfoJoin.get("handicap"), filter.getHandicap()));
+                }
             }
 
-            // Date range logic (based on enrollmentDate)
             if (timeFrame != null) {
                 LocalDate today = LocalDate.now();
                 switch (timeFrame.toLowerCase()) {
