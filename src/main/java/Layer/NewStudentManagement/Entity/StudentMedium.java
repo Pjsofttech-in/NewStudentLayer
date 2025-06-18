@@ -19,7 +19,7 @@ public class StudentMedium
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long mid;
-    private String medium;
+    private String mediumName;
     @Email
     private String createdByEmail;
     private String role;
@@ -28,5 +28,7 @@ public class StudentMedium
     @OneToMany(mappedBy = "medium", cascade = CascadeType.ALL)
     private List<StudentClassRoom> classRooms;
 
+    @OneToMany(mappedBy = "medium", cascade = CascadeType.ALL)
+    private List<StudentEntity> students;
 
 }

@@ -4,14 +4,33 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="attendace">
-      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/AttendanceCountDTO.java" afterDir="false" />
+    <list default="true" id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="Count">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Util/BeanCopyUtils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/AttendanceController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/AttendanceController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/AttendanceRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/AttendanceRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/StudentRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/StudentRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/AttendanceService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/AttendanceService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/AttendanceServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/AttendanceServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/StudentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/StudentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/MediumDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/MediumDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentAddressDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentAddressDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDivisionDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDivisionDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentFilterDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentFilterDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentAddress.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentAddress.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentMedium.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentMedium.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentStandard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentStandard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Mapper/StudentMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Mapper/StudentMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Pagination/StudentSpecification.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Pagination/StudentSpecification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/AdditionalInfoRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/AdditionalInfoRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/AddressRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/AddressRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/EducationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/EducationRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/ReligionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/ReligionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/SportsRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/SportsRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/StudentService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/StudentService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ClassRoomServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ClassRoomServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/MediumServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/MediumServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StandardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StandardServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -195,7 +214,15 @@
       <option name="project" value="LOCAL" />
       <updated>1750145113885</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="Count">
+      <option name="closed" value="true" />
+      <created>1750153591834</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1750153591834</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -223,6 +250,7 @@
     <MESSAGE value="getallWithPagination" />
     <MESSAGE value="1" />
     <MESSAGE value="attendace" />
-    <option name="LAST_COMMIT_MESSAGE" value="attendace" />
+    <MESSAGE value="Count" />
+    <option name="LAST_COMMIT_MESSAGE" value="Count" />
   </component>
 </project>

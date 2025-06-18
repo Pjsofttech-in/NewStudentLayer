@@ -32,7 +32,7 @@ public class StudentResponseDTO {
     private String pancardNumber;
     private Long aadharNumber;
     private Integer rollNo;
-    private String standard;
+    private String standardName;
     @Column(length = 9)
     private String academicYear;
     private String udiseNo;
@@ -45,6 +45,9 @@ public class StudentResponseDTO {
     private String streamName;
     private String groupName;
     private String semister;
+    private Long standardId;
+    private Long mediumId;
+    private String institutionType;
 
     @Email
     private String createdByEmail;

@@ -31,8 +31,8 @@ public class StudentSpecification {
                 if (filter.getMotherTongue() != null) {
                     predicates.add(cb.equal(root.get("motherTongue"), filter.getMotherTongue()));
                 }
-                if (filter.getStandard() != null) {
-                    predicates.add(cb.equal(root.get("standard"), filter.getStandard()));
+                if (filter.getStandardName() != null) {
+                    predicates.add(cb.equal(root.get("standardName"), filter.getStandardName()));
                 }
                 if (filter.getAcademicYear() != null) {
                     predicates.add(cb.equal(root.get("academicYear"), filter.getAcademicYear()));

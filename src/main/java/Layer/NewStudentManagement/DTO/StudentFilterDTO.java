@@ -14,7 +14,7 @@ public class StudentFilterDTO
     private String fullName;
     private String gender;
     private String motherTongue;
-    private String standard;
+    private String standardName;
     private String academicYear;
     private String mediumName;
     private String status;

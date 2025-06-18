@@ -11,6 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 public class StudentRequest
 {
+
+    private Long standardId;
+    private Long mediumId;
     private StudentEntity student;
     private StudentAddress address;
     private List<StudentEducation> educationList;

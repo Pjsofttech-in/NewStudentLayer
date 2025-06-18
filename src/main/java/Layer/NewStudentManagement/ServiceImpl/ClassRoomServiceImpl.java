@@ -257,9 +257,9 @@ public class ClassRoomServiceImpl implements ClassRoomService
         return new StudentClassRoomResponseDTO(
                 classroom.getId(),
                 classroom.getYear(),
-                classroom.getMedium().getMedium(),
+                classroom.getMedium().getMediumName(),
                 classroom.getDivision().getDivision(),
-                classroom.getStandard().getStandard(),
+                classroom.getStandard().getStandardName(),
                 classroom.getBranchCode(),
                 classroom.getCreatedByEmail(),
                 classroom.getRole(),

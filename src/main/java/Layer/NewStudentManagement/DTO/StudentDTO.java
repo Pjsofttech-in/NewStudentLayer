@@ -34,7 +34,7 @@ public class StudentDTO
     private String pancardNumber;
     private Long aadharNumber;
     private Integer rollNo;
-    private String standard;
+    private String standardName;
     @Column(length = 9)
     private String academicYear;
     private String udiseNo;
@@ -47,7 +47,8 @@ public class StudentDTO
     private String streamName;
     private String groupName;
     private String semister;
-    private String password;
+    private String institutionType;
+//    private String password;
 
     @Email
     private String createdByEmail;

@@ -55,7 +55,7 @@ public class MediumServiceImpl implements MediumService
         }
         StudentMedium existingMedium = mediumRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Medium not found"));
-        existingMedium.setMedium(medium.getMedium());
+        existingMedium.setMediumName(medium.getMediumName());
         return mediumRepository.save(existingMedium);
     }
 
@@ -86,7 +86,7 @@ public class MediumServiceImpl implements MediumService
     private MediumDTO mapToMediumDTO(StudentMedium medium) {
         return new MediumDTO(
                 medium.getMid(),
-                medium.getMedium(),
+                medium.getMediumName(),
                 medium.getCreatedByEmail(),
                 medium.getRole(),
                 medium.getBranchCode()

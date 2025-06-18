@@ -38,7 +38,7 @@ public class StudentEntity
     private String pancardNumber;
     private Long aadharNumber;
     private Integer rollNo = 0;
-    private String standard;
+    private String standardName;
     @Column(length = 9)
     private String academicYear;
     private String udiseNo;
@@ -52,6 +52,7 @@ public class StudentEntity
     private String groupName;
     private String semister;
     private String password;
+    private String institutionType;
 //    private String university;
 //    private String board;
 
@@ -77,6 +78,15 @@ public class StudentEntity
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
     private StudentDocument documents;
+
+    @ManyToOne
+    @JoinColumn(name = "medium_id")
+    private StudentMedium medium;
+
+    @ManyToOne
+    @JoinColumn(name = "standard_id")
+    private StudentStandard standard;
+
 
     @ManyToOne
     @JoinColumn(name = "classroom_id")

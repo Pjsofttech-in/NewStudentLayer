@@ -33,7 +33,7 @@ public class StudentMapper
             dto.setPancardNumber(student.getPancardNumber());
             dto.setAadharNumber(student.getAadharNumber());
             dto.setRollNo(student.getRollNo());
-            dto.setStandard(student.getStandard());
+            dto.setStandardName(student.getStandardName());
             dto.setAcademicYear(student.getAcademicYear());
             dto.setUdiseNo(student.getUdiseNo());
             dto.setApaarId(student.getApaarId());
@@ -45,7 +45,8 @@ public class StudentMapper
             dto.setStreamName(student.getStreamName());
             dto.setGroupName(student.getGroupName());
             dto.setSemister(student.getSemister());
-            dto.setPassword(student.getPassword());
+            dto.setInstitutionType(student.getInstitutionType());
+//            dto.setPassword(student.getPassword());
             dto.setCreatedByEmail(student.getCreatedByEmail());
             dto.setRole(student.getRole());
             dto.setBranchCode(student.getBranchCode());
@@ -98,6 +99,7 @@ public class StudentMapper
             dto.setFathersName(address.getFathersName());
             dto.setFathersContact(address.getFathersContact());
             dto.setWhatsappNumber(address.getWhatsappNumber());
+            dto.setSameAsCurrent(address.isSameAsCurrent());
 
             return dto;
         }

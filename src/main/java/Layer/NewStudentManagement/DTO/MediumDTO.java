@@ -12,7 +12,7 @@ import lombok.Setter;
 public class MediumDTO
 {
     private Long mid;
-    private String medium;
+    private String mediumName;
     private String createdByEmail;
     private String role;
     private String branchCode;

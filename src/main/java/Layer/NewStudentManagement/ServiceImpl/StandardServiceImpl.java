@@ -56,7 +56,7 @@ public class StandardServiceImpl implements StandardService
         }
         StudentStandard existingStandard = standardRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Standard not found"));
-        existingStandard.setStandard(standard.getStandard());
+        existingStandard.setStandardName(standard.getStandardName());
         return standardRepository.save(existingStandard);
 
     }
@@ -89,7 +89,7 @@ public class StandardServiceImpl implements StandardService
     private StandardDTO mapToStandardDTO(StudentStandard standard) {
         return new StandardDTO(
                 standard.getSid(),
-                standard.getStandard(),
+                standard.getStandardName(),
                 standard.getCreatedByEmail(),
                 standard.getRole(),
                 standard.getBranchCode()

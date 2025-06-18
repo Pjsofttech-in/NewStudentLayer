@@ -35,4 +35,5 @@ public class StudentAddressDTO
     private String fathersName;
     private String fathersContact;
     private String whatsappNumber;
+    private boolean sameAsCurrent;
 }

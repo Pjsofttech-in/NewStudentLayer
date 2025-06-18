@@ -12,7 +12,7 @@ import lombok.Setter;
 public class StudentDivisionDTO
 {
     private Long did;
-    private String division;
+    private String divisionName;
     private String createdByEmail;
     private String role;
     private String branchCode;

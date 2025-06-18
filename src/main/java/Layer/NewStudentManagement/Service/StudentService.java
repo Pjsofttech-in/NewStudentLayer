@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface StudentService
 {
-    StudentEntity saveStudent(String role, String email, StudentRequest request);
+    StudentResponseDTO  saveStudent(String role, String email, StudentRequest request);
     StudentDTO getStudentById(Long id, String role, String email);
     StudentResponseDTO updateStudent(Long id, String role, String email, StudentRequest request);
     void deleteStudentById(Long id,String role,String email);

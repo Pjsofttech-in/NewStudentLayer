@@ -29,10 +29,12 @@ public class StudentController
     S3Service s3Service;
 
     @PostMapping("/createStudent")
-    public ResponseEntity<StudentEntity> saveStudent(@RequestParam String role,
+    public ResponseEntity<StudentResponseDTO> saveStudent(@RequestParam String role,
                                                      @RequestParam String email,
-                                                     @RequestBody StudentRequest request) {
-        return ResponseEntity.ok(studentService.saveStudent(role, email, request));
+                                                     @RequestBody StudentRequest request)
+    {
+        StudentResponseDTO savedStudent = studentService.saveStudent(role, email, request);
+        return ResponseEntity.ok(savedStudent);
     }
 
     @GetMapping("/getStudentById/{id}")

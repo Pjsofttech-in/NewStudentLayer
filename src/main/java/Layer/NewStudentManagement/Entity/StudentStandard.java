@@ -19,7 +19,7 @@ public class StudentStandard
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sid;
-    private String standard;
+    private String standardName;
     @Email
     private String createdByEmail;
     private String role;
@@ -27,6 +27,9 @@ public class StudentStandard
 
     @OneToMany(mappedBy = "standard", cascade = CascadeType.ALL)
     private List<StudentClassRoom> classRooms;
+
+    @OneToMany(mappedBy = "standard", cascade = CascadeType.ALL)
+    private List<StudentEntity> students;
 
 
 }

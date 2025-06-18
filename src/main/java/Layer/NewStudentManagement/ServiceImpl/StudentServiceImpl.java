@@ -7,6 +7,7 @@ import Layer.NewStudentManagement.Pagination.StudentSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
+import Layer.NewStudentManagement.Util.BeanCopyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,10 @@ public class StudentServiceImpl implements StudentService {
     private DocumentRepository documentRepository;
     @Autowired
     PasswordEncoder passwordEncoder;
+    @Autowired
+    private MediumRepository mediumRepository;
+    @Autowired
+    private StandardRepository standardRepository;
 
 
 
@@ -56,10 +61,23 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public StudentEntity saveStudent(String role, String email, StudentRequest request) {
+    public StudentResponseDTO  saveStudent(String role, String email, StudentRequest request) {
         checkPermission(role, email, "Post");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         StudentEntity student = request.getStudent();
+
+        Long standardId = request.getStandardId();
+
+        StudentStandard standard = standardRepository.findById(standardId)
+                .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
+        student.setStandard(standard);
+        student.setStandardName(standard.getStandardName());
+
+        Long mediumId = request.getMediumId();
+        StudentMedium medium = mediumRepository.findById(mediumId)
+                .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+        student.setMedium(medium);
+        student.setMediumName(medium.getMediumName());
         student.setEnrollmentDate(LocalDate.now());
         student.setPassword(passwordEncoder.encode(student.getPassword()));
         student.setRole(role);
@@ -91,7 +109,7 @@ public class StudentServiceImpl implements StudentService {
         sportsRepo.save(sports);
 
 
-        return savedStudent;
+        return mapToDTO(savedStudent);
 
     }
 
@@ -112,39 +130,64 @@ public class StudentServiceImpl implements StudentService {
         StudentEntity existing = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
-        updateStudentFields(existing, request.getStudent());
+        BeanCopyUtils.copyNonNullProperties(request.getStudent(), existing);
+
+        if (request.getStudent().getPassword() != null) {
+            existing.setPassword(passwordEncoder.encode(request.getStudent().getPassword()));
+        }
 
         StudentEntity savedStudent = studentRepository.save(existing);
 
-        Optional.ofNullable(request.getAddress()).ifPresent(addr -> {
-            addr.setStudent(savedStudent);
-            addressRepo.save(addr);
+        Optional.ofNullable(request.getAddress()).ifPresent(updatedAddr -> {
+            StudentAddress existingAddress = addressRepo.findByStudentId(studentId)
+                    .orElse(new StudentAddress());
+            BeanCopyUtils.copyNonNullProperties(updatedAddr, existingAddress);
+            existingAddress.setStudent(savedStudent);
+            addressRepo.save(existingAddress);
         });
 
         Optional.ofNullable(request.getEducationList()).ifPresent(list -> {
-            list.forEach(edu -> {
-                edu.setStudent(savedStudent);
-                educationRepo.save(edu);
-            });
+            for (StudentEducation updatedEdu : list) {
+                if (updatedEdu.getId() != null) {
+                    StudentEducation existingEdu = educationRepo.findById(updatedEdu.getId())
+                            .orElse(new StudentEducation());
+                    BeanCopyUtils.copyNonNullProperties(updatedEdu, existingEdu);
+                    existingEdu.setStudent(savedStudent);
+                    educationRepo.save(existingEdu);
+                } else {
+                    updatedEdu.setStudent(savedStudent);
+                    educationRepo.save(updatedEdu);
+                }
+            }
         });
 
-        Optional.ofNullable(request.getAdditionalInfo()).ifPresent(info -> {
-            info.setStudent(savedStudent);
-            additionalInfoRepo.save(info);
+        Optional.ofNullable(request.getAdditionalInfo()).ifPresent(updated -> {
+            StudentAdditionalInfo existingAdd = additionalInfoRepo.findByStudentId(studentId)
+                    .orElse(new StudentAdditionalInfo());
+            BeanCopyUtils.copyNonNullProperties(updated, existingAdd);
+            existingAdd.setStudent(savedStudent);
+            additionalInfoRepo.save(existingAdd);
         });
 
-        Optional.ofNullable(request.getReligion()).ifPresent(rel -> {
-            rel.setStudent(savedStudent);
-            religionRepo.save(rel);
+        Optional.ofNullable(request.getReligion()).ifPresent(updated -> {
+            StudentReligion existingRel = religionRepo.findByStudentId(studentId)
+                    .orElse(new StudentReligion());
+            BeanCopyUtils.copyNonNullProperties(updated, existingRel);
+            existingRel.setStudent(savedStudent);
+            religionRepo.save(existingRel);
         });
 
-        Optional.ofNullable(request.getSports()).ifPresent(sport -> {
-            sport.setStudent(savedStudent);
-            sportsRepo.save(sport);
+        Optional.ofNullable(request.getSports()).ifPresent(updated -> {
+            StudentSports existingSports = sportsRepo.findByStudentId(studentId)
+                    .orElse(new StudentSports());
+            BeanCopyUtils.copyNonNullProperties(updated, existingSports);
+            existingSports.setStudent(savedStudent);
+            sportsRepo.save(existingSports);
         });
 
         return mapToDTO(savedStudent);
     }
+
 
     @Override
     public void deleteStudentById(Long id, String role, String email) {
@@ -263,6 +306,7 @@ public class StudentServiceImpl implements StudentService {
         if (incoming.getStreamName() != null) existing.setStreamName(incoming.getStreamName());
         if (incoming.getGroupName() != null) existing.setGroupName(incoming.getGroupName());
         if (incoming.getSemister() != null) existing.setSemister(incoming.getSemister());
+        if (incoming.getInstitutionType() != null) existing.setInstitutionType(incoming.getInstitutionType());
     }
 
 
@@ -276,7 +320,8 @@ public class StudentServiceImpl implements StudentService {
         dto.setBloodGroup(student.getBloodGroup());
         dto.setMotherTongue(student.getMotherTongue());
         dto.setMaritalStatus(student.getMaritalStatus());
-        dto.setContact(String.valueOf(student.getContact())); // Convert Long to String for pattern validation
+
+        dto.setContact(student.getContact() != null ? String.valueOf(student.getContact()) : null); // Safely convert
         dto.setAge(student.getAge());
         dto.setEmail(student.getEmail());
         dto.setDateOfBirth(student.getDateOfBirth());
@@ -285,7 +330,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setPancardNumber(student.getPancardNumber());
         dto.setAadharNumber(student.getAadharNumber());
         dto.setRollNo(student.getRollNo());
-        dto.setStandard(student.getStandard());
+        dto.setStandardName(student.getStandardName());
         dto.setAcademicYear(student.getAcademicYear());
         dto.setUdiseNo(student.getUdiseNo());
         dto.setApaarId(student.getApaarId());
@@ -297,6 +342,12 @@ public class StudentServiceImpl implements StudentService {
         dto.setStreamName(student.getStreamName());
         dto.setGroupName(student.getGroupName());
         dto.setSemister(student.getSemister());
+        dto.setInstitutionType(student.getInstitutionType());
+
+        // Safely get IDs from linked entities
+        dto.setStandardId(student.getStandard() != null ? student.getStandard().getSid() : null);
+        dto.setMediumId(student.getMedium() != null ? student.getMedium().getMid() : null);
+
         dto.setCreatedByEmail(student.getCreatedByEmail());
         dto.setRole(student.getRole());
         dto.setBranchCode(student.getBranchCode());
