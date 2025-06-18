@@ -267,9 +267,9 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email, String medium, String standard, String year) {
+    public List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email, String medium, String standard, String year, String status) {
         checkPermission(role, email, "Get");
-        List<StudentEntity> students = studentRepository.findByMediumAndStandard(medium, standard, year);
+        List<StudentEntity> students = studentRepository.findByMediumAndStandard(medium, standard, year, status);
 
         return students.stream()
                 .map(this::mapToDTO)
@@ -481,5 +481,16 @@ public class StudentServiceImpl implements StudentService {
         return students.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
+    @Override
+    public void updateStatus(String role, String email, Long studentId, String status)
+    {
+        checkPermission(role,email,"Put");
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        student.setStatus(status);
+
+        studentRepository.save(student);
+    }
 
 }

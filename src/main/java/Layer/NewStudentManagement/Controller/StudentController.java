@@ -136,9 +136,9 @@ public class StudentController
     @GetMapping("/getStudentByMediumAndStandard")
     public ResponseEntity<List<StudentResponseDTO>> getStudentByMediumAndStandard(@RequestParam String role, @RequestParam String email,
                                                                                   @RequestParam String medium, @RequestParam String standard,
-                                                                                  @RequestParam String year)
+                                                                                  @RequestParam String year, @RequestParam String status)
     {
-        return ResponseEntity.ok(studentService.getStudentByMediumDivisionStandard(role, email,medium,standard,year));
+        return ResponseEntity.ok(studentService.getStudentByMediumDivisionStandard(role, email,medium,standard,year,status));
     }
 
     @GetMapping("/getStudentByClassRoomId")
@@ -146,6 +146,16 @@ public class StudentController
         List<StudentResponseDTO> students = studentService.getStudentsByClassRoomId(role , email,classRoomId);
         return ResponseEntity.ok(students);
     }
+
+
+    @PutMapping("/updateStudentStatus")
+    public ResponseEntity<String> updateStudentStatus(
+            @RequestParam String role, @RequestParam String email,
+            @RequestParam Long studentId, @RequestParam String status) {
+        studentService.updateStatus(role,email,studentId, status);
+        return ResponseEntity.ok("Status updated successfully");
+    }
+
 
 
 }
