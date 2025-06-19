@@ -46,7 +46,9 @@ public class StudentMapper
             dto.setGroupName(student.getGroupName());
             dto.setSemister(student.getSemister());
             dto.setInstitutionType(student.getInstitutionType());
-//            dto.setPassword(student.getPassword());
+            dto.setPassword(student.getPassword());
+            dto.setStandardId(student.getStandard().getSid());
+            dto.setMediumId(student.getMedium().getMid());
             dto.setCreatedByEmail(student.getCreatedByEmail());
             dto.setRole(student.getRole());
             dto.setBranchCode(student.getBranchCode());
@@ -201,7 +203,7 @@ public class StudentMapper
 
         StudentDocumentDTO dto = new StudentDocumentDTO();
         dto.setId(document.getId());
-        dto.setStudentId(document.getId());
+        dto.setStudentId(document.getStudent().getId());
         dto.setStudentPhoto(document.getStudentPhoto());
         dto.setAadharcardPhoto(document.getAadharcardPhoto());
         dto.setPancardPhoto(document.getPancardPhoto());

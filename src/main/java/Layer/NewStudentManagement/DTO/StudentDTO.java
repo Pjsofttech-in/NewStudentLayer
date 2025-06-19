@@ -48,7 +48,9 @@ public class StudentDTO
     private String groupName;
     private String semister;
     private String institutionType;
-//    private String password;
+    private Long standardId;
+    private Long mediumId;
+    private String password;
 
     @Email
     private String createdByEmail;
