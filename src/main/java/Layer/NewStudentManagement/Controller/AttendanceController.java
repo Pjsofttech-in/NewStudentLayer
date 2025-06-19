@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.AttendanceCountDTO;
+import Layer.NewStudentManagement.DTO.StudentAttendaceDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
 import Layer.NewStudentManagement.Entity.StudentAttendance;
 import Layer.NewStudentManagement.Service.AttendanceService;
@@ -64,7 +65,7 @@ public class AttendanceController
     }
 
     @PostMapping("/getAttendaceByClassroom")
-    public ResponseEntity<Page<StudentAttendance>> filterAttendance(
+    public ResponseEntity<Page<StudentAttendaceDTO>> filterAttendance(
             @RequestParam Long classroomId,
             @RequestParam(required = false) String timeFrame,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customStartDate,
@@ -74,7 +75,7 @@ public class AttendanceController
             @RequestBody(required = false) StudentAttendanceFilterDTO filterDTO) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<StudentAttendance> result = attendanceService.getFilteredAttendance(
+        Page<StudentAttendaceDTO> result = attendanceService.getFilteredAttendance(
                 classroomId, filterDTO, timeFrame, customStartDate, customEndDate, pageable);
         return ResponseEntity.ok(result);
     }

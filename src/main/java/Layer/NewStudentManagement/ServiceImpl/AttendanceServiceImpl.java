@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.AttendanceCountDTO;
+import Layer.NewStudentManagement.DTO.StudentAttendaceDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
 import Layer.NewStudentManagement.Entity.StudentAttendance;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpEntity;
@@ -284,14 +286,121 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
     }
 
+//    @Override
+//    public Page<StudentAttendance> getFilteredAttendance(
+//            Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
+//            LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) {
+//        Specification<StudentAttendance> spec = StudentAttendanceSpecification.build(
+//                filter, classroomId, timeFrame, customStartDate, customEndDate
+//        );
+//        return attendanceRepository.findAll(spec, pageable);
+//    }
+
+
     @Override
-    public Page<StudentAttendance> getFilteredAttendance(
-            Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
+    public Page<StudentAttendaceDTO> getFilteredAttendance(Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
             LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) {
+
+        // 1. Determine date range
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today, endDate = today;
+
+        switch (timeFrame.toLowerCase()) {
+            case "7days" -> startDate = today.minusDays(6);
+            case "30days" -> startDate = today.minusDays(29);
+            case "365days" -> startDate = today.minusDays(364);
+            case "custom" -> {
+                if (customStartDate != null && customEndDate != null) {
+                    startDate = customStartDate;
+                    endDate = customEndDate;
+                }
+            }
+        }
+
+        // 2. Fetch and filter students
+        List<StudentEntity> students = studentRepository.findAllByClassroomId(classroomId);
+
+        if (filter != null) {
+            if (filter.getRollNo() != null) {
+                students = students.stream()
+                        .filter(s -> s.getRollNo() == filter.getRollNo())
+                        .toList();
+            }
+            if (filter.getStudentName() != null && !filter.getStudentName().isBlank()) {
+                String name = filter.getStudentName().toLowerCase();
+                students = students.stream()
+                        .filter(s -> s.getFullName() != null && s.getFullName().toLowerCase().contains(name))
+                        .toList();
+            }
+        }
+
+        // 3. Fetch attendance records for the filtered date range
         Specification<StudentAttendance> spec = StudentAttendanceSpecification.build(
                 filter, classroomId, timeFrame, customStartDate, customEndDate
         );
-        return attendanceRepository.findAll(spec, pageable);
+        List<StudentAttendance> attendanceList = attendanceRepository.findAll(spec);
+
+        // 4. Map (rollNo + date) to attendance record
+        Map<String, StudentAttendance> attendanceMap = attendanceList.stream()
+                .collect(Collectors.toMap(
+                        a -> a.getRollNo() + "_" + a.getDate(),
+                        a -> a
+                ));
+
+        // 5. Build DTO list: present + absent
+        List<StudentAttendaceDTO> combinedList = new ArrayList<>();
+
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+            for (StudentEntity student : students) {
+                String key = student.getRollNo() + "_" + date;
+                StudentAttendance att = attendanceMap.get(key);
+
+                StudentAttendaceDTO dto = (att != null)
+                        ? new StudentAttendaceDTO(
+                        att.getId(),
+                        att.getRollNo(),
+                        att.getBranchCode(),
+                        att.getClassroomId(),
+                        att.getStudentName(),
+                        att.getSystemName(),
+                        att.getDate(),
+                        att.getLoginTime(),
+                        att.getLogoutTime(),
+                        att.getWorkingMinutes(),
+                        att.getStatus()
+                )
+                        : new StudentAttendaceDTO(
+                        null,
+                        student.getRollNo(),
+                        student.getBranchCode(),
+                        classroomId,
+                        student.getFullName(),
+                        null,
+                        date,
+                        null,
+                        null,
+                        0L,
+                        "Absent"
+                );
+
+                combinedList.add(dto);
+            }
+        }
+
+        // 6. Apply `status` filter manually after combining data
+        if (filter != null && filter.getStatus() != null && !filter.getStatus().equalsIgnoreCase("All")) {
+            String status = filter.getStatus().toLowerCase();
+            combinedList = combinedList.stream()
+                    .filter(d -> d.getStatus() != null && d.getStatus().toLowerCase().equals(status))
+                    .toList();
+        }
+
+        // 7. Return paginated result
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), combinedList.size());
+        List<StudentAttendaceDTO> paged = combinedList.subList(start, end);
+
+        return new PageImpl<>(paged, pageable, combinedList.size());
     }
 
 

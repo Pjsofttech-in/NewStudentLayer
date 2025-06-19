@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Service;
 
 
 import Layer.NewStudentManagement.DTO.AttendanceCountDTO;
+import Layer.NewStudentManagement.DTO.StudentAttendaceDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
 import Layer.NewStudentManagement.Entity.StudentAttendance;
 import org.springframework.data.domain.Page;
@@ -21,8 +22,8 @@ public interface AttendanceService
 
     String logoutStudentFromFace(MultipartFile image, String branchCode, String classroomId);
 
-    Page<StudentAttendance> getFilteredAttendance(Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
-            LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) ;
+    Page<StudentAttendaceDTO> getFilteredAttendance(Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
+                                                    LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) ;
 
     AttendanceCountDTO getAttendanceCountByTimeFrame(Long classroomId, String timeFrame,LocalDate customStartDate, LocalDate customEndDate);
 
