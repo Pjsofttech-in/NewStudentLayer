@@ -67,17 +67,20 @@ public class StudentServiceImpl implements StudentService {
         StudentEntity student = request.getStudent();
 
         Long standardId = request.getStandardId();
-
-        StudentStandard standard = standardRepository.findById(standardId)
-                .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
-        student.setStandard(standard);
-        student.setStandardName(standard.getStandardName());
-
+        if (standardId != null) {
+            StudentStandard standard = standardRepository.findById(standardId)
+                    .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
+            student.setStandard(standard);
+            student.setStandardName(standard.getStandardName());
+        }
         Long mediumId = request.getMediumId();
-        StudentMedium medium = mediumRepository.findById(mediumId)
-                .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
-        student.setMedium(medium);
-        student.setMediumName(medium.getMediumName());
+        if (mediumId != null) {
+            StudentMedium medium = mediumRepository.findById(mediumId)
+                    .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+            student.setMedium(medium);
+            student.setMediumName(medium.getMediumName());
+        }
+
         student.setEnrollmentDate(LocalDate.now());
         student.setPassword(passwordEncoder.encode(student.getPassword()));
         student.setRole(role);
