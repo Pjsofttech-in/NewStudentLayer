@@ -86,6 +86,7 @@ public class StudentServiceImpl implements StudentService {
         student.setRole(role);
         student.setBranchCode(branchCode);
         student.setCreatedByEmail(email);
+        student.setRegistrationNumber(generateRegistrationNumber());
 
         StudentEntity savedStudent = studentRepository.save(student);
 
@@ -346,10 +347,18 @@ public class StudentServiceImpl implements StudentService {
         dto.setGroupName(student.getGroupName());
         dto.setSemister(student.getSemister());
         dto.setInstitutionType(student.getInstitutionType());
+        dto.setRegistrationNumber(student.getRegistrationNumber());
 
         // Safely get IDs from linked entities
-        dto.setStandardId(student.getStandard() != null ? student.getStandard().getSid() : null);
-        dto.setMediumId(student.getMedium() != null ? student.getMedium().getMid() : null);
+        if (student.getStandard() != null) {
+            dto.setStandardId(student.getStandard().getSid());
+            dto.setStandardName(student.getStandard().getStandardName());
+        }
+
+        if (student.getMedium() != null) {
+            dto.setMediumId(student.getMedium().getMid());
+            dto.setMediumName(student.getMedium().getMediumName());
+        }
 
         dto.setCreatedByEmail(student.getCreatedByEmail());
         dto.setRole(student.getRole());
@@ -495,5 +504,16 @@ public class StudentServiceImpl implements StudentService {
 
         studentRepository.save(student);
     }
+
+    private String generateRegistrationNumber() {
+        String year = String.valueOf(LocalDate.now().getYear());
+        Long count = studentRepository.countByRegistrationNumberStartingWith(year);
+        String uniquePart = String.format("%08d", count + 1);
+
+        return year + uniquePart;  // e.g., "202500000001"
+    }
+
+
+
 
 }

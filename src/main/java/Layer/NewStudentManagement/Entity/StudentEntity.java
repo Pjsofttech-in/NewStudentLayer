@@ -53,6 +53,9 @@ public class StudentEntity
     private String semister;
     private String password;
     private String institutionType;
+
+    @Column(unique = true, length = 12)
+    private String registrationNumber;
 //    private String university;
 //    private String board;
 
@@ -91,5 +94,9 @@ public class StudentEntity
     @ManyToOne
     @JoinColumn(name = "classroom_id")
     private StudentClassRoom classRoom;
+
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentPromotionRecord> promotionRecords;
 
 }

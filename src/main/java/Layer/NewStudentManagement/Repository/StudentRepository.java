@@ -41,6 +41,9 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     @Query("SELECT s FROM StudentEntity s WHERE s.classRoom.id = :classroomId AND s.rollNo NOT IN :presentRollNos")
     List<StudentEntity> findAbsentStudents(@Param("classroomId") Long classroomId, @Param("presentRollNos") List<Integer> presentRollNos);
 
+    @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.registrationNumber LIKE ?1%")
+    Long countByRegistrationNumberStartingWith(String year);
+
 
 
 }

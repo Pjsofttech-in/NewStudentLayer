@@ -51,6 +51,7 @@ public class StudentDTO
     private Long standardId;
     private Long mediumId;
     private String password;
+    private String registrationNumber;
 
     @Email
     private String createdByEmail;

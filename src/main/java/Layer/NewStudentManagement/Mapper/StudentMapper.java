@@ -47,8 +47,16 @@ public class StudentMapper
             dto.setSemister(student.getSemister());
             dto.setInstitutionType(student.getInstitutionType());
             dto.setPassword(student.getPassword());
-            dto.setStandardId(student.getStandard().getSid());
-            dto.setMediumId(student.getMedium().getMid());
+            dto.setRegistrationNumber(student.getRegistrationNumber());
+            if (student.getStandard() != null) {
+                dto.setStandardId(student.getStandard().getSid());
+                dto.setStandardName(student.getStandard().getStandardName());
+            }
+
+            if (student.getMedium() != null) {
+                dto.setMediumId(student.getMedium().getMid());
+                dto.setMediumName(student.getMedium().getMediumName());
+            }
             dto.setCreatedByEmail(student.getCreatedByEmail());
             dto.setRole(student.getRole());
             dto.setBranchCode(student.getBranchCode());
