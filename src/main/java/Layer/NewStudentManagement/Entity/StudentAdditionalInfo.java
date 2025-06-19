@@ -16,7 +16,6 @@ public class StudentAdditionalInfo
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long domicileNumber;
     private boolean handicap;
 //    private String handicapCertificate;
     private boolean earthquake;
@@ -26,8 +25,6 @@ public class StudentAdditionalInfo
     private boolean ebc;
     private boolean scholarship;
     private String scholarshipName;
-    private boolean domicileBool;
-    private String incomeRanges;
     private String specialPercentage;
     private String disabilityType;
     private boolean isTcGenrated = true;

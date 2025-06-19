@@ -35,4 +35,6 @@ public interface StudentService
     List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email,Long classRoomId);
 
     void updateStatus(String role, String email,Long studentId, String status);
+
+    StudentDTO getStudentByRegistrationNumber(String role, String email, String registrationNumber);
 }

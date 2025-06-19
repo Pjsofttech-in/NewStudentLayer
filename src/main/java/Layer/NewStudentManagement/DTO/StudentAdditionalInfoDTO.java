@@ -12,7 +12,6 @@ import lombok.Setter;
 public class StudentAdditionalInfoDTO
 {
     private Long id;
-    private Long domicileNumber;
     private boolean handicap;
     private boolean earthquake;
     private Long earthquakeNumber;
@@ -21,8 +20,6 @@ public class StudentAdditionalInfoDTO
     private boolean ebc;
     private boolean scholarship;
     private String scholarshipName;
-    private boolean domicileBool;
-    private String incomeRanges;
     private String specialPercentage;
     private String disabilityType;
     private boolean isTcGenrated;

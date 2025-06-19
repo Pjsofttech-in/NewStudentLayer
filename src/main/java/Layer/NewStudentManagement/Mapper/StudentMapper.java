@@ -110,6 +110,7 @@ public class StudentMapper
             dto.setFathersContact(address.getFathersContact());
             dto.setWhatsappNumber(address.getWhatsappNumber());
             dto.setSameAsCurrent(address.isSameAsCurrent());
+            dto.setIncomeRanges(address.getIncomeRanges());
 
             return dto;
         }
@@ -149,7 +150,6 @@ public class StudentMapper
             StudentAdditionalInfoDTO dto = new StudentAdditionalInfoDTO();
 
             dto.setId(additionalInfo.getId());
-            dto.setDomicileNumber(additionalInfo.getDomicileNumber());
             dto.setHandicap(additionalInfo.isHandicap());
             dto.setEarthquake(additionalInfo.isEarthquake());
             dto.setEarthquakeNumber(additionalInfo.getEarthquakeNumber());
@@ -158,8 +158,6 @@ public class StudentMapper
             dto.setEbc(additionalInfo.isEbc());
             dto.setScholarship(additionalInfo.isScholarship());
             dto.setScholarshipName(additionalInfo.getScholarshipName());
-            dto.setDomicileBool(additionalInfo.isDomicileBool());
-            dto.setIncomeRanges(additionalInfo.getIncomeRanges());
             dto.setSpecialPercentage(additionalInfo.getSpecialPercentage());
             dto.setDisabilityType(additionalInfo.getDisabilityType());
             dto.setTcGenrated(additionalInfo.isTcGenrated());
@@ -181,6 +179,8 @@ public class StudentMapper
             dto.setCasteValidation(religion.getCasteValidation());
             dto.setCasteValidationNumber(religion.getCasteValidationNumber());
             dto.setSubCaste(religion.getSubCaste());
+            dto.setDomicileBool(religion.isDomicileBool());
+            dto.setDomicileNumber(religion.getDomicileNumber());
 
             return dto;
         }

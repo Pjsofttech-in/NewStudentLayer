@@ -25,6 +25,8 @@ public class StudentReligion
     private Boolean casteValidation;
     private String casteValidationNumber;
     private String subCaste;
+    private boolean domicileBool;
+    private Long domicileNumber;
 
     @OneToOne
     @JoinColumn(name = "student_id", nullable = false)

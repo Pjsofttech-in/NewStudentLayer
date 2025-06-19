@@ -20,4 +20,6 @@ public class StudentReligionDTO
     private Boolean casteValidation;
     private String casteValidationNumber;
     private String subCaste;
+    private boolean domicileBool;
+    private Long domicileNumber;
 }

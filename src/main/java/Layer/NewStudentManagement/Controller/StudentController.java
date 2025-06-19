@@ -156,6 +156,16 @@ public class StudentController
         return ResponseEntity.ok("Status updated successfully");
     }
 
+    @GetMapping("/getStudentByRegistrationNumber")
+    public ResponseEntity<StudentDTO> getStudentByRegistrationNumber(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam String registrationNumber
+    ) {
+        StudentDTO student = studentService.getStudentByRegistrationNumber(role, email, registrationNumber);
+        return ResponseEntity.ok(student);
+    }
+
 
 
 }

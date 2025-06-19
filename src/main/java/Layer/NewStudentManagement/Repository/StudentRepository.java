@@ -45,5 +45,16 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     Long countByRegistrationNumberStartingWith(String year);
 
 
+    @Query("SELECT s FROM StudentEntity s " +
+            "LEFT JOIN FETCH s.address " +
+            "LEFT JOIN FETCH s.educationList " +
+            "LEFT JOIN FETCH s.additionalInfo " +
+            "LEFT JOIN FETCH s.religion " +
+            "LEFT JOIN FETCH s.sports " +
+            "LEFT JOIN FETCH s.documents " +
+            "WHERE s.registrationNumber = :registrationNumber")
+    Optional<StudentEntity> findByRegistrationNumberWithAllData(@Param("registrationNumber") String registrationNumber);
+
+
 
 }

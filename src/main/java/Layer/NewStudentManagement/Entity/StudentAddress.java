@@ -43,6 +43,7 @@ public class StudentAddress
     @Pattern(regexp = "^[0-9]{10}$", message = "Mobile number must be 10 digits")
     private String whatsappNumber;
     private boolean sameAsCurrent;
+    private String incomeRanges;
 
     @OneToOne
     @JoinColumn(name = "student_id", nullable = false)

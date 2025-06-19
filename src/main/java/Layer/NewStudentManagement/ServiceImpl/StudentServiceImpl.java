@@ -280,6 +280,17 @@ public class StudentServiceImpl implements StudentService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public StudentDTO getStudentByRegistrationNumber(String role, String email, String registrationNumber) {
+        checkPermission(role, email, "Get");
+
+        StudentEntity student = studentRepository.findByRegistrationNumberWithAllData(registrationNumber)
+                .orElseThrow(() -> new RuntimeException("Student not found with registration number: " + registrationNumber));
+
+        return studentMapper.toStudentDTO(student); // or manually map to StudentDTO
+    }
+
+
 
     private void updateStudentFields(StudentEntity existing, StudentEntity incoming) {
         if (incoming.getTitle() != null) existing.setTitle(incoming.getTitle());
@@ -501,6 +512,9 @@ public class StudentServiceImpl implements StudentService {
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
         student.setStatus(status);
+        if ("Approved".equalsIgnoreCase(status)) {
+            student.setApprovalDate(LocalDate.now());
+        }
 
         studentRepository.save(student);
     }
@@ -512,7 +526,6 @@ public class StudentServiceImpl implements StudentService {
 
         return year + uniquePart;  // e.g., "202500000001"
     }
-
 
 
 

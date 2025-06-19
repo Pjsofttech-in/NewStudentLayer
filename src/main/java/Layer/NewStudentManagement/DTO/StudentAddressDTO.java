@@ -36,4 +36,5 @@ public class StudentAddressDTO
     private String fathersContact;
     private String whatsappNumber;
     private boolean sameAsCurrent;
+    private String incomeRanges;
 }
