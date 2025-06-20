@@ -37,4 +37,6 @@ public interface StudentService
     void updateStatus(String role, String email,Long studentId, String status);
 
     StudentDTO getStudentByRegistrationNumber(String role, String email, String registrationNumber);
+
+    void deleteEducationById(String role, String email, Long educationId);
 }

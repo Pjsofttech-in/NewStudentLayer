@@ -167,5 +167,12 @@ public class StudentController
     }
 
 
+    @DeleteMapping("/deleteEducationById")
+    public ResponseEntity<String> deleteEducationDetail(@RequestParam String role,@RequestParam String email,@RequestParam Long educationId)
+    {
+        studentService.deleteEducationById(role, email,educationId);
+        return ResponseEntity.ok("Education deleted successfully with ID: " + educationId);
+    }
+
 
 }

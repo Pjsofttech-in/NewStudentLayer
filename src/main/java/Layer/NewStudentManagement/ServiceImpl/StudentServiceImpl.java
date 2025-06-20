@@ -8,6 +8,7 @@ import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -525,6 +526,17 @@ public class StudentServiceImpl implements StudentService {
         String uniquePart = String.format("%08d", count + 1);
 
         return year + uniquePart;  // e.g., "202500000001"
+    }
+
+    @Override
+    @Transactional
+    public void deleteEducationById(String role, String email, Long educationId) {
+        checkPermission(role, email, "Delete");
+
+        StudentEducation education = educationRepo.findById(educationId)
+                .orElseThrow(() -> new RuntimeException("Education record not found with ID: " + educationId));
+
+        educationRepo.deleteById(educationId);
     }
 
 
