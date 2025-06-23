@@ -25,4 +25,7 @@ public class StudentFilterDTO
     private Boolean minority;
     private String castCategory;
     private Boolean handicap;
+    private Boolean sportYesNo;
+    private Boolean scholarship;
+    private Boolean projectDifferentiated;
 }

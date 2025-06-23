@@ -4,6 +4,7 @@ import Layer.NewStudentManagement.DTO.StudentFilterDTO;
 import Layer.NewStudentManagement.Entity.StudentAdditionalInfo;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentReligion;
+import Layer.NewStudentManagement.Entity.StudentSports;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -28,6 +29,7 @@ public class StudentSpecification {
             // Joins to related tables
             Join<StudentEntity, StudentAdditionalInfo> additionalInfoJoin = root.join("additionalInfo", JoinType.LEFT);
             Join<StudentEntity, StudentReligion> religionJoin = root.join("religion", JoinType.LEFT);
+            Join<StudentEntity, StudentSports> studentSportsJoin = root.join("sports", JoinType.LEFT);
 
             if (filter != null) {
                 if (filter.getFullName() != null) {
@@ -67,12 +69,20 @@ public class StudentSpecification {
                 if (filter.getMinority() != null) {
                     predicates.add(cb.equal(religionJoin.get("minority"), filter.getMinority()));
                 }
-
+                if (filter.getProjectDifferentiated() != null) {
+                    predicates.add(cb.equal(additionalInfoJoin.get("projectDifferentiated"), filter.getProjectDifferentiated()));
+                }
                 if (filter.getEarthquake() != null) {
                     predicates.add(cb.equal(additionalInfoJoin.get("earthquake"), filter.getEarthquake()));
                 }
                 if (filter.getHandicap() != null) {
                     predicates.add(cb.equal(additionalInfoJoin.get("handicap"), filter.getHandicap()));
+                }
+                if (filter.getSportYesNo() != null) {
+                    predicates.add(cb.equal(studentSportsJoin.get("sportYesNo"), filter.getSportYesNo()));
+                }
+                if (filter.getScholarship() != null) {
+                    predicates.add(cb.equal(additionalInfoJoin.get("scholarship"), filter.getScholarship()));
                 }
             }
 
