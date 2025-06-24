@@ -61,7 +61,7 @@ public class DegreeNameServiceImpl implements DegreeNameService
 
 
     @Override
-    public StudentDegreeName updateDegreeName(Long id,String role,String email,StudentDegreeName degreeName)
+    public StudentDegreeNameDTO updateDegreeName(Long id,String role,String email,StudentDegreeName degreeName)
     {
         if(!staffService.hasPermission(role,email,"Put"))
     {
@@ -70,7 +70,9 @@ public class DegreeNameServiceImpl implements DegreeNameService
         StudentDegreeName existingDegreeName = degreeNameRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Division not found"));
         existingDegreeName.setDegreeName(degreeName.getDegreeName());
-        return degreeNameRepository.save(existingDegreeName);
+        StudentDegreeName saved = degreeNameRepository.save(existingDegreeName);
+
+        return mapToDegreeNameDTO(saved);
     }
 
     @Override

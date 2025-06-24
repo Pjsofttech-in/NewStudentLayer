@@ -59,7 +59,7 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
     }
 
     @Override
-    public StudentGraduationType updateGraduationType(Long id,String role,String email,StudentGraduationType graduationType)
+    public StudentGraduationTypeDTO updateGraduationType(Long id,String role,String email,StudentGraduationType graduationType)
     {
         if(!staffService.hasPermission(role,email,"Put"))
         {
@@ -68,7 +68,8 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
         StudentGraduationType existinggraduationType = graduationTypeRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Division not found"));
         existinggraduationType.setGraduationType(graduationType.getGraduationType());
-        return graduationTypeRepository.save(existinggraduationType);
+        StudentGraduationType saved = graduationTypeRepository.save(existinggraduationType);
+        return mapToGraduationTypeDTO(saved);
 
 
     }

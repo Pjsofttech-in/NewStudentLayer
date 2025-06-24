@@ -10,7 +10,7 @@ public interface DepartmentService
 {
     StudentDepartmentDTO saveDepartment(String role, String email, StudentDepartmentDTO request);
     StudentDepartmentDTO getDepartmentById(Long id, String role, String email);
-    StudentDepartment updateDepartment(Long id,String role,String email,StudentDepartment department);
+    StudentDepartmentDTO updateDepartment(Long id,String role,String email,StudentDepartment department);
     void deleteDepartmentById(Long id,String role,String email);
     List<StudentDepartmentDTO> getAllDepartment(String role, String email);
     List<StudentDepartmentDTO> getDepartmentsByDegreeId(String role, String email, Long degreeId);

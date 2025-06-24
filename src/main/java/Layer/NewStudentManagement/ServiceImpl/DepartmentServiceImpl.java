@@ -59,7 +59,7 @@ public class DepartmentServiceImpl implements DepartmentService
     }
 
     @Override
-    public StudentDepartment updateDepartment(Long id,String role,String email,StudentDepartment department)
+    public StudentDepartmentDTO updateDepartment(Long id,String role,String email,StudentDepartment department)
     {
         if(!staffService.hasPermission(role,email,"Put"))
         {
@@ -68,7 +68,8 @@ public class DepartmentServiceImpl implements DepartmentService
         StudentDepartment existingDepartment = departmentRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Division not found"));
         existingDepartment.setDepartmentName(department.getDepartmentName());
-        return departmentRepository.save(existingDepartment);
+        StudentDepartment saved = departmentRepository.save(existingDepartment);
+        return mapToDepartmentDTO(saved);
 
 
     }

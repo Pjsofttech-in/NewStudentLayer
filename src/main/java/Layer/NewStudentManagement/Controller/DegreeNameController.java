@@ -37,9 +37,9 @@ public class DegreeNameController
     }
 
     @PutMapping("/updateDegreeName/{id}")
-    public ResponseEntity<StudentDegreeName> updateDegreeName(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentDegreeName degreeName)
+    public ResponseEntity<StudentDegreeNameDTO> updateDegreeName(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentDegreeName degreeName)
     {
-        StudentDegreeName updateDegreeName = degreeNameService.updateDegreeName(id,role,email,degreeName);
+        StudentDegreeNameDTO updateDegreeName = degreeNameService.updateDegreeName(id,role,email,degreeName);
         return ResponseEntity.ok(updateDegreeName);
     }
 
