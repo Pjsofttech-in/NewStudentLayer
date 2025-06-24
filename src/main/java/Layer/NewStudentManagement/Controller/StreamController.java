@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.StreamDTO;
 import Layer.NewStudentManagement.Entity.StudentStream;
 import Layer.NewStudentManagement.Service.StreamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,23 +24,23 @@ public class StreamController
     }
 
     @GetMapping("/getStreamById/{id}")
-    public ResponseEntity<StudentStream> getStreamById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
+    public ResponseEntity<StreamDTO> getStreamById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
     {
-        StudentStream stream = streamService.getStreamById(id,role,email);
+        StreamDTO stream = streamService.getStreamById(id,role,email);
         return ResponseEntity.ok(stream);
     }
 
     @GetMapping("/getAllStream")
-    public ResponseEntity<Iterable<StudentStream>> getAllStream(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<StreamDTO>> getAllStream(@RequestParam String role, @RequestParam String email)
     {
-        Iterable<StudentStream> streams = streamService.getAllStream(role,email);
+        Iterable<StreamDTO> streams = streamService.getAllStream(role,email);
         return ResponseEntity.ok(streams);
     }
 
     @PutMapping("/updateStream/{id}")
-    public ResponseEntity<StudentStream> updateStream(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentStream stream)
+    public ResponseEntity<StreamDTO> updateStream(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentStream stream)
     {
-        StudentStream updatedStream = streamService.updateStream(id,role,email,stream);
+        StreamDTO updatedStream = streamService.updateStream(id,role,email,stream);
         return ResponseEntity.ok(updatedStream);
     }
 

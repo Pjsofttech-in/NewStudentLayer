@@ -1,5 +1,8 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.StreamDTO;
+import Layer.NewStudentManagement.DTO.StudentDivisionDTO;
+import Layer.NewStudentManagement.Entity.StudentDivision;
 import Layer.NewStudentManagement.Entity.StudentStream;
 import Layer.NewStudentManagement.Repository.StreamRepository;
 import Layer.NewStudentManagement.Service.StreamService;
@@ -7,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class StreamServiceImpl implements StreamService
@@ -33,7 +37,7 @@ public class StreamServiceImpl implements StreamService
     }
 
     @Override
-    public StudentStream getStreamById(Long id,String role,String email)
+    public StreamDTO getStreamById(Long id, String role, String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
@@ -41,11 +45,11 @@ public class StreamServiceImpl implements StreamService
         }
         StudentStream stream = streamRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Stream not found"));
-        return stream;
+        return mapToStreamDTO(stream);
     }
 
     @Override
-    public StudentStream updateStream(Long id,String role,String email,StudentStream stream)
+    public StreamDTO updateStream(Long id,String role,String email,StudentStream stream)
     {
         if(!staffService.hasPermission(role,email,"Put"))
         {
@@ -54,7 +58,8 @@ public class StreamServiceImpl implements StreamService
         StudentStream existingStream = streamRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Stream not found"));
         existingStream.setStream(stream.getStream());
-        return streamRepository.save(existingStream);
+        StudentStream saved = streamRepository.save(existingStream);
+        return mapToStreamDTO(saved);
     }
 
     @Override
@@ -68,13 +73,26 @@ public class StreamServiceImpl implements StreamService
     }
 
     @Override
-    public List<StudentStream> getAllStream(String role, String email)
+    public List<StreamDTO> getAllStream(String role, String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
             throw new RuntimeException("You don't have permission to get stream");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role,email);
-        return streamRepository.findAllByBranchCode(branchCode);
+        List<StudentStream> saved = streamRepository.findAllByBranchCode(branchCode);
+        return saved.stream()
+                .map(this::mapToStreamDTO)
+                .collect(Collectors.toList());
+    }
+
+    private StreamDTO mapToStreamDTO(StudentStream stream) {
+        return new StreamDTO(
+                stream.getId(),
+                stream.getStream(),
+                stream.getCreatedByEmail(),
+                stream.getRole(),
+                stream.getBranchCode()
+        );
     }
 }

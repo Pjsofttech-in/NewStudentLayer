@@ -182,17 +182,14 @@ public class StudentServiceImpl implements StudentService {
             educationRepo.save(education);
         }
 
-        // Save Additional Info
         StudentAdditionalInfo additionalInfo = request.getAdditionalInfo();
         additionalInfo.setStudent(savedStudent);
         additionalInfoRepo.save(additionalInfo);
 
-        // Save Religion
         StudentReligion religion = request.getReligion();
         religion.setStudent(savedStudent);
         religionRepo.save(religion);
 
-        // Save Sports
         StudentSports sports = request.getSports();
         sports.setStudent(savedStudent);
         sportsRepo.save(sports);
