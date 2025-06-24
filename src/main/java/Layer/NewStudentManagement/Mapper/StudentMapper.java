@@ -67,6 +67,9 @@ public class StudentMapper
             if (student.getDegreeName() != null) {
                 dto.setDegreeNameId(student.getDegreeName().getId());
             }
+            if (student.getGraduationType() != null) {
+                dto.setGraduationTypeId(student.getGraduationType().getId());
+            }
 
             dto.setCreatedByEmail(student.getCreatedByEmail());
             dto.setRole(student.getRole());
