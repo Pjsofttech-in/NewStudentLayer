@@ -50,6 +50,10 @@ public class StudentDTO
     private String institutionType;
     private Long standardId;
     private Long mediumId;
+    private Long streamId;
+    private Long graduationTypeId;
+    private Long degreeNameId;
+    private Long departmentId;
     private String password;
     private String registrationNumber;
 

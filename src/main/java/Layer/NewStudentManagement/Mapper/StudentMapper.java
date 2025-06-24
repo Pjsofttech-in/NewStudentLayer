@@ -57,6 +57,17 @@ public class StudentMapper
                 dto.setMediumId(student.getMedium().getMid());
                 dto.setMediumName(student.getMedium().getMediumName());
             }
+            if (student.getDepartment() != null) {
+                dto.setDepartmentId(student.getDepartment().getId());
+            }
+            if (student.getStream() != null) {
+                dto.setStreamId(student.getStream().getId());
+                dto.setStreamName(student.getStream().getStream());
+            }
+            if (student.getDegreeName() != null) {
+                dto.setDegreeNameId(student.getDegreeName().getId());
+            }
+
             dto.setCreatedByEmail(student.getCreatedByEmail());
             dto.setRole(student.getRole());
             dto.setBranchCode(student.getBranchCode());
