@@ -9,11 +9,16 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class StudentRequest
 {
 
     private Long standardId;
     private Long mediumId;
+    private Long streamId;
+    private Long graduationTypeId;
+    private Long degreeNameId;
+    private Long departmentId;
     private StudentEntity student;
     private StudentAddress address;
     private List<StudentEducation> educationList;

@@ -51,7 +51,14 @@ public class StudentServiceImpl implements StudentService {
     private MediumRepository mediumRepository;
     @Autowired
     private StandardRepository standardRepository;
-
+    @Autowired
+    private GraduationTypeRepository graduationTypeRepository;
+    @Autowired
+    private DepartmentRepository departmentRepository;
+    @Autowired
+    private DegreeNameRepository degreeNameRepository;
+    @Autowired
+    private StreamRepository streamRepository;
 
 
     private void checkPermission(String role, String email, String action) {
@@ -62,25 +69,11 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public StudentResponseDTO  saveStudent(String role, String email, StudentRequest request) {
+    public StudentResponseDTO saveStudent(String role, String email, StudentRequest request) {
         checkPermission(role, email, "Post");
+
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         StudentEntity student = request.getStudent();
-
-        Long standardId = request.getStandardId();
-        if (standardId != null) {
-            StudentStandard standard = standardRepository.findById(standardId)
-                    .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
-            student.setStandard(standard);
-            student.setStandardName(standard.getStandardName());
-        }
-        Long mediumId = request.getMediumId();
-        if (mediumId != null) {
-            StudentMedium medium = mediumRepository.findById(mediumId)
-                    .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
-            student.setMedium(medium);
-            student.setMediumName(medium.getMediumName());
-        }
 
         student.setEnrollmentDate(LocalDate.now());
         student.setPassword(passwordEncoder.encode(student.getPassword()));
@@ -89,34 +82,124 @@ public class StudentServiceImpl implements StudentService {
         student.setCreatedByEmail(email);
         student.setRegistrationNumber(generateRegistrationNumber());
 
+        if (request.getGraduationTypeId() != null) {
+            StudentGraduationType gradType = graduationTypeRepository.findById(request.getGraduationTypeId())
+                    .orElseThrow(() -> new RuntimeException("GraduationType not found with ID: " + request.getGraduationTypeId()));
+            student.setGraduationType(gradType);
+        }
+
+        if (request.getStreamId() != null) {
+            StudentStream stream = streamRepository.findById(request.getStreamId())
+                    .orElseThrow(() -> new RuntimeException("Stream not found with ID: " + request.getStreamId()));
+            student.setStream(stream);
+            student.setStreamName(stream.getStream());
+        }
+
+        if ("School".equalsIgnoreCase(student.getInstitutionType())) {
+
+            Long standardId = request.getStandardId();
+            if (standardId != null) {
+                StudentStandard standard = standardRepository.findById(standardId)
+                        .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
+                student.setStandard(standard);
+                student.setStandardName(standard.getStandardName());
+            }
+
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+
+            student.setDegreeName(null);
+            student.setDepartment(null);
+        }
+
+        else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
+                "Jr. College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
+
+            Long standardId = request.getStandardId();
+            if (standardId != null) {
+                StudentStandard standard = standardRepository.findById(standardId)
+                        .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
+                student.setStandard(standard);
+                student.setStandardName(standard.getStandardName());
+            }
+
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+
+            student.setDegreeName(null);
+            student.setDepartment(null);
+        }
+
+        else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
+
+            if (request.getDegreeNameId() != null) {
+                StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
+                        .orElseThrow(() -> new RuntimeException("DegreeName not found with ID: " + request.getDegreeNameId()));
+                student.setDegreeName(degree);
+            }
+
+            if (request.getDepartmentId() != null) {
+                StudentDepartment department = departmentRepository.findById(request.getDepartmentId())
+                        .orElseThrow(() -> new RuntimeException("Department not found with ID: " + request.getDepartmentId()));
+                student.setDepartment(department);
+            }
+
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+
+            student.setGroupName(null);
+            student.setStandardName(null);
+            student.setStandard(null);
+
+        }
+
         StudentEntity savedStudent = studentRepository.save(student);
 
+        // Save Address
         StudentAddress address = request.getAddress();
         address.setStudent(savedStudent);
         addressRepo.save(address);
 
+        // Save Education List
         List<StudentEducation> educationList = request.getEducationList();
         for (StudentEducation education : educationList) {
             education.setStudent(savedStudent);
             educationRepo.save(education);
         }
 
+        // Save Additional Info
         StudentAdditionalInfo additionalInfo = request.getAdditionalInfo();
         additionalInfo.setStudent(savedStudent);
         additionalInfoRepo.save(additionalInfo);
 
+        // Save Religion
         StudentReligion religion = request.getReligion();
         religion.setStudent(savedStudent);
         religionRepo.save(religion);
 
+        // Save Sports
         StudentSports sports = request.getSports();
         sports.setStudent(savedStudent);
         sportsRepo.save(sports);
 
-
         return mapToDTO(savedStudent);
-
     }
+
 
     @Override
     public StudentDTO getStudentById(Long id, String role, String email) {

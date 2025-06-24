@@ -47,6 +47,10 @@ public class StudentResponseDTO {
     private String semister;
     private Long standardId;
     private Long mediumId;
+    private Long streamId;
+    private Long graduationTypeId;
+    private Long degreeNameId;
+    private Long departmentId;
     private String institutionType;
     private boolean earthquake;
     private boolean minority;

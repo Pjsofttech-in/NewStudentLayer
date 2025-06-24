@@ -21,17 +21,24 @@ public class StudentPromotionRecord
     private String academicYear;
     private LocalDate promotionDate;
 
+    private Long classroomId;
+    private String division;
+    private Integer rollNo;
+
     private Boolean isCurrent = true;
 
     @ManyToOne
     @JoinColumn(name = "student_id")
     private StudentEntity student;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "standard_id")
     private StudentStandard standard;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "medium_id")
     private StudentMedium medium;
+
+
+
 }

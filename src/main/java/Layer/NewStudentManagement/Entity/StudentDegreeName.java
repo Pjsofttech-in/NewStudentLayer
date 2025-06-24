@@ -2,7 +2,10 @@ package Layer.NewStudentManagement.Entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -10,21 +13,22 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Entity
-public class StudentStream
+public class StudentDegreeName
 {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String stream;
+    private String degreeName;
     @Email
     private String createdByEmail;
     private String role;
     private String branchCode;
 
-    @OneToMany(mappedBy = "stream", cascade = CascadeType.ALL)
-    private List<StudentGraduationType> graduationTypes;
+    @ManyToOne
+    @JoinColumn(name = "graduation_type_id")
+    private StudentGraduationType graduationType;
 
-
+    @OneToMany(mappedBy = "degreeName", cascade = CascadeType.ALL)
+    private List<StudentDepartment> departments;
 }

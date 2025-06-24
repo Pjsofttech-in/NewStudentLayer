@@ -95,6 +95,22 @@ public class StudentEntity
     @JoinColumn(name = "classroom_id")
     private StudentClassRoom classRoom;
 
+    @ManyToOne
+    @JoinColumn(name = "stream_id")
+    private StudentStream stream;
+
+    @ManyToOne
+    @JoinColumn(name = "graduation_type_id")
+    private StudentGraduationType graduationType;
+
+    @ManyToOne
+    @JoinColumn(name = "degree_name_id")
+    private StudentDegreeName degreeName;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private StudentDepartment department;
+
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentPromotionRecord> promotionRecords;
