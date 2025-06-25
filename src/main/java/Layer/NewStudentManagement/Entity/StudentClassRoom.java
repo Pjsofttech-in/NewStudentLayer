@@ -25,6 +25,8 @@ public class StudentClassRoom
     private String year;
     private LocalTime startTime;
     private LocalTime endTime;
+    private String groupName;
+
 
     @Email
     private String createdByEmail;
@@ -43,10 +45,24 @@ public class StudentClassRoom
     @JoinColumn(name = "standard_id")
     private StudentStandard standard;
 
+    @ManyToOne
+    @JoinColumn(name = "graduation_type_id", nullable = true)
+    private StudentGraduationType graduationType; // optional
+
+    @ManyToOne
+    @JoinColumn(name = "stream_id", nullable = true)
+    private StudentStream stream;
+
+    @ManyToOne
+    @JoinColumn(name = "degree_name_id", nullable = true)
+    private StudentDegreeName degreeName;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = true)
+    private StudentDepartment department;
 
     @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
     private List<StudentEntity> students;
-
 
     @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
     private List<StudentClassRoomTeacherSubject> teacherSubjectAssignments;

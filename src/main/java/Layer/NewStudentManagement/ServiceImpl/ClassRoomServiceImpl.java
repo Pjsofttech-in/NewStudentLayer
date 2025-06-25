@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,17 @@ public class ClassRoomServiceImpl implements ClassRoomService
     @Autowired
     StudentRepository studentRepository;
 
+    @Autowired
+    GraduationTypeRepository graduationTypeRepository;
+
+    @Autowired
+    StreamRepository streamRepository;
+
+    @Autowired
+    DegreeNameRepository degreeNameRepository;
+
+    @Autowired
+    DepartmentRepository departmentRepository;
 
     @Autowired
     private S3Service s3Service;
@@ -67,54 +79,109 @@ public class ClassRoomServiceImpl implements ClassRoomService
             throw new RuntimeException("You don't have permission to create ClassRoom");
         }
 
+        if (dto.getMediumId() == null) {
+            throw new RuntimeException("Medium is required for ClassRoom");
+        }
+
+        if (dto.getDivisionId() == null) {
+            throw new RuntimeException("Division is required for ClassRoom");
+        }
+
+        if (dto.getYear() == null || dto.getYear().isEmpty()) {
+            throw new RuntimeException("Academic year (year) is required for ClassRoom");
+        }
+
         StudentMedium medium = mediumRepository.findById(dto.getMediumId())
                 .orElseThrow(() -> new RuntimeException("Medium not found"));
-
         StudentDivision division = divisionRepository.findById(dto.getDivisionId())
                 .orElseThrow(() -> new RuntimeException("Division not found"));
 
-        StudentStandard standard = standardRepository.findById(dto.getStandardId())
-                .orElseThrow(() -> new RuntimeException("Standard not found"));
-
         StudentClassRoom classRoom = new StudentClassRoom();
         classRoom.setYear(dto.getYear());
+        classRoom.setStartTime(dto.getStartTime());
+        classRoom.setEndTime(dto.getEndTime());
         classRoom.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
         classRoom.setCreatedByEmail(email);
         classRoom.setRole(role);
         classRoom.setMedium(medium);
         classRoom.setDivision(division);
-        classRoom.setStandard(standard);
+        String institutionType = dto.getInstitutionType();
 
+        if ("School".equalsIgnoreCase(institutionType)) {
+            if (dto.getStandardId() == null)
+                throw new RuntimeException("Standard is required for School ClassRoom");
+
+            StudentStandard standard = standardRepository.findById(dto.getStandardId())
+                    .orElseThrow(() -> new RuntimeException("Standard not found"));
+            classRoom.setStandard(standard);
+        }
+
+        else if ("College".equalsIgnoreCase(institutionType)) {
+            if (dto.getGraduationTypeId() == null)
+                throw new RuntimeException("GraduationType is required for College ClassRoom");
+
+            StudentGraduationType graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
+                    .orElseThrow(() -> new RuntimeException("GraduationType not found"));
+            classRoom.setGraduationType(graduationType);
+
+            // Jr. College
+            if ("Jr.College".equalsIgnoreCase(graduationType.getGraduationType())) {
+                if (dto.getStandardId() == null)
+                    throw new RuntimeException("Standard is required for Jr. College ClassRoom");
+
+                StudentStandard standard = standardRepository.findById(dto.getStandardId())
+                        .orElseThrow(() -> new RuntimeException("Standard not found"));
+                classRoom.setStandard(standard);
+
+                if (dto.getStreamId() == null)
+                    throw new RuntimeException("Stream is required for Jr. College ClassRoom");
+
+                StudentStream stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+                classRoom.setStream(stream);
+                classRoom.setGroupName(dto.getGroupName());
+            }
+
+            // UG / PG
+            else {
+                if (dto.getStreamId() == null || dto.getDegreeNameId() == null || dto.getDepartmentId() == null) {
+                    throw new RuntimeException("Stream, DegreeName and Department are required for UG/PG ClassRoom");
+                }
+
+                StudentStream stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+                StudentDegreeName degree = degreeNameRepository.findById(dto.getDegreeNameId())
+                        .orElseThrow(() -> new RuntimeException("Degree not found"));
+                StudentDepartment department = departmentRepository.findById(dto.getDepartmentId())
+                        .orElseThrow(() -> new RuntimeException("Department not found"));
+
+                classRoom.setStream(stream);
+                classRoom.setDegreeName(degree);
+                classRoom.setDepartment(department);
+            }
+        }
+
+        // Save the classroom
         StudentClassRoom savedClassRoom = classRoomRepository.save(classRoom);
 
+        // Save teacher-subject mappings
         for (Map.Entry<Long, List<Long>> entry : dto.getTeacherSubjectMap().entrySet()) {
             Long teacherId = entry.getKey();
-            List<Long> subjectIds = entry.getValue();
+            List<StudentSubject> subjects = subjectRepository.findAllById(entry.getValue());
 
             StudentTeacher teacher = teacherRepository.findById(teacherId)
                     .orElseThrow(() -> new RuntimeException("Teacher not found"));
-
-            List<StudentSubject> subjects = subjectRepository.findAllById(subjectIds);
-            List<String> assignedSubjectNames = teacher.getSubjects()
-                    .stream()
-                    .map(StudentSubject::getSubject)
-                    .collect(Collectors.toList());
-            for (StudentSubject subject : subjects) {
-                if (!assignedSubjectNames.contains(subject.getSubject())) {
-                    throw new RuntimeException("Subject " + subject.getSubject() + " not assigned to teacher " + teacher.getTeacherName());
-                }
-            }
 
             StudentClassRoomTeacherSubject mapping = new StudentClassRoomTeacherSubject();
             mapping.setClassRoom(savedClassRoom);
             mapping.setTeacher(teacher);
             mapping.setSubjects(subjects);
-
             classRoomTeacherSubjectRepository.save(mapping);
         }
 
         return mapToResponseDTO(savedClassRoom);
     }
+
 
     @Override
     public StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, StudentClassRoom updateClassRoom) {
@@ -191,13 +258,14 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
     }
 
+
     @Override
     public Map<Long, String> assignStudentsToClassroom(String role, String email, Long classroomId, List<Long> studentIds) {
         if (!staffService.hasPermission(role, email, "Post")) {
             throw new RuntimeException("You don't have permission to Assign Student To ClassRoom");
         }
 
-        String branchCode =staffService.fetchBranchCodeByRole(role, email);
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
         StudentClassRoom classroom = classRoomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found"));
 
@@ -206,68 +274,81 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
         List<StudentEntity> students = studentRepository.findAllById(studentIds);
         Map<Long, String> studentPhotoUrls = new HashMap<>();
+
         for (StudentEntity student : students) {
-            student.setClassRoom(classroom);
-            student.setRollNo(newRollNo);
+            String institutionType = student.getInstitutionType();
+            String gradType = (student.getGraduationType() != null) ? student.getGraduationType().getGraduationType() : "";
 
+            student.setClassRoom(classroom);  // All types get classroom
+
+            // Only assign roll numbers to School or Jr. College students
+            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr.College".equalsIgnoreCase(gradType))) {
+                student.setRollNo(newRollNo);
+            }
+
+            // Copy photo to attendance faces
             StudentDocument document = documentRepository.findByStudent(student.getId());
-
             if (document != null && document.getStudentPhoto() != null) {
                 try {
-
                     String newPhotoUrl = s3Service.copyStudentPhotoToAttendanceFaces(
                             document.getStudentPhoto(),
                             branchCode,
                             classroomId.toString(),
-                            String.valueOf(newRollNo)
+                            student.getRollNo() != null ? student.getRollNo().toString() : "N/A"
                     );
                     studentPhotoUrls.put(student.getId(), newPhotoUrl);
-                    // (Optional) Set new photo URL in document if needed
-                    // document.setStudentPhoto(s3Prefix + destKey);
-                    // studentDocumentRepository.save(document);
-
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to copy photo for student ID: " + student.getId(), e);
                 }
             }
 
-            newRollNo++;
+            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr.College".equalsIgnoreCase(gradType))) {
+                newRollNo++;
+            }
         }
 
-
-        studentRepository.saveAll(students);
+        studentRepository.saveAll(students); // Persist changes
         return studentPhotoUrls;
     }
 
+
     private StudentClassRoomResponseDTO mapToResponseDTO(StudentClassRoom classroom) {
-        List<StudentClassRoomTeacherSubject> mappings =
-                classRoomTeacherSubjectRepository.findByClassRoomId(classroom.getId());
+        List<StudentClassRoomTeacherSubject> mappings = Collections.emptyList();
+        if (classroom != null && classroom.getId() != null) {
+            mappings = classRoomTeacherSubjectRepository.findByClassRoomId(classroom.getId());
+        }
 
         List<TeacherWithSubjectsDTO> teacherSubjectDTOs = mappings.stream().map(mapping -> {
             TeacherWithSubjectsDTO dto = new TeacherWithSubjectsDTO();
-            dto.setTeacherId(mapping.getTeacher().getId());
-            dto.setTeacherName(mapping.getTeacher().getTeacherName());
-            dto.setTeacherEmail(mapping.getTeacher().getTeacherEmail());
-            dto.setSubjects(mapping.getSubjects().stream()
+            dto.setTeacherId(mapping.getTeacher() != null ? mapping.getTeacher().getId() : null);
+            dto.setTeacherName(mapping.getTeacher() != null ? mapping.getTeacher().getTeacherName() : null);
+            dto.setTeacherEmail(mapping.getTeacher() != null ? mapping.getTeacher().getTeacherEmail() : null);
+            dto.setSubjects(mapping.getSubjects() != null
+                    ? mapping.getSubjects().stream()
                     .map(StudentSubject::getSubject)
-                    .collect(Collectors.toList()));
+                    .collect(Collectors.toList())
+                    : Collections.emptyList());
             return dto;
         }).collect(Collectors.toList());
 
         return new StudentClassRoomResponseDTO(
-                classroom.getId(),
-                classroom.getYear(),
-                classroom.getMedium().getMediumName(),
-                classroom.getDivision().getDivision(),
-                classroom.getStandard().getStandardName(),
-                classroom.getStartTime(),
-                classroom.getEndTime(),
-                classroom.getBranchCode(),
-                classroom.getCreatedByEmail(),
-                classroom.getRole(),
+                classroom != null ? classroom.getId() : null,
+                classroom != null ? classroom.getYear() : null,
+                (classroom != null && classroom.getMedium() != null) ? classroom.getMedium().getMediumName() : null,
+                (classroom != null && classroom.getDivision() != null) ? classroom.getDivision().getDivision() : null,
+                (classroom != null && classroom.getStandard() != null) ? classroom.getStandard().getStandardName() : null,
+                classroom != null ? classroom.getStartTime() : null,
+                classroom != null ? classroom.getEndTime() : null,
+                (classroom != null && classroom.getGraduationType() != null) ? classroom.getGraduationType().getGraduationType() : null,
+                classroom != null ? classroom.getBranchCode() : "",
+                classroom != null ? classroom.getCreatedByEmail() : "",
+                classroom != null ? classroom.getRole() : "",
                 teacherSubjectDTOs
         );
+
     }
+
+
 
 
 

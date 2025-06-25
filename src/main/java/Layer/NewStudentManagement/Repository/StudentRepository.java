@@ -1,6 +1,8 @@
 package Layer.NewStudentManagement.Repository;
 
 import Layer.NewStudentManagement.Entity.StudentEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -54,6 +56,43 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "LEFT JOIN FETCH s.documents " +
             "WHERE s.registrationNumber = :registrationNumber")
     Optional<StudentEntity> findByRegistrationNumberWithAllData(@Param("registrationNumber") String registrationNumber);
+
+
+    @Query("SELECT s FROM StudentEntity s " +
+            "WHERE s.institutionType = 'School' AND " +
+            "s.standard.id = :standardId AND " +
+            "s.medium.id = :mediumId AND " +
+            "s.academicYear = :academicYear AND " +
+            "s.status = 'Approved' AND " +
+            "s.classRoom IS NULL")
+    Page<StudentEntity> findUnassignedSchoolStudents(Long standardId, Long mediumId, String academicYear, Pageable pageable);
+
+
+    @Query("SELECT s FROM StudentEntity s " +
+            "WHERE s.institutionType = 'College' AND " +
+            "s.graduationType.id = :graduationTypeId AND " +
+            "s.standard.id = :standardId AND " +
+            "s.medium.id = :mediumId AND " +
+            "s.stream.id = :streamId AND " +
+            "s.groupName = :groupName AND " +
+            "s.academicYear = :academicYear AND " +
+            "s.status = 'Approved' AND " +
+            "s.classRoom IS NULL")
+    Page<StudentEntity> findUnassignedJrCollegeStudents(Long graduationTypeId, Long standardId, Long mediumId,
+                                                        Long streamId, String groupName, String academicYear, Pageable pageable);
+
+
+    @Query("SELECT s FROM StudentEntity s " +
+            "WHERE s.institutionType = 'College' AND " +
+            "s.graduationType.id = :graduationTypeId AND " +
+            "s.medium.id = :mediumId AND " +
+            "s.stream.id = :streamId AND " +
+            "s.degreeName.id = :degreeNameId AND " +
+            "s.department.id = :departmentId AND " +
+            "s.status = 'Approved' AND " +
+            "s.classRoom IS NULL")
+    Page<StudentEntity> findUnassignedUGPGStudents(Long graduationTypeId, Long mediumId, Long streamId,
+                                                   Long degreeNameId, Long departmentId, Pageable pageable);
 
 
 

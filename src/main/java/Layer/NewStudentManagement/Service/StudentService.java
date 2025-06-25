@@ -30,7 +30,7 @@ public interface StudentService
                                               MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
                                               MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate, MultipartFile studentSignPhoto);
 
-    List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email ,String medium, String standard,String year, String status);
+    Page<StudentResponseDTO> filterStudentsForClassroom(String role, String email, StudentClassRoomFilterDTO filterDTO, Pageable pageable);
 
     List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email,Long classRoomId);
 

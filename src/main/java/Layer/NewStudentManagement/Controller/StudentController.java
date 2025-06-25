@@ -133,12 +133,17 @@ public class StudentController
         return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/getStudentByMediumAndStandard")
-    public ResponseEntity<List<StudentResponseDTO>> getStudentByMediumAndStandard(@RequestParam String role, @RequestParam String email,
-                                                                                  @RequestParam String medium, @RequestParam String standard,
-                                                                                  @RequestParam String year, @RequestParam String status)
-    {
-        return ResponseEntity.ok(studentService.getStudentByMediumDivisionStandard(role, email,medium,standard,year,status));
+    @GetMapping("/getStudentforAssignToClassRoom")
+    public ResponseEntity<Page<StudentResponseDTO>> filterStudentsForClassroom(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestBody StudentClassRoomFilterDTO filterDTO,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<StudentResponseDTO> students = studentService.filterStudentsForClassroom(role, email, filterDTO, pageable);
+        return ResponseEntity.ok(students);
     }
 
     @GetMapping("/getStudentByClassRoomId")

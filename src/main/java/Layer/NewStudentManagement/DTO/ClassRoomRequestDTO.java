@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +16,22 @@ import java.util.Map;
 public class ClassRoomRequestDTO
 {
     private String year;
+    private LocalTime startTime;
+    private LocalTime endTime;
+
     private Long mediumId;
     private Long divisionId;
+
     private Long standardId;
-    private Map<Long, List<Long>> teacherSubjectMap;
+    private Long graduationTypeId;
+
+    private Long streamId;
+    private String groupName; // for Jr. College
+
+    private Long degreeNameId;
+    private Long departmentId;
+
+    private Map<Long, List<Long>> teacherSubjectMap; // teacherId -> List<subjectId>
+
+    private String institutionType; // "School", "College"
 }

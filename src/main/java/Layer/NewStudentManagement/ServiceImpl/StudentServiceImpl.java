@@ -352,14 +352,61 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public List<StudentResponseDTO> getStudentByMediumDivisionStandard(String role, String email, String medium, String standard, String year, String status) {
-        checkPermission(role, email, "Get");
-        List<StudentEntity> students = studentRepository.findByMediumAndStandard(medium, standard, year, status);
+    public Page<StudentResponseDTO> filterStudentsForClassroom(String role, String email, StudentClassRoomFilterDTO filterDTO, Pageable pageable) {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to filter students.");
+        }
 
-        return students.stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+        Page<StudentEntity> studentPage;
+
+        switch (filterDTO.getInstitutionType().toLowerCase()) {
+            case "school":
+                studentPage = studentRepository.findUnassignedSchoolStudents(
+                        filterDTO.getStandardId(),
+                        filterDTO.getMediumId(),
+                        filterDTO.getAcademicYear(),
+                        pageable
+                );
+                break;
+
+            case "college":
+                if (filterDTO.getGraduationTypeId() != null) {
+                    if (filterDTO.getDegreeNameId() != null && filterDTO.getDepartmentId() != null) {
+                        // UG/PG
+                        studentPage = studentRepository.findUnassignedUGPGStudents(
+                                filterDTO.getGraduationTypeId(),
+                                filterDTO.getMediumId(),
+                                filterDTO.getStreamId(),
+                                filterDTO.getDegreeNameId(),
+                                filterDTO.getDepartmentId(),
+                                pageable
+                        );
+                    } else {
+                        // Jr. College
+                        studentPage = studentRepository.findUnassignedJrCollegeStudents(
+                                filterDTO.getGraduationTypeId(),
+                                filterDTO.getStandardId(),
+                                filterDTO.getMediumId(),
+                                filterDTO.getStreamId(),
+                                filterDTO.getGroupName(),
+                                filterDTO.getAcademicYear(),
+                                pageable
+                        );
+                    }
+                } else {
+                    throw new RuntimeException("GraduationTypeId is required for College students.");
+                }
+                break;
+
+            default:
+                throw new RuntimeException("Invalid institution type");
+        }
+
+        // Convert to StudentResponseDTO
+        return studentPage.map(this::mapToDTO);
     }
+
+
 
     @Override
     public StudentDTO getStudentByRegistrationNumber(String role, String email, String registrationNumber) {
@@ -440,8 +487,9 @@ public class StudentServiceImpl implements StudentService {
         dto.setSemister(student.getSemister());
         dto.setInstitutionType(student.getInstitutionType());
         dto.setRegistrationNumber(student.getRegistrationNumber());
-
-        // Safely get IDs from linked entities
+        dto.setCreatedByEmail(student.getCreatedByEmail());
+        dto.setRole(student.getRole());
+        dto.setBranchCode(student.getBranchCode());
         if (student.getStandard() != null) {
             dto.setStandardId(student.getStandard().getSid());
             dto.setStandardName(student.getStandard().getStandardName());
@@ -451,10 +499,19 @@ public class StudentServiceImpl implements StudentService {
             dto.setMediumId(student.getMedium().getMid());
             dto.setMediumName(student.getMedium().getMediumName());
         }
-
-        dto.setCreatedByEmail(student.getCreatedByEmail());
-        dto.setRole(student.getRole());
-        dto.setBranchCode(student.getBranchCode());
+        if (student.getDepartment() != null) {
+            dto.setDepartmentId(student.getDepartment().getId());
+        }
+        if (student.getStream() != null) {
+            dto.setStreamId(student.getStream().getId());
+            dto.setStreamName(student.getStream().getStream());
+        }
+        if (student.getDegreeName() != null) {
+            dto.setDegreeNameId(student.getDegreeName().getId());
+        }
+        if (student.getGraduationType() != null) {
+            dto.setGraduationTypeId(student.getGraduationType().getId());
+        }
         if (student.getAdditionalInfo() != null) {
             dto.setEarthquake(student.getAdditionalInfo().isEarthquake());
             dto.setHandicap(student.getAdditionalInfo().isHandicap());

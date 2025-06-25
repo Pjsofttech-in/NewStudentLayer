@@ -18,8 +18,12 @@ public class StudentClassRoomResponseDTO {
     private String standard;
     private LocalTime startTime;
     private LocalTime endTime;
+    private String graduationType;
     private String branchCode;
     private String email;
     private String role;
     private List<TeacherWithSubjectsDTO> teacherSubjectMappings;
+
+
+
 }

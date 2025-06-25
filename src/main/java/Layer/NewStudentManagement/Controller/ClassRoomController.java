@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.AssignClassroomRequest;
 import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
 import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
@@ -58,10 +59,14 @@ public class ClassRoomController
     @PostMapping("/assignStudentToClassRoom")
     public ResponseEntity<Map<Long, String>> assignStudentsToClassroom(
             @RequestParam String role,
-            @RequestParam String email,
-            @RequestParam Long classroomId,
-            @RequestParam List<Long> studentIds) {
-        Map<Long, String>  response = classRoomService.assignStudentsToClassroom(role,email,classroomId, studentIds);
+            @RequestParam String email,  @RequestBody AssignClassroomRequest request)
+    {
+        Map<Long, String> response = classRoomService.assignStudentsToClassroom(
+                role,
+                email,
+                request.getClassroomId(),
+                request.getStudentIds()
+        );
         return ResponseEntity.ok(response);
     }
 
