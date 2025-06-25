@@ -18,7 +18,7 @@ public interface AttendanceService
     String markStudentsAttendance(List<Integer> rollNos, Long classroomId);
 
     String logoutStudents(List<Integer> rollNos, Long classroomId);
-    String markAttendanceFromFace(MultipartFile imagePath, String branchCode, String classroomId);
+    String markAttendanceFromFace(MultipartFile imagePath, String branchCode);
 
     String logoutStudentFromFace(MultipartFile image, String branchCode, String classroomId);
 

@@ -558,7 +558,7 @@ public class StudentServiceImpl implements StudentService {
                         ? originalFilename.substring(originalFilename.lastIndexOf('.'))
                         : "";
 
-                String photoPath = branchCode + "/student_sys/attendance_faces/"
+                String photoPath = branchCode + "/student-sys/attendance_faces/"
                         + student.getClassRoom().getId() + "/" + student.getRollNo() + extension;
 
                 uploadedUrl = s3Service.uploadFileToExactPath(studentPhoto, photoPath);

@@ -47,10 +47,9 @@ public class AttendanceController
     @PostMapping("/markStudentAttenndance")
     public ResponseEntity<String> markAttendanceFromFace(
             @RequestParam("image") MultipartFile image,
-            @RequestParam("branchCode") String branchCode,
-            @RequestParam("classroomId") String classroomId
+            @RequestParam("branchCode") String branchCode
     ) {
-        String result = attendanceService.markAttendanceFromFace(image, branchCode, classroomId);
+        String result = attendanceService.markAttendanceFromFace(image, branchCode);
         return ResponseEntity.ok(result);
     }
 

@@ -155,9 +155,9 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
-    public String markAttendanceFromFace(MultipartFile image, String branchCode, String classroomId) {
+    public String markAttendanceFromFace(MultipartFile image, String branchCode) {
         try {
-            String fastApiUrl = "https://pjsofttech.in:51443/auto-login"; // adjust if needed
+            String fastApiUrl = "https://pjsofttech.in:51443/auto-branch-scan";
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -170,8 +170,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                 }
             });
             body.add("branch_code", branchCode);
-            body.add("classroomId", classroomId);
-            body.add("system_name", "student-sys"); // default system
+            body.add("system_name", "student-sys"); // Make sure this is handled in FastAPI if required
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
@@ -179,11 +178,20 @@ public class AttendanceServiceImpl implements AttendanceService {
             ResponseEntity<Map> response = restTemplate.postForEntity(fastApiUrl, requestEntity, Map.class);
 
             Map<String, Object> responseBody = response.getBody();
+
+
             if (responseBody == null || !"success".equals(responseBody.get("status"))) {
                 return "Face recognition failed";
             }
 
-            String rollNo = (String) responseBody.get("rollno");
+            List<Map<String, Object>> matches = (List<Map<String, Object>>) responseBody.get("matches");
+            if (matches == null || matches.isEmpty()) {
+                return "No face match found";
+            }
+
+            Map<String, Object> firstMatch = matches.get(0);
+            String rollNo = (String) firstMatch.get("rollno");
+            String classroomId = (String) firstMatch.get("classroomId");
             Long classroomIdLong = Long.parseLong(classroomId);
             LocalDate today = LocalDate.now();
 
@@ -192,23 +200,19 @@ public class AttendanceServiceImpl implements AttendanceService {
                 return "Attendance already marked for Roll No: " + rollNo;
             }
 
-            // Fetch class start time
             StudentClassRoom classroom = classRoomRepository.findById(classroomIdLong)
                     .orElseThrow(() -> new RuntimeException("Classroom not found"));
 
-            // ✅ Fetch student entity for name
-            StudentEntity student = studentRepository.findByClassRoomIdAndRollNo(
-                            classroomIdLong, Integer.parseInt(rollNo))
+            StudentEntity student = studentRepository.findByClassRoomIdAndRollNo(classroomIdLong, Integer.parseInt(rollNo))
                     .orElseThrow(() -> new RuntimeException("Student not found"));
 
             LocalTime loginTime = LocalTime.now();
             LocalTime startTime = classroom.getStartTime();
             String status = loginTime.isAfter(startTime) ? "Late" : "On Time";
 
-            // Save attendance
             StudentAttendance attendance = new StudentAttendance();
             attendance.setRollNo(Integer.parseInt(rollNo));
-            attendance.setStudentName(student.getFullName()); // ✅ set student name here
+            attendance.setStudentName(student.getFullName());
             attendance.setBranchCode(branchCode);
             attendance.setClassroomId(classroomIdLong);
             attendance.setLoginTime(loginTime);
@@ -223,6 +227,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             return "Failed to mark attendance: " + e.getMessage();
         }
     }
+
 
 
     @Override

@@ -280,11 +280,12 @@ public class ClassRoomServiceImpl implements ClassRoomService
             String gradType = (student.getGraduationType() != null) ? student.getGraduationType().getGraduationType() : "";
 
             student.setClassRoom(classroom);  // All types get classroom
+            student.setRollNo(newRollNo);
 
-            // Only assign roll numbers to School or Jr. College students
-            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr.College".equalsIgnoreCase(gradType))) {
-                student.setRollNo(newRollNo);
-            }
+//            // Only assign roll numbers to School or Jr. College students
+//            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr.College".equalsIgnoreCase(gradType))) {
+//                student.setRollNo(newRollNo);
+//            }
 
             // Copy photo to attendance faces
             StudentDocument document = documentRepository.findByStudent(student.getId());
