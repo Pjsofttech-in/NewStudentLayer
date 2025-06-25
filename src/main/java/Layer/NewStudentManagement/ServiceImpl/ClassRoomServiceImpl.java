@@ -124,17 +124,17 @@ public class ClassRoomServiceImpl implements ClassRoomService
                     .orElseThrow(() -> new RuntimeException("GraduationType not found"));
             classRoom.setGraduationType(graduationType);
 
-            // Jr. College
-            if ("Jr. College".equalsIgnoreCase(graduationType.getGraduationType())) {
+            // Jr.College
+            if ("Jr.College".equalsIgnoreCase(graduationType.getGraduationType())) {
                 if (dto.getStandardId() == null)
-                    throw new RuntimeException("Standard is required for Jr. College ClassRoom");
+                    throw new RuntimeException("Standard is required for Jr.College ClassRoom");
 
                 StudentStandard standard = standardRepository.findById(dto.getStandardId())
                         .orElseThrow(() -> new RuntimeException("Standard not found"));
                 classRoom.setStandard(standard);
 
                 if (dto.getStreamId() == null)
-                    throw new RuntimeException("Stream is required for Jr. College ClassRoom");
+                    throw new RuntimeException("Stream is required for Jr.College ClassRoom");
 
                 StudentStream stream = streamRepository.findById(dto.getStreamId())
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
@@ -282,7 +282,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
             student.setClassRoom(classroom);  // All types get classroom
             student.setRollNo(newRollNo);
 
-//            // Only assign roll numbers to School or Jr. College students
+//            // Only assign roll numbers to School or Jr.College students
 //            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr.College".equalsIgnoreCase(gradType))) {
 //                student.setRollNo(newRollNo);
 //            }
@@ -303,7 +303,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 }
             }
 
-            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr. College".equalsIgnoreCase(gradType))) {
+            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr.College".equalsIgnoreCase(gradType))) {
                 newRollNo++;
             }
         }
