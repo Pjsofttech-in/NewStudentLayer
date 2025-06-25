@@ -125,7 +125,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
             classRoom.setGraduationType(graduationType);
 
             // Jr. College
-            if ("Jr.College".equalsIgnoreCase(graduationType.getGraduationType())) {
+            if ("Jr. College".equalsIgnoreCase(graduationType.getGraduationType())) {
                 if (dto.getStandardId() == null)
                     throw new RuntimeException("Standard is required for Jr. College ClassRoom");
 
