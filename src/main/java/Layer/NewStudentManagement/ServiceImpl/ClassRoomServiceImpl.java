@@ -303,7 +303,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 }
             }
 
-            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr.College".equalsIgnoreCase(gradType))) {
+            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr. College".equalsIgnoreCase(gradType))) {
                 newRollNo++;
             }
         }
