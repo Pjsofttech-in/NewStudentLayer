@@ -283,11 +283,6 @@ public class ClassRoomServiceImpl implements ClassRoomService
             student.setClassRoom(classroom);  // All types get classroom
             student.setRollNo(newRollNo);
 
-//            // Only assign roll numbers to School or Jr.College students
-//            if ("School".equalsIgnoreCase(institutionType) || ("College".equalsIgnoreCase(institutionType) && "Jr.College".equalsIgnoreCase(gradType))) {
-//                student.setRollNo(newRollNo);
-//            }
-
             // Copy photo to attendance faces
             StudentDocument document = documentRepository.findByStudent(student.getId());
             if (document != null && document.getStudentPhoto() != null) {
@@ -343,6 +338,9 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 classroom != null ? classroom.getEndTime() : null,
                 (classroom != null && classroom.getGraduationType() != null) ? classroom.getGraduationType().getGraduationType() : null,
                 classroom != null ? classroom.getInstitutionType() : null,
+                (classroom != null && classroom.getStream() != null) ? classroom.getStream().getStream() : null,
+                (classroom != null && classroom.getDegreeName() != null) ? classroom.getDegreeName().getDegreeName() : null,
+                (classroom != null && classroom.getDepartment() != null) ? classroom.getDepartment().getDepartmentName() : null,
                 classroom != null ? classroom.getBranchCode() : "",
                 classroom != null ? classroom.getCreatedByEmail() : "",
                 classroom != null ? classroom.getRole() : "",
