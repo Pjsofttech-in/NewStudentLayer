@@ -336,6 +336,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 (classroom != null && classroom.getStandard() != null) ? classroom.getStandard().getStandardName() : null,
                 classroom != null ? classroom.getStartTime() : null,
                 classroom != null ? classroom.getEndTime() : null,
+                classroom != null ? classroom.getGroupName() :null,
                 (classroom != null && classroom.getGraduationType() != null) ? classroom.getGraduationType().getGraduationType() : null,
                 classroom != null ? classroom.getInstitutionType() : null,
                 (classroom != null && classroom.getStream() != null) ? classroom.getStream().getStream() : null,
