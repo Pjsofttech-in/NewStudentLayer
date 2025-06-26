@@ -56,6 +56,7 @@ public class StudentDTO
     private Long departmentId;
     private String password;
     private String registrationNumber;
+    private String formStatus;
 
     @Email
     private String createdByEmail;

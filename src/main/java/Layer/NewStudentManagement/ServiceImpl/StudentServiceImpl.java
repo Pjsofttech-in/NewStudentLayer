@@ -118,7 +118,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
-                "Jr. College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
+                "Jr.College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
 
             Long standardId = request.getStandardId();
             if (standardId != null) {
@@ -487,6 +487,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setSemister(student.getSemister());
         dto.setInstitutionType(student.getInstitutionType());
         dto.setRegistrationNumber(student.getRegistrationNumber());
+        dto.setFormStatus(student.getFormStatus());
         dto.setCreatedByEmail(student.getCreatedByEmail());
         dto.setRole(student.getRole());
         dto.setBranchCode(student.getBranchCode());
@@ -674,6 +675,16 @@ public class StudentServiceImpl implements StudentService {
                 .orElseThrow(() -> new RuntimeException("Education record not found with ID: " + educationId));
 
         educationRepo.deleteById(educationId);
+    }
+    @Override
+    public void updateFormStatus(String role, String email, Long studentId)
+    {
+        checkPermission(role,email,"Put");
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        student.setFormStatus("Complete");
+        studentRepository.save(student);
     }
 
 

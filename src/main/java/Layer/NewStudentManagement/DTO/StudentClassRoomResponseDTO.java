@@ -19,6 +19,7 @@ public class StudentClassRoomResponseDTO {
     private LocalTime startTime;
     private LocalTime endTime;
     private String graduationType;
+    private String institutionType;
     private String branchCode;
     private String email;
     private String role;

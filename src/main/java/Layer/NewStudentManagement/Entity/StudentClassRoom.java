@@ -26,12 +26,14 @@ public class StudentClassRoom
     private LocalTime startTime;
     private LocalTime endTime;
     private String groupName;
+    private String institutionType;
 
 
     @Email
     private String createdByEmail;
     private String role;
     private String branchCode;
+
 
     @ManyToOne
     @JoinColumn(name = "medium_id")

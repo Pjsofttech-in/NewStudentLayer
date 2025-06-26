@@ -57,6 +57,7 @@ public class StudentResponseDTO {
     private String castCategory;
     private boolean handicap;
     private String registrationNumber;
+    private String formStatus;
 
     @Email
     private String createdByEmail;

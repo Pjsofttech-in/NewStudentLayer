@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.Repository.TeacherRepository;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,10 @@ import java.util.stream.Collectors;
 public class StaffService
 {
     private final WebClient webClient;
+
+
+    @Autowired
+    TeacherRepository teacherRepository;
 
     @Autowired
     public StaffService(WebClient webClient) {
@@ -111,6 +116,11 @@ public class StaffService
     public boolean hasPermission(String role, String email, String action) {
 
         if ("USER".equalsIgnoreCase(role)) {
+            return "POST".equalsIgnoreCase(action);
+        }
+        if ("Teacher".equalsIgnoreCase(role))
+        {
+            Boolean exists = teacherRepository.existsByTeacherEmail(email);
             return "POST".equalsIgnoreCase(action);
         }
         if ("BRANCH".equalsIgnoreCase(role)) {

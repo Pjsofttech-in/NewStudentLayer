@@ -100,6 +100,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
         classRoom.setYear(dto.getYear());
         classRoom.setStartTime(dto.getStartTime());
         classRoom.setEndTime(dto.getEndTime());
+        classRoom.setInstitutionType(dto.getInstitutionType());
         classRoom.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
         classRoom.setCreatedByEmail(email);
         classRoom.setRole(role);
@@ -341,6 +342,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 classroom != null ? classroom.getStartTime() : null,
                 classroom != null ? classroom.getEndTime() : null,
                 (classroom != null && classroom.getGraduationType() != null) ? classroom.getGraduationType().getGraduationType() : null,
+                classroom != null ? classroom.getInstitutionType() : null,
                 classroom != null ? classroom.getBranchCode() : "",
                 classroom != null ? classroom.getCreatedByEmail() : "",
                 classroom != null ? classroom.getRole() : "",

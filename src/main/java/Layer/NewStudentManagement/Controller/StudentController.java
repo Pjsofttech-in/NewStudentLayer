@@ -179,5 +179,12 @@ public class StudentController
         return ResponseEntity.ok("Education deleted successfully with ID: " + educationId);
     }
 
+    @PutMapping("/updateStudentFormStatus")
+    public ResponseEntity<String> updateStudentFormStatus(
+            @RequestParam String role, @RequestParam String email,
+            @RequestParam Long studentId) {
+        studentService.updateFormStatus(role,email,studentId);
+        return ResponseEntity.ok("Status updated successfully");
+    }
 
 }
