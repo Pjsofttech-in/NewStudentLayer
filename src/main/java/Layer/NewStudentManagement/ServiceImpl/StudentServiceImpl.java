@@ -357,17 +357,42 @@ public class StudentServiceImpl implements StudentService {
 
         Page<StudentEntity> studentPage;
 
-        // Resolve IDs by name
+        // Common values
         Long mediumId = mediumRepository.findIdByName(filterDTO.getMedium())
-                .orElseThrow(() -> new RuntimeException("Invalid Medium"));
-        Long standardId = standardRepository.findIdByName(filterDTO.getStandard())
-                .orElseThrow(() -> new RuntimeException("Invalid standard"));
+                .orElseThrow(() -> new RuntimeException("Invalid medium"));
 
-        if ("college".equalsIgnoreCase(filterDTO.getInstitutionType())) {
+        String institutionType = filterDTO.getInstitutionType();
+
+        if ("school".equalsIgnoreCase(institutionType)) {
+            // ✅ SCHOOL: standard, medium, academicYear
+            if (filterDTO.getStandard() == null || filterDTO.getAcademicYear() == null) {
+                throw new RuntimeException("Standard and academic year are required for school students.");
+            }
+
+            Long standardId = standardRepository.findIdByName(filterDTO.getStandard())
+                    .orElseThrow(() -> new RuntimeException("Invalid standard"));
+
+            studentPage = studentRepository.findUnassignedSchoolStudents(
+                    standardId,
+                    mediumId,
+                    filterDTO.getAcademicYear(),
+                    pageable
+            );
+
+        } else if ("college".equalsIgnoreCase(institutionType)) {
+            if (filterDTO.getStreamName() == null || filterDTO.getGraduationType() == null) {
+                throw new RuntimeException("Stream and graduation type are required for college students.");
+            }
+
+            Long streamId = streamRepository.findIdByName(filterDTO.getStreamName())
+                    .orElseThrow(() -> new RuntimeException("Invalid stream name"));
+
             Long graduationTypeId = graduationTypeRepository.findIdByName(filterDTO.getGraduationType())
                     .orElseThrow(() -> new RuntimeException("Invalid graduation type"));
 
+            // ✅ UG/PG Case
             if (filterDTO.getDegreeName() != null && filterDTO.getDepartmentName() != null) {
+
                 Long degreeNameId = degreeNameRepository.findIdByName(filterDTO.getDegreeName())
                         .orElseThrow(() -> new RuntimeException("Invalid degree name"));
 
@@ -375,17 +400,22 @@ public class StudentServiceImpl implements StudentService {
                         .orElseThrow(() -> new RuntimeException("Invalid department name"));
 
                 studentPage = studentRepository.findUnassignedUGPGStudents(
-                        graduationTypeId,
                         mediumId,
-                        null, // Stream ID not required for UG/PG
+                        streamId,
                         degreeNameId,
                         departmentId,
+                        filterDTO.getAcademicYear(),
                         pageable
                 );
 
             } else {
-                Long streamId = streamRepository.findIdByName(filterDTO.getStreamName())
-                        .orElseThrow(() -> new RuntimeException("Invalid stream name"));
+                // ✅ Jr. College Case
+                if (filterDTO.getStandard() == null || filterDTO.getGroupName() == null || filterDTO.getAcademicYear() == null) {
+                    throw new RuntimeException("Standard, group name, and academic year are required for Jr. College students.");
+                }
+
+                Long standardId = standardRepository.findIdByName(filterDTO.getStandard())
+                        .orElseThrow(() -> new RuntimeException("Invalid standard"));
 
                 studentPage = studentRepository.findUnassignedJrCollegeStudents(
                         graduationTypeId,
@@ -397,14 +427,6 @@ public class StudentServiceImpl implements StudentService {
                         pageable
                 );
             }
-
-        } else if ("school".equalsIgnoreCase(filterDTO.getInstitutionType())) {
-            studentPage = studentRepository.findUnassignedSchoolStudents(
-                    standardId,
-                    mediumId,
-                    filterDTO.getAcademicYear(),
-                    pageable
-            );
 
         } else {
             throw new RuntimeException("Invalid institution type");

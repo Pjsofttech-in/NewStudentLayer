@@ -80,20 +80,23 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "s.status = 'Approved' AND " +
             "s.classRoom IS NULL")
     Page<StudentEntity> findUnassignedJrCollegeStudents(Long graduationTypeId, Long standardId, Long mediumId,
-                                                        Long streamId, String groupName, String academicYear, Pageable pageable);
+                                                        Long streamId, String groupName, String academicYear,
+                                                        Pageable pageable);
 
-
+    // For UG/PG
     @Query("SELECT s FROM StudentEntity s " +
             "WHERE s.institutionType = 'College' AND " +
-            "s.graduationType.id = :graduationTypeId AND " +
             "s.medium.id = :mediumId AND " +
             "s.stream.id = :streamId AND " +
             "s.degreeName.id = :degreeNameId AND " +
             "s.department.id = :departmentId AND " +
+            "s.academicYear = :academicYear AND " +
             "s.status = 'Approved' AND " +
             "s.classRoom IS NULL")
-    Page<StudentEntity> findUnassignedUGPGStudents(Long graduationTypeId, Long mediumId, Long streamId,
-                                                   Long degreeNameId, Long departmentId, Pageable pageable);
+    Page<StudentEntity> findUnassignedUGPGStudents(Long mediumId, Long streamId,
+                                                   Long degreeNameId, Long departmentId, String academicYear,
+                                                   Pageable pageable);
+
 
 
     @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.status = :status AND s.enrollmentDate BETWEEN :startDate AND :endDate")
