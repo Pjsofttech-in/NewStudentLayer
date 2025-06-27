@@ -15,6 +15,7 @@ public class StudentTeacherDTO
     private Long id;
     private String teacherName;
     private String teacherEmail;
+    private String institutionType;
     private String branchCode;
     private String role;
     private String createdByEmail;

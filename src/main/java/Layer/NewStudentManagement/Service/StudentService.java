@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface StudentService
 {
@@ -41,4 +42,6 @@ public interface StudentService
     StudentDTO getStudentByRegistrationNumber(String role, String email, String registrationNumber);
 
     void deleteEducationById(String role, String email, Long educationId);
+
+    Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd);
 }

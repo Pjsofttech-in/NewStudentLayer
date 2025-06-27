@@ -20,7 +20,7 @@ public interface AttendanceService
     String logoutStudents(List<Integer> rollNos, Long classroomId);
     String markAttendanceFromFace(MultipartFile imagePath, String branchCode);
 
-    String logoutStudentFromFace(MultipartFile image, String branchCode, String classroomId);
+    String logoutStudentFromFace(MultipartFile image, String branchCode);
 
     Page<StudentAttendaceDTO> getFilteredAttendance(Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
                                                     LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) ;

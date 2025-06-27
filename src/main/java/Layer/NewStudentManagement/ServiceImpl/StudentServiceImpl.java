@@ -18,9 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -658,12 +656,20 @@ public class StudentServiceImpl implements StudentService {
         studentRepository.save(student);
     }
 
-    private String generateRegistrationNumber() {
+    @Transactional
+    public String generateRegistrationNumber() {
         String year = String.valueOf(LocalDate.now().getYear());
-        Long count = studentRepository.countByRegistrationNumberStartingWith(year);
-        String uniquePart = String.format("%08d", count + 1);
+        String regNumber;
+        int attempt = 0;
 
-        return year + uniquePart;  // e.g., "202500000001"
+        do {
+            attempt++;
+            Long count = studentRepository.countByRegistrationNumberStartingWith(year);
+            String uniquePart = String.format("%08d", count + attempt);
+            regNumber = year + uniquePart;
+        } while (studentRepository.existsByRegistrationNumber(regNumber));
+
+        return regNumber;
     }
 
     @Override
@@ -685,6 +691,49 @@ public class StudentServiceImpl implements StudentService {
 
         student.setFormStatus("Complete");
         studentRepository.save(student);
+    }
+
+    @Override
+    public Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd) {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate;
+        LocalDate endDate = today;
+
+        switch (filter.toLowerCase()) {
+            case "today":
+                startDate = today;
+                break;
+            case "7days":
+                startDate = today.minusDays(6);
+                break;
+            case "30days":
+                startDate = today.minusDays(29);
+                break;
+            case "365days":
+                startDate = today.minusDays(364);
+                break;
+            case "custom":
+                if (customStart == null || customEnd == null) {
+                    throw new IllegalArgumentException("Custom date range must be provided.");
+                }
+                startDate = customStart;
+                endDate = customEnd;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid filter: " + filter);
+        }
+
+        Long total = studentRepository.countTotalByDateRange(startDate, endDate);
+        Long approved = studentRepository.countByStatusAndDateRange("Approved", startDate, endDate);
+        Long rejected = studentRepository.countByStatusAndDateRange("Rejected", startDate, endDate);
+        Long pending = total - approved - rejected;
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("total", total);
+        result.put("approved", approved);
+        result.put("rejected", rejected);
+        result.put("pending", pending);
+        return result;
     }
 
 

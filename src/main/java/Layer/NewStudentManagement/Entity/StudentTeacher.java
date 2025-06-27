@@ -23,6 +23,7 @@ public class StudentTeacher
     @Column(unique = true)
     private String teacherEmail;
     private String password;
+    private String institutionType;
 
     @Email
     private String createdByEmail;

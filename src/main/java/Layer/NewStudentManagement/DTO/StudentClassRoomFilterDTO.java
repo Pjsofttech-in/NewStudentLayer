@@ -18,12 +18,10 @@ public class StudentClassRoomFilterDTO
     private Long mediumId;
     private String academicYear;
 
-    // Jr. College
     private Long streamId;
     private String groupName;
     private Long graduationTypeId;
 
-    // UG/PG
     private Long degreeNameId;
     private Long departmentId;
 

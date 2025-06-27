@@ -229,12 +229,10 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
 
-
     @Override
-    public String logoutStudentFromFace(MultipartFile image, String branchCode, String classroomId) {
+    public String logoutStudentFromFace(MultipartFile image, String branchCode) {
         try {
-            // Send image to Python FastAPI
-            String fastApiUrl = "https://pjsofttech.in:51443/auto-logout"; // endpoint for logout
+            String fastApiUrl = "https://pjsofttech.in:51443/auto-branch-scan"; // FastAPI endpoint
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -247,37 +245,45 @@ public class AttendanceServiceImpl implements AttendanceService {
                 }
             });
             body.add("branch_code", branchCode);
-            body.add("classroomId", classroomId);
             body.add("system_name", "student-sys");
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
             RestTemplate restTemplate = new RestTemplate();
             ResponseEntity<Map> response = restTemplate.postForEntity(fastApiUrl, requestEntity, Map.class);
 
             Map<String, Object> responseBody = response.getBody();
-            if (responseBody == null || !"success".equals(responseBody.get("status"))) {
-                return "Face recognition failed";
+            if (responseBody == null || !"success".equalsIgnoreCase((String) responseBody.get("status"))) {
+                return "Face recognition failed or no success status from server.";
             }
 
-            String rollNo = (String) responseBody.get("rollno");
-            Long classroomIdLong = Long.parseLong(classroomId);
-            LocalDate today = LocalDate.now();
+            List<Map<String, Object>> matches = (List<Map<String, Object>>) responseBody.get("matches");
+            if (matches == null || matches.isEmpty()) {
+                return "No face match found";
+            }
 
-            Optional<StudentAttendance> optional = attendanceRepository.findByRollNoAndDateAndClassroomId(rollNo, today, classroomIdLong);
+            Map<String, Object> firstMatch = matches.get(0);
+            String rollNo = String.valueOf(firstMatch.get("rollno"));
+            String classroomIdStr = String.valueOf(firstMatch.get("classroomId"));
+            Long classroomId = Long.parseLong(classroomIdStr);
+
+            LocalDate today = LocalDate.now();
+            Optional<StudentAttendance> optional = attendanceRepository.findByRollNoAndDateAndClassroomId(rollNo, today, classroomId);
+
             if (optional.isEmpty()) {
                 return "No attendance record found for Roll No: " + rollNo;
             }
 
             StudentAttendance attendance = optional.get();
+
             if (attendance.getLogoutTime() != null) {
                 return "Already logged out for Roll No: " + rollNo;
             }
 
-            attendance.setLogoutTime(LocalTime.now());
+            LocalTime logoutTime = LocalTime.now();
+            attendance.setLogoutTime(logoutTime);
 
             if (attendance.getLoginTime() != null) {
-                long workedMinutes = Duration.between(attendance.getLoginTime(), attendance.getLogoutTime()).toMinutes();
+                long workedMinutes = Duration.between(attendance.getLoginTime(), logoutTime).toMinutes();
                 attendance.setWorkingMinutes(workedMinutes);
             }
 
@@ -290,6 +296,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             return "Failed to logout student: " + e.getMessage();
         }
     }
+
 
 //    @Override
 //    public Page<StudentAttendance> getFilteredAttendance(

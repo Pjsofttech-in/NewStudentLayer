@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -94,6 +95,20 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     Page<StudentEntity> findUnassignedUGPGStudents(Long graduationTypeId, Long mediumId, Long streamId,
                                                    Long degreeNameId, Long departmentId, Pageable pageable);
 
+
+    @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.status = :status AND s.enrollmentDate BETWEEN :startDate AND :endDate")
+    Long countByStatusAndDateRange(@Param("status") String status,
+                                   @Param("startDate") LocalDate startDate,
+                                   @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.enrollmentDate BETWEEN :startDate AND :endDate")
+    Long countTotalByDateRange(@Param("startDate") LocalDate startDate,
+                               @Param("endDate") LocalDate endDate);
+
+    boolean existsByRegistrationNumber(String registrationNumber);
+
+//    @Query("SELECT COUNT(s) s FROM StudentEntity s WHERE s.standardName = :standard AND s.status=:'Approved' AND s.branchCode=:branchCode")
+//    Long countByStandard(@Param("branchCode") String branchCode);
 
 
 }

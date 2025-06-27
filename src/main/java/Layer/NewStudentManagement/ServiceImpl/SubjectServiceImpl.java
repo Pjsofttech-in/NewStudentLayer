@@ -2,7 +2,9 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.StudentSubjectDTO;
 import Layer.NewStudentManagement.Entity.StudentSubject;
+import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Repository.SubjectRepository;
+import Layer.NewStudentManagement.Repository.TeacherRepository;
 import Layer.NewStudentManagement.Service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,9 @@ public class SubjectServiceImpl implements SubjectService
 
     @Autowired
     private StaffService staffService;
+
+    @Autowired
+    private TeacherRepository teacherRepository;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -63,13 +68,22 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public void deleteSubjectById(Long id,String role,String email)
-    {
-        if (!staffService.hasPermission(role,email,"Delete"))
+    public void deleteSubjectById(Long id, String role, String email) {
+        if (!staffService.hasPermission(role, email, "Delete"))
             throw new RuntimeException("You don't have permission to delete subject");
-        subjectRepository.deleteById(id);
 
+        StudentSubject subject = subjectRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        List<StudentTeacher> assignedTeachers = teacherRepository.findTeachersBySubjectId(subject.getId());
+
+        if (!assignedTeachers.isEmpty()) {
+            throw new RuntimeException("Subject is assigned to teacher(s). Please unassign it before deletion.");
+        }
+
+        subjectRepository.deleteById(id);
     }
+
 
     @Override
     public List<StudentSubjectDTO> getAllSubject(String role, String email)
