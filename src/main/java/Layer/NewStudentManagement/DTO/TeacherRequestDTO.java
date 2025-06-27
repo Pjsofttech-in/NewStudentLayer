@@ -12,6 +12,8 @@ public class TeacherRequestDTO
 {
     private String teacherName;
     private String teacherEmail;
+    private String institutionType;
+
     private String password;
     private List<Long> subjectIds;
 

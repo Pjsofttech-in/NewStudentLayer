@@ -22,4 +22,12 @@ public interface TeacherRepository extends JpaRepository<StudentTeacher,Long>
 
     boolean existsByTeacherEmail(String teacherEmail);
 
+    @Query("SELECT t FROM StudentTeacher t JOIN t.subjects s WHERE s.id = :subjectId")
+    List<StudentTeacher> findTeachersBySubjectId(@Param("subjectId") Long subjectId);
+
+    @Query("SELECT t FROM StudentTeacher t WHERE t.institutionType = :institutionType AND t.branchCode = :branchCode")
+    List<StudentTeacher> findByInstitutionType(@Param("institutionType") String institutionType,
+                                                            @Param("branchCode") String branchCode);
+
+
 }

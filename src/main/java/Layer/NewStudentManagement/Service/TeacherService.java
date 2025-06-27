@@ -16,5 +16,6 @@ public interface TeacherService
     void deleteTeacherById(Long id,String role,String email);
     List<StudentTeacherDTO> getAllTeacher(String role, String email);
     LoginResponse login(LoginRequest request);
+    List<StudentTeacherDTO> getTeacherByInstitutionType(String role, String email, String institutionType);
 
 }

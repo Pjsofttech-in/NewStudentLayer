@@ -54,6 +54,7 @@ public class TeacherServiceImpl implements TeacherService
         StudentTeacher teacher = new StudentTeacher();
         teacher.setTeacherName(dto.getTeacherName());
         teacher.setTeacherEmail(dto.getTeacherEmail());
+        teacher.setInstitutionType(dto.getInstitutionType());
         teacher.setBranchCode(branchCode);
         teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
         teacher.setRole(role);
@@ -138,6 +139,22 @@ public class TeacherServiceImpl implements TeacherService
     }
 
     @Override
+    public List<StudentTeacherDTO> getTeacherByInstitutionType(String role, String email, String institutionType)
+    {
+        if(!staffService.hasPermission(role,email,"Get"))
+        {
+            throw new RuntimeException("You don't have permission to get teacher");
+        }
+        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+        List<StudentTeacher> teachers = teacherRepository.findByInstitutionType(institutionType,branchCode);
+
+        return teachers.stream()
+                .map(this::mapToResponseDTO)
+                .toList();
+
+    }
+
+    @Override
     public LoginResponse login(LoginRequest request) {
         StudentTeacher teacher = teacherRepository.findByTeacherEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
@@ -172,6 +189,7 @@ public class TeacherServiceImpl implements TeacherService
         responseDTO.setId(teacher.getId());
         responseDTO.setTeacherName(teacher.getTeacherName());
         responseDTO.setTeacherEmail(teacher.getTeacherEmail());
+        responseDTO.setInstitutionType(teacher.getInstitutionType());
         responseDTO.setBranchCode(teacher.getBranchCode());
         responseDTO.setRole(teacher.getRole());
         responseDTO.setCreatedByEmail(teacher.getCreatedByEmail());
