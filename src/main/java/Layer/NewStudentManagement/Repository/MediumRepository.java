@@ -7,10 +7,17 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MediumRepository extends JpaRepository<StudentMedium,Long>
 {
     @Query("SELECT s FROM StudentMedium s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentMedium> findAllByBranchCode(@Param("branchCode") String branchCode);
+
+    @Query("SELECT s.id FROM StudentMedium s WHERE s.mediumName = :medium")
+    Optional<Long> findIdByName(@Param("medium") String medium);
+
+
+
 }

@@ -357,53 +357,61 @@ public class StudentServiceImpl implements StudentService {
 
         Page<StudentEntity> studentPage;
 
-        switch (filterDTO.getInstitutionType().toLowerCase()) {
-            case "school":
-                studentPage = studentRepository.findUnassignedSchoolStudents(
-                        filterDTO.getStandardId(),
-                        filterDTO.getMediumId(),
+        // Resolve IDs by name
+        Long mediumId = mediumRepository.findIdByName(filterDTO.getMedium())
+                .orElseThrow(() -> new RuntimeException("Invalid Medium"));
+        Long standardId = standardRepository.findIdByName(filterDTO.getStandard())
+                .orElseThrow(() -> new RuntimeException("Invalid standard"));
+
+        if ("college".equalsIgnoreCase(filterDTO.getInstitutionType())) {
+            Long graduationTypeId = graduationTypeRepository.findIdByName(filterDTO.getGraduationType())
+                    .orElseThrow(() -> new RuntimeException("Invalid graduation type"));
+
+            if (filterDTO.getDegreeName() != null && filterDTO.getDepartmentName() != null) {
+                Long degreeNameId = degreeNameRepository.findIdByName(filterDTO.getDegreeName())
+                        .orElseThrow(() -> new RuntimeException("Invalid degree name"));
+
+                Long departmentId = departmentRepository.findIdByName(filterDTO.getDepartmentName())
+                        .orElseThrow(() -> new RuntimeException("Invalid department name"));
+
+                studentPage = studentRepository.findUnassignedUGPGStudents(
+                        graduationTypeId,
+                        mediumId,
+                        null, // Stream ID not required for UG/PG
+                        degreeNameId,
+                        departmentId,
+                        pageable
+                );
+
+            } else {
+                Long streamId = streamRepository.findIdByName(filterDTO.getStreamName())
+                        .orElseThrow(() -> new RuntimeException("Invalid stream name"));
+
+                studentPage = studentRepository.findUnassignedJrCollegeStudents(
+                        graduationTypeId,
+                        standardId,
+                        mediumId,
+                        streamId,
+                        filterDTO.getGroupName(),
                         filterDTO.getAcademicYear(),
                         pageable
                 );
-                break;
+            }
 
-            case "college":
-                if (filterDTO.getGraduationTypeId() != null) {
-                    if (filterDTO.getDegreeNameId() != null && filterDTO.getDepartmentId() != null) {
-                        // UG/PG
-                        studentPage = studentRepository.findUnassignedUGPGStudents(
-                                filterDTO.getGraduationTypeId(),
-                                filterDTO.getMediumId(),
-                                filterDTO.getStreamId(),
-                                filterDTO.getDegreeNameId(),
-                                filterDTO.getDepartmentId(),
-                                pageable
-                        );
-                    } else {
-                        // Jr. College
-                        studentPage = studentRepository.findUnassignedJrCollegeStudents(
-                                filterDTO.getGraduationTypeId(),
-                                filterDTO.getStandardId(),
-                                filterDTO.getMediumId(),
-                                filterDTO.getStreamId(),
-                                filterDTO.getGroupName(),
-                                filterDTO.getAcademicYear(),
-                                pageable
-                        );
-                    }
-                } else {
-                    throw new RuntimeException("GraduationTypeId is required for College students.");
-                }
-                break;
+        } else if ("school".equalsIgnoreCase(filterDTO.getInstitutionType())) {
+            studentPage = studentRepository.findUnassignedSchoolStudents(
+                    standardId,
+                    mediumId,
+                    filterDTO.getAcademicYear(),
+                    pageable
+            );
 
-            default:
-                throw new RuntimeException("Invalid institution type");
+        } else {
+            throw new RuntimeException("Invalid institution type");
         }
 
-        // Convert to StudentResponseDTO
         return studentPage.map(this::mapToDTO);
     }
-
 
 
     @Override

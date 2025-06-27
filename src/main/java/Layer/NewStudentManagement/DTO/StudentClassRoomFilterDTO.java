@@ -14,17 +14,18 @@ public class StudentClassRoomFilterDTO
 {
 
     private String institutionType;
-    private Long standardId;
-    private Long mediumId;
+    private String standard;
+    private String medium;
     private String academicYear;
 
-    private Long streamId;
+    // Jr. College
+    private String streamName;
     private String groupName;
-    private Long graduationTypeId;
+    private String graduationType;
 
-    private Long degreeNameId;
-    private Long departmentId;
 
+    private String degreeName;
+    private String departmentName;
 
     private String status;
 }

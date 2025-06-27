@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DegreeNameRepository extends JpaRepository<StudentDegreeName,Long>
@@ -18,4 +19,7 @@ public interface DegreeNameRepository extends JpaRepository<StudentDegreeName,Lo
 
     @Query("SELECT d FROM StudentDegreeName d WHERE d.graduationType.id = :graduationTypeId")
     List<StudentDegreeName> findByGraduationTypeId(@Param("graduationTypeId") Long graduationTypeId);
+
+    @Query("SELECT s.id FROM StudentDegreeName s WHERE s.degreeName = :degreeName")
+    Optional<Long> findIdByName(@Param("degreeName") String degreeName);
 }
