@@ -62,6 +62,9 @@ public class StudentSpecification {
                 if (filter.getSemister() != null) {
                     predicates.add(cb.equal(root.get("semister"), filter.getSemister()));
                 }
+                if (filter.getInstitutionType() != null) {
+                    predicates.add(cb.equal(root.get("institutionType"), filter.getInstitutionType()));
+                }
 
                 if (filter.getCastCategory() != null) {
                     predicates.add(cb.equal(religionJoin.get("castCategory"), filter.getCastCategory()));

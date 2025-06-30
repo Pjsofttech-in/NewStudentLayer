@@ -28,4 +28,5 @@ public class StudentFilterDTO
     private Boolean sportYesNo;
     private Boolean scholarship;
     private Boolean projectDifferentiated;
+    private String institutionType;
 }
