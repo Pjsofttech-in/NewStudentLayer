@@ -15,6 +15,8 @@ public interface StandardRepository extends JpaRepository<StudentStandard,Long>
     @Query("SELECT s FROM StudentStandard s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentStandard> getAllStandardByBranchCode(@Param("branchCode")String branchCode);
 
-    @Query("SELECT s.id FROM StudentStandard s WHERE s.standardName = :standard")
-    Optional<Long> findIdByName(@Param("standard") String standard);
+    @Query("SELECT s.id FROM StudentStandard s " +
+            "WHERE TRIM(LOWER(s.standardName)) = TRIM(LOWER(:standardName))")
+    List<Long> findIdsByName(@Param("standardName") String standardName);
+
 }

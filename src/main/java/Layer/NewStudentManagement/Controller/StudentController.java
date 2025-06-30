@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.Controller;
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentDocument;
 import Layer.NewStudentManagement.Entity.StudentEntity;
+import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class StudentController
 {
     @Autowired
     StudentService studentService;
+
+    @Autowired
+    StudentRepository studentRepository;
 
     @Autowired
     S3Service s3Service;
@@ -186,5 +190,14 @@ public class StudentController
         studentService.updateFormStatus(role,email,studentId);
         return ResponseEntity.ok("Status updated successfully");
     }
+
+    @GetMapping("/debugUGPG")
+    public ResponseEntity<List<StudentEntity>> debugUGPG() {
+        List<StudentEntity> students = studentRepository.testUGPGStudents(1L, 2L, 3L, 3L, "2024-2025");
+        System.out.println("DEBUG STUDENTS: " + students.size());
+        return ResponseEntity.ok(students);
+    }
+
+
 
 }
