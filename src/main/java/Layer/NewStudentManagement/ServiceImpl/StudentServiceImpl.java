@@ -419,9 +419,7 @@ public class StudentServiceImpl implements StudentService {
                 }
 
                 String standard = filterDTO.getStandard().trim();
-                System.out.println("Looking up Jr. College Standard: " + standard);
                 List<Long> standardIds = standardRepository.findIdsByName(standard);
-                System.out.println("Standard IDs: " + standardIds);
                 if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
                 Long standardId = standardIds.get(0);
 
@@ -434,7 +432,6 @@ public class StudentServiceImpl implements StudentService {
                         filterDTO.getAcademicYear(),
                         pageable
                 );
-                System.out.println("Jr. College student page size: " + studentPage.getTotalElements());
             }
 
         } else {
@@ -443,7 +440,6 @@ public class StudentServiceImpl implements StudentService {
 
         return studentPage.map(this::mapToDTO);
     }
-
 
 
     @Override
