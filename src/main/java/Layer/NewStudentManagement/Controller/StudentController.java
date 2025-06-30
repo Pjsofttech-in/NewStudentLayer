@@ -133,7 +133,7 @@ public class StudentController
         return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/getStudentforAssignToClassRoom")
+    @PostMapping("/getStudentforAssignToClassRoom")
     public ResponseEntity<Page<StudentResponseDTO>> filterStudentsForClassroom(
             @RequestParam String role,
             @RequestParam String email,
