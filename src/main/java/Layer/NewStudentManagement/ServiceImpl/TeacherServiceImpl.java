@@ -7,6 +7,7 @@ import Layer.NewStudentManagement.Entity.StudentSubject;
 import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Repository.SubjectRepository;
 import Layer.NewStudentManagement.Repository.TeacherRepository;
+import Layer.NewStudentManagement.Security.EmailService;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,6 +35,9 @@ public class TeacherServiceImpl implements TeacherService
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     JwtUtil jwtUtil;
@@ -175,6 +180,59 @@ public class TeacherServiceImpl implements TeacherService
         return new LoginResponse(token, teacherData);
     }
 
+    @Override
+    public String sendOtp(String email) {
+        StudentTeacher teacher = teacherRepository.findByTeacherEmail(email)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000); // 6-digit
+        teacher.setOtp(otp);
+        teacher.setOtpRequestedTime(System.currentTimeMillis());
+        teacherRepository.save(teacher);
+
+        emailService.sendOtpEmail(email, otp);
+        return "OTP sent to email.";
+    }
+
+    @Override
+    public String verifyOtp(String email, String otp) {
+        StudentTeacher teacher = teacherRepository.findByTeacherEmail(email)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+        if (!otp.equals(teacher.getOtp())) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        long otpAge = System.currentTimeMillis() - teacher.getOtpRequestedTime();
+        if (otpAge > 5 * 60 * 1000) { // 5 minutes
+            throw new RuntimeException("OTP expired");
+        }
+
+        return "OTP verified";
+    }
+
+    @Override
+    public String resetPassword(String email, String otp, String newPassword) {
+        StudentTeacher teacher = teacherRepository.findByTeacherEmail(email)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+        if (!otp.equals(teacher.getOtp())) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        long otpAge = System.currentTimeMillis() - teacher.getOtpRequestedTime();
+        if (otpAge > 5 * 60 * 1000) {
+            throw new RuntimeException("OTP expired");
+        }
+
+        teacher.setPassword(passwordEncoder.encode(newPassword));
+        teacher.setOtp(null);
+        teacher.setOtpRequestedTime(null);
+        teacherRepository.save(teacher);
+
+        return "Password reset successfully";
+    }
+
     private StudentTeacherDTO mapToResponseDTO(StudentTeacher teacher) {
         List<StudentSubjectDTO> subjectDTOs = teacher.getSubjects().stream()
                 .map(subject -> {
@@ -196,5 +254,7 @@ public class TeacherServiceImpl implements TeacherService
         responseDTO.setSubjects(subjectDTOs);
         return responseDTO;
     }
+
+
 
 }

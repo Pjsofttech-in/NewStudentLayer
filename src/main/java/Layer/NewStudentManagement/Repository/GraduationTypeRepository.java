@@ -17,8 +17,8 @@ public interface GraduationTypeRepository extends JpaRepository<StudentGraduatio
     @Query("SELECT s FROM StudentGraduationType s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentGraduationType> findAllByBranchCode(@Param("branchCode") String branchCode);
 
-    @Query("SELECT g FROM StudentGraduationType g WHERE g.stream.stream = :streamName")
-    List<StudentGraduationType> findByStreamName(@Param("streamName") String streamName);
+    @Query("SELECT g FROM StudentGraduationType g WHERE g.stream.stream = :streamName AND g.branchCode=:branchCode")
+    List<StudentGraduationType> findByStreamName(@Param("streamName") String streamName, @Param("branchCode") String branchCode);
 
     @Query("SELECT g.id FROM StudentGraduationType g " +
             "WHERE TRIM(LOWER(g.graduationType)) = TRIM(LOWER(:graduationType)) " +

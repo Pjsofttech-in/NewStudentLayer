@@ -1,0 +1,19 @@
+package Layer.NewStudentManagement.Service;
+
+import Layer.NewStudentManagement.DTO.StandardFeesRequestDTO;
+import Layer.NewStudentManagement.Entity.StudentStandardFees;
+
+import java.util.List;
+
+public interface StandardFeesService
+{
+    StandardFeesRequestDTO createStandardFees(String role, String email, StudentStandardFees standardFees);
+    StandardFeesRequestDTO updateStandardFees(String role, String email,Long sfid, StudentStandardFees standardFees);
+    StandardFeesRequestDTO getStandardFeesById(String role, String email, Long sfid);
+    List<StandardFeesRequestDTO> getAllStandardFees(String role, String email);
+    void deleteStandardFee(String role, String email, Long sfid);
+    List<StandardFeesRequestDTO> getStandardFeesByStandard(String role, String email,String standardName, String mediumName);
+
+
+
+}

@@ -14,10 +14,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -350,8 +347,61 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
     }
 
+    @Override
+    public List<StudentClassRoomResponseDTO> getClassroomDTOsByTeacherId(Long teacherId,String role, String email)
+    {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Assign Student To ClassRoom");
+        }
+        List<StudentClassRoomTeacherSubject> assignments = classRoomTeacherSubjectRepository.findAssignmentsByTeacherId(teacherId);
 
+        Map<Long, StudentClassRoomResponseDTO> classroomMap = new LinkedHashMap<>();
 
+        for (StudentClassRoomTeacherSubject assignment : assignments) {
+            StudentClassRoom classroom = assignment.getClassRoom();
+
+            StudentClassRoomResponseDTO dto = classroomMap.computeIfAbsent(
+                    classroom.getId(),
+                    id -> {
+                        StudentClassRoomResponseDTO newDto = new StudentClassRoomResponseDTO();
+                        newDto.setId(classroom.getId());
+                        newDto.setYear(classroom.getYear());
+                        newDto.setMedium(classroom.getMedium() != null ? classroom.getMedium().getMediumName() : null);
+                        newDto.setDivision(classroom.getDivision() != null ? classroom.getDivision().getDivision() : null);
+                        newDto.setStandard(classroom.getStandard() != null ? classroom.getStandard().getStandardName() : null);
+                        newDto.setStartTime(classroom.getStartTime());
+                        newDto.setEndTime(classroom.getEndTime());
+                        newDto.setGroupName(classroom.getGroupName());
+                        newDto.setGraduationType(classroom.getGraduationType() != null ? classroom.getGraduationType().getGraduationType() : null);
+                        newDto.setInstitutionType(classroom.getInstitutionType());
+                        newDto.setStreamName(classroom.getStream() != null ? classroom.getStream().getStream() : null);
+                        newDto.setDepartmentName(classroom.getDepartment() != null ? classroom.getDepartment().getDepartmentName() : null);
+                        newDto.setDegreeName(classroom.getDegreeName() != null ? classroom.getDegreeName().getDegreeName() : null);
+                        newDto.setBranchCode(classroom.getBranchCode());
+                        newDto.setTeacherSubjectMappings(new ArrayList<>());
+                        return newDto;
+                    }
+            );
+
+            TeacherWithSubjectsDTO teacherDTO = new TeacherWithSubjectsDTO();
+            StudentTeacher teacher = assignment.getTeacher();
+
+            teacherDTO.setTeacherId(teacher.getId());
+            teacherDTO.setTeacherName(teacher.getTeacherName());
+            teacherDTO.setTeacherEmail(teacher.getTeacherEmail());
+
+            List<String> subjectNames = assignment.getSubjects()
+                    .stream()
+                    .map(StudentSubject::getSubject)
+                    .toList();
+
+            teacherDTO.setSubjects(subjectNames);
+
+            dto.getTeacherSubjectMappings().add(teacherDTO);
+        }
+
+        return new ArrayList<>(classroomMap.values());
+    }
 
 
 }

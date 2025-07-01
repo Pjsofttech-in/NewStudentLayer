@@ -191,12 +191,7 @@ public class StudentController
         return ResponseEntity.ok("Status updated successfully");
     }
 
-    @GetMapping("/debugUGPG")
-    public ResponseEntity<List<StudentEntity>> debugUGPG() {
-        List<StudentEntity> students = studentRepository.testUGPGStudents(1L, 2L, 3L, 3L, "2024-2025");
-        System.out.println("DEBUG STUDENTS: " + students.size());
-        return ResponseEntity.ok(students);
-    }
+
 
 
 

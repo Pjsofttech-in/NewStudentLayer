@@ -17,5 +17,8 @@ public interface ClassRoomRepository extends JpaRepository<StudentClassRoom,Long
     @Query("SELECT s FROM StudentClassRoom s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentClassRoom> getAllByBranchCode(@Param("branchCode") String branchCode);
 
+//    @Query("SELECT s.classRoom FROM StudentClassRoomTeacherSubject s WHERE s.teacher.id = :teacherId")
+//    List<StudentClassRoom> findClassroomsByTeacherId(@Param("teacherId") Long teacherId);
+
 
 }

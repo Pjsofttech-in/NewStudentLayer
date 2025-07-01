@@ -107,7 +107,9 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
             throw new RuntimeException("You don't have permission to get graduation types.");
         }
 
-        return graduationTypeRepository.findByStreamName(streamName).stream()
+       String branchCode =  staffService.fetchBranchCodeByRole(role, email);
+
+        return graduationTypeRepository.findByStreamName(streamName,branchCode).stream()
                 .map(this::mapToGraduationTypeDTO)
                 .collect(Collectors.toList());
     }

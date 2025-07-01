@@ -1,7 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
-import Layer.NewStudentManagement.DTO.StudentTeacherDTO;
-import Layer.NewStudentManagement.DTO.TeacherRequestDTO;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
@@ -70,5 +69,20 @@ public class TeacherController
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = teacherService.login(request);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/sendOtpToTeacher")
+    public ResponseEntity<String> sendOtp(@RequestBody SendOtpRequest request) {
+        return ResponseEntity.ok(teacherService.sendOtp(request.getEmail()));
+    }
+
+    @PostMapping("/verifyOtpToTeacher")
+    public ResponseEntity<String> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        return ResponseEntity.ok(teacherService.verifyOtp(request.getEmail(), request.getOtp()));
+    }
+
+    @PostMapping("/resetTeacherPassword")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(teacherService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword()));
     }
 }

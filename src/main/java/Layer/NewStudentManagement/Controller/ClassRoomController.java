@@ -70,4 +70,11 @@ public class ClassRoomController
         return ResponseEntity.ok(response);
     }
 
+
+    @GetMapping("/getClassRoomByTeacherId/{teacherId}")
+    public ResponseEntity<List<StudentClassRoomResponseDTO>> getClassroomDTOs(@PathVariable Long teacherId,@RequestParam String role, @RequestParam String email) {
+        List<StudentClassRoomResponseDTO> dtos = classRoomService.getClassroomDTOsByTeacherId(teacherId,role,email);
+        return ResponseEntity.ok(dtos);
+    }
+
 }

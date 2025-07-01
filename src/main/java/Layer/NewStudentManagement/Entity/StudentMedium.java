@@ -31,4 +31,8 @@ public class StudentMedium
     @OneToMany(mappedBy = "medium", cascade = CascadeType.ALL)
     private List<StudentEntity> students;
 
+    @OneToMany(mappedBy = "medium", cascade = CascadeType.ALL)
+    private List<StudentStandardFees> standardFeesList;
+
+
 }

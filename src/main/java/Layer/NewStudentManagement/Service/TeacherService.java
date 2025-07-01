@@ -17,5 +17,7 @@ public interface TeacherService
     List<StudentTeacherDTO> getAllTeacher(String role, String email);
     LoginResponse login(LoginRequest request);
     List<StudentTeacherDTO> getTeacherByInstitutionType(String role, String email, String institutionType);
-
+    String resetPassword(String email, String otp, String newPassword);
+    String verifyOtp(String email, String otp);
+    String sendOtp(String email);
 }

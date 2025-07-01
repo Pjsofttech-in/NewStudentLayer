@@ -24,6 +24,8 @@ public class StudentTeacher
     private String teacherEmail;
     private String password;
     private String institutionType;
+    private String otp;
+    private Long otpRequestedTime;
 
     @Email
     private String createdByEmail;

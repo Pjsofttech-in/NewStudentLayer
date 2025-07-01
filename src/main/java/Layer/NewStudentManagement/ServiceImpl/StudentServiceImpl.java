@@ -359,7 +359,7 @@ public class StudentServiceImpl implements StudentService {
         Page<StudentEntity> studentPage;
         String institutionType = filterDTO.getInstitutionType();
 
-        // ✅ Medium
+        //  Medium
         String medium = filterDTO.getMedium().trim();
         List<Long> mediumIds = mediumRepository.findIdsByName(medium);
         if (mediumIds.size() != 1) throw new RuntimeException("Invalid or duplicate medium");
@@ -382,38 +382,38 @@ public class StudentServiceImpl implements StudentService {
                     pageable
             );
         } else if ("college".equalsIgnoreCase(institutionType)) {
-            // ✅ Stream
+            //  Stream
             String stream = filterDTO.getStreamName().trim();
             List<Long> streamIds = streamRepository.findIdsByNameAndBranchCode(stream, branchCode);
             if (streamIds.size() != 1) throw new RuntimeException("Invalid or duplicate stream");
             Long streamId = streamIds.get(0);
 
-            // ✅ Graduation Type
+            // Graduation Type
             String graduationType = filterDTO.getGraduationType().trim();
             List<Long> graduationTypeIds = graduationTypeRepository.findIdsByNameAndStreamAndBranchCode(graduationType, streamId, branchCode);
             if (graduationTypeIds.size() != 1) throw new RuntimeException("Invalid or duplicate graduation type");
             Long graduationTypeId = graduationTypeIds.get(0);
 
             if (filterDTO.getDegreeName() != null && filterDTO.getDepartmentName() != null) {
-                // ✅ Degree Name
+                // Degree Name
                 String degreeName = filterDTO.getDegreeName().trim();
                 List<Long> degreeIds = degreeNameRepository.findIdsByNameAndGraduationTypeAndBranchCode(degreeName, graduationTypeId, branchCode);
                 if (degreeIds.size() != 1) throw new RuntimeException("Invalid or duplicate degree name");
                 Long degreeNameId = degreeIds.get(0);
 
-                // ✅ Department
+                //  Department
                 String department = filterDTO.getDepartmentName().trim();
                 List<Long> departmentIds = departmentRepository.findIdsByNameAndDegreeAndBranchCode(department, degreeNameId, branchCode);
                 if (departmentIds.size() != 1) throw new RuntimeException("Invalid or duplicate department name");
                 Long departmentId = departmentIds.get(0);
 
-                // ✅ Final UG/PG student search
+                // Final UG/PG student search
                 studentPage = studentRepository.findUnassignedUGPGStudents(
                         mediumId, streamId, degreeNameId, departmentId,
                         filterDTO.getAcademicYear(), pageable);
 
             } else {
-                // ✅ Jr. College
+                // Jr. College
                 if (filterDTO.getStandard() == null || filterDTO.getGroupName() == null || filterDTO.getAcademicYear() == null) {
                     throw new RuntimeException("Standard, group name, and academic year are required for Jr. College students.");
                 }

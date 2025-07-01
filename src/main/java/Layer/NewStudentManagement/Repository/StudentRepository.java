@@ -83,21 +83,6 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
                                                         Long streamId, String groupName, String academicYear,
                                                         Pageable pageable);
 
-    // For UG/PG
-//    @Query("SELECT s FROM StudentEntity s " +
-//            "WHERE s.institutionType = 'College' AND " +
-//            "s.medium.id = :mediumId AND " +
-//            "s.stream.id = :streamId AND " +
-//            "s.degreeName.id = :degreeNameId AND " +
-//            "s.department.id = :departmentId AND " +
-//            "s.academicYear = :academicYear AND " +
-//            "s.status = 'Approved' AND " +
-//            "s.classRoom IS NULL")
-//    Page<StudentEntity> findUnassignedUGPGStudents(Long mediumId, Long streamId,
-//                                                   Long degreeNameId, Long departmentId, String academicYear,
-//                                                   Pageable pageable);
-
-
     @Query("SELECT s FROM StudentEntity s " +
             "WHERE s.institutionType = 'College' AND " +
             "s.medium.id = :mediumId AND " +
@@ -127,23 +112,6 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
 
     boolean existsByRegistrationNumber(String registrationNumber);
 
-//    @Query("SELECT COUNT(s) s FROM StudentEntity s WHERE s.standardName = :standard AND s.status=:'Approved' AND s.branchCode=:branchCode")
-//    Long countByStandard(@Param("branchCode") String branchCode);
 
-
-    @Query("SELECT s FROM StudentEntity s " +
-            "WHERE s.institutionType = 'College' AND " +
-            "s.medium.id = :mediumId AND " +
-            "s.stream.id = :streamId AND " +
-            "s.degreeName.id = :degreeNameId AND " +
-            "s.department.id = :departmentId AND " +
-            "s.academicYear = :academicYear AND " +
-            "s.status = 'Approved' AND " +
-            "s.classRoom IS NULL")
-    List<StudentEntity> testUGPGStudents(@Param("mediumId") Long mediumId,
-                                         @Param("streamId") Long streamId,
-                                         @Param("degreeNameId") Long degreeNameId,
-                                         @Param("departmentId") Long departmentId,
-                                         @Param("academicYear") String academicYear);
 
 }
