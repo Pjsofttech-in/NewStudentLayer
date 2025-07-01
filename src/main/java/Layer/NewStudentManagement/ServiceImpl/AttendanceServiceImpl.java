@@ -63,7 +63,13 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         String branchCode = classRoom.getBranchCode();
         String systemName = "student-sys";
-
+        LocalTime classStartTime = classRoom.getStartTime();
+        LocalTime earliestAllowed = classStartTime.minusMinutes(10);
+        LocalTime latestAllowed = classStartTime.plusMinutes(20);
+        if (now.isBefore(earliestAllowed) || now.isAfter(latestAllowed)) {
+            throw new RuntimeException("Attendance can only be marked between " +
+                    earliestAllowed + " and " + latestAllowed + " for class starting at " + classStartTime);
+        }
 
         List<StudentEntity> students = studentRepository.findByClassRoomIdAndRollNos(classroomId, rollNos);
 
@@ -112,7 +118,6 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         return toSave.size() + " student(s) marked present successfully.";
     }
-
 
     @Override
     public String logoutStudents(List<Integer> rollNos, Long classroomId) {
@@ -202,12 +207,19 @@ public class AttendanceServiceImpl implements AttendanceService {
 
             StudentClassRoom classroom = classRoomRepository.findById(classroomIdLong)
                     .orElseThrow(() -> new RuntimeException("Classroom not found"));
+            LocalTime classStartTime = classroom.getStartTime();
+            LocalTime earliestAllowed = classStartTime.minusMinutes(10);
+            LocalTime latestAllowed = classStartTime.plusMinutes(20);
 
             StudentEntity student = studentRepository.findByClassRoomIdAndRollNo(classroomIdLong, Integer.parseInt(rollNo))
                     .orElseThrow(() -> new RuntimeException("Student not found"));
 
             LocalTime loginTime = LocalTime.now();
             LocalTime startTime = classroom.getStartTime();
+            if (loginTime.isBefore(earliestAllowed) || loginTime.isAfter(latestAllowed)) {
+                throw new RuntimeException("Attendance can only be marked between " +
+                        earliestAllowed + " and " + latestAllowed + " for class starting at " + classStartTime);
+            }
             String status = loginTime.isAfter(startTime) ? "Late" : "On Time";
 
             StudentAttendance attendance = new StudentAttendance();

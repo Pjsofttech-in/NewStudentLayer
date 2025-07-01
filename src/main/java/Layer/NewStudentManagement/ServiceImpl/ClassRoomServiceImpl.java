@@ -158,11 +158,12 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 classRoom.setDepartment(department);
             }
         }
-
-        // Save the classroom
         StudentClassRoom savedClassRoom = classRoomRepository.save(classRoom);
 
-        // Save teacher-subject mappings
+        if (dto.getTeacherSubjectMap() == null || dto.getTeacherSubjectMap().isEmpty()) {
+            throw new RuntimeException("At least one teacher and subject mapping is required to create a ClassRoom");
+        }
+
         for (Map.Entry<Long, List<Long>> entry : dto.getTeacherSubjectMap().entrySet()) {
             Long teacherId = entry.getKey();
             List<StudentSubject> subjects = subjectRepository.findAllById(entry.getValue());
