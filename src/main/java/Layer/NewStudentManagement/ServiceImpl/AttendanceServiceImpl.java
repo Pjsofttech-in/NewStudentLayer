@@ -70,6 +70,9 @@ public class AttendanceServiceImpl implements AttendanceService {
             throw new RuntimeException("Attendance can only be marked between " +
                     earliestAllowed + " and " + latestAllowed + " for class starting at " + classStartTime);
         }
+        LocalTime loginTime = LocalTime.now();
+        LocalTime startTime = classRoom.getStartTime();
+        String status = loginTime.isAfter(startTime) ? "Late" : "On Time";
 
         List<StudentEntity> students = studentRepository.findByClassRoomIdAndRollNos(classroomId, rollNos);
 
@@ -107,7 +110,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             attendance.setSystemName(systemName);
             attendance.setDate(today);
             attendance.setLoginTime(now);
-            attendance.setStatus("Present");
+            attendance.setStatus(status);
 
             toSave.add(attendance);
         }
