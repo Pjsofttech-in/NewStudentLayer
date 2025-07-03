@@ -1,6 +1,5 @@
-package Layer.NewStudentManagement.Entity;
+package Layer.NewStudentManagement.DTO;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,20 +10,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class StudentGroup
+public class StudentGroupDTO
 {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String studentGroup;
     private String graduationTypeName;
+    private Long graduationTypeId;
     @Email
     private String createdByEmail;
     private String role;
     private String branchCode;
-
-    @ManyToOne
-    @JoinColumn(name = "graduation_type_id")
-    private StudentGraduationType graduationType;
 }

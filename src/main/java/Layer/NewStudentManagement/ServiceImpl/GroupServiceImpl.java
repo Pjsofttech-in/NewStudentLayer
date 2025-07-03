@@ -1,12 +1,18 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.StudentDepartmentDTO;
+import Layer.NewStudentManagement.DTO.StudentGroupDTO;
+import Layer.NewStudentManagement.Entity.StudentDepartment;
+import Layer.NewStudentManagement.Entity.StudentGraduationType;
 import Layer.NewStudentManagement.Entity.StudentGroup;
+import Layer.NewStudentManagement.Repository.GraduationTypeRepository;
 import Layer.NewStudentManagement.Repository.GroupRepository;
 import Layer.NewStudentManagement.Service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GroupServiceImpl implements GroupService
@@ -17,23 +23,37 @@ public class GroupServiceImpl implements GroupService
     @Autowired
     private GroupRepository groupRepository;
 
+    @Autowired
+    private GraduationTypeRepository graduationTypeRepository;
+
     @Override
-    public StudentGroup createGroup(String role, String email, StudentGroup group)
+    public StudentGroupDTO createGroup(String role, String email, StudentGroup group)
     {
         if(!staffService.hasPermission(role,email,"Post"))
         {
             throw new RuntimeException("You don't have permission to create group");
         }
+
+        StudentGraduationType graduationType = graduationTypeRepository.findById(group.getGraduationType().getId())
+                .orElseThrow(() -> new RuntimeException("Graduation type not found"));
+
+        if ("Jr.College".equalsIgnoreCase(graduationType.getGraduationType())) {
+            group.setGraduationType(graduationType);
+        } else {
+            group.setGraduationType(null);
+        }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         group.setRole(role);
         group.setBranchCode(branchCode);
+        group.setGraduationTypeName(graduationType.getGraduationType());
         group.setCreatedByEmail(email);
-        return groupRepository.save(group);
+        StudentGroup group1 = groupRepository.save(group);
+        return mapToGroupDTO(group1);
 
     }
 
     @Override
-    public StudentGroup getGroupById(Long id,String role,String email)
+    public StudentGroupDTO getGroupById(Long id,String role,String email)
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
@@ -41,12 +61,12 @@ public class GroupServiceImpl implements GroupService
         }
         StudentGroup group = groupRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Group not found"));
-        return group;
+        return mapToGroupDTO(group);
 
     }
 
     @Override
-    public StudentGroup updateGroup(Long id,String role,String email,StudentGroup group)
+    public StudentGroupDTO updateGroup(Long id,String role,String email,StudentGroup group)
     {
         if (!staffService.hasPermission(role,email,"Put"))
         {
@@ -55,8 +75,8 @@ public class GroupServiceImpl implements GroupService
         StudentGroup existingGroup = groupRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Group not found"));
         existingGroup.setStudentGroup(group.getStudentGroup());
-        return groupRepository.save(existingGroup);
-
+        StudentGroup group1 = groupRepository.save(existingGroup);
+        return mapToGroupDTO(group1);
     }
 
     @Override
@@ -70,14 +90,44 @@ public class GroupServiceImpl implements GroupService
     }
 
     @Override
-    public List<StudentGroup> getAllGroupByName(String role, String email)
+    public List<StudentGroupDTO> getAllGroupByName(String role, String email)
     {
         if (!staffService.hasPermission(role,email,"Get"))
         {
             throw new RuntimeException("You don't have permission to get group");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        return groupRepository.getAllByBranchCode(branchCode);
+        List<StudentGroup> groups = groupRepository.getAllByBranchCode(branchCode);
+        return groups.stream()
+                .map(this::mapToGroupDTO)
+                .collect(Collectors.toList());
 
+    }
+
+    @Override
+    public List<StudentGroupDTO> getGroupsByGraduationTypeId(String role, String email,Long graduationTypeId)
+    {
+        if (!staffService.hasPermission(role,email,"Get"))
+        {
+            throw new RuntimeException("You don't have permission to get group");
+        }
+        List<StudentGroup> groups = groupRepository.findGroupsByGraduationTypeId(graduationTypeId);
+        return groups.stream()
+                .map(this::mapToGroupDTO)
+                .collect(Collectors.toList());
+    }
+
+
+    private StudentGroupDTO mapToGroupDTO(StudentGroup group) {
+        StudentGroupDTO dto = new StudentGroupDTO();
+        dto.setId(group.getId());
+        dto.setStudentGroup(group.getStudentGroup());
+        dto.setGraduationTypeName(group.getGraduationTypeName());
+        dto.setGraduationTypeId(group.getGraduationType().getId());
+        dto.setCreatedByEmail(group.getCreatedByEmail());
+        dto.setRole(group.getRole());
+        dto.setBranchCode(group.getBranchCode());
+
+        return dto;
     }
 }

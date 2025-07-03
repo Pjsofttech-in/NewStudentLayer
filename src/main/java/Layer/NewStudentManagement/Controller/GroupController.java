@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.StudentGroupDTO;
 import Layer.NewStudentManagement.Entity.StudentGroup;
 import Layer.NewStudentManagement.Service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,30 +17,30 @@ public class GroupController
 
 
     @PostMapping("/createGroup")
-    public ResponseEntity<StudentGroup> createGroup(@RequestParam String role, @RequestParam String email, @RequestBody StudentGroup group)
+    public ResponseEntity<StudentGroupDTO> createGroup(@RequestParam String role, @RequestParam String email, @RequestBody StudentGroup group)
     {
-        StudentGroup createdGroup = groupService.createGroup(role,email,group);
+        StudentGroupDTO createdGroup = groupService.createGroup(role,email,group);
         return ResponseEntity.ok(createdGroup);
     }
 
     @GetMapping("/getGroupById/{id}")
-    public ResponseEntity<StudentGroup> getGroupById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
+    public ResponseEntity<StudentGroupDTO> getGroupById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
     {
-        StudentGroup group = groupService.getGroupById(id,role,email);
+        StudentGroupDTO group = groupService.getGroupById(id,role,email);
         return ResponseEntity.ok(group);
     }
 
     @GetMapping("/getAllGroup")
-    public ResponseEntity<Iterable<StudentGroup>> getAllGroup(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<StudentGroupDTO>> getAllGroup(@RequestParam String role, @RequestParam String email)
     {
-        Iterable<StudentGroup> groups = groupService.getAllGroupByName(role, email);
+        Iterable<StudentGroupDTO> groups = groupService.getAllGroupByName(role, email);
         return ResponseEntity.ok(groups);
     }
 
     @PutMapping("/updateGroup/{id}")
-    public ResponseEntity<StudentGroup> updateGroup(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentGroup group)
+    public ResponseEntity<StudentGroupDTO> updateGroup(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentGroup group)
     {
-        StudentGroup updatedGroup = groupService.updateGroup(id,role,email,group);
+        StudentGroupDTO updatedGroup = groupService.updateGroup(id,role,email,group);
         return ResponseEntity.ok(updatedGroup);
     }
 
@@ -48,6 +49,13 @@ public class GroupController
     {
         groupService.deleteGroupById(id,role,email);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/getGroupByGraduationType/{id}")
+    public ResponseEntity<Iterable<StudentGroupDTO>> getGroupsByGraduationTypeId( @RequestParam String role, @RequestParam String email,@PathVariable Long id)
+    {
+        Iterable<StudentGroupDTO> groupDTOS = groupService.getGroupsByGraduationTypeId(role,email,id);
+        return ResponseEntity.ok(groupDTOS);
     }
 
 
