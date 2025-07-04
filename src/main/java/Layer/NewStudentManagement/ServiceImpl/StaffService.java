@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Repository.TeacherRepository;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
@@ -114,36 +115,39 @@ public class StaffService
 
 
     public boolean hasPermission(String role, String email, String action) {
+        if (role == null || action == null) {
+            return false;
+        }
 
-        if ("USER".equalsIgnoreCase(role)) {
-            return "POST".equalsIgnoreCase(action);
-        }
-        if ("Teacher".equalsIgnoreCase(role)) {
-            boolean exists = teacherRepository.existsByTeacherEmail(email);
-            if (exists) {
-                return "POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action);
-            } else {
-                return false;
-            }
-        }
-        if ("BRANCH".equalsIgnoreCase(role)) {
-            try {
-                Boolean exists = webClient.get()
-                        .uri(uriBuilder -> uriBuilder
-                                .path("/existBranchbyemail")
-                                .queryParam("email", email)
-                                .build())
-                        .retrieve()
-                        .bodyToMono(Boolean.class)
-                        .block();
-
-                return Boolean.TRUE.equals(exists);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
         switch (role.toUpperCase()) {
+            case "USER" -> {
+                return "POST".equalsIgnoreCase(action);
+            }
+
+            case "TEACHER" -> {
+                System.out.println("Checking role for Teacher: " + email + " Action: " + action);
+                boolean exists = teacherRepository.existsByTeacherEmail(email);
+                return exists && ("POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action));
+            }
+
+            case "BRANCH" -> {
+                try {
+                    Boolean exists = webClient.get()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path("/existBranchbyemail")
+                                    .queryParam("email", email)
+                                    .build())
+                            .retrieve()
+                            .bodyToMono(Boolean.class)
+                            .block();
+
+                    return Boolean.TRUE.equals(exists);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+
             case "STAFF" -> {
                 Map<String, Boolean> perms = getPermissionsByEmail(email);
                 return switch (action.toUpperCase()) {
@@ -156,7 +160,7 @@ public class StaffService
             }
 
             case "DEPARTMENT" -> {
-                Map<String, Object> perms =getCrudPermissionForDepartmentByEmail(email);
+                Map<String, Object> perms = getCrudPermissionForDepartmentByEmail(email);
                 return switch (action.toUpperCase()) {
                     case "GET" -> Boolean.TRUE.equals(perms.get("candGet"));
                     case "POST" -> Boolean.TRUE.equals(perms.get("candPost"));
@@ -167,6 +171,7 @@ public class StaffService
             }
 
             default -> {
+                // Unknown role
                 return false;
             }
         }
@@ -174,22 +179,38 @@ public class StaffService
 
 
     public String fetchBranchCodeByRole(String role, String email) {
-        String endpoint = switch (role.toLowerCase()) {
-            case "branch" -> "/branch/getbranchcode";
-            case "department" -> "/department/getbranchcode";
-            case "staff" -> "/staff/getbranchcode";
-            default -> throw new IllegalArgumentException("Invalid role: " + role);
-        };
+        switch (role.toLowerCase()) {
+            case "branch":
+            case "department":
+            case "staff": {
+                String endpoint = switch (role.toLowerCase()) {
+                    case "branch" -> "/branch/getbranchcode";
+                    case "department" -> "/department/getbranchcode";
+                    case "staff" -> "/staff/getbranchcode";
+                    default -> throw new IllegalArgumentException("Invalid role: " + role);
+                };
 
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path(endpoint)
-                        .queryParam("email", email)
-                        .build())
-                .retrieve()
-                .bodyToMono(String.class)
-                .block();
+                return webClient.get()
+                        .uri(uriBuilder -> uriBuilder
+                                .path(endpoint)
+                                .queryParam("email", email)
+                                .build())
+                        .retrieve()
+                        .bodyToMono(String.class)
+                        .block();
+            }
+
+            case "teacher": {
+                StudentTeacher teacher = teacherRepository.findByTeacherEmail(email)
+                        .orElseThrow(() -> new IllegalArgumentException("Teacher not found: " + email));
+                return teacher.getBranchCode();
+            }
+
+            default:
+                throw new IllegalArgumentException("Invalid role: " + role);
+        }
     }
+
 
 
 }
