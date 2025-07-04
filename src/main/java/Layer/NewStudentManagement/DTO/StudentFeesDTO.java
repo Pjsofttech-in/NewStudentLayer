@@ -46,6 +46,11 @@ public class StudentFeesDTO
     private double lateFeeCharges;
     private Long sfid;
 
+    private double paidAmount;         // total paid by student
+    private double pendingAmount;     // remaining amount
+    private String paymentStatus;     // Pending, Ongoing, Completed
+    private String feesPaymentType;
+
     @Email
     private String createdByEmail;
     private String role;
