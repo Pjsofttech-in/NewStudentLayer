@@ -118,11 +118,13 @@ public class StaffService
         if ("USER".equalsIgnoreCase(role)) {
             return "POST".equalsIgnoreCase(action);
         }
-        if ("Teacher".equalsIgnoreCase(role))
-        {
-            Boolean exists = teacherRepository.existsByTeacherEmail(email);
-            return "POST".equalsIgnoreCase(action) || "Get".equalsIgnoreCase(action);
-
+        if ("Teacher".equalsIgnoreCase(role)) {
+            boolean exists = teacherRepository.existsByTeacherEmail(email);
+            if (exists) {
+                return "POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action);
+            } else {
+                return false;
+            }
         }
         if ("BRANCH".equalsIgnoreCase(role)) {
             try {
