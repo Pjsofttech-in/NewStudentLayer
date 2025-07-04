@@ -62,6 +62,7 @@ public class FeesServiceImpl implements FeesService
         fees.setRollNo(student.getRollNo());
         fees.setStandard(standard);
         fees.setStandardName(standard.getStandardName());
+        fees.setPendingAmount(fees.getTotalamount());
         fees.setCreatedByEmail(email);
         fees.setRole(role);
         fees.setBranchCode(branchCode);
@@ -167,6 +168,10 @@ public class FeesServiceImpl implements FeesService
         dto.setTotalamount(fees.getTotalamount());
         dto.setLateFeeCharges(fees.getLateFeeCharges());
         dto.setSfid(fees.getSfid());
+        dto.setPaidAmount(fees.getPaidAmount());
+        dto.setPendingAmount(fees.getPendingAmount());
+        dto.setPaymentStatus(fees.getPaymentStatus());
+        dto.setFeesPaymentType(fees.getFeesPaymentType());
         dto.setCreatedByEmail(fees.getCreatedByEmail());
         dto.setRole(fees.getRole());
         dto.setBranchCode(fees.getBranchCode());
