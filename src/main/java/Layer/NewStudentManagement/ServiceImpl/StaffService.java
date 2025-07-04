@@ -121,7 +121,8 @@ public class StaffService
         if ("Teacher".equalsIgnoreCase(role))
         {
             Boolean exists = teacherRepository.existsByTeacherEmail(email);
-            return "POST".equalsIgnoreCase(action);
+            return "POST".equalsIgnoreCase(action) || "Get".equalsIgnoreCase(action);
+
         }
         if ("BRANCH".equalsIgnoreCase(role)) {
             try {
