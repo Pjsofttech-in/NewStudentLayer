@@ -27,6 +27,8 @@ public class StandardFeesRequestDTO
     private double sportFees;
     private double GST;
     private Double totalamount;
+    private String standardName;
+    private String mediumName;
     private String createdByEmail;
     private String role;
     private String branchCode;

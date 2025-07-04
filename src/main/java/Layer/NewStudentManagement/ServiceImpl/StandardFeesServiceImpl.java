@@ -162,6 +162,8 @@ public class StandardFeesServiceImpl implements StandardFeesService
         dto.setSportFees(entity.getSportFees());
         dto.setGST(entity.getGST());
         dto.setTotalamount(entity.getFeesAmount());
+        dto.setStandardName(entity.getStandardName());
+        dto.setMediumName(entity.getMediumName());
 
         dto.setBranchCode(entity.getBranchCode());
         dto.setCreatedByEmail(entity.getCreatedByEmail());
