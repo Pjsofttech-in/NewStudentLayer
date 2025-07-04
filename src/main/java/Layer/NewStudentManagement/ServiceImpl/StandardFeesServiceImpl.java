@@ -90,7 +90,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
         if (updatedFees.getLibraryFees() != 0) existing.setLibraryFees(updatedFees.getLibraryFees());
         if (updatedFees.getSportFees() != 0) existing.setSportFees(updatedFees.getSportFees());
         if (updatedFees.getGST() != 0) existing.setGST(updatedFees.getGST());
-        if (updatedFees.getTotalamount() != null && updatedFees.getTotalamount() != 0) existing.setTotalamount(updatedFees.getTotalamount());
+        if (updatedFees.getFeesAmount() != null && updatedFees.getFeesAmount() != 0) existing.setFeesAmount(updatedFees.getFeesAmount());
         if (updatedFees.getBranchCode() != null) existing.setBranchCode(updatedFees.getBranchCode());
 
         StudentStandardFees standardFees = standardFeesRepository.save(existing);
@@ -161,7 +161,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
         dto.setLibraryFees(entity.getLibraryFees());
         dto.setSportFees(entity.getSportFees());
         dto.setGST(entity.getGST());
-        dto.setTotalamount(entity.getTotalamount());
+        dto.setTotalamount(entity.getFeesAmount());
 
         dto.setBranchCode(entity.getBranchCode());
         dto.setCreatedByEmail(entity.getCreatedByEmail());

@@ -1,25 +1,32 @@
-package Layer.NewStudentManagement.Entity;
+package Layer.NewStudentManagement.DTO;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class StudentStandardFees
+public class StudentFeesDTO
 {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long sfid;
+    private Long fid;
+    private String studentName;
+    private Integer rollNo;
     private String standardName;
     private String mediumName;
+    private String feesType;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate approvalDate;
+
+    private String feesStatus;
+    private String feesCollectionType;
+
     private double tuitionFee;
     private double admissionFee;
     private double practicalFee;
@@ -31,22 +38,17 @@ public class StudentStandardFees
     private double buildingFundFee;
     private double libraryFees;
     private double sportFees;
-    private double GST;
-    private Double feesAmount;
+    private Double feesAmount;      // fees total before discount
 
+    private double discount;
+    private double discountedAmount;
+    private Double totalamount;         // fees total after discount
+    private double lateFeeCharges;
+    private Long sfid;
 
     @Email
     private String createdByEmail;
     private String role;
     private String branchCode;
-
-
-    @ManyToOne
-    @JoinColumn(name = "standard_id", nullable = false)
-    private StudentStandard standard;
-
-    @ManyToOne
-    @JoinColumn(name = "medium_id", nullable = false)
-    private StudentMedium medium;
 
 }

@@ -116,4 +116,7 @@ public class StudentEntity
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentPromotionRecord> promotionRecords;
 
+
+
+
 }
