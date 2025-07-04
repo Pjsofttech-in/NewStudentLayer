@@ -26,7 +26,7 @@ public class StandardFeesRequestDTO
     private double libraryFees;
     private double sportFees;
     private double GST;
-    private Double totalamount;
+    private Double feesAmount;
     private String standardName;
     private String mediumName;
     private String createdByEmail;
