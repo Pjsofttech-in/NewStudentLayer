@@ -29,6 +29,6 @@ public class StudentFilterDTO
     private Boolean scholarship;
     private Boolean projectDifferentiated;
     private String institutionType;
-//    private String graduationType;
-//    private String degreeName;
+    private String graduationType;
+    private String degreeName;
 }
