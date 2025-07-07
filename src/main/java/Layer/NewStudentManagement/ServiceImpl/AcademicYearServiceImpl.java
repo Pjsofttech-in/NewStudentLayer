@@ -2,10 +2,14 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentAcademicYear;
 import Layer.NewStudentManagement.Repository.AcademicYearRepository;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.AcademicYearService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -16,6 +20,9 @@ public class AcademicYearServiceImpl implements AcademicYearService
 
     @Autowired
     private StaffService staffService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public StudentAcademicYear createAcademicYear(String role, String email, StudentAcademicYear academicYear)
@@ -69,14 +76,25 @@ public class AcademicYearServiceImpl implements AcademicYearService
     }
 
     @Override
-    public List<StudentAcademicYear> getAllAcademicYear(String role, String email)
-    {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
-            throw new RuntimeException("You don't have permission to get AcademicYear");
+    public List<StudentAcademicYear> getAllAcademicYear(String role, String email, String token) {
+        String branchCode;
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+
+            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+        } else {
+            if (!staffService.hasPermission(role, email, "Get")) {
+                throw new RuntimeException("You don't have permission to get AcademicYear");
+            }
+            branchCode = staffService.fetchBranchCodeByRole(role, email);
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
-       return academicYearRepository.findAllByBranchCode(branchCode);
+
+        return academicYearRepository.findAllByBranchCode(branchCode);
 
     }
 }

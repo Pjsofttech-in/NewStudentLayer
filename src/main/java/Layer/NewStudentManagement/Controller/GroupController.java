@@ -4,8 +4,12 @@ import Layer.NewStudentManagement.DTO.StudentGroupDTO;
 import Layer.NewStudentManagement.Entity.StudentGroup;
 import Layer.NewStudentManagement.Service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -31,10 +35,19 @@ public class GroupController
     }
 
     @GetMapping("/getAllGroup")
-    public ResponseEntity<Iterable<StudentGroupDTO>> getAllGroup(@RequestParam String role, @RequestParam String email)
-    {
-        Iterable<StudentGroupDTO> groups = groupService.getAllGroupByName(role, email);
-        return ResponseEntity.ok(groups);
+    public ResponseEntity<Iterable<StudentGroupDTO>> getAllGroup(@RequestParam String role, @RequestParam(required = false) String email,
+                                                                 @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
+    {try {
+        String token = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+        }
+
+        List<StudentGroupDTO> academicYear = groupService.getAllGroupByName(role, email, token);
+        return ResponseEntity.ok(academicYear);
+    } catch (RuntimeException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+    }
     }
 
     @PutMapping("/updateGroup/{id}")

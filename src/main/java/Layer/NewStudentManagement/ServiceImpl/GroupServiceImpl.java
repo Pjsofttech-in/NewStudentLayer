@@ -7,10 +7,14 @@ import Layer.NewStudentManagement.Entity.StudentGraduationType;
 import Layer.NewStudentManagement.Entity.StudentGroup;
 import Layer.NewStudentManagement.Repository.GraduationTypeRepository;
 import Layer.NewStudentManagement.Repository.GroupRepository;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.GroupService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -27,6 +31,9 @@ public class GroupServiceImpl implements GroupService
 
     @Autowired
     private GraduationTypeRepository graduationTypeRepository;
+
+    @Autowired
+    JwtUtil jwtUtil;
 
     @Override
     public StudentGroupDTO createGroup(String role, String email, StudentGroup group)
@@ -92,9 +99,21 @@ public class GroupServiceImpl implements GroupService
     }
 
     @Override
-    public List<StudentGroupDTO> getAllGroupByName(String role, String email) {
-        if (!staffService.hasPermission(role, email, "Get")) {
-            throw new RuntimeException("You don't have permission to get group");
+    public List<StudentGroupDTO> getAllGroupByName(String role, String email,String token) {
+        String branchCode;
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+
+            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+        } else {
+            if (!staffService.hasPermission(role, email, "Get")) {
+                throw new RuntimeException("You don't have permission to get group");
+            }
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);

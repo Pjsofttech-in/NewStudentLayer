@@ -11,6 +11,6 @@ public interface AcademicYearService
     StudentAcademicYear getAcademicYearById(Long id,String role,String email);
     StudentAcademicYear updateAcademicYear(Long id,String role,String email,StudentAcademicYear academicYear);
     void deleteAcademicYearById(Long id,String role,String email);
-    List<StudentAcademicYear> getAllAcademicYear(String role, String email);
+    List<StudentAcademicYear> getAllAcademicYear(String role, String email, String token);
 
 }
