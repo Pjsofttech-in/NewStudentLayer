@@ -1,12 +1,15 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.StreamDTO;
 import Layer.NewStudentManagement.DTO.StudentDepartmentDTO;
 import Layer.NewStudentManagement.Entity.StudentDepartment;
 import Layer.NewStudentManagement.Service.DepartmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -54,10 +57,21 @@ public class DepartmentController
     @GetMapping("/getDepartmentByDegree")
     public ResponseEntity<List<StudentDepartmentDTO>> getDepartmentsByDegreeId(
             @RequestParam String role,
-            @RequestParam String email,
-            @RequestParam Long degreeId) {
-        List<StudentDepartmentDTO> departments = departmentService.getDepartmentsByDegreeId(role, email, degreeId);
-        return ResponseEntity.ok(departments);
+            @RequestParam(required = false) String email,
+            @RequestParam Long degreeId,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
+    {
+        try {
+            String token = null;
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            }
+
+            List<StudentDepartmentDTO> department = departmentService.getDepartmentsByDegreeId(role, email, degreeId,token);
+            return ResponseEntity.ok(department);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+        }
     }
 
 

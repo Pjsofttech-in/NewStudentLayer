@@ -11,5 +11,5 @@ public interface StreamService
     StreamDTO getStreamById(Long id, String role, String email);
     StreamDTO updateStream(Long id,String role,String email,StudentStream stream);
     void deleteStreamById(Long id,String role,String email);
-    List<StreamDTO> getAllStream(String role, String email);
+    List<StreamDTO> getAllStream(String role, String email,String token);
 }

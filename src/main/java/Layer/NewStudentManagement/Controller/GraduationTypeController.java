@@ -4,9 +4,11 @@ import Layer.NewStudentManagement.DTO.StudentGraduationTypeDTO;
 import Layer.NewStudentManagement.Entity.StudentGraduationType;
 import Layer.NewStudentManagement.Service.GraduationTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -55,11 +57,22 @@ public class GraduationTypeController
     @GetMapping("/graduationTypesByStreamName")
     public ResponseEntity<List<StudentGraduationTypeDTO>> getGraduationTypesByStream(
             @RequestParam String role,
-            @RequestParam String email,
-            @RequestParam String streamName) {
-        return ResponseEntity.ok(
-                graduationTypeService.getGraduationTypesByStream(role, email, streamName)
-        );
+            @RequestParam(required = false) String email,
+            @RequestParam String streamName,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
+    {
+
+        try {
+            String token = null;
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            }
+
+            List<StudentGraduationTypeDTO> graduationTypeDTOS = graduationTypeService.getGraduationTypesByStream(role, email,streamName, token);
+            return ResponseEntity.ok(graduationTypeDTOS);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+        }
     }
 
 

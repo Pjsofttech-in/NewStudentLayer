@@ -5,10 +5,14 @@ import Layer.NewStudentManagement.DTO.StudentDivisionDTO;
 import Layer.NewStudentManagement.Entity.StudentDivision;
 import Layer.NewStudentManagement.Entity.StudentStream;
 import Layer.NewStudentManagement.Repository.StreamRepository;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.StreamService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +24,9 @@ public class StreamServiceImpl implements StreamService
 
     @Autowired
     private StreamRepository streamRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Override
     public StudentStream createStream(String role, String email, StudentStream stream)
@@ -73,13 +80,26 @@ public class StreamServiceImpl implements StreamService
     }
 
     @Override
-    public List<StreamDTO> getAllStream(String role, String email)
+    public List<StreamDTO> getAllStream(String role, String email, String token)
     {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
-            throw new RuntimeException("You don't have permission to get stream");
+        String branchCode;
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+
+            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+        else {
+            if (!staffService.hasPermission(role, email, "Get")) {
+                throw new RuntimeException("You don't have permission to get stream");
+            }
+            branchCode = staffService.fetchBranchCodeByRole(role, email);
+        }
+
         List<StudentStream> saved = streamRepository.findAllByBranchCode(branchCode);
         return saved.stream()
                 .map(this::mapToStreamDTO)

@@ -14,5 +14,5 @@ public interface GraduationTypeService
     void deleteGraduationTypeById(Long id,String role,String email);
     List<StudentGraduationTypeDTO> getAllGraduationType(String role, String email);
 
-    List<StudentGraduationTypeDTO> getGraduationTypesByStream(String role, String email, String streamName);
+    List<StudentGraduationTypeDTO> getGraduationTypesByStream(String role, String email, String streamName, String token);
 }

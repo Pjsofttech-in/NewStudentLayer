@@ -5,10 +5,14 @@ import Layer.NewStudentManagement.Entity.StudentDegreeName;
 import Layer.NewStudentManagement.Entity.StudentDepartment;
 import Layer.NewStudentManagement.Repository.DegreeNameRepository;
 import Layer.NewStudentManagement.Repository.DepartmentRepository;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.DepartmentService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +28,9 @@ public class DepartmentServiceImpl implements DepartmentService
 
     @Autowired
     DegreeNameRepository degreeNameRepository;
+
+    @Autowired
+    JwtUtil jwtUtil;
 
     @Override
     public StudentDepartmentDTO saveDepartment(String role, String email, StudentDepartmentDTO request) {
@@ -101,9 +108,21 @@ public class DepartmentServiceImpl implements DepartmentService
     }
 
     @Override
-    public List<StudentDepartmentDTO> getDepartmentsByDegreeId(String role, String email, Long degreeId) {
-        if (!staffService.hasPermission(role, email, "Get")) {
-            throw new RuntimeException("You don't have permission to get departments");
+    public List<StudentDepartmentDTO> getDepartmentsByDegreeId(String role, String email, Long degreeId, String token) {
+        String branchCode;
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+
+        }
+        else {
+            if (!staffService.hasPermission(role, email, "Get")) {
+                throw new RuntimeException("You don't have permission to get departments");
+            }
         }
 
         List<StudentDepartment> departments = departmentRepository.findByDegreeNameId(degreeId);

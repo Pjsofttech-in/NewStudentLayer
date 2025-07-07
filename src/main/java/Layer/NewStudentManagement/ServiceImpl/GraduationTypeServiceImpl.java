@@ -5,10 +5,14 @@ import Layer.NewStudentManagement.Entity.StudentGraduationType;
 import Layer.NewStudentManagement.Entity.StudentStream;
 import Layer.NewStudentManagement.Repository.GraduationTypeRepository;
 import Layer.NewStudentManagement.Repository.StreamRepository;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.GraduationTypeService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -26,6 +30,9 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
 
     @Autowired
     StreamRepository streamRepository;
+
+    @Autowired
+    JwtUtil jwtUtil;
 
     @Override
     public StudentGraduationTypeDTO saveGraduationType(String role, String email, StudentGraduationTypeDTO request) {
@@ -114,13 +121,28 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
 
 
     @Override
-    public List<StudentGraduationTypeDTO> getGraduationTypesByStream(String role, String email, String streamName) {
-        if (!staffService.hasPermission(role, email, "Get")) {
-            throw new RuntimeException("You don't have permission to get graduation types.");
+    public List<StudentGraduationTypeDTO> getGraduationTypesByStream(String role, String email, String streamName, String token) {
+        String branchCode;
+
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+
+            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+
+        } else {
+
+            if (!staffService.hasPermission(role, email, "Get")) {
+                throw new RuntimeException("You don't have permission to get graduation types.");
+            }
+
+             branchCode = staffService.fetchBranchCodeByRole(role, email);
+
         }
-
-       String branchCode =  staffService.fetchBranchCodeByRole(role, email);
-
         return graduationTypeRepository.findByStreamName(streamName,branchCode).stream()
                 .map(this::mapToGraduationTypeDTO)
                 .collect(Collectors.toList());

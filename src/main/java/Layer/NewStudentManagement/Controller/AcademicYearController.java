@@ -35,7 +35,7 @@ public class AcademicYearController
 
     @GetMapping("/getAllAcademicYear")
     public ResponseEntity<Iterable<StudentAcademicYear>> getAllAcademicYear(@RequestParam String role,
-                                                                            @RequestParam String email,
+                                                                            @RequestParam(required = false) String email,
                                                                             @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
         try {
