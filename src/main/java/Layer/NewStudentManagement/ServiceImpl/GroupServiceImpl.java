@@ -101,6 +101,7 @@ public class GroupServiceImpl implements GroupService
     @Override
     public List<StudentGroupDTO> getAllGroupByName(String role, String email,String token) {
         String branchCode;
+
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
@@ -110,20 +111,23 @@ public class GroupServiceImpl implements GroupService
             }
 
             branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+
         } else {
             if (!staffService.hasPermission(role, email, "Get")) {
                 throw new RuntimeException("You don't have permission to get group");
             }
+
+            branchCode = staffService.fetchBranchCodeByRole(role, email);
         }
 
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
         if (branchCode == null || branchCode.trim().isEmpty()) {
             throw new RuntimeException("Branch code not found for given role and email.");
         }
 
         List<StudentGroup> groups = groupRepository.getAllByBranchCode(branchCode);
+
         if (groups == null || groups.isEmpty()) {
-            return Collections.emptyList(); // Return empty list instead of null
+            return Collections.emptyList();
         }
 
         return groups.stream()
