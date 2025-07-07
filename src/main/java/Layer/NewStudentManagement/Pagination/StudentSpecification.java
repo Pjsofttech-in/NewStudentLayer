@@ -1,10 +1,7 @@
 package Layer.NewStudentManagement.Pagination;
 
 import Layer.NewStudentManagement.DTO.StudentFilterDTO;
-import Layer.NewStudentManagement.Entity.StudentAdditionalInfo;
-import Layer.NewStudentManagement.Entity.StudentEntity;
-import Layer.NewStudentManagement.Entity.StudentReligion;
-import Layer.NewStudentManagement.Entity.StudentSports;
+import Layer.NewStudentManagement.Entity.*;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -66,6 +63,18 @@ public class StudentSpecification {
                     predicates.add(cb.equal(root.get("institutionType"), filter.getInstitutionType()));
                 }
 
+                Join<StudentEntity, StudentStream> streamJoin = root.join("stream", JoinType.LEFT);
+                Join<?, ?> graduationTypeJoin = streamJoin.join("graduationType", JoinType.LEFT);
+                if (filter.getGraduationType() != null) {
+                    predicates.add(cb.equal(cb.lower(graduationTypeJoin.get("graduationType")), filter.getGraduationType().toLowerCase()));
+                }
+
+                Join<StudentEntity, StudentGraduationType> graduationJoin = root.join("graduationType", JoinType.LEFT);
+                Join<?, ?> degreeNameJoin = graduationJoin.join("degreeName", JoinType.LEFT);
+                if (filter.getDegreeName() != null) {
+                    predicates.add(cb.equal(cb.lower(degreeNameJoin.get("degreeName")),filter.getDegreeName().toLowerCase()));
+                }
+
                 if (filter.getCastCategory() != null) {
                     predicates.add(cb.equal(religionJoin.get("castCategory"), filter.getCastCategory()));
                 }
@@ -87,6 +96,7 @@ public class StudentSpecification {
                 if (filter.getScholarship() != null) {
                     predicates.add(cb.equal(additionalInfoJoin.get("scholarship"), filter.getScholarship()));
                 }
+
             }
 
             if (timeFrame != null) {

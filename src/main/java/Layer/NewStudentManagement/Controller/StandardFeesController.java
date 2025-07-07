@@ -8,7 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+//@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
 public class StandardFeesController
 {
@@ -38,12 +39,18 @@ public class StandardFeesController
     }
 
     @GetMapping("/getFeesByMediumAndStandard")
-    public ResponseEntity<List<StandardFeesRequestDTO>> getFeesByMediumAndStandard(@RequestParam String role, @RequestParam String email,
-                                                                                @RequestParam String standardName,@RequestParam String mediumName)
-    {
-        List<StandardFeesRequestDTO> standardFees  = standardFeesService.getStandardFeesByStandard(role, email, standardName, mediumName);
+    public ResponseEntity<List<StandardFeesRequestDTO>> getFeesByMediumAndStandard(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam String standardName,
+            @RequestParam String mediumName) {
+
+        List<StandardFeesRequestDTO> standardFees = standardFeesService
+                .getStandardFeesByStandard(role, email, standardName, mediumName);
+
         return ResponseEntity.ok(standardFees);
     }
+
 
     @PutMapping("/updateStandardFees/{sfid}")
     public ResponseEntity<StandardFeesRequestDTO> updateStandardFees(@RequestParam String role, @RequestParam String email,@PathVariable Long sfid, @RequestBody StudentStandardFees updatedStandardFees)

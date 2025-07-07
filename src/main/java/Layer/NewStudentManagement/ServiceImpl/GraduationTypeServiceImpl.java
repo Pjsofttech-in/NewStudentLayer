@@ -9,7 +9,9 @@ import Layer.NewStudentManagement.Service.GraduationTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -86,18 +88,28 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
     }
 
     @Override
-    public List<StudentGraduationTypeDTO> getAllGraduationType(String role, String email)
-    {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
+    public List<StudentGraduationTypeDTO> getAllGraduationType(String role, String email) {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to get graduationType");
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
-        List<StudentGraduationType> graduationType = graduationTypeRepository.findAllByBranchCode(branchCode);
-        return graduationType.stream()
-                .map(this::mapToGraduationTypeDTO)
-                .collect(Collectors.toList());
 
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        if (branchCode == null || branchCode.trim().isEmpty()) {
+            throw new RuntimeException("Branch code is missing for the given role/email.");
+        }
+
+        List<StudentGraduationType> graduationTypes = graduationTypeRepository.findAllByBranchCode(branchCode);
+
+        if (graduationTypes == null || graduationTypes.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return graduationTypes.stream()
+                .filter(Objects::nonNull)
+                .map(this::mapToGraduationTypeDTO)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
 

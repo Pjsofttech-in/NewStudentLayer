@@ -4,8 +4,12 @@ import Layer.NewStudentManagement.DTO.MediumDTO;
 import Layer.NewStudentManagement.Entity.StudentMedium;
 import Layer.NewStudentManagement.Service.MediumService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -23,10 +27,21 @@ public class MediumController
     }
 
     @GetMapping("/getAllMedium")
-    public ResponseEntity<Iterable<MediumDTO>> getAllMedium(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<MediumDTO>> getAllMedium(@RequestParam String role,
+                                                            @RequestParam(required = false) String email,
+                                                            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
-        Iterable<MediumDTO> mediums = mediumService.getAllMedium(role,email);
-        return ResponseEntity.ok(mediums);
+        try {
+            String token = null;
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            }
+
+            List<MediumDTO> medium = mediumService.getAllMedium(role, email, token);
+            return ResponseEntity.ok(medium);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+        }
     }
 
     @GetMapping("/getMediumById/{id}")

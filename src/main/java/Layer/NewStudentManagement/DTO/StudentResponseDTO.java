@@ -49,7 +49,9 @@ public class StudentResponseDTO {
     private Long mediumId;
     private Long streamId;
     private Long graduationTypeId;
+    private String graduationType;
     private Long degreeNameId;
+    private String degreeName;
     private Long departmentId;
     private String institutionType;
     private boolean earthquake;

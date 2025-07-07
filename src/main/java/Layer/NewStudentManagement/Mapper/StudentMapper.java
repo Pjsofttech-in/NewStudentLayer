@@ -67,9 +67,11 @@ public class StudentMapper
             }
             if (student.getDegreeName() != null) {
                 dto.setDegreeNameId(student.getDegreeName().getId());
+                dto.setDegreeName(student.getDegreeName().getDegreeName());
             }
             if (student.getGraduationType() != null) {
                 dto.setGraduationTypeId(student.getGraduationType().getId());
+                dto.setGraduationType(student.getGraduationType().getGraduationType());
             }
 
             dto.setCreatedByEmail(student.getCreatedByEmail());

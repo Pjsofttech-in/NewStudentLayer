@@ -11,7 +11,9 @@ import Layer.NewStudentManagement.Service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -90,19 +92,28 @@ public class GroupServiceImpl implements GroupService
     }
 
     @Override
-    public List<StudentGroupDTO> getAllGroupByName(String role, String email)
-    {
-        if (!staffService.hasPermission(role,email,"Get"))
-        {
+    public List<StudentGroupDTO> getAllGroupByName(String role, String email) {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to get group");
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        List<StudentGroup> groups = groupRepository.getAllByBranchCode(branchCode);
-        return groups.stream()
-                .map(this::mapToGroupDTO)
-                .collect(Collectors.toList());
 
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        if (branchCode == null || branchCode.trim().isEmpty()) {
+            throw new RuntimeException("Branch code not found for given role and email.");
+        }
+
+        List<StudentGroup> groups = groupRepository.getAllByBranchCode(branchCode);
+        if (groups == null || groups.isEmpty()) {
+            return Collections.emptyList(); // Return empty list instead of null
+        }
+
+        return groups.stream()
+                .filter(Objects::nonNull)
+                .map(this::mapToGroupDTO)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
+
 
     @Override
     public List<StudentGroupDTO> getGroupsByGraduationTypeId(String role, String email,Long graduationTypeId)

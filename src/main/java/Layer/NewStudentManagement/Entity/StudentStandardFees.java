@@ -33,6 +33,11 @@ public class StudentStandardFees
     private double sportFees;
     private double GST;
     private Double feesAmount;
+    private String institutionType;
+    private String streamName;
+    private String graduationTypeName;
+    private String degreeName;
+    private String departmentName;
 
 
     @Email
@@ -42,11 +47,28 @@ public class StudentStandardFees
 
 
     @ManyToOne
-    @JoinColumn(name = "standard_id", nullable = false)
+    @JoinColumn(name = "standard_id")
     private StudentStandard standard;
 
     @ManyToOne
-    @JoinColumn(name = "medium_id", nullable = false)
+    @JoinColumn(name = "medium_id")
     private StudentMedium medium;
+
+    @ManyToOne
+    @JoinColumn(name = "stream_id")
+    private StudentStream stream;
+
+    @ManyToOne
+    @JoinColumn(name = "graduation_type_id")
+    private StudentGraduationType graduationType;
+
+    @ManyToOne
+    @JoinColumn(name = "degree_id")
+    private StudentDegreeName degree;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private StudentDepartment department;
+
 
 }
