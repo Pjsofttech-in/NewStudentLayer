@@ -237,6 +237,11 @@ public class StandardFeesServiceImpl implements StandardFeesService
         dto.setFeesAmount(entity.getFeesAmount());
         dto.setStandardName(entity.getStandardName());
         dto.setMediumName(entity.getMediumName());
+        dto.setInstitutionType(entity.getInstitutionType());
+        dto.setStreamName(entity.getStreamName());
+        dto.setGraduationTypeName(entity.getGraduationTypeName());
+        dto.setDegreeName(entity.getDegreeName());
+        dto.setDepartmentName(entity.getDepartmentName());
 
         dto.setBranchCode(entity.getBranchCode());
         dto.setCreatedByEmail(entity.getCreatedByEmail());

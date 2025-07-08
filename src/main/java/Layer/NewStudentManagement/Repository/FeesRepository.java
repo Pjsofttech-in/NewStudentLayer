@@ -19,4 +19,23 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>
     @Query("SELECT s FROM StudentFees s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentFees> getAllByBranchCode(@Param("branchCode") String branchCode);
 
+
+    // For UG/PG
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
+            "WHERE f.student = :student AND f.student.degreeName.id = :degreeId AND f.student.department.id = :departmentId")
+    boolean existsUGPGFees(@Param("student") StudentEntity student,
+                           @Param("degreeId") Long degreeId,
+                           @Param("departmentId") Long departmentId);
+
+    // For Jr. College
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
+            "WHERE f.student = :student AND f.student.streamName = :streamName")
+    boolean existsJrCollegeFees(@Param("student") StudentEntity student,
+                                @Param("streamName") String streamName);
+
+
+    @Query("SELECT f FROM StudentFees f WHERE f.student.id = :studentId")
+    List<StudentFees> findFeesByStudentId(@Param("studentId") Long studentId);
+
+
 }

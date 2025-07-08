@@ -52,5 +52,13 @@ public class FeesController
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/getStudentFeesByStudentId")
+    public ResponseEntity<List<StudentFeesDTO>> getAllFeesByStudentId(@RequestParam Long studentId,@RequestParam String role, @RequestParam String email) {
+
+        List<StudentFeesDTO> feesDTO =feesService.getAllFeesForStudent(studentId,role, email);
+        return ResponseEntity.ok(feesDTO);
+    }
+
+
 
 }

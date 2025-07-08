@@ -235,7 +235,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             attendance.setStatus(status);
 
             attendanceRepository.save(attendance);
-            return "Attendance marked for Roll No: " + rollNo + " (" + status + ")";
+            return "Attendance marked for Roll No: " + rollNo +" Name:"+ attendance.getStudentName()+ " (" + status + ")";
 
         } catch (Exception e) {
             e.printStackTrace();

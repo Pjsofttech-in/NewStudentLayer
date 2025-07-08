@@ -29,6 +29,11 @@ public class StandardFeesRequestDTO
     private Double feesAmount;
     private String standardName;
     private String mediumName;
+    private String institutionType;
+    private String streamName;
+    private String graduationTypeName;
+    private String degreeName;
+    private String departmentName;
     private String createdByEmail;
     private String role;
     private String branchCode;

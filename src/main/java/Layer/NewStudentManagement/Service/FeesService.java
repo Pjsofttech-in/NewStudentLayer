@@ -12,5 +12,6 @@ public interface FeesService
     void deleteFees(Long id,String role, String email);
     StudentFeesDTO getFeesById(Long id,String role, String email);
     List<StudentFeesDTO> getAllFees(String role, String email);
+    List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email);
 
 }

@@ -64,7 +64,8 @@ public class StudentFees
     @JoinColumn(name = "student_id")
     private StudentEntity student;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "standard_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "standard_id", nullable = true)
     private StudentStandard standard;
+
 }

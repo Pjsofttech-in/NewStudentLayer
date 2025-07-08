@@ -37,39 +37,62 @@ public class FeesServiceImpl implements FeesService
     }
 
     @Override
-    public StudentFeesDTO assignFeesToStudent(String role, String email, StudentFees fees)
-    {
-        checkPermission(role,email,"Post");
+    public StudentFeesDTO assignFeesToStudent(String role, String email, StudentFees fees) {
+        checkPermission(role, email, "Post");
 
         StudentEntity student = studentRepository.findById(fees.getStudent().getId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        StudentStandard standard = standardRepository.findById(fees.getStandard().getSid())
-                .orElseThrow(() -> new RuntimeException("Standard not found"));
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        if (feesRepository.existsByStudentAndStandard(student, standard)) {
-            throw new RuntimeException("Fees already assigned for this student and standard.");
+        boolean isStandardBased = fees.getStandard() != null;
+        boolean isUGPG = student.getDegreeName() != null && student.getDepartment() != null;
+        boolean isJrCollege = student.getStream() != null && !isStandardBased && !isUGPG;
+
+        if (isStandardBased) {
+            StudentStandard standard = standardRepository.findById(fees.getStandard().getSid())
+                    .orElseThrow(() -> new RuntimeException("Standard not found"));
+
+            if (feesRepository.existsByStudentAndStandard(student, standard)) {
+                throw new RuntimeException("Fees already assigned for this student and standard.");
+            }
+
+            fees.setStandard(standard);
+            fees.setStandardName(standard.getStandardName());
+
+        } else if (isUGPG) {
+            if (feesRepository.existsUGPGFees(
+                    student,
+                    student.getDegreeName().getId(),
+                    student.getDepartment().getId())) {
+                throw new RuntimeException("Fees already assigned for this student, degree, and department.");
+            }
+
+        } else if (isJrCollege) {
+            if (feesRepository.existsJrCollegeFees(student, student.getStream().getStream())) {
+                throw new RuntimeException("Fees already assigned for this student and stream.");
+            }
+
+        } else {
+            throw new RuntimeException("Insufficient student data to determine uniqueness criteria.");
         }
 
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
-
-        fees.setDiscountedAmount(fees.getDiscountedAmount());
-        fees.setTotalamount(fees.getTotalamount());
         fees.setStudent(student);
         fees.setStudentName(student.getFullName());
         fees.setMediumName(student.getMediumName());
         fees.setApprovalDate(student.getApprovalDate());
         fees.setRollNo(student.getRollNo());
-        fees.setStandard(standard);
-        fees.setStandardName(standard.getStandardName());
+        fees.setDiscountedAmount(fees.getDiscountedAmount());
+        fees.setTotalamount(fees.getTotalamount());
         fees.setPendingAmount(fees.getTotalamount());
         fees.setCreatedByEmail(email);
         fees.setRole(role);
         fees.setBranchCode(branchCode);
-        StudentFees fees1 = feesRepository.save(fees);
-        return mapToDTOFees(fees1);
 
+        StudentFees savedFees = feesRepository.save(fees);
+        return mapToDTOFees(savedFees);
     }
+
 
     @Override
     public StudentFeesDTO updateFees(Long id, StudentFees updatedFees,String role, String email)
@@ -138,6 +161,15 @@ public class FeesServiceImpl implements FeesService
         return fees.stream().map(this::mapToDTOFees)
             .collect(Collectors.toList());
     }
+
+    @Override
+    public List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email)
+    {
+        checkPermission(role,email,"Get");
+        List<StudentFees> feesList = feesRepository.findFeesByStudentId(studentId);
+        return feesList.stream().map(this::mapToDTOFees).toList();
+    }
+
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {
         StudentFeesDTO dto = new StudentFeesDTO();
