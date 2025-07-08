@@ -35,7 +35,7 @@ public interface StudentService
 
     List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email,Long classRoomId);
 
-    void updateStatus(String role, String email,Long studentId, String status);
+    void updateStatus(String role, String email,Long studentId, String status,String reason);
 
     void updateFormStatus(String role, String email, Long studentId);
 

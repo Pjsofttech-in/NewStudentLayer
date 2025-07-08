@@ -175,8 +175,9 @@ public class StudentController
     @PutMapping("/updateStudentStatus")
     public ResponseEntity<String> updateStudentStatus(
             @RequestParam String role, @RequestParam String email,
-            @RequestParam Long studentId, @RequestParam String status) {
-        studentService.updateStatus(role,email,studentId, status);
+            @RequestParam Long studentId, @RequestParam String status,
+            @RequestParam(required = false) String reason) {
+        studentService.updateStatus(role,email,studentId, status,reason);
         return ResponseEntity.ok("Status updated successfully");
     }
 

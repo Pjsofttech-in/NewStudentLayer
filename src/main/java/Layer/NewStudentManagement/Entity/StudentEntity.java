@@ -54,6 +54,7 @@ public class StudentEntity
     private String password;
     private String institutionType;
     private String formStatus = "Incomplete";
+    private String reason;
 
     @Column(unique = true, length = 12)
     private String registrationNumber;

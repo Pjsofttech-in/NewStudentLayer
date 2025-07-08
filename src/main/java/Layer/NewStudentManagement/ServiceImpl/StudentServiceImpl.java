@@ -696,15 +696,20 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public void updateStatus(String role, String email, Long studentId, String status)
+    public void updateStatus(String role, String email, Long studentId, String status,String reason)
     {
         checkPermission(role,email,"Put");
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
         student.setStatus(status);
-        if ("Approved".equalsIgnoreCase(status)) {
+        if ("Approved".equalsIgnoreCase(status))
+        {
             student.setApprovalDate(LocalDate.now());
+        }
+        else
+        {
+            student.setReason(reason);
         }
 
         studentRepository.save(student);
