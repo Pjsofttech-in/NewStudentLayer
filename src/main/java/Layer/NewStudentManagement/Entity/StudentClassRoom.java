@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class StudentClassRoom
     private LocalTime endTime;
     private String groupName;
     private String institutionType;
+    private LocalDate createdDate;
 
 
     @Email

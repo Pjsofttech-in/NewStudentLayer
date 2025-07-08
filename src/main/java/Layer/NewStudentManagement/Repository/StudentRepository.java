@@ -112,6 +112,9 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
 
     boolean existsByRegistrationNumber(String registrationNumber);
 
+    @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.classRoom.id = :classroomId")
+    Long countByClassRoomId(@Param("classroomId") Long classroomId);
+
 
 
 }

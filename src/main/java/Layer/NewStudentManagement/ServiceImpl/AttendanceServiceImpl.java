@@ -31,6 +31,7 @@ import java.io.File;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -235,7 +236,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             attendance.setStatus(status);
 
             attendanceRepository.save(attendance);
-            return "Attendance marked for Roll No: " + rollNo +" Name:"+ attendance.getStudentName()+ " (" + status + ")";
+            return "Attendance marked for Roll No: " + rollNo +"  Name:"+ attendance.getStudentName()+ " (" + status + ")";
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -435,37 +436,46 @@ public class AttendanceServiceImpl implements AttendanceService {
     public AttendanceCountDTO getAttendanceCountByTimeFrame(Long classroomId, String timeFrame,
                                                             LocalDate customStartDate, LocalDate customEndDate) {
         LocalDate endDate = LocalDate.now();
+        StudentClassRoom classroom = classRoomRepository.findById(classroomId)
+                .orElseThrow(() -> new RuntimeException("Classroom not found"));
+
+        LocalDate classroomCreatedDate = classroom.getCreatedDate();
         LocalDate startDate;
 
         switch (timeFrame.toLowerCase()) {
             case "today" -> {
-                startDate = endDate;
+                startDate = endDate.isBefore(classroomCreatedDate) ? classroomCreatedDate : endDate;
             }
             case "7days" -> {
-                startDate = endDate.minusDays(6); // Includes today
+                LocalDate tempStart = endDate.minusDays(6); // last 7 days including today
+                startDate = tempStart.isBefore(classroomCreatedDate) ? classroomCreatedDate : tempStart;
             }
             case "30days" -> {
-                startDate = endDate.minusDays(29);
+                LocalDate tempStart = endDate.minusDays(29);
+                startDate = tempStart.isBefore(classroomCreatedDate) ? classroomCreatedDate : tempStart;
             }
             case "365days" -> {
-                startDate = endDate.minusDays(364);
+                LocalDate tempStart = endDate.minusDays(364);
+                startDate = tempStart.isBefore(classroomCreatedDate) ? classroomCreatedDate : tempStart;
             }
             case "custom" -> {
-                if (customStartDate == null || customEndDate == null) {
-                    throw new IllegalArgumentException("Custom range requires both start and end dates.");
-                }
-                startDate = customStartDate;
-                endDate = customEndDate;
+                startDate = classroomCreatedDate;
             }
             default -> throw new IllegalArgumentException("Invalid timeFrame. Use 'today', '7days', '30days', '365days', or 'custom'.");
         }
 
-        List<Integer> presentRollNos = attendanceRepository.findDistinctRollNosByDateRange(classroomId, startDate, endDate);
-        Long totalStudents = studentRepository.countByClassroomId(classroomId);
-        Long presentCount = (long) presentRollNos.size();
-        Long absentCount = totalStudents - presentCount;
+        long numberOfDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
 
-        return new AttendanceCountDTO(totalStudents, presentCount, absentCount);
+        List<StudentEntity> students = studentRepository.findByClassRoomId(classroomId);
+        long totalStudents = students.size();
+
+        long expectedEntries = totalStudents * numberOfDays;
+
+        long presentCount = attendanceRepository.countByClassroomIdAndDateRange(classroomId, startDate, endDate);
+
+        long absentCount = expectedEntries - presentCount;
+
+        return new AttendanceCountDTO(expectedEntries, presentCount, absentCount);
     }
 
 

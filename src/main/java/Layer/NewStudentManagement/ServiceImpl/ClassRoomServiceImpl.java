@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -103,6 +104,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
         classRoom.setRole(role);
         classRoom.setMedium(medium);
         classRoom.setDivision(division);
+        classRoom.setCreatedDate(LocalDate.now());
         String institutionType = dto.getInstitutionType();
 
         if ("School".equalsIgnoreCase(institutionType)) {

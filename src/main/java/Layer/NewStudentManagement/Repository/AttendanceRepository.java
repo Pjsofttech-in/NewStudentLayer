@@ -32,9 +32,13 @@ public interface AttendanceRepository extends JpaRepository<StudentAttendance,Lo
 
     @Query("SELECT sa.rollNo FROM StudentAttendance sa WHERE sa.classroomId = :classroomId AND sa.date = :date")
     List<Integer> findPresentRollNos(@Param("classroomId") Long classroomId, @Param("date") LocalDate date);
+//
 
-    @Query("SELECT DISTINCT sa.rollNo FROM StudentAttendance sa WHERE sa.classroomId = :classroomId AND sa.date BETWEEN :startDate AND :endDate")
-    List<Integer> findDistinctRollNosByDateRange(
-            @Param("classroomId") Long classroomId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+@Query("SELECT COUNT(sa) FROM StudentAttendance sa WHERE sa.classroomId = :classroomId AND sa.date BETWEEN :startDate AND :endDate")
+long countByClassroomIdAndDateRange(@Param("classroomId") Long classroomId,
+                                    @Param("startDate") LocalDate startDate,
+                                    @Param("endDate") LocalDate endDate);
+
+
 
 }
