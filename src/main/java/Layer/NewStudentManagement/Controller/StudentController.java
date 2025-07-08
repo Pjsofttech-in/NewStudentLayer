@@ -4,6 +4,7 @@ import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentDocument;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Repository.StudentRepository;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -30,15 +36,24 @@ public class StudentController
     StudentRepository studentRepository;
 
     @Autowired
+    JwtUtil jwtUtil;
+
+    @Autowired
     S3Service s3Service;
 
     @PostMapping("/createStudent")
     public ResponseEntity<StudentResponseDTO> saveStudent(@RequestParam String role,
-                                                     @RequestParam String email,
-                                                     @RequestBody StudentRequest request)
+                                                     @RequestParam(required = false) String email,
+                                                     @RequestBody StudentRequest request,
+                                                     @RequestHeader(name = "Authorization", required = false) String authorizationHeader)
     {
-        StudentResponseDTO savedStudent = studentService.saveStudent(role, email, request);
-        return ResponseEntity.ok(savedStudent);
+        String token = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7);
+        }
+
+        StudentResponseDTO saved = studentService.saveStudent(role, email,request,token);
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/getStudentById/{id}")

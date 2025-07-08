@@ -5,9 +5,11 @@ import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Mapper.StudentMapper;
 import Layer.NewStudentManagement.Pagination.StudentSpecification;
 import Layer.NewStudentManagement.Repository.*;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
+import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -57,6 +60,8 @@ public class StudentServiceImpl implements StudentService {
     private DegreeNameRepository degreeNameRepository;
     @Autowired
     private StreamRepository streamRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
 
     private void checkPermission(String role, String email, String action) {
@@ -67,12 +72,25 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public StudentResponseDTO saveStudent(String role, String email, StudentRequest request) {
-        checkPermission(role, email, "Post");
+    public StudentResponseDTO saveStudent(String role, String email, StudentRequest request, String token) {
 
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        String branchCode;
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+
+            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+        }
+        else {
+            checkPermission(role, email, "Post");
+            branchCode = staffService.fetchBranchCodeByRole(role, email);
+        }
+
         StudentEntity student = request.getStudent();
-
         student.setEnrollmentDate(LocalDate.now());
         student.setPassword(passwordEncoder.encode(student.getPassword()));
         student.setRole(role);
