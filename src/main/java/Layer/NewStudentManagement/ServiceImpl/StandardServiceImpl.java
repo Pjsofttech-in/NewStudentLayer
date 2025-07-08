@@ -28,7 +28,9 @@ public class StandardServiceImpl implements StandardService
             throw new RuntimeException("You don't have permission to create standard");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-
+        if (standardRepository.existsByStandardNameIgnoreCaseAndBranchCode(standard.getStandardName(), branchCode)) {
+            throw new RuntimeException("Standard already exists for this branch");
+        }
         standard.setBranchCode(branchCode);
         standard.setRole(role);
         standard.setCreatedByEmail(email);

@@ -20,6 +20,7 @@ public interface MediumRepository extends JpaRepository<StudentMedium,Long>
     List<Long> findIdsByName(@Param("medium") String medium);
 
 
+    boolean existsByMediumNameIgnoreCaseAndBranchCode(String mediumName, String branchCode);
 
 
 }

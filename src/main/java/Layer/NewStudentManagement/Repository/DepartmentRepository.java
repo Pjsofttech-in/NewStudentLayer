@@ -29,6 +29,8 @@ public interface DepartmentRepository extends JpaRepository<StudentDepartment,Lo
                                                    @Param("degreeNameId") Long degreeNameId,
                                                    @Param("branchCode") String branchCode);
 
+    @Query("SELECT d FROM StudentDepartment d WHERE LOWER(d.departmentName) = LOWER(:departmentName)")
+    Optional<StudentDepartment> findByDepartmentName(@Param("departmentName") String departmentName);
 
 }
 

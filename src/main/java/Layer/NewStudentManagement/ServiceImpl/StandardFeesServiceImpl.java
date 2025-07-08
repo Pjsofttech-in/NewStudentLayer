@@ -50,7 +50,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
         checkPermission(role, email, "Post");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        // Medium is common across all cases
+        // Fetch Medium by ID
         StudentMedium medium = mediumRepository.findById(standardFees.getMedium().getMid())
                 .orElseThrow(() -> new RuntimeException("Invalid medium ID"));
         standardFees.setMedium(medium);
@@ -60,10 +60,10 @@ public class StandardFeesServiceImpl implements StandardFeesService
         standardFees.setRole(role);
         standardFees.setBranchCode(branchCode);
 
-        String institutionType = standardFees.getInstitutionType(); // "School" or "College"
+        String institutionType = standardFees.getInstitutionType();
 
+        // School: standard + medium
         if ("School".equalsIgnoreCase(institutionType)) {
-            // School: standard + medium
             StudentStandard standard = standardRepository.findById(standardFees.getStandard().getSid())
                     .orElseThrow(() -> new RuntimeException("Invalid standard ID"));
 
@@ -76,62 +76,64 @@ public class StandardFeesServiceImpl implements StandardFeesService
             standardFees.setStandardName(standard.getStandardName());
         }
 
-        else if ("College".equalsIgnoreCase(institutionType)) {
-            // Graduation type is required
+        // Jr. College: standard + stream + medium + graduationType (Jr.College)
+        else if ("College".equalsIgnoreCase(institutionType) &&
+                "Jr.College".equalsIgnoreCase(standardFees.getGraduationTypeName())) {
+
+            StudentStandard standard = standardRepository.findById(standardFees.getStandard().getSid())
+                    .orElseThrow(() -> new RuntimeException("Invalid standard ID"));
+
+            StudentStream stream = streamRepository.findById(standardFees.getStream().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid stream ID"));
+
             StudentGraduationType graduationType = graduationTypeRepository.findById(standardFees.getGraduationType().getId())
                     .orElseThrow(() -> new RuntimeException("Invalid graduation type ID"));
+
+            boolean exists = standardFeesRepository.existsByStandardAndStreamAndMediumAndBranchCode(
+                    standard, stream, medium, branchCode);
+
+            if (exists) {
+                throw new RuntimeException("Fees already assigned for this standard, stream, and medium.");
+            }
+
+            standardFees.setStandard(standard);
+            standardFees.setStandardName(standard.getStandardName());
+            standardFees.setStream(stream);
+            standardFees.setStreamName(stream.getStream());
             standardFees.setGraduationType(graduationType);
+            standardFees.setGraduationTypeName(graduationType.getGraduationType());
+        }
 
-            // Jr.College: standard + stream + medium
-            if ("Jr.College".equalsIgnoreCase(graduationType.getGraduationType())) {
-                StudentStandard standard = standardRepository.findById(standardFees.getStandard().getSid())
-                        .orElseThrow(() -> new RuntimeException("Invalid standard ID"));
-                StudentStream stream = streamRepository.findById(standardFees.getStream().getId())
-                        .orElseThrow(() -> new RuntimeException("Invalid stream ID"));
+        //  UG/PG: graduationType + degree + department + medium
+        else if ("College".equalsIgnoreCase(institutionType)) {
 
-                boolean exists = standardFeesRepository.existsByStandardAndStreamAndMediumAndBranchCode(
-                        standard, stream, medium, branchCode);
+            StudentGraduationType graduationType = graduationTypeRepository.findById(standardFees.getGraduationType().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid graduation type ID"));
 
-                if (exists) {
-                    throw new RuntimeException("Fees already assigned for this standard, stream, and medium.");
-                }
+            StudentDegreeName degree = degreeNameRepository.findById(standardFees.getDegree().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid degree ID"));
 
-                standardFees.setStandard(standard);
-                standardFees.setStandardName(standard.getStandardName());
-                standardFees.setStream(stream);
-                standardFees.setStreamName(stream.getStream());
+            StudentDepartment department = departmentRepository.findById(standardFees.getDepartment().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid department ID"));
+
+            boolean exists = standardFeesRepository.existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCode(
+                    graduationType, degree, department, medium, branchCode);
+
+            if (exists) {
+                throw new RuntimeException("Fees already assigned for this graduation type, degree, department, and medium.");
             }
 
-            // UG/PG: graduationType + degree + department + medium
-            else if ("UG".equalsIgnoreCase(graduationType.getGraduationType())
-                    || "PG".equalsIgnoreCase(graduationType.getGraduationType())) {
-
-                StudentDegreeName degree = degreeNameRepository.findById(standardFees.getDegree().getId())
-                        .orElseThrow(() -> new RuntimeException("Invalid degree ID"));
-                StudentDepartment department = departmentRepository.findById(standardFees.getDepartment().getId())
-                        .orElseThrow(() -> new RuntimeException("Invalid department ID"));
-
-                boolean exists = standardFeesRepository.existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCode(
-                        graduationType, degree, department, medium, branchCode);
-
-                if (exists) {
-                    throw new RuntimeException("Fees already assigned for this graduation type, degree, department, and medium.");
-                }
-
-                standardFees.setDegree(degree);
-                standardFees.setDegreeName(degree.getDegreeName());
-                standardFees.setDepartment(department);
-            }
-
-            else {
-                throw new RuntimeException("Invalid graduation type for college.");
-            }
+            standardFees.setGraduationType(graduationType);
+            standardFees.setGraduationTypeName(graduationType.getGraduationType());
+            standardFees.setDegree(degree);
+            standardFees.setDegreeName(degree.getDegreeName());
+            standardFees.setDepartment(department);
+            standardFees.setDepartmentName(department.getDepartmentName());
         }
 
         else {
-            throw new RuntimeException("Invalid institution type. It must be 'School' or 'College'.");
+            throw new RuntimeException("Invalid institution type or missing data.");
         }
-
         standardFeesRepository.save(standardFees);
         return mapToDto(standardFees);
     }

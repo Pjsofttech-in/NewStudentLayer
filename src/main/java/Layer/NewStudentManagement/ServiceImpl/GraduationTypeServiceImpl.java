@@ -50,6 +50,7 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
         graduationType.setRole(role);
         graduationType.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
 
+
         StudentGraduationType saved = graduationTypeRepository.save(graduationType);
         return mapToGraduationTypeDTO(saved);
     }

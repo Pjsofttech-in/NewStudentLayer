@@ -35,6 +35,9 @@ public class MediumServiceImpl implements MediumService
             throw new RuntimeException("You don't have permission to create medium");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        if (mediumRepository.existsByMediumNameIgnoreCaseAndBranchCode(medium.getMediumName(), branchCode)) {
+            throw new RuntimeException("Medium already exists for this branch");
+        }
         medium.setBranchCode(branchCode);
         medium.setRole(role);
         medium.setCreatedByEmail(email);

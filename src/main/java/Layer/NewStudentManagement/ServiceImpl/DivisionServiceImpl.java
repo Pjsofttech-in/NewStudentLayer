@@ -27,6 +27,9 @@ public class DivisionServiceImpl implements DivisionService
             throw new RuntimeException("You don't have permission to create division");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        if (divisionRepository.existsByDivisionIgnoreCaseAndBranchCode(division.getDivision(), branchCode)) {
+            throw new RuntimeException("Medium already exists for this branch");
+        }
         division.setBranchCode(branchCode);
         division.setRole(role);
         division.setCreatedByEmail(email);
