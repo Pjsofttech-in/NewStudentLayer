@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Service;
 
+import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.StandardFeesRequestDTO;
 import Layer.NewStudentManagement.Entity.StudentStandardFees;
 
@@ -12,7 +13,7 @@ public interface StandardFeesService
     StandardFeesRequestDTO getStandardFeesById(String role, String email, Long sfid);
     List<StandardFeesRequestDTO> getAllStandardFees(String role, String email);
     void deleteStandardFee(String role, String email, Long sfid);
-    List<StandardFeesRequestDTO> getStandardFeesByStandard(String role, String email,String standardName, String mediumName);
+    List<StandardFeesRequestDTO> filterFees(String role, String email, FeesFilterDTO filterDTO);
 
 
 

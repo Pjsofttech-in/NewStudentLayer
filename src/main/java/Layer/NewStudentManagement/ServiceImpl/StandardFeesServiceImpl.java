@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.StandardFeesRequestDTO;
 import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Repository.*;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -211,18 +213,85 @@ public class StandardFeesServiceImpl implements StandardFeesService
     }
 
     @Override
-    public List<StandardFeesRequestDTO> getStandardFeesByStandard(String role, String email, String standardName, String mediumName) {
-        checkPermission(role, email, "Get");
+    public List<StandardFeesRequestDTO> filterFees(String role, String email, FeesFilterDTO filterDTO) {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to filter fees.");
+        }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        String institutionType = Optional.ofNullable(filterDTO.getInstitutionType()).orElse("").trim();
 
-        List<StudentStandardFees> standardFees = standardFeesRepository
-                .findByStandardAndMediumAndBranch(standardName, mediumName, branchCode);
+        // Medium
+        String mediumName = Optional.ofNullable(filterDTO.getMediumName()).orElseThrow(() ->
+                new RuntimeException("Medium is required")).trim();
+        List<Long> mediumIds = mediumRepository.findIdsByName(mediumName, branchCode);
+        if (mediumIds.size() != 1) throw new RuntimeException("Invalid or duplicate medium");
+        Long mediumId = mediumIds.get(0);
 
-        return standardFees.stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
+        List<StudentStandardFees> feesList;
+
+        // SCHOOL
+        if ("school".equalsIgnoreCase(institutionType)) {
+            String standardName = Optional.ofNullable(filterDTO.getStandardName()).orElseThrow(() ->
+                    new RuntimeException("Standard is required for school")).trim();
+            List<Long> standardIds = standardRepository.findIdsByName(standardName, branchCode);
+            if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
+            Long standardId = standardIds.get(0);
+
+            feesList = standardFeesRepository.findForSchool(standardId, mediumId, branchCode);
+        }
+
+        // COLLEGE
+        else if ("college".equalsIgnoreCase(institutionType)) {
+            String streamName = Optional.ofNullable(filterDTO.getStreamName()).orElseThrow(() ->
+                    new RuntimeException("Stream name is required")).trim();
+            List<Long> streamIds = streamRepository.findIdsByNameAndBranchCode(streamName, branchCode);
+            if (streamIds.size() != 1) throw new RuntimeException("Invalid or duplicate stream");
+            Long streamId = streamIds.get(0);
+
+            String graduationType = Optional.ofNullable(filterDTO.getGraduationTypeName()).orElseThrow(() ->
+                    new RuntimeException("Graduation type is required")).trim();
+            List<Long> graduationTypeIds = graduationTypeRepository.findIdsByNameAndStreamAndBranchCode(graduationType, streamId, branchCode);
+            if (graduationTypeIds.size() != 1) throw new RuntimeException("Invalid or duplicate graduation type");
+            Long graduationTypeId = graduationTypeIds.get(0);
+
+            // UG/PG
+            if (filterDTO.getDegreeName() != null && filterDTO.getDepartmentName() != null) {
+                String degreeName = filterDTO.getDegreeName().trim();
+                List<Long> degreeIds = degreeNameRepository.findIdsByNameAndGraduationTypeAndBranchCode(degreeName, graduationTypeId, branchCode);
+                if (degreeIds.size() != 1) throw new RuntimeException("Invalid or duplicate degree name");
+                Long degreeId = degreeIds.get(0);
+
+                String departmentName = filterDTO.getDepartmentName().trim();
+                List<Long> departmentIds = departmentRepository.findIdsByNameAndDegreeAndBranchCode(departmentName, degreeId, branchCode);
+                if (departmentIds.size() != 1) throw new RuntimeException("Invalid or duplicate department");
+                Long departmentId = departmentIds.get(0);
+
+                feesList = standardFeesRepository.findForUGPG(mediumId, streamId, degreeId, departmentId, branchCode);
+            }
+            // JR.COLLEGE
+            else {
+                String standardName = Optional.ofNullable(filterDTO.getStandardName()).orElseThrow(() ->
+                        new RuntimeException("Standard is required for Jr. College")).trim();
+                List<Long> standardIds = standardRepository.findIdsByName(standardName, branchCode);
+                if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
+                Long standardId = standardIds.get(0);
+
+                String groupName = Optional.ofNullable(filterDTO.getGroupName()).orElseThrow(() ->
+                        new RuntimeException("Group name is required for Jr. College")).trim();
+
+                feesList = standardFeesRepository.findForJrCollege(
+                        standardId, mediumId, streamId, graduationTypeId, groupName, branchCode
+                );
+            }
+
+        } else {
+            throw new RuntimeException("Invalid institution type: " + institutionType);
+        }
+
+        return feesList.stream().map(this::mapToDto).collect(Collectors.toList());
     }
+
 
 
     public StandardFeesRequestDTO mapToDto(StudentStandardFees entity) {
@@ -251,7 +320,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
         dto.setGraduationTypeName(entity.getGraduationTypeName());
         dto.setDegreeName(entity.getDegreeName());
         dto.setDepartmentName(entity.getDepartmentName());
-
+        dto.setGroupName(entity.getGroupName());
         dto.setBranchCode(entity.getBranchCode());
         dto.setCreatedByEmail(entity.getCreatedByEmail());
         dto.setRole(entity.getRole());

@@ -34,6 +34,7 @@ public class StandardFeesRequestDTO
     private String graduationTypeName;
     private String degreeName;
     private String departmentName;
+    private String groupName;
     private String createdByEmail;
     private String role;
     private String branchCode;

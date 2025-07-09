@@ -37,7 +37,10 @@ public class StudentStandardFees
     private String streamName;
     private String graduationTypeName;
     private String degreeName;
+    private String groupName;
     private String departmentName;
+    @Column(length = 9)
+    private String academicYear;
 
 
     @Email

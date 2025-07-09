@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.StandardFeesRequestDTO;
 import Layer.NewStudentManagement.Entity.StudentStandardFees;
 import Layer.NewStudentManagement.Service.StandardFeesService;
@@ -38,18 +39,13 @@ public class StandardFeesController
         return ResponseEntity.ok(standardFees);
     }
 
-    @GetMapping("/getFeesByMediumAndStandard")
-    public ResponseEntity<List<StandardFeesRequestDTO>> getFeesByMediumAndStandard(
-            @RequestParam String role,
-            @RequestParam String email,
-            @RequestParam String standardName,
-            @RequestParam String mediumName) {
-
-        List<StandardFeesRequestDTO> standardFees = standardFeesService
-                .getStandardFeesByStandard(role, email, standardName, mediumName);
-
-        return ResponseEntity.ok(standardFees);
+    @GetMapping("/getStandardFeesByFilter")
+    public ResponseEntity<List<StandardFeesRequestDTO>> filterFees(@RequestParam String role, @RequestParam String email,@RequestBody FeesFilterDTO filterDTO) {
+        List<StandardFeesRequestDTO> fees = standardFeesService.filterFees(
+               role, email, filterDTO);
+        return ResponseEntity.ok(fees);
     }
+
 
 
     @PutMapping("/updateStandardFees/{sfid}")

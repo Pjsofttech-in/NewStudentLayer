@@ -9,8 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface StandardFeesRepository extends JpaRepository<StudentStandardFees,Long>
-{
+public interface StandardFeesRepository extends JpaRepository<StudentStandardFees,Long> {
     @Query("SELECT s FROM StudentStandardFees s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentStandardFees> findAllByBranchCode(@Param("branchCode") String branchCode);
 
@@ -40,4 +39,15 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
             StudentMedium medium,
             String branchCode
     );
+
+
+    @Query("SELECT f FROM StudentStandardFees f WHERE f.standard.id = :standardId AND f.medium.id = :mediumId AND f.institutionType = 'School' AND f.branchCode = :branchCode")
+    List<StudentStandardFees> findForSchool(Long standardId, Long mediumId, String branchCode);
+
+    @Query("SELECT f FROM StudentStandardFees f WHERE f.standard.id = :standardId AND f.medium.id = :mediumId AND f.stream.id = :streamId AND f.graduationType.id = :graduationTypeId AND f.groupName = :groupName AND f.institutionType = 'College' AND f.branchCode = :branchCode")
+    List<StudentStandardFees> findForJrCollege(Long standardId, Long mediumId, Long streamId, Long graduationTypeId, String groupName, String branchCode);
+
+    @Query("SELECT f FROM StudentStandardFees f WHERE f.medium.id = :mediumId AND f.stream.id = :streamId AND f.degree.id = :degreeId AND f.department.id = :departmentId AND f.institutionType = 'College' AND f.branchCode = :branchCode")
+    List<StudentStandardFees> findForUGPG(Long mediumId, Long streamId, Long degreeId, Long departmentId, String branchCode);
+
 }
