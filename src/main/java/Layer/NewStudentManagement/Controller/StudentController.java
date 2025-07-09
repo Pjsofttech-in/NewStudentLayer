@@ -102,7 +102,7 @@ public class StudentController
     public ResponseEntity<StudentDocumentDTO> uploadDocuments(
             @RequestParam Long studentId,
             @RequestParam String role,
-            @RequestParam String email,
+            @RequestParam(required = false) String email,
             @RequestParam(required = false) MultipartFile studentPhoto,
             @RequestParam(required = false) MultipartFile aadharcardPhoto,
             @RequestParam(required = false) MultipartFile pancardPhoto,
@@ -112,17 +112,19 @@ public class StudentController
             @RequestParam(required = false) MultipartFile domicilePhoto,
             @RequestParam(required = false) MultipartFile birthCertificatePhoto,
             @RequestParam(required = false) MultipartFile disabilityCertificate,
-            @RequestParam(required = false) MultipartFile studentSignPhoto) {
+            @RequestParam(required = false) MultipartFile studentSignPhoto,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
+    {
+        String token = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+        }
 
-        StudentDocumentDTO saved = studentService.uploadStudentDocuments(
-                studentId, role, email,
-                studentPhoto, aadharcardPhoto, pancardPhoto,
-                casteValidationPhoto, casteCertificatePhoto,
-                leavingCertificatePhoto, domicilePhoto,
-                birthCertificatePhoto, disabilityCertificate,
-                studentSignPhoto
-        );
-        return ResponseEntity.ok(saved);
+        StudentDocumentDTO academicYear = studentService.uploadStudentDocuments(studentId, role, email,
+                    studentPhoto, aadharcardPhoto, pancardPhoto, casteValidationPhoto, casteCertificatePhoto,
+                    leavingCertificatePhoto, domicilePhoto, birthCertificatePhoto, disabilityCertificate, studentSignPhoto,token);
+            return ResponseEntity.ok(academicYear);
+
     }
 
     @PutMapping("/updateDocument")
@@ -206,9 +208,5 @@ public class StudentController
         studentService.updateFormStatus(role,email,studentId);
         return ResponseEntity.ok("Status updated successfully");
     }
-
-
-
-
 
 }

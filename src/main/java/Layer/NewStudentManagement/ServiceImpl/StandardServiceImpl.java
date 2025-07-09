@@ -3,10 +3,14 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.StandardDTO;
 import Layer.NewStudentManagement.Entity.StudentStandard;
 import Layer.NewStudentManagement.Repository.StandardRepository;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.StandardService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +23,9 @@ public class StandardServiceImpl implements StandardService
 
     @Autowired
     private StaffService staffService;
+
+    @Autowired
+    JwtUtil jwtUtil;
 
     @Override
     public StudentStandard createStandard(String role, String email, StudentStandard standard)
@@ -77,13 +84,26 @@ public class StandardServiceImpl implements StandardService
     }
 
     @Override
-    public List<StandardDTO> getAllStandard(String role, String email)
+    public List<StandardDTO> getAllStandard(String role, String email, String token)
     {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
-            throw new RuntimeException("You don't have permission to get standard");
+        String branchCode;
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+
+            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        else {
+
+            if (!staffService.hasPermission(role, email, "Get")) {
+                throw new RuntimeException("You don't have permission to get standard");
+            }
+            branchCode = staffService.fetchBranchCodeByRole(role, email);
+        }
         List<StudentStandard> standards = standardRepository.getAllStandardByBranchCode(branchCode);
         return standards.stream()
             .map(this::mapToStandardDTO)

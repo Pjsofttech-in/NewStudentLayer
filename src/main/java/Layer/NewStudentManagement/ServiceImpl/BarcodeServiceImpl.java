@@ -22,7 +22,7 @@ import java.util.Map;
 public class BarcodeServiceImpl implements BarcodeService
 {
 
-    private static final String HR_INQUIRY_BASE_URL = "https://pjsofttech.in/schoolqrcode/";
+    private static final String HR_INQUIRY_BASE_URL = "https://pjsofttech.in/layeringstudentqr/";
 
     @Autowired
     private StaffService staffService;

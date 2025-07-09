@@ -16,8 +16,8 @@ public interface MediumRepository extends JpaRepository<StudentMedium,Long>
     List<StudentMedium> findAllByBranchCode(@Param("branchCode") String branchCode);
 
     @Query("SELECT s.id FROM StudentMedium s " +
-            "WHERE TRIM(LOWER(s.mediumName)) = TRIM(LOWER(:medium))")
-    List<Long> findIdsByName(@Param("medium") String medium);
+            "WHERE TRIM(LOWER(s.mediumName)) = TRIM(LOWER(:medium)) AND s.branchCode=:branchCode")
+    List<Long> findIdsByName(@Param("medium") String medium,@Param("branchCode") String branchCode);
 
 
     boolean existsByMediumNameIgnoreCaseAndBranchCode(String mediumName, String branchCode);

@@ -16,8 +16,8 @@ public interface StandardRepository extends JpaRepository<StudentStandard,Long>
     List<StudentStandard> getAllStandardByBranchCode(@Param("branchCode")String branchCode);
 
     @Query("SELECT s.id FROM StudentStandard s " +
-            "WHERE TRIM(LOWER(s.standardName)) = TRIM(LOWER(:standardName))")
-    List<Long> findIdsByName(@Param("standardName") String standardName);
+            "WHERE TRIM(LOWER(s.standardName)) = TRIM(LOWER(:standardName)) AND s.branchCode=:branchCode")
+    List<Long> findIdsByName(@Param("standardName") String standardName,@Param("branchCode") String branchCode);
 
     boolean existsByStandardNameIgnoreCaseAndBranchCode(String standardName, String branchCode);
 

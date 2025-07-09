@@ -317,13 +317,28 @@ public class StudentServiceImpl implements StudentService {
             MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto,
             MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
             MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate,
-            MultipartFile studentSignPhoto) {
-        checkPermission(role, email, "Post");
+            MultipartFile studentSignPhoto,String token)
+    {
+        String branchCode;
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+
+            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+        }
+        else {
+            checkPermission(role, email, "Post");
+            branchCode = staffService.fetchBranchCodeByRole(role, email);
+        }
+
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
         StudentDocument doc = new StudentDocument();
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         if (studentPhoto != null)
             doc.setStudentPhoto(s3Service.uploadFile(studentPhoto, branchCode));
@@ -379,7 +394,7 @@ public class StudentServiceImpl implements StudentService {
 
         //  Medium
         String medium = filterDTO.getMedium().trim();
-        List<Long> mediumIds = mediumRepository.findIdsByName(medium);
+        List<Long> mediumIds = mediumRepository.findIdsByName(medium,branchCode);
         if (mediumIds.size() != 1) throw new RuntimeException("Invalid or duplicate medium");
         Long mediumId = mediumIds.get(0);
 
@@ -389,7 +404,7 @@ public class StudentServiceImpl implements StudentService {
             }
 
             String standard = filterDTO.getStandard().trim();
-            List<Long> standardIds = standardRepository.findIdsByName(standard);
+            List<Long> standardIds = standardRepository.findIdsByName(standard,branchCode);
             if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
             Long standardId = standardIds.get(0);
 
@@ -437,7 +452,7 @@ public class StudentServiceImpl implements StudentService {
                 }
 
                 String standard = filterDTO.getStandard().trim();
-                List<Long> standardIds = standardRepository.findIdsByName(standard);
+                List<Long> standardIds = standardRepository.findIdsByName(standard,branchCode);
                 if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
                 Long standardId = standardIds.get(0);
 

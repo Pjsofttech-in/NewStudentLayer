@@ -1,11 +1,16 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.StandardDTO;
+import Layer.NewStudentManagement.DTO.StreamDTO;
 import Layer.NewStudentManagement.Entity.StudentStandard;
 import Layer.NewStudentManagement.Service.StandardService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -24,10 +29,20 @@ public class StandardController
     }
 
     @GetMapping("/getAllStandard")
-    public ResponseEntity<Iterable<StandardDTO>> getAllStandard(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<StandardDTO>> getAllStandard(@RequestParam String role, @RequestParam(required = false) String email,
+                                                                @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
-        Iterable<StandardDTO> standards = standardService.getAllStandard(role,email);
-        return ResponseEntity.ok(standards);
+        try {
+            String token = null;
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            }
+
+            Iterable<StandardDTO> standard = standardService.getAllStandard(role, email, token);
+            return ResponseEntity.ok(standard);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+        }
     }
 
     @GetMapping("/getStandardById/{id}")
