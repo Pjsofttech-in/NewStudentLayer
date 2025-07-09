@@ -60,6 +60,7 @@ public class StudentResponseDTO {
     private boolean handicap;
     private String registrationNumber;
     private String formStatus;
+    private String reason;
 
     @Email
     private String createdByEmail;
