@@ -56,6 +56,7 @@ public class StudentDTO
     private Long degreeNameId;
     private String degreeName;
     private Long departmentId;
+    private String departmentName;
     private String password;
     private String registrationNumber;
     private String formStatus;

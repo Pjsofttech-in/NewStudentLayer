@@ -157,7 +157,11 @@ public class GroupServiceImpl implements GroupService
         dto.setId(group.getId());
         dto.setStudentGroup(group.getStudentGroup());
         dto.setGraduationTypeName(group.getGraduationTypeName());
-        dto.setGraduationTypeId(group.getGraduationType().getId());
+        if (group.getGraduationType() != null && group.getGraduationType().getGraduationType() != null) {
+            dto.setGraduationTypeId(group.getGraduationType().getId());
+        } else {
+            dto.setGraduationTypeId(0L); // or null if preferred
+        }
         dto.setCreatedByEmail(group.getCreatedByEmail());
         dto.setRole(group.getRole());
         dto.setBranchCode(group.getBranchCode());

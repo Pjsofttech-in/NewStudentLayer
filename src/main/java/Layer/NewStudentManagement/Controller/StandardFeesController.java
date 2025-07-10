@@ -39,7 +39,7 @@ public class StandardFeesController
         return ResponseEntity.ok(standardFees);
     }
 
-    @GetMapping("/getStandardFeesByFilter")
+    @PostMapping("/getStandardFeesByFilter")
     public ResponseEntity<List<StandardFeesRequestDTO>> filterFees(@RequestParam String role, @RequestParam String email,@RequestBody FeesFilterDTO filterDTO) {
         List<StandardFeesRequestDTO> fees = standardFeesService.filterFees(
                role, email, filterDTO);

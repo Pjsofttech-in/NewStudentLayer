@@ -187,36 +187,24 @@ public class ClassRoomServiceImpl implements ClassRoomService
     @Override
     public StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, StudentClassRoom updateClassRoom) {
         if (!staffService.hasPermission(role, email, "Put")) {
-            throw new RuntimeException("You don't have permission for Update ClassRoom");
+            throw new RuntimeException("You don't have permission to update ClassRoom");
         }
 
         StudentClassRoom existingClassRoom = classRoomRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ClassRoom not found"));
 
-        if (updateClassRoom.getYear() != null) {
-            existingClassRoom.setYear(updateClassRoom.getYear());
+        if (updateClassRoom.getStartTime() != null) {
+            existingClassRoom.setStartTime(updateClassRoom.getStartTime());
         }
 
-        if (updateClassRoom.getMedium() != null && updateClassRoom.getMedium().getMid() != null) {
-            StudentMedium medium = mediumRepository.findById(updateClassRoom.getMedium().getMid())
-                    .orElseThrow(() -> new RuntimeException("Medium not found"));
-            existingClassRoom.setMedium(medium);
+        if (updateClassRoom.getEndTime() != null) {
+            existingClassRoom.setEndTime(updateClassRoom.getEndTime());
         }
 
-        if (updateClassRoom.getDivision() != null && updateClassRoom.getDivision().getDid() != null) {
-            StudentDivision division = divisionRepository.findById(updateClassRoom.getDivision().getDid())
-                    .orElseThrow(() -> new RuntimeException("Division not found"));
-            existingClassRoom.setDivision(division);
-        }
-
-        if (updateClassRoom.getStandard() != null && updateClassRoom.getStandard().getSid() != null) {
-            StudentStandard standard = standardRepository.findById(updateClassRoom.getStandard().getSid())
-                    .orElseThrow(() -> new RuntimeException("Standard not found"));
-            existingClassRoom.setStandard(standard);
-        }
         StudentClassRoom updated = classRoomRepository.save(existingClassRoom);
         return mapToResponseDTO(updated);
     }
+
 
     @Override
     public StudentClassRoomResponseDTO getClassRoomById(Long id, String role, String email)
@@ -278,11 +266,12 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
         for (StudentEntity student : students) {
             StudentDocument document = documentRepository.findByStudent(student.getId());
-            //  Check if photo is present
+
             if (document == null || document.getStudentPhoto() == null || document.getStudentPhoto().isBlank()) {
                 throw new RuntimeException("Student photo is required for assignment. Missing for student ID: " + student.getId());
             }
-            //  Assign classroom and roll number
+
+            // Assign classroom and mandatory roll number
             student.setClassRoom(classroom);
             student.setRollNo(newRollNo);
 
@@ -291,12 +280,13 @@ public class ClassRoomServiceImpl implements ClassRoomService
                         document.getStudentPhoto(),
                         branchCode,
                         classroomId.toString(),
-                        student.getRollNo() != null ? student.getRollNo().toString() : "N/A"
+                        String.valueOf(newRollNo) // rollNo is mandatory
                 );
                 studentPhotoUrls.put(student.getId(), newPhotoUrl);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to copy photo for student ID: " + student.getId(), e);
             }
+
             newRollNo++;
         }
 

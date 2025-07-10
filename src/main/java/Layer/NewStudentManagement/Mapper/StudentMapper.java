@@ -61,6 +61,7 @@ public class StudentMapper
             }
             if (student.getDepartment() != null) {
                 dto.setDepartmentId(student.getDepartment().getId());
+                dto.setDepartmentName(student.getDepartment().getDepartmentName());
             }
             if (student.getStream() != null) {
                 dto.setStreamId(student.getStream().getId());

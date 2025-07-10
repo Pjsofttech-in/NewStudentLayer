@@ -163,13 +163,11 @@ public class StudentServiceImpl implements StudentService {
                         .orElseThrow(() -> new RuntimeException("DegreeName not found with ID: " + request.getDegreeNameId()));
                 student.setDegreeName(degree);
             }
-
             if (request.getDepartmentId() != null) {
                 StudentDepartment department = departmentRepository.findById(request.getDepartmentId())
                         .orElseThrow(() -> new RuntimeException("Department not found with ID: " + request.getDepartmentId()));
                 student.setDepartment(department);
             }
-
             Long mediumId = request.getMediumId();
             if (mediumId != null) {
                 StudentMedium medium = mediumRepository.findById(mediumId)
@@ -177,11 +175,9 @@ public class StudentServiceImpl implements StudentService {
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
             }
-
             student.setGroupName(null);
             student.setStandardName(null);
             student.setStandard(null);
-
         }
 
         StudentEntity savedStudent = studentRepository.save(student);
