@@ -49,6 +49,7 @@ public class StudentMapper
             dto.setPassword(student.getPassword());
             dto.setRegistrationNumber(student.getRegistrationNumber());
             dto.setFormStatus(student.getFormStatus());
+            dto.setReason(student.getReason());
             if (student.getStandard() != null) {
                 dto.setStandardId(student.getStandard().getSid());
                 dto.setStandardName(student.getStandard().getStandardName());
