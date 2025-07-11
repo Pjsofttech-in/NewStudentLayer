@@ -41,7 +41,6 @@ public class StudentFeesDTO
     private Double feesAmount;      // fees total before discount
 
     private double discount;
-    private double discountedAmount;
     private Double totalamount;         // fees total after discount
     private double lateFeeCharges;
     private Long sfid;

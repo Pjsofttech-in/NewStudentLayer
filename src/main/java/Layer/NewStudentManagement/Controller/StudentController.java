@@ -71,7 +71,7 @@ public class StudentController
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customStart,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customEnd,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "25") int size,
             @RequestBody(required = false) StudentFilterDTO filterDTO
     ) {
         Pageable pageable = PageRequest.of(page, size);

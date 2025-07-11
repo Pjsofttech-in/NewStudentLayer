@@ -1,0 +1,53 @@
+package Layer.NewStudentManagement.Entity;
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity
+public class StudentFeesCollect
+{
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+        private Double amount;
+        private String invoice;
+        private LocalDate duedate;
+        @DateTimeFormat(pattern = "yyyy-MM-dd")
+        private LocalDate paymentDate;
+        private String paymentMode; // Cash, Online, UPI
+        private String feesPaymentType;
+        private String status;
+
+        private double tuitionFee;
+        private double admissionFee;
+        private double practicalFee;
+        private double computerClassFee;
+        private double examFees;
+        private double uniformFee;
+        private double transportBusFee;
+        private double hostelFee;
+        private double buildingFundFee;
+        private double libraryFees;
+        private double sportFees;
+
+        private double discount;
+        private double discountedAmount;
+        @ManyToOne
+        @JoinColumn(name = "student_fees_id")
+        private StudentFees studentFees;
+        @Email
+        private String createdByEmail;
+        private String branchCode;
+        private String role;
+}

@@ -55,6 +55,7 @@ public class StudentEntity
     private String institutionType;
     private String formStatus = "Incomplete";
     private String reason;
+    private double discount;
 
     @Column(unique = true, length = 12)
     private String registrationNumber;

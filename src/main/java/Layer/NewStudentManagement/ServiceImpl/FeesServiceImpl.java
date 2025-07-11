@@ -82,7 +82,7 @@ public class FeesServiceImpl implements FeesService
         fees.setMediumName(student.getMediumName());
         fees.setApprovalDate(student.getApprovalDate());
         fees.setRollNo(student.getRollNo());
-        fees.setDiscountedAmount(fees.getDiscountedAmount());
+        fees.setDiscount(student.getDiscount());
         fees.setTotalamount(fees.getTotalamount());
         fees.setPendingAmount(fees.getTotalamount());
         fees.setCreatedByEmail(email);
@@ -119,8 +119,6 @@ public class FeesServiceImpl implements FeesService
         if (updatedFees.getLibraryFees() != 0) existing.setLibraryFees(updatedFees.getLibraryFees());
         if (updatedFees.getSportFees() != 0) existing.setSportFees(updatedFees.getSportFees());
         if (updatedFees.getFeesAmount() != null && updatedFees.getFeesAmount() != 0) existing.setFeesAmount(updatedFees.getFeesAmount());
-        if (updatedFees.getDiscount() != 0) existing.setDiscount(updatedFees.getDiscount());
-        if (updatedFees.getDiscountedAmount() != 0) existing.setDiscountedAmount(updatedFees.getDiscountedAmount());
         if (updatedFees.getTotalamount() != null && updatedFees.getTotalamount() != 0) existing.setTotalamount(updatedFees.getTotalamount());
         if (updatedFees.getLateFeeCharges() != 0) existing.setLateFeeCharges(updatedFees.getLateFeeCharges());
         if (updatedFees.getSfid() != null) existing.setSfid(updatedFees.getSfid());
@@ -149,6 +147,7 @@ public class FeesServiceImpl implements FeesService
         return mapToDTOFees(fees);
 
     }
+
 
     @Override
     public List<StudentFeesDTO> getAllFees(String role, String email)
@@ -196,7 +195,6 @@ public class FeesServiceImpl implements FeesService
         dto.setSportFees(fees.getSportFees());
         dto.setFeesAmount(fees.getFeesAmount());
         dto.setDiscount(fees.getDiscount());
-        dto.setDiscountedAmount(fees.getDiscountedAmount());
         dto.setTotalamount(fees.getTotalamount());
         dto.setLateFeeCharges(fees.getLateFeeCharges());
         dto.setSfid(fees.getSfid());

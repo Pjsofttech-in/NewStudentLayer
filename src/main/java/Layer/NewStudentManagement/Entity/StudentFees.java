@@ -42,14 +42,12 @@ public class StudentFees
     private double buildingFundFee;
     private double libraryFees;
     private double sportFees;
-    private Double feesAmount;      // fees total before discount
-
     private double discount;
-    private double discountedAmount;
+
+    private Double feesAmount;      // fees total before discount
     private Double totalamount;         // fees total after discount
     private double lateFeeCharges;
     private Long sfid;
-
     private double paidAmount;         // total paid by student
     private double pendingAmount;     // remaining amount
     private String paymentStatus;     // Pending, Ongoing, Completed

@@ -61,6 +61,7 @@ public class StudentDTO
     private String registrationNumber;
     private String formStatus;
     private String reason;
+    private double discount;
 
     @Email
     private String createdByEmail;

@@ -552,6 +552,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setRegistrationNumber(student.getRegistrationNumber());
         dto.setFormStatus(student.getFormStatus());
         dto.setReason(student.getReason());
+        dto.setDiscount(student.getDiscount());
         dto.setCreatedByEmail(student.getCreatedByEmail());
         dto.setRole(student.getRole());
         dto.setBranchCode(student.getBranchCode());
