@@ -1,5 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.InstituteClientWrapperResponse;
+import Layer.NewStudentManagement.DTO.InstituteLoginResponse;
 import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Repository.TeacherRepository;
 import Layer.NewStudentManagement.Security.LoginRequest;
@@ -15,6 +17,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -112,6 +115,21 @@ public class StaffService
                 .flatMap(List::stream)
                 .collect(Collectors.toList());
     }
+
+    public List<InstituteLoginResponse> getInstituteDetailsOnly(String email) {
+        InstituteClientWrapperResponse response = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/getLayerClientByClientEmail")
+                        .queryParam("email", email)
+                        .build())
+                .retrieve()
+                .bodyToMono(InstituteClientWrapperResponse.class)
+                .block();
+
+        // Return only instituteResponseDTOS
+        return response != null ? response.getInstituteResponseDTOS() : Collections.emptyList();
+    }
+
 
 
     public boolean hasPermission(String role, String email, String action) {

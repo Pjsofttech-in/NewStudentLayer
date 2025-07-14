@@ -1,5 +1,7 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.InstituteClientWrapperResponse;
+import Layer.NewStudentManagement.DTO.InstituteLoginResponse;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.ServiceImpl.StaffService;
@@ -8,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,5 +46,10 @@ public class StaffController
         return ResponseEntity.ok(permissions);
     }
 
+    @GetMapping("/getInstituteDetails")
+    public ResponseEntity<List<InstituteLoginResponse>> getInstitute(@RequestParam String email) {
+        List<InstituteLoginResponse> response = staffLoginService.getInstituteDetailsOnly(email);
+        return ResponseEntity.ok(response);
+    }
 }
 
