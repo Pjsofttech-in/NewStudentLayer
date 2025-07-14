@@ -24,4 +24,9 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
 
     @Query("SELECT s FROM StudentFeesCollect s WHERE s.studentFees.fid = :feesId")
     List<StudentFeesCollect> findAllStudentFeesCollected(@Param("feesId") Long feesId);
+
+    @Query("SELECT sfc FROM StudentFeesCollect sfc " +
+            "JOIN sfc.studentFees sf " +
+            "WHERE sf.student.id = :studentId")
+    List<StudentFeesCollect> findCollectedFeesByStudentId(@Param("studentId") Long studentId);
 }

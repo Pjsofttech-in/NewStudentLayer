@@ -23,5 +23,20 @@ public class FeesCollectDTO
     private String feesPaymentType;
     private String status;
 
+    private double tuitionFee;
+    private double admissionFee;
+    private double practicalFee;
+    private double computerClassFee;
+    private double examFees;
+    private double uniformFee;
+    private double transportBusFee;
+    private double hostelFee;
+    private double buildingFundFee;
+    private double libraryFees;
+    private double sportFees;
+
+    private double discount;
+    private double discountedAmount;
+
 
 }

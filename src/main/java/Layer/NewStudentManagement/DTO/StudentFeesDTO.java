@@ -20,13 +20,8 @@ public class StudentFeesDTO
     private Integer rollNo;
     private String standardName;
     private String mediumName;
-    private String feesType;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;
-
-    private String feesStatus;
-    private String feesCollectionType;
-
     private double tuitionFee;
     private double admissionFee;
     private double practicalFee;
@@ -39,17 +34,17 @@ public class StudentFeesDTO
     private double libraryFees;
     private double sportFees;
     private Double feesAmount;      // fees total before discount
-
     private double discount;
     private Double totalamount;         // fees total after discount
-    private double lateFeeCharges;
     private Long sfid;
-
     private double paidAmount;         // total paid by student
     private double pendingAmount;     // remaining amount
     private String paymentStatus;     // Pending, Ongoing, Completed
-    private String feesPaymentType;
-
+//    private String feesPaymentType;
+//    private double lateFeeCharges;
+//    private String feesStatus;
+//    private String feesCollectionType;
+//    private String feesType;
     @Email
     private String createdByEmail;
     private String role;

@@ -10,5 +10,6 @@ public interface FeesCollectService
     FeesCollectDTO saveFeeCollection(StudentFeesCollect collect, String role, String email);
     FeesCollectDTO updateFeeCollectionStatus(Long id, String role, String email, String newStatus);
     List<FeesCollectDTO> getAllCollectDataByStudentFeesID(Long fid,String role,String email);
+    List<FeesCollectDTO> getCollectedFeesByStudentId(String role, String email,Long studentId);
 
 }

@@ -103,10 +103,10 @@ public class FeesServiceImpl implements FeesService
 
         if (updatedFees.getStandardName() != null) existing.setStandardName(updatedFees.getStandardName());
         if (updatedFees.getMediumName() != null) existing.setMediumName(updatedFees.getMediumName());
-        if (updatedFees.getFeesType() != null) existing.setFeesType(updatedFees.getFeesType());
+//        if (updatedFees.getFeesType() != null) existing.setFeesType(updatedFees.getFeesType());
         if (updatedFees.getApprovalDate() != null) existing.setApprovalDate(updatedFees.getApprovalDate());
-        if (updatedFees.getFeesStatus() != null) existing.setFeesStatus(updatedFees.getFeesStatus());
-        if (updatedFees.getFeesCollectionType() != null) existing.setFeesCollectionType(updatedFees.getFeesCollectionType());
+//        if (updatedFees.getFeesStatus() != null) existing.setFeesStatus(updatedFees.getFeesStatus());
+//        if (updatedFees.getFeesCollectionType() != null) existing.setFeesCollectionType(updatedFees.getFeesCollectionType());
         if (updatedFees.getTuitionFee() != 0) existing.setTuitionFee(updatedFees.getTuitionFee());
         if (updatedFees.getAdmissionFee() != 0) existing.setAdmissionFee(updatedFees.getAdmissionFee());
         if (updatedFees.getPracticalFee() != 0) existing.setPracticalFee(updatedFees.getPracticalFee());
@@ -120,7 +120,7 @@ public class FeesServiceImpl implements FeesService
         if (updatedFees.getSportFees() != 0) existing.setSportFees(updatedFees.getSportFees());
         if (updatedFees.getFeesAmount() != null && updatedFees.getFeesAmount() != 0) existing.setFeesAmount(updatedFees.getFeesAmount());
         if (updatedFees.getTotalamount() != null && updatedFees.getTotalamount() != 0) existing.setTotalamount(updatedFees.getTotalamount());
-        if (updatedFees.getLateFeeCharges() != 0) existing.setLateFeeCharges(updatedFees.getLateFeeCharges());
+//        if (updatedFees.getLateFeeCharges() != 0) existing.setLateFeeCharges(updatedFees.getLateFeeCharges());
         if (updatedFees.getSfid() != null) existing.setSfid(updatedFees.getSfid());
         if (updatedFees.getCreatedByEmail() != null) existing.setCreatedByEmail(updatedFees.getCreatedByEmail());
         if (updatedFees.getRole() != null) existing.setRole(updatedFees.getRole());
@@ -178,10 +178,10 @@ public class FeesServiceImpl implements FeesService
         dto.setRollNo(fees.getRollNo());
         dto.setStandardName(fees.getStandardName());
         dto.setMediumName(fees.getMediumName());
-        dto.setFeesType(fees.getFeesType());
+//        dto.setFeesType(fees.getFeesType());
         dto.setApprovalDate(fees.getApprovalDate());
-        dto.setFeesStatus(fees.getFeesStatus());
-        dto.setFeesCollectionType(fees.getFeesCollectionType());
+//        dto.setFeesStatus(fees.getFeesStatus());
+//        dto.setFeesCollectionType(fees.getFeesCollectionType());
         dto.setTuitionFee(fees.getTuitionFee());
         dto.setAdmissionFee(fees.getAdmissionFee());
         dto.setPracticalFee(fees.getPracticalFee());
@@ -196,12 +196,12 @@ public class FeesServiceImpl implements FeesService
         dto.setFeesAmount(fees.getFeesAmount());
         dto.setDiscount(fees.getDiscount());
         dto.setTotalamount(fees.getTotalamount());
-        dto.setLateFeeCharges(fees.getLateFeeCharges());
+//        dto.setLateFeeCharges(fees.getLateFeeCharges());
         dto.setSfid(fees.getSfid());
         dto.setPaidAmount(fees.getPaidAmount());
         dto.setPendingAmount(fees.getPendingAmount());
         dto.setPaymentStatus(fees.getPaymentStatus());
-        dto.setFeesPaymentType(fees.getFeesPaymentType());
+//        dto.setFeesPaymentType(fees.getFeesPaymentType());
         dto.setCreatedByEmail(fees.getCreatedByEmail());
         dto.setRole(fees.getRole());
         dto.setBranchCode(fees.getBranchCode());

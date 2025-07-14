@@ -44,4 +44,10 @@ public class FeesCollectController
         List<FeesCollectDTO>  feesCollectDTOS = feesCollectService.getAllCollectDataByStudentFeesID(fid,role,email);
         return ResponseEntity.ok(feesCollectDTOS);
     }
+
+    @GetMapping("/getCollectedFeesByStudentId")
+    public ResponseEntity<List<FeesCollectDTO>> getCollectedFeesByStudentId(@RequestParam String role, @RequestParam String email,@RequestParam Long studentId) {
+        List<FeesCollectDTO> collectedFees = feesCollectService.getCollectedFeesByStudentId(role, email, studentId);
+        return ResponseEntity.ok(collectedFees);
+    }
 }

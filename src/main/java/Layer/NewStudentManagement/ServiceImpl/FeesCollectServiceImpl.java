@@ -136,19 +136,47 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
     }
 
-
-    public FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect)
+    @Override
+    public List<FeesCollectDTO> getCollectedFeesByStudentId(String role, String email, Long studentId)
     {
-        return new FeesCollectDTO(
-                feesCollect.getId(),
-                feesCollect.getAmount(),
-                feesCollect.getInvoice(),
-                feesCollect.getDuedate(),
-                feesCollect.getPaymentDate(),
-                feesCollect.getPaymentMode(),
-                feesCollect.getFeesPaymentType(),
-                feesCollect.getStatus()
-        );
+        if(!staffService.hasPermission(role,email,"Get"))
+        {
+            throw new RuntimeException("You don't have permission to Get Fees Status");
+        }
+        List<StudentFeesCollect> studentFeesCollects = feesCollectRepository.findCollectedFeesByStudentId(studentId);
+
+        return studentFeesCollects.stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
+
+    private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {
+        FeesCollectDTO dto = new FeesCollectDTO();
+        dto.setId(feesCollect.getId());
+        dto.setAmount(feesCollect.getAmount());
+        dto.setInvoice(feesCollect.getInvoice());
+        dto.setDuedate(feesCollect.getDuedate());
+        dto.setPaymentDate(feesCollect.getPaymentDate());
+        dto.setPaymentMode(feesCollect.getPaymentMode());
+        dto.setFeesPaymentType(feesCollect.getFeesPaymentType());
+        dto.setStatus(feesCollect.getStatus());
+
+        dto.setTuitionFee(feesCollect.getTuitionFee());
+        dto.setAdmissionFee(feesCollect.getAdmissionFee());
+        dto.setPracticalFee(feesCollect.getPracticalFee());
+        dto.setComputerClassFee(feesCollect.getComputerClassFee());
+        dto.setExamFees(feesCollect.getExamFees());
+        dto.setUniformFee(feesCollect.getUniformFee());
+        dto.setTransportBusFee(feesCollect.getTransportBusFee());
+        dto.setHostelFee(feesCollect.getHostelFee());
+        dto.setBuildingFundFee(feesCollect.getBuildingFundFee());
+        dto.setLibraryFees(feesCollect.getLibraryFees());
+        dto.setSportFees(feesCollect.getSportFees());
+
+        dto.setDiscount(feesCollect.getDiscount());
+        dto.setDiscountedAmount(feesCollect.getDiscountedAmount());
+        return dto;
+    }
+
 
 }
