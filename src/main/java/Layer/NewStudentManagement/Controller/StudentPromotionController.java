@@ -23,11 +23,14 @@ public class StudentPromotionController
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam Long studentId,
-            @RequestParam Long standardId,
-            @RequestParam Long mediumId,
-            @RequestParam String academicYear
-    ) {
-        StudentPromotionResponseDTO response = studentPromotionService.promoteStudent(role, email, studentId, standardId, mediumId, academicYear);
+            @RequestParam(required = false) Long newStandardId,
+            @RequestParam Long newMediumId,
+            @RequestParam(required = false) Long newDegreeNameId,
+            @RequestParam(required = false) Long newDepartmentId,
+
+            @RequestParam String academicYear)
+    {
+        StudentPromotionResponseDTO response = studentPromotionService.promoteStudent(role, email, studentId, newStandardId, newMediumId, newDegreeNameId, newDepartmentId, academicYear);
         return ResponseEntity.ok(response);
     }
 

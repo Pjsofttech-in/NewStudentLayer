@@ -8,7 +8,7 @@ import java.util.List;
 public interface StudentPromotionService
 {
 
-    StudentPromotionResponseDTO promoteStudent(String role, String email,Long studentId, Long newStandardId, Long newMediumId, String academicYear);
+    StudentPromotionResponseDTO promoteStudent(String role, String email, Long studentId, Long newStandardId, Long newMediumId, Long newDegreeNameId, Long newDepartmentId, String academicYear);
     StudentPromotionResponseDTO getPromotionInfoById(String role, String email, Long studentId);
 }
 

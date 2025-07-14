@@ -16,6 +16,7 @@ public class PromotionInfoDTO
     private Long standardId;
     private String standardName;
     private Long mediumId;
+    private Integer rollNo;
     private String mediumName;
     private String academicYear;
     private LocalDate promotionDate;
