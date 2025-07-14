@@ -47,8 +47,8 @@ public class StaffController
     }
 
     @GetMapping("/getInstituteDetails")
-    public ResponseEntity<List<InstituteLoginResponse>> getInstitute(@RequestParam String email) {
-        List<InstituteLoginResponse> response = staffLoginService.getInstituteDetailsOnly(email);
+    public ResponseEntity<List<InstituteLoginResponse>> getInstitute(@RequestParam String instituteEmail) {
+        List<InstituteLoginResponse> response = staffLoginService.getInstituteDetailsOnly(instituteEmail);
         return ResponseEntity.ok(response);
     }
 }
