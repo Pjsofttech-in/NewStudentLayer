@@ -43,7 +43,7 @@ public class StudentFees
     private double libraryFees;
     private double sportFees;
     private double discount;
-
+    private double GST;
     private Double feesAmount;      // fees total before discount
     private Double totalamount;         // fees total after discount
 //    private double lateFeeCharges;

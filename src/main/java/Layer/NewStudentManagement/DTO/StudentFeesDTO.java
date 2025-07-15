@@ -35,6 +35,7 @@ public class StudentFeesDTO
     private double sportFees;
     private Double feesAmount;      // fees total before discount
     private double discount;
+    private double GST;
     private Double totalamount;         // fees total after discount
     private Long sfid;
     private double paidAmount;         // total paid by student

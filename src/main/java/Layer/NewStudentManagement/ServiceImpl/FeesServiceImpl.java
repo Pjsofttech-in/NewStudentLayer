@@ -4,7 +4,9 @@ import Layer.NewStudentManagement.DTO.StudentFeesDTO;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentStandard;
+import Layer.NewStudentManagement.Entity.StudentStandardFees;
 import Layer.NewStudentManagement.Repository.FeesRepository;
+import Layer.NewStudentManagement.Repository.StandardFeesRepository;
 import Layer.NewStudentManagement.Repository.StandardRepository;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Service.FeesService;
@@ -29,6 +31,9 @@ public class FeesServiceImpl implements FeesService
     @Autowired
     private StandardRepository standardRepository;
 
+    @Autowired
+    private StandardFeesRepository standardFeesRepository;
+
 
     private void checkPermission(String role, String email, String action) {
         if (!staffService.hasPermission(role, email, action)) {
@@ -44,6 +49,9 @@ public class FeesServiceImpl implements FeesService
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        StudentStandardFees standardFees = standardFeesRepository.findById(fees.getSfid())
+                .orElseThrow(() -> new RuntimeException("Standard Fees not found"));
 
         boolean isStandardBased = fees.getStandard() != null;
         boolean isUGPG = student.getDegreeName() != null && student.getDepartment() != null;
@@ -83,6 +91,7 @@ public class FeesServiceImpl implements FeesService
         fees.setApprovalDate(student.getApprovalDate());
         fees.setRollNo(student.getRollNo());
         fees.setDiscount(student.getDiscount());
+        fees.setGST(standardFees.getGST());
         fees.setTotalamount(fees.getTotalamount());
         fees.setPendingAmount(fees.getTotalamount());
         fees.setCreatedByEmail(email);
@@ -195,6 +204,7 @@ public class FeesServiceImpl implements FeesService
         dto.setSportFees(fees.getSportFees());
         dto.setFeesAmount(fees.getFeesAmount());
         dto.setDiscount(fees.getDiscount());
+        dto.setGST(fees.getGST());
         dto.setTotalamount(fees.getTotalamount());
 //        dto.setLateFeeCharges(fees.getLateFeeCharges());
         dto.setSfid(fees.getSfid());

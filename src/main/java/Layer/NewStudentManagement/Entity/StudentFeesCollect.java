@@ -28,6 +28,7 @@ public class StudentFeesCollect
         private String paymentMode; // Cash, Online, UPI
         private String feesPaymentType;
         private String status;
+        private String transactionId;
 
         private double tuitionFee;
         private double admissionFee;

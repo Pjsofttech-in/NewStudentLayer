@@ -29,4 +29,7 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
             "JOIN sfc.studentFees sf " +
             "WHERE sf.student.id = :studentId")
     List<StudentFeesCollect> findCollectedFeesByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT MAX(e.id) FROM StudentFeesCollect e")
+    Long findMaxId();
 }

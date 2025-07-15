@@ -59,6 +59,11 @@ public class FeesCollectServiceImpl implements FeesCollectService
             collect.setDuedate(collect.getDuedate());
         }
 
+        Long maxId = feesCollectRepository.findMaxId();
+        Long nextId = (maxId != null) ? maxId + 1 : 1;
+        String invoiceNumber = String.format("%06d", nextId);
+        collect.setInvoice(invoiceNumber);
+
         if ("Completed".equalsIgnoreCase(collect.getStatus())) {
             double newPaidAmount = fees.getPaidAmount() + collect.getAmount();
             double newPending = fees.getTotalamount() - newPaidAmount;

@@ -51,7 +51,7 @@ public class BarcodeServiceImpl implements BarcodeService
 
         String jwt = jwtUtil.generateTokenWithClaims("user@gmail.com", claims, Duration.ofDays(90));
 
-        String qrData = HR_INQUIRY_BASE_URL + "&token=" +jwt;
+        String qrData = HR_INQUIRY_BASE_URL + "?token=" +jwt;
 
         QRCodeWriter barcodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = barcodeWriter.encode(qrData, BarcodeFormat.QR_CODE, 300, 300);
