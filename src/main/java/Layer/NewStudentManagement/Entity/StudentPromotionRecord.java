@@ -20,17 +20,18 @@ public class StudentPromotionRecord
 
     private String academicYear;
     private LocalDate promotionDate;
-
-    private Long classroomId;
+    private Long classroomId;         // Old classroom ID
     private String division;
     private Integer rollNo;
 
-    private Boolean isCurrent = true;
+    private Boolean isCurrent = true; // True for latest promotion
 
-    @ManyToOne
+    // ============ Student Reference ============
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id")
     private StudentEntity student;
 
+    // ============ School Related ============
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "standard_id")
     private StudentStandard standard;
@@ -39,6 +40,29 @@ public class StudentPromotionRecord
     @JoinColumn(name = "medium_id")
     private StudentMedium medium;
 
+    // ============ Jr. College / UG/PG Related ============
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "degree_id")
+    private StudentDegreeName degree;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "department_id")
+    private StudentDepartment department;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "stream_id")
+    private StudentStream stream;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "group_id")
+    private StudentGroup group;
+
+    private String standardName;
+    private String mediumName;
+//    private String degreeName;
+//    private String departmentName;
+    private String streamName;
+    private String groupName;
 
 
 }

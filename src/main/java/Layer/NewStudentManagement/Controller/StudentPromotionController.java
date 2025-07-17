@@ -1,9 +1,11 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.StudentPromotionRequest;
 import Layer.NewStudentManagement.DTO.StudentPromotionResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentPromotionRecord;
 import Layer.NewStudentManagement.Service.StudentPromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,19 +22,21 @@ public class StudentPromotionController
 
     @PostMapping("/studentPramoteInNextClass")
     public ResponseEntity<StudentPromotionResponseDTO> promoteStudent(
+            @RequestBody StudentPromotionRequest request,
             @RequestParam String role,
-            @RequestParam String email,
-            @RequestParam Long studentId,
-            @RequestParam(required = false) Long newStandardId,
-            @RequestParam Long newMediumId,
-            @RequestParam(required = false) Long newDegreeNameId,
-            @RequestParam(required = false) Long newDepartmentId,
+            @RequestParam String email) {
 
-            @RequestParam String academicYear)
-    {
-        StudentPromotionResponseDTO response = studentPromotionService.promoteStudent(role, email, studentId, newStandardId, newMediumId, newDegreeNameId, newDepartmentId, academicYear);
+        StudentPromotionResponseDTO response = studentPromotionService.promoteStudent(
+                role, email, request.getStudentId(),
+                request.getNewStandardId(), request.getNewMediumId(),
+                request.getNewDegreeNameId(), request.getNewDepartmentId(),
+                request.getNewStreamId(), request.getGroupName(),
+                request.getAcademicYear(), request.getNewClassroomId()
+        );
+
         return ResponseEntity.ok(response);
     }
+
 
 
     @GetMapping("/getPromoteHistoryByStudentId")
