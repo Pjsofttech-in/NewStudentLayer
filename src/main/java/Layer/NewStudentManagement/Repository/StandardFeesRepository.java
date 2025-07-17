@@ -16,9 +16,6 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
     @Query("SELECT s FROM StudentStandardFees s WHERE s.standardName = :standardName AND s.mediumName = :mediumName AND s.branchCode = :branchCode")
     List<StudentStandardFees> findByStandardAndMediumAndBranch(String standardName, String mediumName, String branchCode);
 
-//    boolean existsByStandardAndMediumAndBranchCode(StudentStandard standard, StudentMedium medium, String branchCode);
-
-
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
             "WHERE f.standard = :standard AND f.medium = :medium AND f.branchCode = :branchCode " +
             "AND f.academicYear = :academicYear AND f.institutionType = 'School'")

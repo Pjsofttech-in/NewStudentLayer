@@ -1,9 +1,11 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.StudentFeesDTO;
+import Layer.NewStudentManagement.DTO.StudentFeesFilterRequest;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Service.FeesService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,12 +40,12 @@ public class FeesController
         return ResponseEntity.ok(feesDTO);
     }
 
-    @GetMapping("/getAllStudentFees")
-    public ResponseEntity<List<StudentFeesDTO>> getAllStudentFees(@RequestParam String role, @RequestParam String email)
-    {
-        List<StudentFeesDTO> feesDTO =feesService.getAllFees(role, email);
-        return ResponseEntity.ok(feesDTO);
-    }
+//    @GetMapping("/getAllStudentFees")
+//    public ResponseEntity<List<StudentFeesDTO>> getAllStudentFees(@RequestParam String role, @RequestParam String email)
+//    {
+//        List<StudentFeesDTO> feesDTO =feesService.getAllFees(role, email);
+//        return ResponseEntity.ok(feesDTO);
+//    }
 
     @DeleteMapping("/deleteStudentFees/{id}")
     public ResponseEntity<Void> deleteStudentFees(@RequestParam Long id,@RequestParam String role, @RequestParam String email)
@@ -57,6 +59,17 @@ public class FeesController
 
         List<StudentFeesDTO> feesDTO =feesService.getAllFeesForStudent(studentId,role, email);
         return ResponseEntity.ok(feesDTO);
+    }
+
+    @PostMapping("/getAllFeesForStudentWithFilter")
+    public Page<StudentFeesDTO> filterStudentFees(
+            @RequestBody StudentFeesFilterRequest request,
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return feesService.filterStudentFees(request, role, email, page, size);
     }
 
 

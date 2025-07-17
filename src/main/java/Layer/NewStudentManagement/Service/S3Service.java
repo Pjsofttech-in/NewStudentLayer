@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -83,15 +84,39 @@ public class S3Service {
         }
     }
 
+//    public void deleteFileFromUrl(String fileUrl) {
+//        if (fileUrl == null || fileUrl.isBlank()) {
+//            return; // Nothing to delete
+//        }
+//
+//        try {
+//            String fileKey = fileUrl.startsWith("https://")
+//                    ? fileUrl.substring(fileUrl.indexOf(".com/") + 5)
+//                    : fileUrl;
+//
+//            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
+//                    .bucket(bucketName)
+//                    .key(fileKey)
+//                    .build();
+//
+//            s3Client.deleteObject(deleteRequest);
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to delete file from S3", e);
+//        }
+//    }
+
     public void deleteFileFromUrl(String fileUrl) {
         if (fileUrl == null || fileUrl.isBlank()) {
-            return; // Nothing to delete
+            return; // No file to delete
         }
 
         try {
-            String fileKey = fileUrl.startsWith("https://")
-                    ? fileUrl.substring(fileUrl.indexOf(".com/") + 5)
-                    : fileUrl;
+            // Parse the URL and extract the path, removing the leading slash
+            URI uri = new URI(fileUrl);
+            String fileKey = uri.getPath().startsWith("/")
+                    ? uri.getPath().substring(1)
+                    : uri.getPath();
 
             DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
                     .bucket(bucketName)
@@ -101,7 +126,7 @@ public class S3Service {
             s3Client.deleteObject(deleteRequest);
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to delete file from S3", e);
+            throw new RuntimeException("Failed to delete file from S3: " + fileUrl, e);
         }
     }
 

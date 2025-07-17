@@ -50,4 +50,6 @@ public class FeesCollectController
         List<FeesCollectDTO> collectedFees = feesCollectService.getCollectedFeesByStudentId(role, email, studentId);
         return ResponseEntity.ok(collectedFees);
     }
+
+
 }

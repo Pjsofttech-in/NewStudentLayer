@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,6 +21,9 @@ public class StudentFeesDTO
     private Integer rollNo;
     private String standardName;
     private String mediumName;
+    private String streamName;         // For Jr. College students
+    private String degreeName;         // For UG/PG students
+    private String departmentName;     // For UG/PG students
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;
     private double tuitionFee;
@@ -40,12 +44,15 @@ public class StudentFeesDTO
     private Long sfid;
     private double paidAmount;         // total paid by student
     private double pendingAmount;     // remaining amount
-    private String paymentStatus;     // Pending, Ongoing, Completed
+//    private String paymentStatus;     // Pending, Ongoing, Completed
 //    private String feesPaymentType;
 //    private double lateFeeCharges;
-//    private String feesStatus;
-//    private String feesCollectionType;
-//    private String feesType;
+    private String feesStatus;
+    private String feesCollectionType;
+    private List<FeeScheduleDTO> scheduleList;
+
+
+    //    private String feesType;
     @Email
     private String createdByEmail;
     private String role;

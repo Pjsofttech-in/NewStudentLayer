@@ -1,15 +1,18 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.FeesCollectDTO;
+import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Repository.FeesCollectRepository;
 import Layer.NewStudentManagement.Repository.FeesRepository;
+import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Service.FeesCollectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,60 +29,105 @@ public class FeesCollectServiceImpl implements FeesCollectService
     @Autowired
     StaffService staffService;
 
+    @Autowired
+    FeesScheduleRepository feesScheduleRepository;
 
 
     @Override
-    public FeesCollectDTO saveFeeCollection(StudentFeesCollect collect,String role, String email)
-    {
-        if(!staffService.hasPermission(role,email,"Post"))
-        {
-            throw new RuntimeException("You don't have permission to Collect Fees");
+    public FeesCollectDTO saveFeeCollection(StudentFeesCollect collect, String role, String email) {
+        if (!staffService.hasPermission(role, email, "Post")) {
+            throw new RuntimeException("You don't have permission to collect fees.");
         }
+
         StudentFees fees = feesRepository.findById(collect.getStudentFees().getFid())
                 .orElseThrow(() -> new RuntimeException("Student Fees not found"));
 
-        if("Completed".equalsIgnoreCase(collect.getStatus()))
-        {
-            if(collect.getPaymentDate()==null || collect.getFeesPaymentType().isEmpty())
-            {
-                collect.setPaymentDate(LocalDate.now());
-                LocalDate startDate = LocalDate.of(collect.getPaymentDate().getYear(), collect.getPaymentDate().getMonthValue(), 1);
-                LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-                List<StudentFeesCollect> alreadyPaid = feesCollectRepository
-                        .findCompletedPaymentInMonth(fees.getFid(), startDate, endDate);
-                if (!alreadyPaid.isEmpty()) {
-                    throw new RuntimeException("Fees already collected with status 'Completed' in this month.");
-                }
+        // ✅ Validate the schedule exists for the student
+        StudentFeeSchedule schedule = feesScheduleRepository
+                .findByStudentFeesAndLabelAndType(fees, collect.getMonth(), collect.getFeesType())
+                .orElseThrow(() -> new RuntimeException("No schedule found for the given Month and FeesType."));
 
+        if (schedule.isPaid()) {
+            throw new RuntimeException("Fees already collected for: " + collect.getMonth());
+        }
+
+        // ✅ Allow early payment only for Installment
+        if ("Monthly".equalsIgnoreCase(collect.getMonth())) {
+            LocalDate currentDate = LocalDate.now();
+            Month currentMonth = currentDate.getMonth();
+            Month scheduleMonth;
+
+            try {
+                scheduleMonth = Month.valueOf(collect.getMonth().toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                throw new RuntimeException("Invalid month format: " + collect.getMonth());
+            }
+
+            if (scheduleMonth.getValue() > currentMonth.getValue()) {
+                throw new RuntimeException("Cannot pay for a future month: " + scheduleMonth);
             }
         }
-        else
-        {
-            collect.setPaymentDate(null);
-            collect.setDuedate(collect.getDuedate());
+
+        if ("Installment".equalsIgnoreCase(collect.getMonth())) {
+            LocalDate currentDate = LocalDate.now();
+            Month currentMonth = currentDate.getMonth();
+            Month scheduleMonth;
+
+            try {
+                scheduleMonth = Month.valueOf(collect.getMonth().toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                throw new RuntimeException("Invalid month format: " + collect.getMonth());
+            }
+
+            if (scheduleMonth.getValue() > currentMonth.getValue()) {
+                throw new RuntimeException("Cannot pay for a future month: " + scheduleMonth);
+            }
         }
 
+        // ✅ Check status for duplicate completed payment in month
+        if ("Completed".equalsIgnoreCase(collect.getStatus())) {
+            LocalDate now = LocalDate.now();
+            LocalDate start = now.withDayOfMonth(1);
+            LocalDate end = now.withDayOfMonth(now.lengthOfMonth());
+
+            List<StudentFeesCollect> existing = feesCollectRepository
+                    .findCompletedPaymentInMonth(fees.getFid(), start, end);
+
+            for (StudentFeesCollect e : existing) {
+                if (e.getMonth().equalsIgnoreCase(collect.getMonth())) {
+                    throw new RuntimeException("Fees already collected for this month/installment.");
+                }
+            }
+        }
+
+        // ✅ Assign Invoice Number
         Long maxId = feesCollectRepository.findMaxId();
-        Long nextId = (maxId != null) ? maxId + 1 : 1;
-        String invoiceNumber = String.format("%06d", nextId);
-        collect.setInvoice(invoiceNumber);
+        String invoice = String.format("%06d", (maxId != null ? maxId + 1 : 1));
+        collect.setInvoice(invoice);
+
+        // ✅ Set common info
+        collect.setCreatedByEmail(email);
+        collect.setRole(role);
+        collect.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
+        collect.setFeesPaymentType(fees.getFeesCollectionType());
+        collect.setPaymentDate(LocalDate.now());
 
         if ("Completed".equalsIgnoreCase(collect.getStatus())) {
             double newPaidAmount = fees.getPaidAmount() + collect.getAmount();
             double newPending = fees.getTotalamount() - newPaidAmount;
+
             fees.setPaidAmount(newPaidAmount);
             fees.setPendingAmount(newPending);
-            fees.setPaymentStatus(newPending <= 0 ? "Completed" : "Ongoing");
+            fees.setFeesStatus(newPending <= 0 ? "Completed" : "Ongoing");
 
-            collect.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
-            collect.setRole(role);
-            collect.setCreatedByEmail(email);
+            // ✅ Mark the schedule as paid
+            schedule.setPaid(true);
+            feesScheduleRepository.save(schedule);
             feesRepository.save(fees);
         }
 
-        collect.setPaymentDate(LocalDate.now());
-        StudentFeesCollect feesCollect = feesCollectRepository.save(collect);
-        return mapToDTO(feesCollect);
+        StudentFeesCollect saved = feesCollectRepository.save(collect);
+        return mapToDTO(saved);
     }
 
 
@@ -115,7 +163,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
                 fees.setPaidAmount(newPaid);
                 fees.setPendingAmount(newPending);
-                fees.setPaymentStatus(newPending <= 0 ? "Completed" : "Ongoing");
+                fees.setFeesStatus(newPending <= 0 ? "Completed" : "Ongoing");
                 feesRepository.save(fees);
             }
             StudentFeesCollect fees1 = feesCollectRepository.save(collect);
@@ -178,8 +226,6 @@ public class FeesCollectServiceImpl implements FeesCollectService
         dto.setLibraryFees(feesCollect.getLibraryFees());
         dto.setSportFees(feesCollect.getSportFees());
 
-        dto.setDiscount(feesCollect.getDiscount());
-        dto.setDiscountedAmount(feesCollect.getDiscountedAmount());
         return dto;
     }
 

@@ -35,8 +35,6 @@ public class FeesCollectDTO
     private double libraryFees;
     private double sportFees;
 
-    private double discount;
-    private double discountedAmount;
 
 
 }

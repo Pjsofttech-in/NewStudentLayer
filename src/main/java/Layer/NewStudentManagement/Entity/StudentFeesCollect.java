@@ -41,9 +41,9 @@ public class StudentFeesCollect
         private double buildingFundFee;
         private double libraryFees;
         private double sportFees;
+        private String feesType; // e.g., "July", "1st Installment"
+        private String month;
 
-        private double discount;
-        private double discountedAmount;
         @ManyToOne
         @JoinColumn(name = "student_fees_id")
         private StudentFees studentFees;
