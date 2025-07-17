@@ -172,17 +172,6 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         response.setFullName(student.getFullName());
         response.setBranchCode(student.getBranchCode());
 
-//        PromotionInfoDTO current = new PromotionInfoDTO(
-//                student.getStandard() != null ? student.getStandard().getSid() : null,
-//                student.getStandard() != null ? student.getStandard().getStandardName() : null,
-//                student.getMedium() != null ? student.getMedium().getMid() : null,
-//                student.getRollNo(),
-//                student.getMedium() != null ? student.getMedium().getMediumName() : null,
-//                student.getAcademicYear(),
-//                LocalDate.now(),
-//                true
-//        );
-//        response.setCurrentPromotion(current);
 
         StudentPromotionRecord latestRecord = promotionRecordRepository.findCurrentByStudentId(studentId)
                 .orElseThrow(() -> new RuntimeException("Current promotion not found"));

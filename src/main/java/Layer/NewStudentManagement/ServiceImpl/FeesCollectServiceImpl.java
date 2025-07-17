@@ -42,42 +42,48 @@ public class FeesCollectServiceImpl implements FeesCollectService
         StudentFees fees = feesRepository.findById(collect.getStudentFees().getFid())
                 .orElseThrow(() -> new RuntimeException("Student Fees not found"));
 
+        String collectionType = fees.getFeesCollectionType(); // One Time / Monthly / Installment
 
-        StudentFeeSchedule schedule = feesScheduleRepository
-                .findByStudentFeesAndLabelAndType(fees, collect.getMonth(), collect.getFeesType())
-                .orElseThrow(() -> new RuntimeException("No schedule found for the given Month and FeesType."));
+        StudentFeeSchedule schedule = null;
+        if (!"One Time".equalsIgnoreCase(collectionType)) {
+            // Only check schedule for Monthly or Installment
+            schedule = feesScheduleRepository
+                    .findByStudentFeesAndLabelAndType(fees, collect.getMonth(), collect.getFeesType())
+                    .orElseThrow(() -> new RuntimeException("No schedule found for the given Month and FeesType."));
 
-        if (schedule.isPaid()) {
-            throw new RuntimeException("Fees already collected for: " + collect.getMonth());
+            if (schedule.isPaid()) {
+                throw new RuntimeException("Fees already collected for: " + collect.getMonth());
+            }
+
+            // Schedule Validations
+            LocalDate currentDate = LocalDate.now();
+
+            if ("Monthly".equalsIgnoreCase(schedule.getFeesType())) {
+                Month currentMonth = currentDate.getMonth();
+                Month scheduledMonth;
+                try {
+                    scheduledMonth = Month.valueOf(schedule.getMonth().toUpperCase());
+                } catch (IllegalArgumentException ex) {
+                    throw new RuntimeException("Invalid month format in schedule: " + schedule.getMonth());
+                }
+                if (currentMonth.getValue() > scheduledMonth.getValue()) {
+                    throw new RuntimeException("Cannot pay after the scheduled month: " + scheduledMonth);
+                }
+            } else if ("Installment".equalsIgnoreCase(schedule.getFeesType())) {
+                int scheduledInstallment = extractInstallmentNumber(schedule.getMonth());
+                int currentInstallment = extractInstallmentNumber(collect.getMonth());
+                if (currentInstallment > scheduledInstallment) {
+                    throw new RuntimeException("Cannot pay after the scheduled installment: " + schedule.getMonth());
+                }
+            }
         }
 
-        LocalDate currentDate = LocalDate.now();
-
-        if ("Monthly".equalsIgnoreCase(schedule.getFeesType())) {
-            Month currentMonth = currentDate.getMonth();
-            Month scheduledMonth;
-            try {
-                scheduledMonth = Month.valueOf(schedule.getMonth().toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                throw new RuntimeException("Invalid month format in schedule: " + schedule.getMonth());
-            }
-            if (currentMonth.getValue() > scheduledMonth.getValue()) {
-                throw new RuntimeException("Cannot pay after the scheduled month: " + scheduledMonth);
-            }
-        } else if ("Installment".equalsIgnoreCase(schedule.getFeesType())) {
-            // Example: "1st Installment", "2nd Installment"
-            int scheduledInstallment = extractInstallmentNumber(schedule.getMonth());
-            int currentInstallment = extractInstallmentNumber(collect.getMonth());
-            if (currentInstallment > scheduledInstallment) {
-                throw new RuntimeException("Cannot pay after the scheduled installment: " + schedule.getMonth());
-            }
-        }
-
-
-        // Check status for duplicate completed payment in month
+        // Check duplicate completed payment
         if ("Completed".equalsIgnoreCase(collect.getStatus())) {
-            LocalDate start = currentDate.withDayOfMonth(1);
-            LocalDate end = currentDate.withDayOfMonth(currentDate.lengthOfMonth());
+            LocalDate now = LocalDate.now();
+            LocalDate start = now.withDayOfMonth(1);
+            LocalDate end = now.withDayOfMonth(now.lengthOfMonth());
+
             List<StudentFeesCollect> existing = feesCollectRepository
                     .findCompletedPaymentInMonth(fees.getFid(), start, end);
 
@@ -93,13 +99,14 @@ public class FeesCollectServiceImpl implements FeesCollectService
         String invoice = String.format("%06d", (maxId != null ? maxId + 1 : 1));
         collect.setInvoice(invoice);
 
-        // Set common info
+        // Set metadata
         collect.setCreatedByEmail(email);
         collect.setRole(role);
         collect.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
-        collect.setFeesPaymentType(fees.getFeesCollectionType());
+        collect.setFeesPaymentType(collectionType);
         collect.setPaymentDate(LocalDate.now());
 
+        // Finalize payment
         if ("Completed".equalsIgnoreCase(collect.getStatus())) {
             double newPaidAmount = fees.getPaidAmount() + collect.getAmount();
             double newPending = fees.getTotalamount() - newPaidAmount;
@@ -108,9 +115,11 @@ public class FeesCollectServiceImpl implements FeesCollectService
             fees.setPendingAmount(newPending);
             fees.setFeesStatus(newPending <= 0 ? "Completed" : "Ongoing");
 
-            // Mark the schedule as paid
-            schedule.setPaid(true);
-            feesScheduleRepository.save(schedule);
+            if (schedule != null) {
+                schedule.setPaid(true);
+                feesScheduleRepository.save(schedule);
+            }
+
             feesRepository.save(fees);
         }
 
