@@ -35,6 +35,32 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
                                 @Param("streamName") String streamName);
 
 
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
+            "WHERE f.student = :student AND f.standard.sid = :standardId AND f.medium.mid = :mediumId")
+    boolean existsByStandardAndMedium(@Param("student") StudentEntity student,
+                                      @Param("standardId") Long standardId,
+                                      @Param("mediumId") Long mediumId);
+
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
+            "WHERE f.student = :student AND f.standard.sid = :standardId AND f.medium.mid = :mediumId " +
+            "AND f.stream.id = :streamId AND f.group.id = :groupId")
+    boolean existsByStandardMediumStreamGroup(@Param("student") StudentEntity student,
+                                              @Param("standardId") Long standardId,
+                                              @Param("mediumId") Long mediumId,
+                                              @Param("streamId") Long streamId,
+                                              @Param("groupName") Long groupName);
+
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
+            "WHERE f.student = :student AND f.medium.mid = :mediumId AND f.stream.id = :streamId " +
+            "AND f.degree.id = :degreeId AND f.department.id = :departmentId")
+    boolean existsByMediumStreamDegreeDepartment(@Param("student") StudentEntity student,
+                                                 @Param("mediumId") Long mediumId,
+                                                 @Param("streamId") Long streamId,
+                                                 @Param("degreeId") Long degreeId,
+                                                 @Param("departmentId") Long departmentId);
+
+
+
     @Query("SELECT f FROM StudentFees f WHERE f.student.id = :studentId")
     List<StudentFees> findFeesByStudentId(@Param("studentId") Long studentId);
 

@@ -21,7 +21,8 @@ public class StudentFeesDTO
     private Integer rollNo;
     private String standardName;
     private String mediumName;
-    private String streamName;         // For Jr. College students
+    private String streamName;          // For Jr. College students
+    private String groupName;
     private String degreeName;         // For UG/PG students
     private String departmentName;     // For UG/PG students
     @DateTimeFormat(pattern = "yyyy-MM-dd")

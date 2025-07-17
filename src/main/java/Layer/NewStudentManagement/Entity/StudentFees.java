@@ -26,7 +26,8 @@ public class StudentFees
     private Integer rollNo;
     private String standardName;
     private String mediumName;
-    private String streamName;         //  For Jr. College students
+    private String streamName;//  For Jr. College students
+    private String groupName;
     private String degreeName;         //  For UG/PG students
     private String departmentName;     //  For UG/PG students
 //    private String feesType;
@@ -78,6 +79,10 @@ public class StudentFees
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "stream_id", nullable = true)
     private StudentStream stream;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "group_id", nullable = true)
+    private StudentGroup group;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "degree_id", nullable = true)

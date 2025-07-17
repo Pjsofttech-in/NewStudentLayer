@@ -42,7 +42,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
         StudentFees fees = feesRepository.findById(collect.getStudentFees().getFid())
                 .orElseThrow(() -> new RuntimeException("Student Fees not found"));
 
-        // ✅ Validate the schedule exists for the student
+
         StudentFeeSchedule schedule = feesScheduleRepository
                 .findByStudentFeesAndLabelAndType(fees, collect.getMonth(), collect.getFeesType())
                 .orElseThrow(() -> new RuntimeException("No schedule found for the given Month and FeesType."));
@@ -51,45 +51,33 @@ public class FeesCollectServiceImpl implements FeesCollectService
             throw new RuntimeException("Fees already collected for: " + collect.getMonth());
         }
 
-        // ✅ Allow early payment only for Installment
-        if ("Monthly".equalsIgnoreCase(collect.getMonth())) {
-            LocalDate currentDate = LocalDate.now();
+        LocalDate currentDate = LocalDate.now();
+
+        if ("Monthly".equalsIgnoreCase(schedule.getFeesType())) {
             Month currentMonth = currentDate.getMonth();
-            Month scheduleMonth;
-
+            Month scheduledMonth;
             try {
-                scheduleMonth = Month.valueOf(collect.getMonth().toUpperCase());
+                scheduledMonth = Month.valueOf(schedule.getMonth().toUpperCase());
             } catch (IllegalArgumentException ex) {
-                throw new RuntimeException("Invalid month format: " + collect.getMonth());
+                throw new RuntimeException("Invalid month format in schedule: " + schedule.getMonth());
             }
-
-            if (scheduleMonth.getValue() > currentMonth.getValue()) {
-                throw new RuntimeException("Cannot pay for a future month: " + scheduleMonth);
+            if (currentMonth.getValue() > scheduledMonth.getValue()) {
+                throw new RuntimeException("Cannot pay after the scheduled month: " + scheduledMonth);
+            }
+        } else if ("Installment".equalsIgnoreCase(schedule.getFeesType())) {
+            // Example: "1st Installment", "2nd Installment"
+            int scheduledInstallment = extractInstallmentNumber(schedule.getMonth());
+            int currentInstallment = extractInstallmentNumber(collect.getMonth());
+            if (currentInstallment > scheduledInstallment) {
+                throw new RuntimeException("Cannot pay after the scheduled installment: " + schedule.getMonth());
             }
         }
 
-        if ("Installment".equalsIgnoreCase(collect.getMonth())) {
-            LocalDate currentDate = LocalDate.now();
-            Month currentMonth = currentDate.getMonth();
-            Month scheduleMonth;
 
-            try {
-                scheduleMonth = Month.valueOf(collect.getMonth().toUpperCase());
-            } catch (IllegalArgumentException ex) {
-                throw new RuntimeException("Invalid month format: " + collect.getMonth());
-            }
-
-            if (scheduleMonth.getValue() > currentMonth.getValue()) {
-                throw new RuntimeException("Cannot pay for a future month: " + scheduleMonth);
-            }
-        }
-
-        // ✅ Check status for duplicate completed payment in month
+        // Check status for duplicate completed payment in month
         if ("Completed".equalsIgnoreCase(collect.getStatus())) {
-            LocalDate now = LocalDate.now();
-            LocalDate start = now.withDayOfMonth(1);
-            LocalDate end = now.withDayOfMonth(now.lengthOfMonth());
-
+            LocalDate start = currentDate.withDayOfMonth(1);
+            LocalDate end = currentDate.withDayOfMonth(currentDate.lengthOfMonth());
             List<StudentFeesCollect> existing = feesCollectRepository
                     .findCompletedPaymentInMonth(fees.getFid(), start, end);
 
@@ -100,12 +88,12 @@ public class FeesCollectServiceImpl implements FeesCollectService
             }
         }
 
-        // ✅ Assign Invoice Number
+        // Assign Invoice Number
         Long maxId = feesCollectRepository.findMaxId();
         String invoice = String.format("%06d", (maxId != null ? maxId + 1 : 1));
         collect.setInvoice(invoice);
 
-        // ✅ Set common info
+        // Set common info
         collect.setCreatedByEmail(email);
         collect.setRole(role);
         collect.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
@@ -120,7 +108,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
             fees.setPendingAmount(newPending);
             fees.setFeesStatus(newPending <= 0 ? "Completed" : "Ongoing");
 
-            // ✅ Mark the schedule as paid
+            // Mark the schedule as paid
             schedule.setPaid(true);
             feesScheduleRepository.save(schedule);
             feesRepository.save(fees);
@@ -129,7 +117,6 @@ public class FeesCollectServiceImpl implements FeesCollectService
         StudentFeesCollect saved = feesCollectRepository.save(collect);
         return mapToDTO(saved);
     }
-
 
     @Override
     public FeesCollectDTO updateFeeCollectionStatus(Long id, String role, String email, String newStatus)
@@ -201,6 +188,16 @@ public class FeesCollectServiceImpl implements FeesCollectService
         return studentFeesCollects.stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    private int extractInstallmentNumber(String installmentLabel) {
+        // Assumes format like "1st Installment", "2nd Installment"
+        String[] parts = installmentLabel.split(" ");
+        try {
+            return Integer.parseInt(parts[0].replaceAll("[^0-9]", ""));
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid installment format: " + installmentLabel);
+        }
     }
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {

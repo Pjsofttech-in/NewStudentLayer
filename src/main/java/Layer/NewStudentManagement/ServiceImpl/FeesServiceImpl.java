@@ -44,6 +44,9 @@ public class FeesServiceImpl implements FeesService
     @Autowired
     private StreamRepository streamRepository;
 
+    @Autowired
+    private GroupRepository groupRepository;
+
 
     private void checkPermission(String role, String email, String action) {
         if (!staffService.hasPermission(role, email, action)) {
@@ -61,23 +64,16 @@ public class FeesServiceImpl implements FeesService
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        // Determine type
         boolean isUGPG = student.getDegreeName() != null && student.getDepartment() != null;
         boolean isJrCollege = student.getStream() != null && !isUGPG;
 
-        // === UG/PG ===
+        // === Fetch and set Degree & Department if UG/PG ===
         if (isUGPG) {
             if (fees.getDegree() == null || fees.getDegree().getId() == null ||
                     fees.getDepartment() == null || fees.getDepartment().getId() == null) {
                 throw new RuntimeException("Degree and Department must be provided for UG/PG student.");
             }
 
-            // Check if fees already assigned
-            if (feesRepository.existsUGPGFees(student, fees.getDegree().getId(), fees.getDepartment().getId())) {
-                throw new RuntimeException("Fees already assigned for this student, degree, and department.");
-            }
-
-            // Fetch and set degree and department
             StudentDegreeName degree = degreeNameRepository.findById(fees.getDegree().getId())
                     .orElseThrow(() -> new RuntimeException("Invalid degree ID"));
             StudentDepartment department = departmentRepository.findById(fees.getDepartment().getId())
@@ -89,14 +85,10 @@ public class FeesServiceImpl implements FeesService
             fees.setDepartmentName(department.getDepartmentName());
         }
 
-        // === Jr. College ===
-        else if (isJrCollege) {
+        // === Fetch and set Stream if Jr. College ===
+        if (isJrCollege) {
             if (fees.getStream() == null || fees.getStream().getId() == null) {
                 throw new RuntimeException("Stream must be provided for Jr. College student.");
-            }
-
-            if (feesRepository.existsJrCollegeFees(student, fees.getStream().getStream())) {
-                throw new RuntimeException("Fees already assigned for this student and stream.");
             }
 
             StudentStream stream = streamRepository.findById(fees.getStream().getId())
@@ -105,11 +97,7 @@ public class FeesServiceImpl implements FeesService
             fees.setStreamName(stream.getStream());
         }
 
-        else {
-            throw new RuntimeException("Student must be either Jr. College or UG/PG to assign fees.");
-        }
-
-        // === Optional: Standard (in case you also support standard-based logic later) ===
+        // === Optional: Standard ===
         if (fees.getStandard() != null && fees.getStandard().getSid() != null) {
             StudentStandard standard = standardRepository.findById(fees.getStandard().getSid())
                     .orElseThrow(() -> new RuntimeException("Standard not found"));
@@ -125,20 +113,71 @@ public class FeesServiceImpl implements FeesService
             fees.setMediumName(medium.getMediumName());
         }
 
-        // === Set basic details ===
+        // === Optional: Group ===
+        if (fees.getGroup() != null && fees.getGroup().getId() != null) {
+            StudentGroup group = groupRepository.findById(fees.getGroup().getId())
+                    .orElseThrow(() -> new RuntimeException("Group not found"));
+            fees.setGroup(group);
+        }
+
+        // === Existence Checks AFTER setting entities ===
+
+        // UGPG check
+        if (isUGPG && feesRepository.existsUGPGFees(student, fees.getDegree().getId(), fees.getDepartment().getId())) {
+            throw new RuntimeException("Fees already assigned for this student, degree, and department.");
+        }
+
+        // Jr College check
+        if (isJrCollege && feesRepository.existsJrCollegeFees(student, fees.getStream().getStream())) {
+            throw new RuntimeException("Fees already assigned for this student and stream.");
+        }
+
+        // Standard + Medium check
+        if (fees.getStandard() != null && fees.getMedium() != null &&
+                fees.getStream() == null && fees.getDegree() == null) {
+            if (feesRepository.existsByStandardAndMedium(student,
+                    fees.getStandard().getSid(), fees.getMedium().getMid())) {
+                throw new RuntimeException("Fees already assigned for this student with same Standard and Medium.");
+            }
+        }
+
+        // Standard + Medium + Stream + Group check
+        if (fees.getStandard() != null && fees.getMedium() != null &&
+                fees.getStream() != null && fees.getGroup() != null) {
+            if (feesRepository.existsByStandardMediumStreamGroup(student,
+                    fees.getStandard().getSid(),
+                    fees.getMedium().getMid(),
+                    fees.getStream().getId(),
+                    fees.getGroup().getId())) {
+                throw new RuntimeException("Fees already assigned for this student with same Standard, Medium, Stream, and Group.");
+            }
+        }
+
+        // Medium + Stream + Degree + Department check
+        if (fees.getMedium() != null && fees.getStream() != null &&
+                fees.getDegree() != null && fees.getDepartment() != null) {
+            if (feesRepository.existsByMediumStreamDegreeDepartment(student,
+                    fees.getMedium().getMid(),
+                    fees.getStream().getId(),
+                    fees.getDegree().getId(),
+                    fees.getDepartment().getId())) {
+                throw new RuntimeException("Fees already assigned for this student with same Medium, Stream, Degree, and Department.");
+            }
+        }
+
+        // === Set base details ===
         fees.setStudent(student);
         fees.setStudentName(student.getFullName());
         fees.setRollNo(student.getRollNo());
-        fees.setApprovalDate(fees.getApprovalDate()); // From frontend
-        fees.setDiscount(fees.getDiscount());// From frontend
+        fees.setApprovalDate(fees.getApprovalDate());
+        fees.setDiscount(fees.getDiscount());
         fees.setFeesStatus(fees.getFeesStatus());
         fees.setCreatedByEmail(email);
         fees.setRole(role);
         fees.setBranchCode(branchCode);
+        fees.setPendingAmount(fees.getTotalamount());
 
-        // === Frontend must send all fee values (backend doesn't calculate) ===
-        fees.setPendingAmount(fees.getTotalamount()); // initially all is pending
-
+        // === Schedule mapping ===
         List<StudentFeeSchedule> scheduleList = new ArrayList<>();
         if (fees.getScheduleList() != null && !fees.getScheduleList().isEmpty()) {
             for (StudentFeeSchedule item : fees.getScheduleList()) {
@@ -152,9 +191,12 @@ public class FeesServiceImpl implements FeesService
             }
         }
         fees.setScheduleList(scheduleList);
+
         StudentFees savedFees = feesRepository.save(fees);
         return mapToDTOFees(savedFees);
     }
+
+
 
     @Override
     public StudentFeesDTO updateFees(Long id, StudentFees updatedFees,String role, String email)
@@ -256,6 +298,7 @@ public class FeesServiceImpl implements FeesService
         dto.setStandardName(fees.getStandardName());
         dto.setMediumName(fees.getMediumName());
         dto.setStreamName(fees.getStreamName());
+        dto.setGroupName(fees.getGroupName());
         dto.setDegreeName(fees.getDegreeName());
         dto.setDepartmentName(fees.getDepartmentName());
 //        dto.setFeesType(fees.getFeesType());
