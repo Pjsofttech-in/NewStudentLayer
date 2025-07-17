@@ -20,26 +20,40 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
 
 
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
-            "WHERE f.standard = :standard AND f.medium = :medium AND f.branchCode = :branchCode AND f.institutionType = 'School'")
-    boolean existsByStandardAndMediumAndBranchCode(StudentStandard standard, StudentMedium medium, String branchCode);
+            "WHERE f.standard = :standard AND f.medium = :medium AND f.branchCode = :branchCode " +
+            "AND f.academicYear = :academicYear AND f.institutionType = 'School'")
+    boolean existsByStandardAndMediumAndBranchCodeAndAcademicYear(StudentStandard standard,
+                                                                  StudentMedium medium,
+                                                                  String branchCode,
+                                                                  String academicYear);
 
-    // Junior College: standard + stream + medium + branchCode
+    // Jr. College: standard + stream + medium + branchCode + academicYear + groupName
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
-            "WHERE f.standard = :standard AND f.stream = :stream AND f.medium = :medium AND f.branchCode = :branchCode AND f.institutionType = 'College' AND f.graduationType.graduationType = 'Jr.College'")
-    boolean existsByStandardAndStreamAndMediumAndBranchCode(StudentStandard standard, StudentStream stream, StudentMedium medium, String branchCode);
+            "WHERE f.standard = :standard AND f.stream = :stream AND f.medium = :medium AND " +
+            "f.branchCode = :branchCode AND f.academicYear = :academicYear AND f.groupName = :groupName " +
+            "AND f.institutionType = 'College' AND f.graduationType.graduationType = 'Jr.College'")
+    boolean existsByStandardAndStreamAndMediumAndBranchCodeAndAcademicYearAndGroupName(
+            StudentStandard standard,
+            StudentStream stream,
+            StudentMedium medium,
+            String branchCode,
+            String academicYear,
+            String groupName
+    );
 
-    // UG/PG: graduationType + degree + department + medium + branchCode
+    // UG/PG: graduationType + degree + department + medium + branchCode + academicYear
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
             "WHERE f.graduationType = :graduationType AND f.degree = :degree AND f.department = :department " +
-            "AND f.medium = :medium AND f.branchCode = :branchCode AND f.institutionType = 'College'")
-    boolean existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCode(
+            "AND f.medium = :medium AND f.branchCode = :branchCode AND f.academicYear = :academicYear " +
+            "AND f.institutionType = 'College'")
+    boolean existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCodeAndAcademicYear(
             StudentGraduationType graduationType,
             StudentDegreeName degree,
             StudentDepartment department,
             StudentMedium medium,
-            String branchCode
+            String branchCode,
+            String academicYear
     );
-
 
     @Query("SELECT f FROM StudentStandardFees f WHERE f.standard.id = :standardId AND f.medium.id = :mediumId AND f.institutionType = 'School' AND f.branchCode = :branchCode")
     List<StudentStandardFees> findForSchool(Long standardId, Long mediumId, String branchCode);

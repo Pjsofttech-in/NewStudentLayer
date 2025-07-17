@@ -63,13 +63,14 @@ public class StandardFeesServiceImpl implements StandardFeesService
         standardFees.setBranchCode(branchCode);
 
         String institutionType = standardFees.getInstitutionType();
+        String academicYear=standardFees.getAcademicYear();
 
         if ("School".equalsIgnoreCase(institutionType)) {
             // School case
             StudentStandard standard = standardRepository.findById(standardFees.getStandard().getSid())
                     .orElseThrow(() -> new RuntimeException("Invalid standard ID"));
 
-            boolean exists = standardFeesRepository.existsByStandardAndMediumAndBranchCode(standard, medium, branchCode);
+            boolean exists = standardFeesRepository.existsByStandardAndMediumAndBranchCodeAndAcademicYear(standard, medium, branchCode,academicYear);
             if (exists) {
                 throw new RuntimeException("Fees already assigned for this standard and medium.");
             }
@@ -100,8 +101,9 @@ public class StandardFeesServiceImpl implements StandardFeesService
                 StudentStream stream = streamRepository.findById(standardFees.getStream().getId())
                         .orElseThrow(() -> new RuntimeException("Invalid stream ID"));
 
-                boolean exists = standardFeesRepository.existsByStandardAndStreamAndMediumAndBranchCode(
-                        standard, stream, medium, branchCode);
+                String groupName = standardFees.getGroupName();
+                boolean exists = standardFeesRepository.existsByStandardAndStreamAndMediumAndBranchCodeAndAcademicYearAndGroupName(
+                        standard, stream, medium, branchCode,academicYear,groupName);
 
                 if (exists) {
                     throw new RuntimeException("Fees already assigned for this standard, stream, and medium.");
@@ -126,8 +128,8 @@ public class StandardFeesServiceImpl implements StandardFeesService
                 StudentDepartment department = departmentRepository.findById(standardFees.getDepartment().getId())
                         .orElseThrow(() -> new RuntimeException("Invalid department ID"));
 
-                boolean exists = standardFeesRepository.existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCode(
-                        graduationType, degree, department, medium, branchCode);
+                boolean exists = standardFeesRepository.existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCodeAndAcademicYear(
+                        graduationType, degree, department, medium, branchCode,academicYear);
 
                 if (exists) {
                     throw new RuntimeException("Fees already assigned for this graduation type, degree, department, and medium.");
