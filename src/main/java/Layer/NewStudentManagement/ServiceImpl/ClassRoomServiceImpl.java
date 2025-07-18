@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.ClassRoomFilterRequest;
 import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
 import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
 import Layer.NewStudentManagement.DTO.TeacherWithSubjectsDTO;
@@ -392,5 +393,23 @@ public class ClassRoomServiceImpl implements ClassRoomService
         return new ArrayList<>(classroomMap.values());
     }
 
+
+    @Override
+    public List<StudentClassRoomResponseDTO> getClassRoomsByFilter(ClassRoomFilterRequest filter) {
+        List<StudentClassRoom> classrooms = classRoomRepository.findByFilters(
+                filter.getInstitutionType(),
+                filter.getGraduationTypeId(),
+                filter.getStreamId(),
+                filter.getMediumId(),
+                filter.getStandardId(),
+                filter.getDegreeNameId(),
+                filter.getDepartmentId(),
+                filter.getGroupName(),
+                filter.getYear()
+        );
+        return classrooms.stream()
+                .map(this::mapToResponseDTO) // using your mapping method
+                .collect(Collectors.toList());
+    }
 
 }

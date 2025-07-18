@@ -21,4 +21,27 @@ public interface ClassRoomRepository extends JpaRepository<StudentClassRoom,Long
 //    List<StudentClassRoom> findClassroomsByTeacherId(@Param("teacherId") Long teacherId);
 
 
+    @Query("SELECT c FROM StudentClassRoom c " +
+            "WHERE (:institutionType IS NULL OR c.institutionType = :institutionType) " +
+            "AND (:graduationTypeId IS NULL OR c.graduationType.id = :graduationTypeId) " +
+            "AND (:streamId IS NULL OR c.stream.id = :streamId) " +
+            "AND (:mediumId IS NULL OR c.medium.id = :mediumId) " +
+            "AND (:standardId IS NULL OR c.standard.id = :standardId) " +
+            "AND (:degreeNameId IS NULL OR c.degreeName.id = :degreeNameId) " +
+            "AND (:departmentId IS NULL OR c.department.id = :departmentId) " +
+            "AND (:groupName IS NULL OR LOWER(c.groupName) = LOWER(:groupName)) " +
+            "AND (:year IS NULL OR c.year = :year)")
+    List<StudentClassRoom> findByFilters(
+            @Param("institutionType") String institutionType,
+            @Param("graduationTypeId") Long graduationTypeId,
+            @Param("streamId") Long streamId,
+            @Param("mediumId") Long mediumId,
+            @Param("standardId") Long standardId,
+            @Param("degreeNameId") Long degreeNameId,
+            @Param("departmentId") Long departmentId,
+            @Param("groupName") String groupName,
+            @Param("year") String year
+    );
+
+
 }

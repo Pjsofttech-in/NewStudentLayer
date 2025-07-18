@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Service;
 
+import Layer.NewStudentManagement.DTO.ClassRoomFilterRequest;
 import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
 import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
@@ -18,5 +19,6 @@ public interface ClassRoomService
     List<StudentClassRoomResponseDTO> getAllClassRoom(String role, String email);
     Map<Long, String> assignStudentsToClassroom(String role, String email, Long classroomId, List<Long> studentIds);
     List<StudentClassRoomResponseDTO> getClassroomDTOsByTeacherId(Long teacherId,String role, String email);
+    List<StudentClassRoomResponseDTO> getClassRoomsByFilter(ClassRoomFilterRequest filter);
 
 }

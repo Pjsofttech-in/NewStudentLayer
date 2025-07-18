@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.AssignClassroomRequest;
+import Layer.NewStudentManagement.DTO.ClassRoomFilterRequest;
 import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
 import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
@@ -75,6 +76,13 @@ public class ClassRoomController
     public ResponseEntity<List<StudentClassRoomResponseDTO>> getClassroomDTOs(@PathVariable Long teacherId,@RequestParam String role, @RequestParam String email) {
         List<StudentClassRoomResponseDTO> dtos = classRoomService.getClassroomDTOsByTeacherId(teacherId,role,email);
         return ResponseEntity.ok(dtos);
+    }
+
+    @PostMapping("/getClassRoomByFilter")
+    public ResponseEntity<List<StudentClassRoomResponseDTO>> getClassRoomsByFilter(
+            @RequestBody ClassRoomFilterRequest filterRequest) {
+        List<StudentClassRoomResponseDTO> classrooms = classRoomService.getClassRoomsByFilter(filterRequest);
+        return ResponseEntity.ok(classrooms);
     }
 
 }
