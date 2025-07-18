@@ -25,7 +25,6 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
     private final DepartmentRepository departmentRepository;
     private final DegreeNameRepository degreeNameRepository;
     private final StreamRepository streamRepository;
-    private final GroupRepository groupRepository;
     private final ClassRoomService classRoomService;
     private final StaffService staffService;
 
@@ -35,7 +34,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             Long newStandardId, Long newMediumId,
             Long newDegreeNameId, Long newDepartmentId,
             Long newStreamId, String groupName, // <-- groupName as String
-            String academicYear, Long newClassroomId) {
+            String academicYear, Long newClassroomId,String institutionType) {
 
         if (!staffService.hasPermission(role, email, "Post")) {
             throw new RuntimeException("You don't have permission to Promote Student");
@@ -57,6 +56,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         record.setPromotionDate(LocalDate.now());
         record.setIsCurrent(true);
         record.setRollNo(student.getRollNo());
+        record.setInstitutionType(student.getInstitutionType());
 
         if (student.getClassRoom() != null) {
             record.setClassroomId(student.getClassRoom().getId());
@@ -83,15 +83,15 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         promotionRecordRepository.save(record);
 
         // 3. Promotion logic
-        if ("School".equalsIgnoreCase(student.getInstitutionType())) {
+        if ("School".equalsIgnoreCase(institutionType)) {
             StudentStandard standard = standardRepository.findById(newStandardId)
                     .orElseThrow(() -> new RuntimeException("Standard not found"));
             StudentMedium medium = mediumRepository.findById(newMediumId)
                     .orElseThrow(() -> new RuntimeException("Medium not found"));
 
+            student.setInstitutionType(institutionType);
             student.setStandard(standard);
             student.setStandardName(standard.getStandardName());
-
             student.setMedium(medium);
             student.setMediumName(medium.getMediumName());
 
@@ -102,7 +102,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             student.setGroupName(null);  // reset groupName
         }
 
-        else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
+        else if ("College".equalsIgnoreCase(institutionType)) {
             if (student.getGraduationType() != null &&
                     "Jr.College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
 
@@ -232,6 +232,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
 
         dto.setRollNo(record.getRollNo());
         dto.setAcademicYear(record.getAcademicYear());
+        dto.setInstitutionType(record.getInstitutionType());
         dto.setPromotionDate(record.getPromotionDate());
         dto.setIsCurrent(record.getIsCurrent());
 

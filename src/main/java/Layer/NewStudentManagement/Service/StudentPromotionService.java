@@ -9,7 +9,7 @@ public interface StudentPromotionService
 {
 
      StudentPromotionResponseDTO promoteStudent(String role, String email, Long studentId, Long newStandardId,
-                                                      Long newMediumId, Long newDegreeNameId, Long newDepartmentId, Long newStreamId, String groupName, String academicYear, Long newClassroomId);
+                                                      Long newMediumId, Long newDegreeNameId, Long newDepartmentId, Long newStreamId, String groupName, String academicYear, Long newClassroomId,String institutionType);
     StudentPromotionResponseDTO getPromotionInfoById(String role, String email, Long studentId);
 }
 

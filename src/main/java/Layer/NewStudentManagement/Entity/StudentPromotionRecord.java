@@ -23,6 +23,7 @@ public class StudentPromotionRecord
     private Long classroomId;         // Old classroom ID
     private String division;
     private Integer rollNo;
+    private String institutionType;
 
     private Boolean isCurrent = true; // True for latest promotion
 

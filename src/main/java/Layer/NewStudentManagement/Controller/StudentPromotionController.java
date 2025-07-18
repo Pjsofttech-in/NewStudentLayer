@@ -31,7 +31,8 @@ public class StudentPromotionController
                 request.getNewStandardId(), request.getNewMediumId(),
                 request.getNewDegreeNameId(), request.getNewDepartmentId(),
                 request.getNewStreamId(), request.getGroupName(),
-                request.getAcademicYear(), request.getNewClassroomId()
+                request.getAcademicYear(), request.getNewClassroomId(),
+                request.getInstitutionType()
         );
 
         return ResponseEntity.ok(response);

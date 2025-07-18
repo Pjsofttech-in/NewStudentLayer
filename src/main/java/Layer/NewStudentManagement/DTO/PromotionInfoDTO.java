@@ -19,6 +19,7 @@ public class PromotionInfoDTO
     private Integer rollNo;
     private String mediumName;
     private String academicYear;
+    private String institutionType;
     private LocalDate promotionDate;
     private Boolean isCurrent;
 

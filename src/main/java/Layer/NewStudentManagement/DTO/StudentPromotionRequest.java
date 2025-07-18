@@ -20,4 +20,5 @@ public class StudentPromotionRequest
     private String groupName;
     private String academicYear;
     private Long newClassroomId;
+    private String institutionType;
 }
