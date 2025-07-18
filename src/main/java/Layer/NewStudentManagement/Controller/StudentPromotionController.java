@@ -22,17 +22,24 @@ public class StudentPromotionController
 
     @PostMapping("/studentPramoteInNextClass")
     public ResponseEntity<StudentPromotionResponseDTO> promoteStudent(
-            @RequestBody StudentPromotionRequest request,
             @RequestParam String role,
-            @RequestParam String email) {
-
+            @RequestParam String email,
+            @RequestBody StudentPromotionRequest requestDTO
+    ) {
         StudentPromotionResponseDTO response = studentPromotionService.promoteStudent(
-                role, email, request.getStudentId(),
-                request.getNewStandardId(), request.getNewMediumId(),
-                request.getNewDegreeNameId(), request.getNewDepartmentId(),
-                request.getNewStreamId(), request.getGroupName(),
-                request.getAcademicYear(), request.getNewClassroomId(),
-                request.getInstitutionType()
+                role,
+                email,
+                requestDTO.getStudentId(),
+                requestDTO.getNewStandardId(),
+                requestDTO.getNewMediumId(),
+                requestDTO.getNewDegreeNameId(),
+                requestDTO.getNewDepartmentId(),
+                requestDTO.getNewStreamId(),
+                requestDTO.getGroupName(),
+                requestDTO.getAcademicYear(),
+                requestDTO.getNewClassroomId(),
+                requestDTO.getInstitutionType(),
+                requestDTO.getGraduationTypeId()
         );
 
         return ResponseEntity.ok(response);

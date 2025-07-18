@@ -58,6 +58,10 @@ public class StudentPromotionRecord
     @JoinColumn(name = "group_id")
     private StudentGroup group;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "graduation_type_id")
+    private StudentGraduationType graduationType;
+
     private String standardName;
     private String mediumName;
 //    private String degreeName;

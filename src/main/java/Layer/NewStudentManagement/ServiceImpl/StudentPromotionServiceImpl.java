@@ -25,6 +25,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
     private final DepartmentRepository departmentRepository;
     private final DegreeNameRepository degreeNameRepository;
     private final StreamRepository streamRepository;
+    private final GraduationTypeRepository graduationTypeRepository;
     private final ClassRoomService classRoomService;
     private final StaffService staffService;
 
@@ -33,9 +34,10 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             String role, String email, Long studentId,
             Long newStandardId, Long newMediumId,
             Long newDegreeNameId, Long newDepartmentId,
-            Long newStreamId, String groupName, // <-- groupName as String
-            String academicYear, Long newClassroomId,String institutionType) {
-
+            Long newStreamId, String groupName,
+            String academicYear, Long newClassroomId,
+            String institutionType, Long graduationTypeId )
+    {
         if (!staffService.hasPermission(role, email, "Post")) {
             throw new RuntimeException("You don't have permission to Promote Student");
         }
@@ -43,13 +45,13 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        // 1. Mark current promotion record inactive
+        // Step 1: Mark current promotion record as inactive
         promotionRecordRepository.findCurrentByStudentId(studentId).ifPresent(current -> {
             current.setIsCurrent(false);
             promotionRecordRepository.save(current);
         });
 
-        // 2. Create promotion record with previous data
+        // Step 2: Create and save the previous promotion record
         StudentPromotionRecord record = new StudentPromotionRecord();
         record.setStudent(student);
         record.setAcademicYear(student.getAcademicYear());
@@ -67,42 +69,48 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
 
         record.setStandard(student.getStandard());
         record.setStandardName(student.getStandardName());
-
         record.setMedium(student.getMedium());
         record.setMediumName(student.getMediumName());
-
         record.setDegree(student.getDegreeName());
         record.setDepartment(student.getDepartment());
-
         record.setStream(student.getStream());
         record.setStreamName(student.getStreamName());
-
-        // Set previous groupName string in promotion record
         record.setGroupName(student.getGroupName());
-
+        record.setGraduationType(student.getGraduationType()); // Save previous graduation type
         promotionRecordRepository.save(record);
 
-        // 3. Promotion logic
+        // Step 3: Promotion logic based on institutionType
+        student.setInstitutionType(institutionType); // update institution type in student
+
         if ("School".equalsIgnoreCase(institutionType)) {
             StudentStandard standard = standardRepository.findById(newStandardId)
                     .orElseThrow(() -> new RuntimeException("Standard not found"));
             StudentMedium medium = mediumRepository.findById(newMediumId)
                     .orElseThrow(() -> new RuntimeException("Medium not found"));
 
-            student.setInstitutionType(institutionType);
             student.setStandard(standard);
             student.setStandardName(standard.getStandardName());
             student.setMedium(medium);
             student.setMediumName(medium.getMediumName());
 
+            // Reset college-related fields
             student.setDegreeName(null);
             student.setDepartment(null);
             student.setStream(null);
             student.setStreamName(null);
-            student.setGroupName(null);  // reset groupName
+            student.setGroupName(null);
+            student.setGraduationType(null);
         }
 
         else if ("College".equalsIgnoreCase(institutionType)) {
+            // Set new graduation type if provided
+            if (graduationTypeId != null) {
+                StudentGraduationType graduationType = graduationTypeRepository.findById(graduationTypeId)
+                        .orElseThrow(() -> new RuntimeException("GraduationType not found"));
+                student.setGraduationType(graduationType);
+            }
+
+            // Jr.College promotion logic
             if (student.getGraduationType() != null &&
                     "Jr.College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
 
@@ -115,21 +123,17 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
 
                 student.setStandard(standard);
                 student.setStandardName(standard.getStandardName());
-
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
-
                 student.setStream(stream);
                 student.setStreamName(stream.getStream());
+                student.setGroupName(groupName); // From request
 
-                // Set the passed groupName string directly
-                student.setGroupName(groupName);
-
+                // Reset UG/PG fields
                 student.setDegreeName(null);
                 student.setDepartment(null);
-
             } else {
-                // UG/PG Promotion
+                // UG/PG promotion logic
                 StudentDegreeName degree = degreeNameRepository.findById(newDegreeNameId)
                         .orElseThrow(() -> new RuntimeException("DegreeName not found"));
                 StudentDepartment department = departmentRepository.findById(newDepartmentId)
@@ -141,37 +145,36 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
 
                 student.setDegreeName(degree);
                 student.setDepartment(department);
-
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
-
                 student.setStream(stream);
                 student.setStreamName(stream.getStream());
 
+                // Reset school fields
                 student.setStandard(null);
                 student.setStandardName(null);
-                student.setGroupName(null);  // reset groupName for UG/PG
+                student.setGroupName(null);  // Not needed in UG/PG
             }
         }
 
-        // 4. Update academic year and reset classroom
+        // Step 4: Update academic year, classroom, and roll number
         student.setAcademicYear(academicYear);
         student.setClassRoom(null);
         student.setRollNo(null);
+
         studentRepository.save(student);
 
-        // 5. Assign new classroom and generate roll number
+        // Step 5: Assign new classroom
         classRoomService.assignStudentsToClassroom(role, email, newClassroomId, List.of(student.getId()));
 
-        // 6. Reload updated student
+        // Step 6: Reload updated student
         student = studentRepository.findById(studentId).orElseThrow();
 
-        // 7. Build response
+        // Step 7: Prepare response
         StudentPromotionResponseDTO response = new StudentPromotionResponseDTO();
         response.setStudentId(student.getId());
         response.setFullName(student.getFullName());
         response.setBranchCode(student.getBranchCode());
-
 
         StudentPromotionRecord latestRecord = promotionRecordRepository.findCurrentByStudentId(studentId)
                 .orElseThrow(() -> new RuntimeException("Current promotion not found"));
@@ -183,9 +186,6 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
                 .stream()
                 .map(this::mapToPromotionInfoDTO)
                 .collect(Collectors.toList());
-
-        response.setPromotionHistory(history);
-
 
         response.setPromotionHistory(history);
         return response;
@@ -251,6 +251,9 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
 
         dto.setStreamId(record.getStream() != null ? record.getStream().getId() : null);
         dto.setStreamName(record.getStreamName());
+
+        dto.setGraduationTypeId(record.getGraduationType() != null ? record.getGraduationType().getId() : null);
+        dto.setGraduationTypeName(record.getGraduationType() != null ? record.getGraduationType().getGraduationType() : null);
 
         dto.setGroupName(record.getGroupName());
 

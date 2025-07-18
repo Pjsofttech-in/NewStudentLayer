@@ -37,5 +37,8 @@ public class PromotionInfoDTO
     private Long streamId;
     private String streamName;
 
+    private Long graduationTypeId;
+    private String graduationTypeName;
+
     private String groupName;
 }
