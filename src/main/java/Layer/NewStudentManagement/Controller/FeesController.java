@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -74,8 +75,12 @@ public class FeesController
     }
 
     @GetMapping("/feesRevenewByBranch")
-    public ResponseEntity<FeesRevenueProjection> getFeesRevenueByBranch(@RequestParam String role, @RequestParam String email) {
-        FeesRevenueProjection summary = feesService.getFeesRevenueByBranch(role,email);
+    public ResponseEntity<FeesRevenueProjection> getFeesRevenueByBranch(@RequestParam String role, @RequestParam String email,
+                                                                        @RequestParam String timeFrame,
+                                                                        @RequestParam(required = false) LocalDate startDate,
+                                                                        @RequestParam(required = false) LocalDate endDate) {
+
+        FeesRevenueProjection summary = feesService.getFeesRevenueByBranch(role,email,timeFrame,startDate,endDate);
         return ResponseEntity.ok(summary);
     }
 

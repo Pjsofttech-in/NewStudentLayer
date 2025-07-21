@@ -7,6 +7,7 @@ import Layer.NewStudentManagement.Entity.StudentFees;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface FeesService
@@ -19,5 +20,5 @@ public interface FeesService
     List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email);
     Page<StudentFeesDTO> filterStudentFees(StudentFeesFilterRequest request,String role, String email, int page, int size);
 
-    FeesRevenueProjection getFeesRevenueByBranch(String role, String email);
+    FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate);
 }

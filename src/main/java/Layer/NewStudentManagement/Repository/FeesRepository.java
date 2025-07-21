@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -73,4 +74,16 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
             "WHERE s.branchCode = :branchCode")
     FeesRevenueProjection getFeesRevenueSummaryByBranch(@Param("branchCode") String branchCode);
 
+    @Query("SELECT " +
+            "COALESCE(SUM(f.totalamount), 0) as totalFees, " +
+            "COALESCE(SUM(f.paidAmount), 0) as totalPaid, " +
+            "COALESCE(SUM(f.pendingAmount), 0) as totalPending " +
+            "FROM StudentFees f " +
+            "WHERE f.branchCode = :branchCode " +
+            "AND f.approvalDate BETWEEN :startDate AND :endDate")
+    FeesRevenueProjection getFeesRevenueSummaryByBranchAndDateRange(
+            @Param("branchCode") String branchCode,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }

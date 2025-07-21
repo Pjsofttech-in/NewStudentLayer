@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -253,19 +254,6 @@ public class FeesServiceImpl implements FeesService
 
     }
 
-
-//    @Override
-//    public List<StudentFeesDTO> getAllFees(String role, String email)
-//    {
-//        checkPermission(role,email,"Get");
-//        String branchCode = staffService.fetchBranchCodeByRole(role, email);
-//
-//        List<StudentFees> fees = feesRepository.getAllByBranchCode(branchCode);
-//
-//        return fees.stream().map(this::mapToDTOFees)
-//            .collect(Collectors.toList());
-//    }
-
     @Override
     public List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email)
     {
@@ -290,13 +278,42 @@ public class FeesServiceImpl implements FeesService
     }
 
     @Override
-    public FeesRevenueProjection getFeesRevenueByBranch(String role, String email)
-    {
+    public FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate) {
         checkPermission(role, email, "Get");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        return feesRepository.getFeesRevenueSummaryByBranch(branchCode);
-    }
 
+        LocalDate calculatedStartDate = null;
+        LocalDate calculatedEndDate = LocalDate.now();
+
+        if ("custom".equalsIgnoreCase(timeFrame) && startDate != null && endDate != null) {
+            calculatedStartDate = startDate;
+            calculatedEndDate = endDate;
+        } else {
+            switch (timeFrame.toLowerCase()) {
+                case "today":
+                    calculatedStartDate = calculatedEndDate;
+                    break;
+                case "7days":
+                    calculatedStartDate = calculatedEndDate.minusDays(6);
+                    break;
+                case "30days":
+                    calculatedStartDate = calculatedEndDate.minusDays(29);
+                    break;
+                case "365days":
+                    calculatedStartDate = calculatedEndDate.minusDays(364);
+                    break;
+                case "all":
+                default:
+                    calculatedStartDate = null;
+            }
+        }
+
+        if (calculatedStartDate != null) {
+            return feesRepository.getFeesRevenueSummaryByBranchAndDateRange(branchCode, calculatedStartDate, calculatedEndDate);
+        } else {
+            return feesRepository.getFeesRevenueSummaryByBranch(branchCode);
+        }
+    }
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {
         StudentFeesDTO dto = new StudentFeesDTO();
