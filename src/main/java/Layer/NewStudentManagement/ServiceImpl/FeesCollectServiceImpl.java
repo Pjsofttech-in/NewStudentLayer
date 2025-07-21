@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.FeesCollectDTO;
+import Layer.NewStudentManagement.DTO.StudentFeeScheduleDTO;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
@@ -243,6 +244,21 @@ public class FeesCollectServiceImpl implements FeesCollectService
         dto.setBuildingFundFee(feesCollect.getBuildingFundFee());
         dto.setLibraryFees(feesCollect.getLibraryFees());
         dto.setSportFees(feesCollect.getSportFees());
+
+
+        dto.setStudentFeesId(
+                feesCollect.getStudentFees() != null ? feesCollect.getStudentFees().getFid() : null
+        );
+
+        if (feesCollect.getStudentFeeSchedule() != null) {
+            StudentFeeSchedule schedule = feesCollect.getStudentFeeSchedule();
+            StudentFeeScheduleDTO scheduleDTO = new StudentFeeScheduleDTO();
+            scheduleDTO.setId(schedule.getId());
+            scheduleDTO.setMonth(schedule.getMonth());
+            scheduleDTO.setPaid(schedule.isPaid());
+            scheduleDTO.setAmount(schedule.getCollectAmount());
+            dto.setSchedule(scheduleDTO);
+        }
 
         return dto;
     }

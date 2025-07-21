@@ -35,6 +35,10 @@ public class FeesCollectDTO
     private double libraryFees;
     private double sportFees;
 
+    private Long studentFeesId;
+
+    private StudentFeeScheduleDTO schedule;
+
 
 
 }
