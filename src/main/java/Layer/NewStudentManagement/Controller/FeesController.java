@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.DTO.StudentFeesDTO;
 import Layer.NewStudentManagement.DTO.StudentFeesFilterRequest;
 import Layer.NewStudentManagement.Entity.StudentFees;
@@ -72,6 +73,11 @@ public class FeesController
         return feesService.filterStudentFees(request, role, email, page, size);
     }
 
+    @GetMapping("/feesRevenewByBranch")
+    public ResponseEntity<FeesRevenueProjection> getFeesRevenueByBranch(@RequestParam String role, @RequestParam String email) {
+        FeesRevenueProjection summary = feesService.getFeesRevenueByBranch(role,email);
+        return ResponseEntity.ok(summary);
+    }
 
 
 }

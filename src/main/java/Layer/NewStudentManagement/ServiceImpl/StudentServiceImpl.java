@@ -229,6 +229,8 @@ public class StudentServiceImpl implements StudentService {
 
         BeanCopyUtils.copyNonNullProperties(request.getStudent(), existing);
 
+        updateStudentFields(existing, request.getStudent());
+
         if (request.getStudent().getPassword() != null) {
             existing.setPassword(passwordEncoder.encode(request.getStudent().getPassword()));
         }
@@ -509,6 +511,7 @@ public class StudentServiceImpl implements StudentService {
         if (incoming.getApprovalDate() != null) existing.setApprovalDate(incoming.getApprovalDate());
         if (incoming.getStatus() != null) existing.setStatus(incoming.getStatus());
         if (incoming.getApplyFor() != null) existing.setApplyFor(incoming.getApplyFor());
+        if (incoming.getFormStatus() != null) existing.setFormStatus(incoming.getFormStatus());
         if (incoming.getStreamName() != null) existing.setStreamName(incoming.getStreamName());
         if (incoming.getGroupName() != null) existing.setGroupName(incoming.getGroupName());
         if (incoming.getSemister() != null) existing.setSemister(incoming.getSemister());

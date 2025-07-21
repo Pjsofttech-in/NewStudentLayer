@@ -51,5 +51,13 @@ public class FeesCollectController
         return ResponseEntity.ok(collectedFees);
     }
 
+    @GetMapping("/getCollectedFeesById")
+    public ResponseEntity<FeesCollectDTO> getCollectedFeesById(@RequestParam String role, @RequestParam String email, @RequestParam Long id)
+    {
+        FeesCollectDTO feesCollect =feesCollectService.getCollectedFeesById(role, email, id);
+        return ResponseEntity.ok(feesCollect);
+
+    }
+
 
 }

@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.FeeScheduleDTO;
+import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.DTO.StudentFeesDTO;
 import Layer.NewStudentManagement.DTO.StudentFeesFilterRequest;
 import Layer.NewStudentManagement.Entity.*;
@@ -286,6 +287,14 @@ public class FeesServiceImpl implements FeesService
         Page<StudentFees> studentFeesPage = feesRepository.findAll(spec, pageRequest);
 
         return studentFeesPage.map(this::mapToDTOFees);
+    }
+
+    @Override
+    public FeesRevenueProjection getFeesRevenueByBranch(String role, String email)
+    {
+        checkPermission(role, email, "Get");
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        return feesRepository.getFeesRevenueSummaryByBranch(branchCode);
     }
 
 

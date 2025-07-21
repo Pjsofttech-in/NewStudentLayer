@@ -188,7 +188,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
     {
         if(!staffService.hasPermission(role,email,"Get"))
         {
-            throw new RuntimeException("You don't have permission to Get Fees Status");
+            throw new RuntimeException("You don't have permission to Get Fees by StudentId");
         }
         List<StudentFeesCollect> studentFeesCollects = feesCollectRepository.findCollectedFeesByStudentId(studentId);
 
@@ -205,6 +205,20 @@ public class FeesCollectServiceImpl implements FeesCollectService
         } catch (Exception e) {
             throw new RuntimeException("Invalid installment format: " + installmentLabel);
         }
+    }
+
+    public FeesCollectDTO getCollectedFeesById(String role, String email, Long id)
+    {
+        if(!staffService.hasPermission(role,email,"Get"))
+        {
+            throw new RuntimeException("You don't have permission to Get Collected Fees by Fees Id");
+        }
+
+        StudentFeesCollect collectedFees = feesCollectRepository.findById(id).orElseThrow(()->
+                new RuntimeException("FeesCollected Not Found for this Id"));
+
+        return mapToDTO(collectedFees);
+
     }
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {

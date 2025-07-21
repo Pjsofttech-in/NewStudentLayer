@@ -53,7 +53,7 @@ public class StudentEntity
     private String semister;
     private String password;
     private String institutionType;
-    private String formStatus = "Incomplete";
+    private String formStatus ;
     private String reason;
     private double discount;
 

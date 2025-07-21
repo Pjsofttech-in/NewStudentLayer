@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Repository;
 
+import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentStandard;
@@ -64,5 +65,12 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
     @Query("SELECT f FROM StudentFees f WHERE f.student.id = :studentId")
     List<StudentFees> findFeesByStudentId(@Param("studentId") Long studentId);
 
+    @Query("SELECT " +
+            "SUM(s.totalamount) as totalFees, " +
+            "SUM(s.paidAmount) as totalPaid, " +
+            "SUM(s.pendingAmount) as totalPending " +
+            "FROM StudentFees s " +
+            "WHERE s.branchCode = :branchCode")
+    FeesRevenueProjection getFeesRevenueSummaryByBranch(@Param("branchCode") String branchCode);
 
 }
