@@ -45,6 +45,10 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
+        if (!"Approved".equalsIgnoreCase(student.getStatus())) {
+            throw new RuntimeException("Student cannot be promoted. Status must be 'Approved'.");
+        }
+
         // Step 1: Mark current promotion record as inactive
         promotionRecordRepository.findCurrentByStudentId(studentId).ifPresent(current -> {
             current.setIsCurrent(false);
