@@ -244,6 +244,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
         dto.setBuildingFundFee(feesCollect.getBuildingFundFee());
         dto.setLibraryFees(feesCollect.getLibraryFees());
         dto.setSportFees(feesCollect.getSportFees());
+        dto.setTransactionId(feesCollect.getTransactionId());
 
 
         dto.setStudentFeesId(
