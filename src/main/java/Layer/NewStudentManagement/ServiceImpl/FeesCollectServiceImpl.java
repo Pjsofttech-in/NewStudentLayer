@@ -257,6 +257,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
             scheduleDTO.setId(schedule.getId());
             scheduleDTO.setMonth(schedule.getMonth());
             scheduleDTO.setPaid(schedule.isPaid());
+            scheduleDTO.setDueDate(schedule.getDueDate());
             scheduleDTO.setAmount(schedule.getCollectAmount());
             dto.setSchedule(scheduleDTO);
         }
