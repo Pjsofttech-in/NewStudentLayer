@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -24,6 +26,7 @@ public class StudentFeeSchedule
     private String feesType;    // "Monthly" or "Installment"
     private String month;   // "July", "August" OR "1st Installment", etc.
     private Double collectAmount;
+    private LocalDate dueDate;
     private boolean isPaid = false;
 
 }
