@@ -72,7 +72,7 @@ public class FeesServiceImpl implements FeesService
         // === Fetch and set Degree & Department if UG/PG ===
         if (isUGPG) {
             if (fees.getDegree() == null || fees.getDegree().getId() == null ||
-                    fees.getDepartment() == null || fees.getDepartment().getId() == null || fees.getStream() != null || fees.getStudentName() != null) {
+                    fees.getDepartment() == null || fees.getDepartment().getId() == null || fees.getStream() != null || fees.getStreamName() != null) {
                 throw new RuntimeException("Stream, Degree and Department  must be provided for UG/PG student.");
             }
 
