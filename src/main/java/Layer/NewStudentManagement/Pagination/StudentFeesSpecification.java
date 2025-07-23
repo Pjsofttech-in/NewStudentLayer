@@ -31,7 +31,7 @@ public class StudentFeesSpecification
 
             if (dto.getStreamName() != null && !dto.getStreamName().isEmpty()) {
                 Join<StudentFees, StudentStream> streamJoin = root.join("stream", JoinType.LEFT);
-                predicates.add(criteriaBuilder.equal(streamJoin.get("streamName"), dto.getStreamName()));
+                predicates.add(criteriaBuilder.equal(streamJoin.get("stream"), dto.getStreamName()));
             }
 
             if (dto.getGroupName() != null && !dto.getGroupName().isEmpty()) {
