@@ -59,6 +59,7 @@ public class StudentFees
     private double pendingAmount;     // remaining amount
 //    private String feesPaymentType;   // OneTime, Monthly, Installment
 
+    private String institutionType;
     @Email
     private String createdByEmail;
     private String role;

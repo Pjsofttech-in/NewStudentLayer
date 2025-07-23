@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.DTO.FeeScheduleDTO;
-import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
-import Layer.NewStudentManagement.DTO.StudentFeesDTO;
-import Layer.NewStudentManagement.DTO.StudentFeesFilterRequest;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Pagination.StudentFeesSpecification;
 import Layer.NewStudentManagement.Repository.*;
@@ -11,6 +8,8 @@ import Layer.NewStudentManagement.Service.FeesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -66,6 +65,7 @@ public class FeesServiceImpl implements FeesService
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
+        fees.setInstitutionType(fees.getInstitutionType());
         boolean isUGPG = student.getDegreeName() != null && student.getDepartment() != null;
         boolean isJrCollege = student.getStream() != null && !isUGPG;
 
@@ -264,17 +264,14 @@ public class FeesServiceImpl implements FeesService
 
 
     @Override
-    public Page<StudentFeesDTO> filterStudentFees(StudentFeesFilterRequest request, String role, String email, int page, int size) {
-        checkPermission(role, email, "Get");
-
-        Specification<StudentFees> spec = Specification
-                .where(StudentFeesSpecification.hasStudentName(request.getStudentName()))
-                .and(StudentFeesSpecification.hasFeesStatus(request.getFeesStatus()));
-
-        PageRequest pageRequest = PageRequest.of(page, size);
-        Page<StudentFees> studentFeesPage = feesRepository.findAll(spec, pageRequest);
-
-        return studentFeesPage.map(this::mapToDTOFees);
+    public Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fid").descending());
+        Page<StudentFees> fees = feesRepository.findAll(
+                StudentFeesSpecification.filterByDTOAndBranchCode(filterDTO, branchCode),
+                pageable
+        );
+        Page<StudentFeesDTO> dtoPage = fees.map(this::mapToDTOFees);
+        return dtoPage;
     }
 
     @Override
@@ -351,6 +348,8 @@ public class FeesServiceImpl implements FeesService
         dto.setPaidAmount(fees.getPaidAmount());
         dto.setPendingAmount(fees.getPendingAmount());
 //        dto.setFeesPaymentType(fees.getFeesPaymentType());
+        dto.setInstitutionType(fees.getInstitutionType());
+
         dto.setCreatedByEmail(fees.getCreatedByEmail());
         dto.setRole(fees.getRole());
         dto.setBranchCode(fees.getBranchCode());

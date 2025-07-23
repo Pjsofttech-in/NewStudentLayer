@@ -1,10 +1,12 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.DTO.StudentFeesDTO;
 import Layer.NewStudentManagement.DTO.StudentFeesFilterRequest;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Service.FeesService;
+import Layer.NewStudentManagement.ServiceImpl.StaffService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,8 @@ import java.util.List;
 @RestController
 public class FeesController
 {
+    @Autowired
+    StaffService staffService;
 
     @Autowired
     private FeesService feesService;
@@ -64,14 +68,18 @@ public class FeesController
     }
 
     @PostMapping("/getAllFeesForStudentWithFilter")
-    public Page<StudentFeesDTO> filterStudentFees(
-            @RequestBody StudentFeesFilterRequest request,
+    public ResponseEntity<Page<StudentFeesDTO>> filterStudentFees(
+            @RequestBody FeesFilterDTO filterDTO,
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return feesService.filterStudentFees(request, role, email, page, size);
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        Page<StudentFeesDTO> feesPage = feesService.getAllFeesWithFilter(filterDTO, branchCode, page, size);
+
+        return ResponseEntity.ok(feesPage);
     }
 
     @GetMapping("/feesRevenewByBranch")

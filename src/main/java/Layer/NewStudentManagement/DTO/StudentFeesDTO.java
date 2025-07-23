@@ -50,6 +50,7 @@ public class StudentFeesDTO
 //    private double lateFeeCharges;
     private String feesStatus;
     private String feesCollectionType;
+    private String institutionType;
     private List<FeeScheduleDTO> scheduleList;
 
 

@@ -246,7 +246,6 @@ public class FeesCollectServiceImpl implements FeesCollectService
         dto.setSportFees(feesCollect.getSportFees());
         dto.setTransactionId(feesCollect.getTransactionId());
 
-
         dto.setStudentFeesId(
                 feesCollect.getStudentFees() != null ? feesCollect.getStudentFees().getFid() : null
         );

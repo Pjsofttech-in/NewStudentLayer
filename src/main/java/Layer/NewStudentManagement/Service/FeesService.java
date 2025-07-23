@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Service;
 
+import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.DTO.StudentFeesDTO;
 import Layer.NewStudentManagement.DTO.StudentFeesFilterRequest;
@@ -18,7 +19,6 @@ public interface FeesService
     StudentFeesDTO getFeesById(Long id,String role, String email);
 //    List<StudentFeesDTO> getAllFees(String role, String email);
     List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email);
-    Page<StudentFeesDTO> filterStudentFees(StudentFeesFilterRequest request,String role, String email, int page, int size);
-
+    Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size);
     FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate);
 }

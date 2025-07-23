@@ -305,7 +305,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
             attendanceRepository.save(attendance);
 
-            return "Logout successful for Roll No: " + rollNo;
+            return "Logout successful for Roll No: " + rollNo+"  Name:"+ attendance.getStudentName();
 
         } catch (Exception e) {
             e.printStackTrace();
