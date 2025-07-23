@@ -121,6 +121,8 @@ public class StandardFeesServiceImpl implements StandardFeesService
                         standardFees.getDepartment() == null || standardFees.getDepartment().getId() == null) {
                     throw new RuntimeException("Degree and Department must be provided for UG/PG College students.");
                 }
+                StudentStream stream = streamRepository.findById(standardFees.getStream().getId())
+                        .orElseThrow(() -> new RuntimeException("Invalid stream ID"));
 
                 StudentDegreeName degree = degreeNameRepository.findById(standardFees.getDegree().getId())
                         .orElseThrow(() -> new RuntimeException("Invalid degree ID"));
@@ -135,6 +137,8 @@ public class StandardFeesServiceImpl implements StandardFeesService
                     throw new RuntimeException("Fees already assigned for this graduation type, degree, department, and medium.");
                 }
 
+                standardFees.setStream(stream);
+                standardFees.setStreamName(stream.getStream());
                 standardFees.setDegree(degree);
                 standardFees.setDegreeName(degree.getDegreeName());
                 standardFees.setDepartment(department);

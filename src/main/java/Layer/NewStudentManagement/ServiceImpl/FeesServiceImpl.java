@@ -66,21 +66,26 @@ public class FeesServiceImpl implements FeesService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         fees.setInstitutionType(fees.getInstitutionType());
-        boolean isUGPG = student.getDegreeName() != null && student.getDepartment() != null;
-        boolean isJrCollege = student.getStream() != null && !isUGPG;
+        boolean isUGPG = student.getDegreeName() != null && student.getDepartment() != null && student.getStream() != null;
+        boolean isJrCollege = student.getStream() != null && student.getGroupName() != null&& !isUGPG;
 
         // === Fetch and set Degree & Department if UG/PG ===
         if (isUGPG) {
             if (fees.getDegree() == null || fees.getDegree().getId() == null ||
-                    fees.getDepartment() == null || fees.getDepartment().getId() == null) {
-                throw new RuntimeException("Degree and Department must be provided for UG/PG student.");
+                    fees.getDepartment() == null || fees.getDepartment().getId() == null || fees.getStream() != null || fees.getStudentName() != null) {
+                throw new RuntimeException("Stream, Degree and Department  must be provided for UG/PG student.");
             }
 
+            StudentStream stream = streamRepository.findById(fees.getStream().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid stream ID"));
             StudentDegreeName degree = degreeNameRepository.findById(fees.getDegree().getId())
                     .orElseThrow(() -> new RuntimeException("Invalid degree ID"));
             StudentDepartment department = departmentRepository.findById(fees.getDepartment().getId())
                     .orElseThrow(() -> new RuntimeException("Invalid department ID"));
 
+
+            fees.setStream(stream);
+            fees.setStreamName(stream.getStream());
             fees.setDegree(degree);
             fees.setDegreeName(degree.getDegreeName());
             fees.setDepartment(department);
