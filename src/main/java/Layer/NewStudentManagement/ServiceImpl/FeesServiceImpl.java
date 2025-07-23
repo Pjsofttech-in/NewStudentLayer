@@ -354,7 +354,7 @@ public class FeesServiceImpl implements FeesService
         dto.setPendingAmount(fees.getPendingAmount());
 //        dto.setFeesPaymentType(fees.getFeesPaymentType());
         dto.setInstitutionType(fees.getInstitutionType());
-
+        dto.setStudentId(fees.getStudent().getId());
         dto.setCreatedByEmail(fees.getCreatedByEmail());
         dto.setRole(fees.getRole());
         dto.setBranchCode(fees.getBranchCode());

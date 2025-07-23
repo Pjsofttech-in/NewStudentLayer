@@ -53,6 +53,8 @@ public class StudentFeesDTO
     private String institutionType;
     private List<FeeScheduleDTO> scheduleList;
 
+    private Long studentId;
+
 
     //    private String feesType;
     @Email
