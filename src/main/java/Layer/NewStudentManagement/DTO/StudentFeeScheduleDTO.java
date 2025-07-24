@@ -19,5 +19,5 @@ public class StudentFeeScheduleDTO
     private boolean paid;
     private LocalDate dueDate;
     private Double amount;
-
+    private String FeesType;
 }

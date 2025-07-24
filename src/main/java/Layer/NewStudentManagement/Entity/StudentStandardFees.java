@@ -31,6 +31,7 @@ public class StudentStandardFees
     private double buildingFundFee;
     private double libraryFees;
     private double sportFees;
+//    private double  extraCurricular;
     private double GST;
     private Double feesAmount;
     private String institutionType;

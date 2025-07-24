@@ -21,4 +21,6 @@ public class FeesFilterDTO
     private String groupName;
     private String institutionType;
     private String academicYear;
+    private String feesCollectionType;
+    private String feesStatus;
 }

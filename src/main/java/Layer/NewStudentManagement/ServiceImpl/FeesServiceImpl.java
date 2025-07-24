@@ -368,6 +368,7 @@ public class FeesServiceImpl implements FeesService
                         sdto.setMonth(s.getMonth());
                         sdto.setPaid(s.isPaid());
                         sdto.setCollectAmount(s.getCollectAmount());
+                        sdto.setDueDate(s.getDueDate());
                         return sdto;
                     }).collect(Collectors.toList());
 

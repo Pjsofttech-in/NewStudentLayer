@@ -48,6 +48,7 @@ public class StudentFeesSpecification
                 Join<StudentFees, StudentDepartment> deptJoin = root.join("department", JoinType.LEFT);
                 predicates.add(criteriaBuilder.equal(deptJoin.get("departmentName"), dto.getDepartmentName()));
             }
+
             if (dto.getInstitutionType() != null && !dto.getInstitutionType().isBlank()) {
                 predicates.add(criteriaBuilder.equal(
                         criteriaBuilder.lower(root.get("institutionType")),
@@ -55,6 +56,19 @@ public class StudentFeesSpecification
                 ));
             }
 
+            if (dto.getFeesCollectionType() != null && !dto.getFeesCollectionType().isBlank()) {
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.lower(root.get("feesCollectionType")),
+                        dto.getFeesCollectionType().toLowerCase()
+                ));
+            }
+
+            if (dto.getFeesStatus() != null && !dto.getFeesStatus().isBlank()) {
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.lower(root.get("feesStatus")),
+                        dto.getFeesStatus().toLowerCase()
+                ));
+            }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
