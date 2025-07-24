@@ -1,12 +1,14 @@
 package Layer.NewStudentManagement.Pagination;
 
 import Layer.NewStudentManagement.DTO.FeesFilterDTO;
+import Layer.NewStudentManagement.DTO.FeesRevenueFilterDTO;
 import Layer.NewStudentManagement.Entity.*;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,6 +72,48 @@ public class StudentFeesSpecification
                 ));
             }
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<StudentFees> withFilters(String branchCode, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters) {
+        return (root, query, cb) -> {
+            query.multiselect(
+                    cb.sum(root.get("feesAmount")),
+                    cb.sum(root.get("paidAmount")),
+                    cb.sum(root.get("pendingAmount"))
+            );
+
+            Predicate predicate = cb.equal(root.get("branchCode"), branchCode);
+
+            if (startDate != null && endDate != null) {
+                predicate = cb.and(predicate, cb.between(root.get("approvalDate"), startDate, endDate));
+            }
+
+            if (filters.getInstitutionType() != null && !filters.getInstitutionType().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(root.get("institutionType"), filters.getInstitutionType()));
+            }
+
+            if (filters.getAcademicYear() != null && !filters.getAcademicYear().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(root.get("student").get("academicYear"), filters.getAcademicYear()));
+            }
+
+            if (filters.getStandardName() != null && !filters.getStandardName().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(root.get("standardName"), filters.getStandardName()));
+            }
+
+            if (filters.getMediumName() != null && !filters.getMediumName().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(root.get("mediumName"), filters.getMediumName()));
+            }
+
+            if (filters.getStreamName() != null && !filters.getStreamName().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(root.get("streamName"), filters.getStreamName()));
+            }
+
+            if (filters.getGraduationTypeName() != null && !filters.getGraduationTypeName().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(root.get("degreeName"), filters.getGraduationTypeName()));
+            }
+
+            return predicate;
         };
     }
 }

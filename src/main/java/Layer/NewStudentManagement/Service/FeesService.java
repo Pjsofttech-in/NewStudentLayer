@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.Service;
 
-import Layer.NewStudentManagement.DTO.FeesFilterDTO;
-import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
-import Layer.NewStudentManagement.DTO.StudentFeesDTO;
-import Layer.NewStudentManagement.DTO.StudentFeesFilterRequest;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,5 +17,5 @@ public interface FeesService
 //    List<StudentFeesDTO> getAllFees(String role, String email);
     List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email);
     Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size);
-    FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate);
+    FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters);
 }

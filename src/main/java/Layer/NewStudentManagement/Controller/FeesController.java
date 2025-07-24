@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
-import Layer.NewStudentManagement.DTO.FeesFilterDTO;
-import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
-import Layer.NewStudentManagement.DTO.StudentFeesDTO;
-import Layer.NewStudentManagement.DTO.StudentFeesFilterRequest;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Service.FeesService;
 import Layer.NewStudentManagement.ServiceImpl.StaffService;
@@ -82,13 +79,14 @@ public class FeesController
         return ResponseEntity.ok(feesPage);
     }
 
-    @GetMapping("/feesRevenewByBranch")
+    @PostMapping("/feesRevenewByBranch")
     public ResponseEntity<FeesRevenueProjection> getFeesRevenueByBranch(@RequestParam String role, @RequestParam String email,
                                                                         @RequestParam String timeFrame,
                                                                         @RequestParam(required = false) LocalDate startDate,
-                                                                        @RequestParam(required = false) LocalDate endDate) {
+                                                                        @RequestParam(required = false) LocalDate endDate,
+                                                                        @RequestBody FeesRevenueFilterDTO filters) {
 
-        FeesRevenueProjection summary = feesService.getFeesRevenueByBranch(role,email,timeFrame,startDate,endDate);
+        FeesRevenueProjection summary = feesService.getFeesRevenueByBranch(role,email,timeFrame,startDate,endDate,filters);
         return ResponseEntity.ok(summary);
     }
 

@@ -5,6 +5,12 @@ import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Pagination.StudentFeesSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.FeesService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Tuple;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +29,9 @@ public class FeesServiceImpl implements FeesService
 {
     @Autowired
     private FeesRepository feesRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private StaffService staffService;
@@ -280,8 +289,10 @@ public class FeesServiceImpl implements FeesService
         return dtoPage;
     }
 
+
+
     @Override
-    public FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate) {
+    public FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters) {
         checkPermission(role, email, "Get");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
@@ -293,29 +304,48 @@ public class FeesServiceImpl implements FeesService
             calculatedEndDate = endDate;
         } else {
             switch (timeFrame.toLowerCase()) {
-                case "today":
-                    calculatedStartDate = calculatedEndDate;
-                    break;
-                case "7days":
-                    calculatedStartDate = calculatedEndDate.minusDays(6);
-                    break;
-                case "30days":
-                    calculatedStartDate = calculatedEndDate.minusDays(29);
-                    break;
-                case "365days":
-                    calculatedStartDate = calculatedEndDate.minusDays(364);
-                    break;
-                case "all":
-                default:
-                    calculatedStartDate = null;
+                case "today" -> calculatedStartDate = calculatedEndDate;
+                case "7days" -> calculatedStartDate = calculatedEndDate.minusDays(6);
+                case "30days" -> calculatedStartDate = calculatedEndDate.minusDays(29);
+                case "365days" -> calculatedStartDate = calculatedEndDate.minusDays(364);
+                case "all" -> calculatedStartDate = null; // No filter
+                default -> calculatedStartDate = null;    // Also no filter
             }
         }
 
-        if (calculatedStartDate != null) {
-            return feesRepository.getFeesRevenueSummaryByBranchAndDateRange(branchCode, calculatedStartDate, calculatedEndDate);
-        } else {
-            return feesRepository.getFeesRevenueSummaryByBranch(branchCode);
-        }
+        Specification<StudentFees> spec = StudentFeesSpecification.withFilters(branchCode, calculatedStartDate, calculatedEndDate, filters);
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tuple> cq = cb.createTupleQuery();
+        Root<StudentFees> root = cq.from(StudentFees.class);
+
+        Predicate predicate = spec.toPredicate(root, cq, cb);
+        cq.where(predicate);
+
+        cq.multiselect(
+                cb.sum(root.get("totalamount")).alias("totalFees"),
+                cb.sum(root.get("paidAmount")).alias("totalPaid"),
+                cb.sum(root.get("pendingAmount")).alias("totalPending")
+        );
+
+        Tuple result = entityManager.createQuery(cq).getSingleResult();
+
+        return new FeesRevenueProjection() {
+            @Override
+            public Double getTotalFees() {
+                return result.get("totalFees", Double.class);
+            }
+
+            @Override
+            public Double getTotalPaid() {
+                return result.get("totalPaid", Double.class);
+            }
+
+            @Override
+            public Double getTotalPending() {
+                return result.get("totalPending", Double.class);
+            }
+        };
     }
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {
