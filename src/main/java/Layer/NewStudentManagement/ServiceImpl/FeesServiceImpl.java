@@ -193,6 +193,7 @@ public class FeesServiceImpl implements FeesService
                 schedule.setMonth(item.getMonth());
                 schedule.setCollectAmount(item.getCollectAmount());
                 schedule.setPaid(false);
+                schedule.setDueDate(item.getDueDate());
                 schedule.setStudentFees(fees);
                 scheduleList.add(schedule);
             }
