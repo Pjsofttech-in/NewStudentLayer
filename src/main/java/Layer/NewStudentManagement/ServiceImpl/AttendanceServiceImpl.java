@@ -158,7 +158,7 @@ public class AttendanceServiceImpl implements AttendanceService {
             }
         }
 
-        return "✅ Logout Success: " + String.join(", ", successList) +
+        return "Logout Success: " + String.join(", ", successList) +
                 "\nAlready Logged Out: " + String.join(", ", alreadyLoggedOut) +
                 "\nNo Attendance Found: " + String.join(", ", notFound);
     }

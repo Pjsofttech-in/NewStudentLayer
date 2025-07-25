@@ -64,6 +64,10 @@ public class StudentResponseDTO {
     private String reason;
     private double discount;
 
+    private boolean scholarship;
+    private boolean projectDifferentiated;
+    private Boolean sportYesNo;
+
     @Email
     private String createdByEmail;
     private String role;

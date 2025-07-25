@@ -91,6 +91,7 @@ public class StudentMapper
 
             dto.setAdditionalInfo(toStudentAdditionalInfoDTO(student.getAdditionalInfo()));
 
+
             dto.setReligion(toStudentReligionDTO(student.getReligion()));
 
             dto.setSports(toStudentSportsDTO(student.getSports()));
