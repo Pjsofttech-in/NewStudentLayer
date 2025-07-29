@@ -556,7 +556,11 @@ public class StudentServiceImpl implements StudentService {
         dto.setFormStatus(student.getFormStatus());
         dto.setReason(student.getReason());
         dto.setDiscount(student.getDiscount());
-        dto.setSportYesNo(student.getSports().getSportYesNo());
+        if (student.getSports() != null) {
+            dto.setSportYesNo(student.getSports().getSportYesNo());
+        } else {
+            dto.setSportYesNo(null); // or default value like false
+        }
         dto.setScholarship(student.getAdditionalInfo().isScholarship());
         dto.setProjectDifferentiated(student.getAdditionalInfo().isProjectDifferentiated());
         dto.setCreatedByEmail(student.getCreatedByEmail());
