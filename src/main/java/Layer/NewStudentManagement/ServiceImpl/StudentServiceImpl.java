@@ -561,8 +561,17 @@ public class StudentServiceImpl implements StudentService {
         } else {
             dto.setSportYesNo(null); // or default value like false
         }
-        dto.setScholarship(student.getAdditionalInfo().isScholarship());
-        dto.setProjectDifferentiated(student.getAdditionalInfo().isProjectDifferentiated());
+        if (student.getAdditionalInfo() != null) {
+            dto.setScholarship(student.getAdditionalInfo().isScholarship());
+            dto.setProjectDifferentiated(student.getAdditionalInfo().isProjectDifferentiated());
+            dto.setEarthquake(student.getAdditionalInfo().isEarthquake());
+            dto.setHandicap(student.getAdditionalInfo().isHandicap());
+        } else {
+            dto.setScholarship(false);
+            dto.setProjectDifferentiated(false);
+            dto.setEarthquake(false);
+            dto.setHandicap(false);
+        }
         dto.setCreatedByEmail(student.getCreatedByEmail());
         dto.setRole(student.getRole());
         dto.setBranchCode(student.getBranchCode());
