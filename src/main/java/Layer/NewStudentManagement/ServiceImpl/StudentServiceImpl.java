@@ -11,6 +11,8 @@ import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
 import io.jsonwebtoken.Claims;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -63,6 +65,7 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     private JwtUtil jwtUtil;
 
+    private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
 
     private void checkPermission(String role, String email, String action) {
         if (!staffService.hasPermission(role, email, action)) {
@@ -90,6 +93,9 @@ public class StudentServiceImpl implements StudentService {
             branchCode = staffService.fetchBranchCodeByRole(role, email);
         }
 
+        if (studentRepository.existsByEmailAndBranchCode(request.getStudent().getEmail(), branchCode)) {
+            throw new RuntimeException("Student with this email already exists in this branch.");
+        }
         StudentEntity student = request.getStudent();
         student.setEnrollmentDate(LocalDate.now());
         student.setPassword(passwordEncoder.encode(student.getPassword()));
@@ -182,29 +188,84 @@ public class StudentServiceImpl implements StudentService {
 
         StudentEntity savedStudent = studentRepository.save(student);
 
-        // Save Address
-        StudentAddress address = request.getAddress();
-        address.setStudent(savedStudent);
-        addressRepo.save(address);
-
-        // Save Education List
-        List<StudentEducation> educationList = request.getEducationList();
-        for (StudentEducation education : educationList) {
-            education.setStudent(savedStudent);
-            educationRepo.save(education);
+//        // Save Address
+//        StudentAddress address = request.getAddress();
+//        address.setStudent(savedStudent);
+//        addressRepo.save(address);
+//
+//        // Save Education List
+//        List<StudentEducation> educationList = request.getEducationList();
+//        for (StudentEducation education : educationList) {
+//            education.setStudent(savedStudent);
+//            educationRepo.save(education);
+//        }
+//
+//        StudentAdditionalInfo additionalInfo = request.getAdditionalInfo();
+//        additionalInfo.setStudent(savedStudent);
+//        additionalInfoRepo.save(additionalInfo);
+//
+//        StudentReligion religion = request.getReligion();
+//        religion.setStudent(savedStudent);
+//        religionRepo.save(religion);
+//
+//        StudentSports sports = request.getSports();
+//        sports.setStudent(savedStudent);
+//        sportsRepo.save(sports);
+        try {
+            StudentAddress address = request.getAddress();
+            if (address != null) {
+                address.setStudent(savedStudent);
+                addressRepo.save(address);
+            }
+        } catch (Exception e) {
+            logger.error("Address saving failed: {}", e.getMessage());
         }
 
-        StudentAdditionalInfo additionalInfo = request.getAdditionalInfo();
-        additionalInfo.setStudent(savedStudent);
-        additionalInfoRepo.save(additionalInfo);
+// Save Education List
+        List<StudentEducation> educationList = request.getEducationList();
+        if (educationList != null) {
+            for (StudentEducation education : educationList) {
+                try {
+                    education.setStudent(savedStudent);
+                    educationRepo.save(education);
+                } catch (Exception e) {
+                    logger.error("Education saving failed: {}", e.getMessage());
+                }
+            }
+        }
 
-        StudentReligion religion = request.getReligion();
-        religion.setStudent(savedStudent);
-        religionRepo.save(religion);
+// Save Additional Info
+        try {
+            StudentAdditionalInfo additionalInfo = request.getAdditionalInfo();
+            if (additionalInfo != null) {
+                additionalInfo.setStudent(savedStudent);
+                additionalInfoRepo.save(additionalInfo);
+            }
+        } catch (Exception e) {
+            logger.error("AdditionalInfo saving failed: {}", e.getMessage());
+        }
 
-        StudentSports sports = request.getSports();
-        sports.setStudent(savedStudent);
-        sportsRepo.save(sports);
+// Save Religion
+        try {
+            StudentReligion religion = request.getReligion();
+            if (religion != null) {
+                religion.setStudent(savedStudent);
+                religionRepo.save(religion);
+            }
+        } catch (Exception e) {
+            logger.error("Religion saving failed: {}", e.getMessage());
+        }
+
+// Save Sports
+        try {
+            StudentSports sports = request.getSports();
+            if (sports != null) {
+                sports.setStudent(savedStudent);
+                sportsRepo.save(sports);
+            }
+        } catch (Exception e) {
+            logger.error("Sports saving failed: {}", e.getMessage());
+        }
 
         return mapToDTO(savedStudent);
     }

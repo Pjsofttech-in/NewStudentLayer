@@ -30,7 +30,7 @@ public class StudentEntity
     @Pattern(regexp = "^[0-9]{10}$", message = "Mobile number must be 10 digits")
     private String contact;
     private Long age;
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false)
     private String email;
     private LocalDate dateOfBirth;
     private String birthPlace;

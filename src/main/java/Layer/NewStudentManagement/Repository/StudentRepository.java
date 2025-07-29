@@ -116,5 +116,9 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     Long countByClassRoomId(@Param("classroomId") Long classroomId);
 
 
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
+            "FROM StudentEntity s WHERE s.email = :email AND s.branchCode = :branchCode")
+    boolean existsByEmailAndBranchCode(@Param("email") String email,
+                                       @Param("branchCode") String branchCode);
 
 }

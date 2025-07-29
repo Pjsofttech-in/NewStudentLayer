@@ -89,14 +89,29 @@ public class StudentMapper
                             : null
             );
 
-            dto.setAdditionalInfo(toStudentAdditionalInfoDTO(student.getAdditionalInfo()));
+            if (student.getAdditionalInfo() != null) {
+                dto.setAdditionalInfo(toStudentAdditionalInfoDTO(student.getAdditionalInfo()));
+            } else {
+                dto.setAdditionalInfo(null);
+            }
 
+            if (student.getReligion() != null) {
+                dto.setReligion(toStudentReligionDTO(student.getReligion()));
+            } else {
+                dto.setReligion(null);
+            }
 
-            dto.setReligion(toStudentReligionDTO(student.getReligion()));
+            if (student.getSports() != null) {
+                dto.setSports(toStudentSportsDTO(student.getSports()));
+            } else {
+                dto.setSports(null);
+            }
 
-            dto.setSports(toStudentSportsDTO(student.getSports()));
-
-            dto.setDocuments(toStudentDocumentDTO(student.getDocuments()));
+            if (student.getDocuments() != null) {
+                dto.setDocuments(toStudentDocumentDTO(student.getDocuments()));
+            } else {
+                dto.setDocuments(null);
+            }
 
             return dto;
         }
