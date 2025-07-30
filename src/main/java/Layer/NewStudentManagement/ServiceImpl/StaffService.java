@@ -2,7 +2,9 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.InstituteClientWrapperResponse;
 import Layer.NewStudentManagement.DTO.InstituteLoginResponse;
+import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentTeacher;
+import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Repository.TeacherRepository;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
@@ -30,6 +32,9 @@ public class StaffService
 
     @Autowired
     TeacherRepository teacherRepository;
+
+    @Autowired
+    StudentRepository studentRepository;
 
     @Autowired
     public StaffService(WebClient webClient) {
@@ -139,13 +144,29 @@ public class StaffService
 
         switch (role.toUpperCase()) {
             case "USER" -> {
-                return ("POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action));
+                return "POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action);
+            }
+
+            case "STUDENT" -> {
+                try {
+                    System.out.println("Checking role for Student: " + email + " Action: " + action);
+                    boolean exists = studentRepository.existsByEmail(email);
+                    return exists && ("POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action));
+                } catch (Exception e) {
+                    System.err.println("Error checking student permission: " + e.getMessage());
+                    return false;
+                }
             }
 
             case "TEACHER" -> {
-                System.out.println("Checking role for Teacher: " + email + " Action: " + action);
-                boolean exists = teacherRepository.existsByTeacherEmail(email);
-                return exists && ("POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action));
+                try {
+                    System.out.println("Checking role for Teacher: " + email + " Action: " + action);
+                    boolean exists = teacherRepository.existsByTeacherEmail(email);
+                    return exists && ("POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action));
+                } catch (Exception e) {
+                    System.err.println("Error checking teacher permission: " + e.getMessage());
+                    return false;
+                }
             }
 
             case "BRANCH" -> {
@@ -158,7 +179,6 @@ public class StaffService
                             .retrieve()
                             .bodyToMono(Boolean.class)
                             .block();
-
                     return Boolean.TRUE.equals(exists);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -189,43 +209,48 @@ public class StaffService
             }
 
             default -> {
-                // Unknown role
                 return false;
             }
         }
     }
 
-
     public String fetchBranchCodeByRole(String role, String email) {
-        switch (role.toLowerCase()) {
-            case "branch":
-            case "department":
-            case "staff": {
-                String endpoint = switch (role.toLowerCase()) {
-                    case "branch" -> "/branch/getbranchcode";
-                    case "department" -> "/department/getbranchcode";
-                    case "staff" -> "/staff/getbranchcode";
-                    default -> throw new IllegalArgumentException("Invalid role: " + role);
-                };
+        try {
+            switch (role.toLowerCase()) {
+                case "branch", "department", "staff" -> {
+                    String endpoint = switch (role.toLowerCase()) {
+                        case "branch" -> "/branch/getbranchcode";
+                        case "department" -> "/department/getbranchcode";
+                        case "staff" -> "/staff/getbranchcode";
+                        default -> throw new IllegalArgumentException("Invalid role: " + role);
+                    };
 
-                return webClient.get()
-                        .uri(uriBuilder -> uriBuilder
-                                .path(endpoint)
-                                .queryParam("email", email)
-                                .build())
-                        .retrieve()
-                        .bodyToMono(String.class)
-                        .block();
+                    return webClient.get()
+                            .uri(uriBuilder -> uriBuilder
+                                    .path(endpoint)
+                                    .queryParam("email", email)
+                                    .build())
+                            .retrieve()
+                            .bodyToMono(String.class)
+                            .block();
+                }
+
+                case "teacher" -> {
+                    return teacherRepository.findByTeacherEmail(email)
+                            .map(StudentTeacher::getBranchCode)
+                            .orElseThrow(() -> new RuntimeException("Teacher not found with email: " + email));
+                }
+
+                case "student" -> {
+                    return studentRepository.findByEmail(email)
+                            .map(StudentEntity::getBranchCode)
+                            .orElseThrow(() -> new RuntimeException("Student not found with email: " + email));
+                }
+
+                default -> throw new IllegalArgumentException("Invalid role: " + role);
             }
-
-            case "teacher": {
-                StudentTeacher teacher = teacherRepository.findByTeacherEmail(email)
-                        .orElseThrow(() -> new IllegalArgumentException("Teacher not found: " + email));
-                return teacher.getBranchCode();
-            }
-
-            default:
-                throw new IllegalArgumentException("Invalid role: " + role);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch branch code for role: " + role + ", email: " + email, e);
         }
     }
 

@@ -900,6 +900,8 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("Invalid email or password");
         }
 
+        student.setUserRole("Student");
+
         String token = jwtUtil.generateToken(student.getEmail());
 
         Map<String, Object> studentData = new HashMap<>();
