@@ -16,4 +16,9 @@ public class StudentSubjectDTO
     private String createdByEmail;
     private String role;
     private String branchCode;
+    private String institutionType;
+    private Long graduationTypeId;
+    private String graduationType;
+    private Long streamId;
+    private String stream;
 }

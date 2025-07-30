@@ -24,16 +24,15 @@ public class StudentTeacher
     private String teacherEmail;
     private String password;
     private String institutionType;
+    private String streamName;
     private String otp;
     private Long otpRequestedTime;
-
+    private String graduationTypeName;
     @Email
     private String createdByEmail;
     private String role;
     private String branchCode;
-
-
-    @ManyToMany
+      @ManyToMany
     @JoinTable(
             name = "student_teacher_subject",
             joinColumns = @JoinColumn(name = "teacher_id"),
@@ -43,5 +42,15 @@ public class StudentTeacher
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
     private List<StudentClassRoomTeacherSubject> assignments;
+
+    @ManyToOne
+    @JoinColumn(name = "graduation_type_id", nullable = true)
+    private StudentGraduationType graduationType;
+
+    @ManyToOne
+    @JoinColumn(name = "stream_id", nullable = true)
+    private StudentStream stream;
+
+
 
 }

@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +20,9 @@ public class StudentSubject
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
     private String subject;
+    private String institutionType;
+    private String graduationTypeName;
+    private String streamName;
     @Email
     private String createdByEmail;
     private String role;
@@ -30,4 +30,13 @@ public class StudentSubject
 
     @ManyToMany(mappedBy = "subjects")
     private List<StudentTeacher> teachers;
+
+    @ManyToOne
+    @JoinColumn(name = "graduation_type_id", nullable = true)
+    private StudentGraduationType graduationType;
+
+    @ManyToOne
+    @JoinColumn(name = "stream_id", nullable = true)
+    private StudentStream stream;
+
 }

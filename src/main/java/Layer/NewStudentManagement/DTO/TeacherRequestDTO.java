@@ -13,6 +13,8 @@ public class TeacherRequestDTO
     private String teacherName;
     private String teacherEmail;
     private String institutionType;
+    private Long graduationTypeId;
+    private Long streamId;
 
     private String password;
     private List<Long> subjectIds;

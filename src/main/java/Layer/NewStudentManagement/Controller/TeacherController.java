@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -64,12 +65,12 @@ public class TeacherController
         return ResponseEntity.ok(teachers);
     }
 
-    @GetMapping("/getTeacherByInstitutionType")
-    public ResponseEntity<Iterable<StudentTeacherDTO>> getTeacherByInstitutionType(@RequestParam String role, @RequestParam String email, @RequestParam String institutionType)
-    {
-        Iterable<StudentTeacherDTO> teachers = teacherService.getTeacherByInstitutionType(role,email,institutionType);
-        return ResponseEntity.ok(teachers);
-    }
+//    @GetMapping("/getTeacherByInstitutionType")
+//    public ResponseEntity<Iterable<StudentTeacherDTO>> getTeacherByInstitutionType(@RequestParam String role, @RequestParam String email, @RequestParam String institutionType)
+//    {
+//        Iterable<StudentTeacherDTO> teachers = teacherService.getTeacherByInstitutionType(role,email,institutionType);
+//        return ResponseEntity.ok(teachers);
+//    }
 
     @PostMapping("/teacherLogin")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
@@ -99,6 +100,22 @@ public class TeacherController
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
         return ResponseEntity.ok("Logout successful");
+    }
+
+    @GetMapping("/getTeacherByInstitutionType")
+    public ResponseEntity<List<StudentTeacherDTO>> getTeachers(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false) String institutionType,
+            @RequestParam(required = false) String graduationType,
+            @RequestParam(required = false) String stream
+    ) {
+        if (institutionType == null || institutionType.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+        List<StudentTeacherDTO> teachers = teacherService.getTeachers(
+                role, email, institutionType, graduationType,stream);
+        return ResponseEntity.ok(teachers);
     }
 
 

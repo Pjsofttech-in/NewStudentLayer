@@ -6,6 +6,10 @@ import Layer.NewStudentManagement.Service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.List;
+
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
@@ -15,9 +19,9 @@ public class SubjectController
     private SubjectService subjectService;
 
     @PostMapping("/createSubject")
-    public ResponseEntity<StudentSubject> createSubject(@RequestParam String role, @RequestParam String email, @RequestBody StudentSubject subjectName)
+    public ResponseEntity<StudentSubjectDTO> createSubject( @RequestBody StudentSubjectDTO dto,@RequestParam String role, @RequestParam String email)
     {
-        StudentSubject createdSubject = subjectService.createSubject(role,email,subjectName);
+        StudentSubjectDTO createdSubject = subjectService.saveSubject(dto,role,email);
         return ResponseEntity.ok(createdSubject);
     }
 
@@ -46,6 +50,23 @@ public class SubjectController
     public ResponseEntity<Iterable<StudentSubjectDTO>> getAllSubject(@RequestParam String role, @RequestParam String email)
     {
         Iterable<StudentSubjectDTO> subjects = subjectService.getAllSubject(role,email);
+        return ResponseEntity.ok(subjects);
+    }
+
+    @GetMapping("/getSubjectByInstitutionType")
+    public ResponseEntity<List<StudentSubjectDTO>> getSubjects(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false) String institutionType,
+            @RequestParam(required = false) String graduationType,
+            @RequestParam(required = false) String stream
+            ) {
+        if (institutionType == null || institutionType.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+        List<StudentSubjectDTO> subjects = subjectService.getSubjects(
+                role, email, institutionType, graduationType,stream);
+
         return ResponseEntity.ok(subjects);
     }
 

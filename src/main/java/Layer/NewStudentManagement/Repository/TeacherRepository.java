@@ -30,4 +30,17 @@ public interface TeacherRepository extends JpaRepository<StudentTeacher,Long>
                                                             @Param("branchCode") String branchCode);
 
 
+    @Query("SELECT t FROM StudentTeacher t " +
+            "WHERE t.institutionType = :institutionType " +
+            "AND t.branchCode = :branchCode " +
+            "AND (:graduationTypeName IS NULL OR t.graduationTypeName = :graduationTypeName) " +
+            "AND (:streamName IS NULL OR t.streamName = :streamName)")
+    List<StudentTeacher> findByInstitutionTypeAndGraduationTypeNameAndStreamNameAndBranchCode(
+            @Param("institutionType") String institutionType,
+            @Param("graduationTypeName") String graduationTypeName,
+            @Param("streamName") String streamName,
+            @Param("branchCode") String branchCode
+    );
+
+
 }
