@@ -6,6 +6,8 @@ import Layer.NewStudentManagement.Mapper.StudentMapper;
 import Layer.NewStudentManagement.Pagination.StudentSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Security.JwtUtil;
+import Layer.NewStudentManagement.Security.LoginRequest;
+import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
@@ -93,8 +95,8 @@ public class StudentServiceImpl implements StudentService {
             branchCode = staffService.fetchBranchCodeByRole(role, email);
         }
 
-        if (studentRepository.existsByEmailAndBranchCode(request.getStudent().getEmail(), branchCode)) {
-            throw new RuntimeException("Student with this email already exists in this branch.");
+        if (studentRepository.existsByEmail(request.getStudent().getEmail())) {
+            throw new RuntimeException("Student with this email already exists.");
         }
         StudentEntity student = request.getStudent();
         student.setEnrollmentDate(LocalDate.now());
@@ -886,6 +888,28 @@ public class StudentServiceImpl implements StudentService {
         result.put("rejected", rejected);
         result.put("pending", pending);
         return result;
+    }
+
+
+    @Override
+    public LoginResponse studentLogin(LoginRequest request) {
+        StudentEntity student = studentRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        String token = jwtUtil.generateToken(student.getEmail());
+
+        Map<String, Object> studentData = new HashMap<>();
+        studentData.put("id", student.getId());
+        studentData.put("name", student.getFullName());
+        studentData.put("email", student.getEmail());
+        studentData.put("role", student.getRole());
+        studentData.put("branchCode", student.getBranchCode());
+
+        return new LoginResponse(token, studentData);
     }
 
 

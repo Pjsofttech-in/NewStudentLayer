@@ -4,6 +4,8 @@ package Layer.NewStudentManagement.Service;
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentDocument;
 import Layer.NewStudentManagement.Entity.StudentEntity;
+import Layer.NewStudentManagement.Security.LoginRequest;
+import Layer.NewStudentManagement.Security.LoginResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,4 +46,6 @@ public interface StudentService
     void deleteEducationById(String role, String email, Long educationId);
 
     Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd);
+
+    LoginResponse studentLogin(LoginRequest request);
 }

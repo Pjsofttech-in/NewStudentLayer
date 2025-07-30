@@ -48,7 +48,7 @@ public class SecurityConfig {
                     return config;
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/stafflogin","/teacherLogin","/verifyOtpToTeacher","/sendOtpToTeacher","/resetTeacherPassword").permitAll()
+                        .requestMatchers("/stafflogin","/teacherLogin","/verifyOtpToTeacher","/sendOtpToTeacher","/resetTeacherPassword","/studentLogin").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

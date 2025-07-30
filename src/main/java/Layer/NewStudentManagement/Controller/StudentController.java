@@ -5,6 +5,8 @@ import Layer.NewStudentManagement.Entity.StudentDocument;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
+import Layer.NewStudentManagement.Security.LoginRequest;
+import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -207,6 +209,12 @@ public class StudentController
             @RequestParam Long studentId) {
         studentService.updateFormStatus(role,email,studentId);
         return ResponseEntity.ok("Status updated successfully");
+    }
+
+    @PostMapping("/studentLogin")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        LoginResponse response = studentService.studentLogin(request);
+        return ResponseEntity.ok(response);
     }
 
 }
