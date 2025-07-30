@@ -28,6 +28,8 @@ public class StudentTeacher
     private String otp;
     private Long otpRequestedTime;
     private String graduationTypeName;
+    private String degreeName;
+    private String departmentName;
     @Email
     private String createdByEmail;
     private String role;
@@ -51,6 +53,12 @@ public class StudentTeacher
     @JoinColumn(name = "stream_id", nullable = true)
     private StudentStream stream;
 
+    @ManyToOne
+    @JoinColumn(name = "degree_id", nullable = true)
+    private StudentDegreeName degree;
 
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = true)
+    private StudentDepartment department;
 
 }

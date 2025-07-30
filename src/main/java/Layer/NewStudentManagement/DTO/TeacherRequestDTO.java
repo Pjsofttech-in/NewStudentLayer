@@ -15,6 +15,8 @@ public class TeacherRequestDTO
     private String institutionType;
     private Long graduationTypeId;
     private Long streamId;
+    private Long degreeId;
+    private Long departmentId;
 
     private String password;
     private List<Long> subjectIds;

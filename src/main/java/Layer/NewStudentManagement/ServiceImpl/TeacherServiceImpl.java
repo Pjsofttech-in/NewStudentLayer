@@ -3,14 +3,8 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.StudentSubjectDTO;
 import Layer.NewStudentManagement.DTO.StudentTeacherDTO;
 import Layer.NewStudentManagement.DTO.TeacherRequestDTO;
-import Layer.NewStudentManagement.Entity.StudentGraduationType;
-import Layer.NewStudentManagement.Entity.StudentStream;
-import Layer.NewStudentManagement.Entity.StudentSubject;
-import Layer.NewStudentManagement.Entity.StudentTeacher;
-import Layer.NewStudentManagement.Repository.GraduationTypeRepository;
-import Layer.NewStudentManagement.Repository.StreamRepository;
-import Layer.NewStudentManagement.Repository.SubjectRepository;
-import Layer.NewStudentManagement.Repository.TeacherRepository;
+import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Security.EmailService;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
@@ -41,6 +35,12 @@ public class TeacherServiceImpl implements TeacherService
     StreamRepository streamRepository;
 
     @Autowired
+    DegreeNameRepository degreeRepository;
+
+    @Autowired
+    DepartmentRepository departmentRepository;
+
+    @Autowired
     private GraduationTypeRepository graduationTypeRepository;
 
     @Autowired
@@ -62,31 +62,58 @@ public class TeacherServiceImpl implements TeacherService
         String institutionType = dto.getInstitutionType().trim();
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
+        // Fetch subjects
         List<StudentSubject> subjectEntities = subjectRepository.findAllById(dto.getSubjectIds());
         if (subjectEntities.size() != dto.getSubjectIds().size()) {
             throw new RuntimeException("One or more subject IDs are invalid");
         }
 
+        // Initialize all dependent entities
         StudentGraduationType graduationType = null;
-        if (!"School".equalsIgnoreCase(institutionType)) {
+        StudentStream stream = null;
+        StudentDegreeName degree = null;
+        StudentDepartment department = null;
+
+        if ("School".equalsIgnoreCase(institutionType)) {
+            // School: no further checks
+        } else {
+            // For College, graduationType is required
             if (dto.getGraduationTypeId() == null) {
-                throw new RuntimeException("Graduation Type ID is required for non-school institutions");
+                throw new RuntimeException("Graduation Type ID is required for College");
             }
 
             graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
                     .orElseThrow(() -> new RuntimeException("Graduation Type not found"));
-        }
 
-        StudentStream stream = null;
-        if (!"School".equalsIgnoreCase(institutionType)) {
-            if (dto.getStreamId() == null) {
-                throw new RuntimeException("Stream ID is required for non-school institutions");
+            String gradTypeName = graduationType.getGraduationType();
+
+            if ("Jr.College".equalsIgnoreCase(gradTypeName)) {
+                if (dto.getStreamId() == null) {
+                    throw new RuntimeException("Stream ID is required for Jr.College");
+                }
+
+                stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+            } else if ("UG".equalsIgnoreCase(gradTypeName) || "PG".equalsIgnoreCase(gradTypeName)) {
+                if (dto.getStreamId() == null || dto.getDegreeId() == null || dto.getDepartmentId() == null) {
+                    throw new RuntimeException("Stream, Degree, and Department are required for UG/PG");
+                }
+
+                stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+                degree = degreeRepository.findById(dto.getDegreeId())
+                        .orElseThrow(() -> new RuntimeException("Degree not found"));
+
+                department = departmentRepository.findById(dto.getDepartmentId())
+                        .orElseThrow(() -> new RuntimeException("Department not found"));
+            } else {
+                throw new RuntimeException("Unsupported Graduation Type for College");
             }
-
-            stream = streamRepository.findById(dto.getStreamId())
-                    .orElseThrow(() -> new RuntimeException("Stream not found"));
         }
 
+        // Validate subjects match with institution, graduationType and stream
         for (StudentSubject subject : subjectEntities) {
             if (subject.getInstitutionType() == null ||
                     !institutionType.equalsIgnoreCase(subject.getInstitutionType())) {
@@ -106,6 +133,7 @@ public class TeacherServiceImpl implements TeacherService
             }
         }
 
+        // Create teacher entity
         StudentTeacher teacher = new StudentTeacher();
         teacher.setTeacherName(dto.getTeacherName());
         teacher.setTeacherEmail(dto.getTeacherEmail());
@@ -116,6 +144,7 @@ public class TeacherServiceImpl implements TeacherService
         teacher.setCreatedByEmail(email);
         teacher.setSubjects(subjectEntities);
 
+        // Set graduationType and stream
         if (graduationType != null) {
             teacher.setGraduationType(graduationType);
             teacher.setGraduationTypeName(graduationType.getGraduationType());
@@ -126,9 +155,21 @@ public class TeacherServiceImpl implements TeacherService
             teacher.setStreamName(stream.getStream());
         }
 
+        if (degree != null) {
+            teacher.setDegree(degree);
+            teacher.setDegreeName(degree.getDegreeName());
+        }
+
+        if (department != null) {
+            teacher.setDepartment(department);
+            teacher.setDepartmentName(department.getDepartmentName());
+        }
+
+        // Save and return
         StudentTeacher savedTeacher = teacherRepository.save(teacher);
         return mapToResponseDTO(savedTeacher);
     }
+
 
     @Override
     public StudentTeacherDTO getTeacherById(Long id,String role,String email)
@@ -292,27 +333,21 @@ public class TeacherServiceImpl implements TeacherService
 
 
     @Override
-    public List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName, String streamName) {
+    public List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName, String streamName,String degreeName, String departmentName) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to get teachers");
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        if (institutionType == null || institutionType.trim().isEmpty()) {
-            return Collections.emptyList(); // Safe fallback
-        }
 
-        if ("School".equalsIgnoreCase(institutionType)) {
-            graduationTypeName = null;
-            streamName = null;
-        }
-
-        List<StudentTeacher> teachers = teacherRepository.findByInstitutionTypeAndGraduationTypeNameAndStreamNameAndBranchCode(
-                institutionType.trim(),
-                graduationTypeName != null ? graduationTypeName.trim() : null,
-                streamName != null ? streamName.trim() : null,
-                branchCode
+        List<StudentTeacher> teachers = teacherRepository.findTeachersByFilters(
+                branchCode,
+                institutionType != null && !institutionType.trim().isEmpty() ? institutionType.trim() : null,
+                graduationTypeName != null && !graduationTypeName.trim().isEmpty() ? graduationTypeName.trim() : null,
+                streamName != null && !streamName.trim().isEmpty() ? streamName.trim() : null,
+                degreeName != null && !degreeName.trim().isEmpty() ? degreeName.trim() : null,
+                departmentName != null && !departmentName.trim().isEmpty() ? departmentName.trim() : null
         );
 
         return teachers.stream()
@@ -322,34 +357,55 @@ public class TeacherServiceImpl implements TeacherService
 
 
     private StudentTeacherDTO mapToResponseDTO(StudentTeacher teacher) {
-        List<StudentSubjectDTO> subjectDTOs = teacher.getSubjects().stream()
-                .map(subject -> {
-                    StudentSubjectDTO dto = new StudentSubjectDTO();
-                    dto.setId(subject.getId());
-                    dto.setSubject(subject.getSubject());
-                    return dto;
-                })
-                .collect(Collectors.toList());
+        List<StudentSubjectDTO> subjectDTOs = new ArrayList<>();
+        if (teacher.getSubjects() != null) {
+            subjectDTOs = teacher.getSubjects().stream()
+                    .filter(Objects::nonNull)
+                    .map(subject -> {
+                        StudentSubjectDTO dto = new StudentSubjectDTO();
+                        dto.setId(subject.getId());
+                        dto.setSubject(subject.getSubject());
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+        }
 
         StudentTeacherDTO responseDTO = new StudentTeacherDTO();
         responseDTO.setId(teacher.getId());
         responseDTO.setTeacherName(teacher.getTeacherName());
         responseDTO.setTeacherEmail(teacher.getTeacherEmail());
         responseDTO.setInstitutionType(teacher.getInstitutionType());
-        responseDTO.setStream(teacher.getStreamName());
-        responseDTO.setStreamId(teacher.getStream().getId());
         responseDTO.setBranchCode(teacher.getBranchCode());
         responseDTO.setRole(teacher.getRole());
         responseDTO.setCreatedByEmail(teacher.getCreatedByEmail());
         responseDTO.setSubjects(subjectDTOs);
 
+        // Graduation Type
         if (teacher.getGraduationType() != null) {
             responseDTO.setGraduationTypeId(teacher.getGraduationType().getId());
             responseDTO.setGraduationType(teacher.getGraduationType().getGraduationType());
         }
+
+        // Stream
+        if (teacher.getStream() != null) {
+            responseDTO.setStreamId(teacher.getStream().getId());
+            responseDTO.setStream(teacher.getStream().getStream());
+        }
+
+        // Degree Name
+        if (teacher.getDegree() != null) {
+            responseDTO.setDegreeId(teacher.getDegree().getId());
+            responseDTO.setDegreeName(teacher.getDegree().getDegreeName());
+        }
+
+        // Department
+        if (teacher.getDepartment() != null) {
+            responseDTO.setDepartmentId(teacher.getDepartment().getId());
+            responseDTO.setDepartmentName(teacher.getDepartment().getDepartmentName());
+        }
+
         return responseDTO;
     }
-
 
 
 }

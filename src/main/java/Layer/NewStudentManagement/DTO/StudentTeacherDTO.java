@@ -20,6 +20,10 @@ public class StudentTeacherDTO
     private String graduationType;
     private Long streamId;
     private String stream;
+    private String degreeName;
+    private Long degreeId;
+    private String departmentName;
+    private Long departmentId;
     private String branchCode;
     private String role;
     private String createdByEmail;

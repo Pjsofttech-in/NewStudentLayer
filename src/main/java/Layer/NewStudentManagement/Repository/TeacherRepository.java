@@ -31,15 +31,19 @@ public interface TeacherRepository extends JpaRepository<StudentTeacher,Long>
 
 
     @Query("SELECT t FROM StudentTeacher t " +
-            "WHERE t.institutionType = :institutionType " +
-            "AND t.branchCode = :branchCode " +
+            "WHERE t.branchCode = :branchCode " +
+            "AND t.institutionType = :institutionType " +
             "AND (:graduationTypeName IS NULL OR t.graduationTypeName = :graduationTypeName) " +
-            "AND (:streamName IS NULL OR t.streamName = :streamName)")
-    List<StudentTeacher> findByInstitutionTypeAndGraduationTypeNameAndStreamNameAndBranchCode(
+            "AND (:streamName IS NULL OR t.streamName = :streamName) " +
+            "AND (:degreeName IS NULL OR t.degreeName = :degreeName) " +
+            "AND (:departmentName IS NULL OR t.departmentName = :departmentName)")
+    List<StudentTeacher> findTeachersByFilters(
+            @Param("branchCode") String branchCode,
             @Param("institutionType") String institutionType,
             @Param("graduationTypeName") String graduationTypeName,
             @Param("streamName") String streamName,
-            @Param("branchCode") String branchCode
+            @Param("degreeName") String degreeName,
+            @Param("departmentName") String departmentName
     );
 
 

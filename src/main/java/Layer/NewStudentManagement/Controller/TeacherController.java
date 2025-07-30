@@ -108,13 +108,16 @@ public class TeacherController
             @RequestParam String email,
             @RequestParam(required = false) String institutionType,
             @RequestParam(required = false) String graduationType,
-            @RequestParam(required = false) String stream
+            @RequestParam(required = false) String stream,
+            @RequestParam(required = false) String degreeName,
+            @RequestParam(required = false) String departmentName
     ) {
         if (institutionType == null || institutionType.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(Collections.emptyList());
         }
-        List<StudentTeacherDTO> teachers = teacherService.getTeachers(
-                role, email, institutionType, graduationType,stream);
+        List<StudentTeacherDTO> teachers = teacherService.getTeachers
+                (role, email, institutionType, graduationType,stream, degreeName,
+                departmentName);
         return ResponseEntity.ok(teachers);
     }
 

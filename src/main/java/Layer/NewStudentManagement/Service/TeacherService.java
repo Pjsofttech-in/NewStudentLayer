@@ -20,6 +20,6 @@ public interface TeacherService
     String resetPassword(String email, String otp, String newPassword);
     String verifyOtp(String email, String otp);
     String sendOtp(String email);
-    List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName,String streamName);
+    List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName,String streamName,String degreeName, String departmentName);
 
 }
