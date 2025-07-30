@@ -56,6 +56,7 @@ public class StudentEntity
     private String formStatus ;
     private String reason;
     private double discount;
+    private String userRole;
 
     @Column(unique = true, length = 12)
     private String registrationNumber;

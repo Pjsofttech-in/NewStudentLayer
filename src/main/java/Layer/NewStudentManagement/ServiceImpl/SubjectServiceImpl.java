@@ -1,14 +1,8 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.StudentSubjectDTO;
-import Layer.NewStudentManagement.Entity.StudentGraduationType;
-import Layer.NewStudentManagement.Entity.StudentStream;
-import Layer.NewStudentManagement.Entity.StudentSubject;
-import Layer.NewStudentManagement.Entity.StudentTeacher;
-import Layer.NewStudentManagement.Repository.GraduationTypeRepository;
-import Layer.NewStudentManagement.Repository.StreamRepository;
-import Layer.NewStudentManagement.Repository.SubjectRepository;
-import Layer.NewStudentManagement.Repository.TeacherRepository;
+import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,6 +30,11 @@ public class SubjectServiceImpl implements SubjectService
     @Autowired
     private GraduationTypeRepository graduationTypeRepository;
 
+    @Autowired
+    private DegreeNameRepository degreeRepository;
+
+    @Autowired
+    private DepartmentRepository departmentRepository;
 
     @Override
     public StudentSubjectDTO saveSubject(StudentSubjectDTO dto, String role, String email) {
@@ -52,25 +51,74 @@ public class SubjectServiceImpl implements SubjectService
         subject.setInstitutionType(dto.getInstitutionType());
         subject.setSubject(dto.getSubject());
 
-        // Graduation Type Mapping
-        if (dto.getGraduationTypeId() != null) {
+        String institutionType = dto.getInstitutionType();
+        String graduationTypeName = null;
+
+        // Validate and Map based on Institution Type
+        if ("School".equalsIgnoreCase(institutionType)) {
+            // Set all academic fields null
+            subject.setGraduationType(null);
+            subject.setStream(null);
+            subject.setDegree(null);
+            subject.setDepartment(null);
+        }
+        else if ("College".equalsIgnoreCase(institutionType)) {
+            // Graduation Type must be present
+            if (dto.getGraduationTypeId() == null) {
+                throw new RuntimeException("Graduation Type is required for College");
+            }
+
             StudentGraduationType graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
                     .orElseThrow(() -> new RuntimeException("Graduation Type not found"));
+            graduationTypeName = graduationType.getGraduationType();
             subject.setGraduationType(graduationType);
-            subject.setGraduationTypeName(graduationType.getGraduationType());
-        }
+            subject.setGraduationTypeName(graduationTypeName);
 
-        // Stream Mapping
-        if (dto.getStreamId() != null) {
-            StudentStream stream = streamRepository.findById(dto.getStreamId())
-                    .orElseThrow(() -> new RuntimeException("Stream not found"));
-            subject.setStream(stream);
-            subject.setStreamName(stream.getStream());
+            if ("Jr.College".equalsIgnoreCase(graduationTypeName)) {
+                // Only Stream is required
+                if (dto.getStreamId() == null) {
+                    throw new RuntimeException("Stream is required for Jr.College");
+                }
+                StudentStream stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+                subject.setStream(stream);
+                subject.setStreamName(stream.getStream());
+
+                subject.setDegree(null);
+                subject.setDepartment(null);
+            }
+            else if ("UG".equalsIgnoreCase(graduationTypeName) || "PG".equalsIgnoreCase(graduationTypeName)) {
+                // All fields are required
+                if (dto.getStreamId() == null || dto.getDegreeId() == null || dto.getDepartmentId() == null) {
+                    throw new RuntimeException("Stream, Degree, and Department are required for UG/PG");
+                }
+
+                StudentStream stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+                subject.setStream(stream);
+                subject.setStreamName(stream.getStream());
+
+                StudentDegreeName degree = degreeRepository.findById(dto.getDegreeId())
+                        .orElseThrow(() -> new RuntimeException("Degree not found"));
+                subject.setDegree(degree);
+                subject.setDegreeName(degree.getDegreeName());
+
+                StudentDepartment department = departmentRepository.findById(dto.getDepartmentId())
+                        .orElseThrow(() -> new RuntimeException("Department not found"));
+                subject.setDepartment(department);
+                subject.setDepartmentName(department.getDepartmentName());
+            }
+            else {
+                throw new RuntimeException("Unsupported Graduation Type for College");
+            }
+        }
+        else {
+            throw new RuntimeException("Invalid institution type");
         }
 
         StudentSubject saved = subjectRepository.save(subject);
 
-        // Return safe DTO (not entity) to avoid deep nesting
+        // Prepare DTO response
         StudentSubjectDTO response = new StudentSubjectDTO();
         response.setId(saved.getId());
         response.setSubject(saved.getSubject());
@@ -89,8 +137,19 @@ public class SubjectServiceImpl implements SubjectService
             response.setStream(saved.getStream().getStream());
         }
 
+        if (saved.getDegree() != null) {
+            response.setDegreeId(saved.getDegree().getId());
+            response.setDegreeName(saved.getDegree().getDegreeName());
+        }
+
+        if (saved.getDepartment() != null) {
+            response.setDepartmentId(saved.getDepartment().getId());
+            response.setDepartmentName(saved.getDepartment().getDepartmentName());
+        }
+
         return response;
     }
+
 
     @Override
     public StudentSubjectDTO getSubjectById(Long id,String role,String email)
@@ -153,30 +212,25 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public List<StudentSubjectDTO> getSubjects(String role, String email, String institutionType, String graduationTypeName, String streamName)
+    public List<StudentSubjectDTO> getSubjects(String role, String email, String institutionType, String graduationTypeName, String streamName, String degreeName, String departmentName)
     {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to get subject");
         }
 
-        if (institutionType == null || institutionType.trim().isEmpty()) {
-            return Collections.emptyList(); // no need to query if key input is missing
-        }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        // School doesn't require graduation or stream filters
-        if ("School".equalsIgnoreCase(institutionType)) {
-            graduationTypeName = null;
-            streamName = null;
-        }
 
-        List<StudentSubject> subjects = subjectRepository.findByFilters(
+        List<StudentSubject> subjects = subjectRepository.findSubjectsByFilters(
                 branchCode,
-                institutionType.trim(),
+                institutionType != null && !institutionType.trim().isEmpty() ? institutionType.trim() : null,
                 graduationTypeName != null && !graduationTypeName.trim().isEmpty() ? graduationTypeName.trim() : null,
-                streamName != null && !streamName.trim().isEmpty() ? streamName.trim() : null
+                streamName != null && !streamName.trim().isEmpty() ? streamName.trim() : null,
+                degreeName != null && !degreeName.trim().isEmpty() ? degreeName.trim() : null,
+                departmentName != null && !departmentName.trim().isEmpty() ? departmentName.trim() : null
         );
+
 
         return subjects.stream()
                 .map(this::mapToSubjectDTO)
@@ -186,6 +240,7 @@ public class SubjectServiceImpl implements SubjectService
 
     private StudentSubjectDTO mapToSubjectDTO(StudentSubject subject) {
         StudentSubjectDTO dto = new StudentSubjectDTO();
+
         dto.setId(subject.getId());
         dto.setSubject(subject.getSubject());
         dto.setCreatedByEmail(subject.getCreatedByEmail());
@@ -193,18 +248,30 @@ public class SubjectServiceImpl implements SubjectService
         dto.setBranchCode(subject.getBranchCode());
         dto.setInstitutionType(subject.getInstitutionType());
 
+        // Graduation Type
         if (subject.getGraduationType() != null) {
-            dto.setGraduationType(subject.getGraduationTypeName());
             dto.setGraduationTypeId(subject.getGraduationType().getId());
+            dto.setGraduationType(subject.getGraduationType().getGraduationType());
+        }
 
-            if (subject.getGraduationType().getStream() != null) {
-                dto.setStreamId(subject.getGraduationType().getStream().getId());
-                dto.setStream(subject.getGraduationType().getStream().getStream());
-            }
+        // Stream
+        if (subject.getStream() != null) {
+            dto.setStreamId(subject.getStream().getId());
+            dto.setStream(subject.getStream().getStream());
+        }
+
+        if (subject.getDegree() != null) {
+            dto.setDegreeId(subject.getDegree().getId());
+            dto.setDegreeName(subject.getDegree().getDegreeName());
+        }
+        if (subject.getDepartment() != null) {
+            dto.setDepartmentId(subject.getDepartment().getId());
+            dto.setDepartmentName(subject.getDepartment().getDepartmentName());
         }
 
         return dto;
     }
+
 
 
 }

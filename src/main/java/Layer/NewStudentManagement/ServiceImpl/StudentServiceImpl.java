@@ -906,7 +906,7 @@ public class StudentServiceImpl implements StudentService {
         studentData.put("id", student.getId());
         studentData.put("name", student.getFullName());
         studentData.put("email", student.getEmail());
-        studentData.put("role", student.getRole());
+        studentData.put("role", student.getUserRole());
         studentData.put("branchCode", student.getBranchCode());
 
         return new LoginResponse(token, studentData);

@@ -21,4 +21,8 @@ public class StudentSubjectDTO
     private String graduationType;
     private Long streamId;
     private String stream;
+    private Long degreeId;
+    private String degreeName;
+    private Long departmentId;
+    private String departmentName;
 }

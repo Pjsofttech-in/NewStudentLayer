@@ -57,16 +57,13 @@ public class SubjectController
     public ResponseEntity<List<StudentSubjectDTO>> getSubjects(
             @RequestParam String role,
             @RequestParam String email,
-            @RequestParam(required = false) String institutionType,
-            @RequestParam(required = false) String graduationType,
-            @RequestParam(required = false) String stream
-            ) {
-        if (institutionType == null || institutionType.trim().isEmpty()) {
-            return ResponseEntity.badRequest().body(Collections.emptyList());
-        }
-        List<StudentSubjectDTO> subjects = subjectService.getSubjects(
-                role, email, institutionType, graduationType,stream);
+            @RequestParam String institutionType,
+            @RequestParam(required = false) String graduationTypeName,
+            @RequestParam(required = false) String streamName,
+            @RequestParam(required = false) String degreeName,
+            @RequestParam(required = false) String departmentName) {
 
+        List<StudentSubjectDTO> subjects = subjectService.getSubjects(role, email, institutionType, graduationTypeName, streamName, degreeName, departmentName);
         return ResponseEntity.ok(subjects);
     }
 

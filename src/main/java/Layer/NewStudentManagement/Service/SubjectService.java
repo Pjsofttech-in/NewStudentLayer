@@ -13,5 +13,7 @@ public interface SubjectService
     void deleteSubjectById(Long id,String role,String email);
     List<StudentSubjectDTO> getAllSubject(String role, String email);
 
-    List<StudentSubjectDTO> getSubjects(String role, String email, String institutionType, String graduationTypeName, String streamName);
+    List<StudentSubjectDTO> getSubjects(String role, String email, String institutionType,
+                                        String graduationTypeName, String streamName,
+                                        String degreeName, String departmentName);
 }
