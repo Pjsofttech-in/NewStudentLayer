@@ -63,6 +63,7 @@ public class StudentResponseDTO {
     private String formStatus;
     private String reason;
     private double discount;
+    private Long classsRoomId;
 
     private boolean scholarship;
     private boolean projectDifferentiated;

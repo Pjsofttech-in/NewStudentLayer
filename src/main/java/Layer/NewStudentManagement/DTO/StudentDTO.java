@@ -62,6 +62,7 @@ public class StudentDTO
     private String formStatus;
     private String reason;
     private double discount;
+    private Long classsRoomId;
 
     @Email
     private String createdByEmail;

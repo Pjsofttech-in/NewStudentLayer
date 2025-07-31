@@ -619,6 +619,13 @@ public class StudentServiceImpl implements StudentService {
         dto.setFormStatus(student.getFormStatus());
         dto.setReason(student.getReason());
         dto.setDiscount(student.getDiscount());
+
+        if (student.getClassRoom() != null) {
+            dto.setClasssRoomId(student.getClassRoom().getId());
+        } else {
+            dto.setClasssRoomId(null);
+        }
+
         if (student.getSports() != null) {
             dto.setSportYesNo(student.getSports().getSportYesNo());
         } else {
