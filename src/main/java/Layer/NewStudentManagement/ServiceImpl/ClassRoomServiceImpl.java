@@ -186,51 +186,26 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
 
     @Override
-    @Transactional
-    public StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, ClassRoomRequestDTO dto) {
+    public StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, StudentClassRoom updateClassRoom) {
         if (!staffService.hasPermission(role, email, "Put")) {
             throw new RuntimeException("You don't have permission to update ClassRoom");
         }
 
-        StudentClassRoom classRoom = classRoomRepository.findById(id)
+        StudentClassRoom existingClassRoom = classRoomRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ClassRoom not found"));
 
-        // ✅ Only update times
-        if (dto.getStartTime() != null) {
-            classRoom.setStartTime(dto.getStartTime());
+        if (updateClassRoom.getStartTime() != null) {
+            existingClassRoom.setStartTime(updateClassRoom.getStartTime());
         }
 
-        if (dto.getEndTime() != null) {
-            classRoom.setEndTime(dto.getEndTime());
+        if (updateClassRoom.getEndTime() != null) {
+            existingClassRoom.setEndTime(updateClassRoom.getEndTime());
         }
 
-        // ✅ Only update teacherSubjectAssignments
-        if (dto.getTeacherSubjectMap() != null && !dto.getTeacherSubjectMap().isEmpty()) {
-            // Clear existing assignments
-            classRoom.getTeacherSubjectAssignments().clear();
-
-            // Add new assignments
-            for (Map.Entry<Long, List<Long>> entry : dto.getTeacherSubjectMap().entrySet()) {
-                Long teacherId = entry.getKey();
-                List<Long> subjectIds = entry.getValue();
-
-                StudentTeacher teacher = teacherRepository.findById(teacherId)
-                        .orElseThrow(() -> new RuntimeException("Teacher not found with ID: " + teacherId));
-
-                List<StudentSubject> subjects = subjectRepository.findAllById(subjectIds);
-
-                StudentClassRoomTeacherSubject assignment = new StudentClassRoomTeacherSubject();
-                assignment.setTeacher(teacher);
-                assignment.setSubjects(subjects);
-                assignment.setClassRoom(classRoom); // maintain link
-
-                classRoom.getTeacherSubjectAssignments().add(assignment);
-            }
-        }
-
-        StudentClassRoom updated = classRoomRepository.save(classRoom);
-        return mapToResponseDTO(updated); // assume you have this mapper
+        StudentClassRoom updated = classRoomRepository.save(existingClassRoom);
+        return mapToResponseDTO(updated);
     }
+
 
     @Override
     public StudentClassRoomResponseDTO getClassRoomById(Long id, String role, String email)

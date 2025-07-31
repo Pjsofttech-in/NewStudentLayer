@@ -13,7 +13,7 @@ public interface ClassRoomService
 {
 
     StudentClassRoomResponseDTO createClassRoom(String role, String email, ClassRoomRequestDTO dto);
-    StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, ClassRoomRequestDTO dto);
+    StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, StudentClassRoom classRoom);
     StudentClassRoomResponseDTO getClassRoomById(Long id, String role, String email);
     void deleteClassRoomById(Long id, String role, String email);
     List<StudentClassRoomResponseDTO> getAllClassRoom(String role, String email);
