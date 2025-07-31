@@ -91,7 +91,7 @@ public class AttendanceController
     @GetMapping("/getAllAttendaceByStudentId")
     public ResponseEntity<Page<StudentAttendaceDTO>> getAttendanceByStudent(
             @RequestParam Long studentId,
-            @RequestParam String filter,
+            @RequestParam(required = false) String filter,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(defaultValue = "0") int page,

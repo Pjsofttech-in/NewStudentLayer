@@ -504,8 +504,9 @@ public class AttendanceServiceImpl implements AttendanceService {
         LocalDate fromDate;
         LocalDate toDate;
 
-        // Determine filter-based date range
-        switch (filter.toLowerCase()) {
+        String frame = (filter == null || filter.equalsIgnoreCase("all")) ? "all" : filter.toLowerCase();
+
+        switch (frame.toLowerCase()) {
             case "today":
                 fromDate = toDate = today;
                 break;
