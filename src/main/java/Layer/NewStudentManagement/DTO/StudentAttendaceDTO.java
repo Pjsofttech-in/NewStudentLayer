@@ -19,10 +19,10 @@ public class StudentAttendaceDTO
     private String branchCode;
     private Long classroomId;
     private String studentName;
-    private String systemName;
     private LocalDate date;
     private LocalTime loginTime;
     private LocalTime logoutTime;
     private Long workingMinutes;
     private String status;
+    private Long studentId;
 }

@@ -88,6 +88,24 @@ public class AttendanceController
     }
 
 
+    @GetMapping("/getAllAttendaceByStudentId")
+    public ResponseEntity<Page<StudentAttendaceDTO>> getAttendanceByStudent(
+            @RequestParam Long studentId,
+            @RequestParam String filter,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<StudentAttendaceDTO> result = attendanceService.getAttendanceByStudentId(
+                studentId, filter, startDate, endDate, pageable);
+
+        return ResponseEntity.ok(result);
+    }
+
+
 
 
 

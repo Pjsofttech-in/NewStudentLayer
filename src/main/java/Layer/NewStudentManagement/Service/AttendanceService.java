@@ -27,4 +27,7 @@ public interface AttendanceService
 
     AttendanceCountDTO getAttendanceCountByTimeFrame(Long classroomId, String timeFrame,LocalDate customStartDate, LocalDate customEndDate);
 
+    Page<StudentAttendaceDTO> getAttendanceByStudentId(Long studentId, String filter,
+                                                       LocalDate startDate, LocalDate endDate,
+                                                       Pageable pageable);
 }

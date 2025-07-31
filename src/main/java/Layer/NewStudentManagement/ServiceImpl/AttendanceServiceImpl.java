@@ -28,14 +28,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -327,7 +325,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public Page<StudentAttendaceDTO> getFilteredAttendance(Long classroomId, StudentAttendanceFilterDTO filter, String timeFrame,
-            LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) {
+                                                           LocalDate customStartDate, LocalDate customEndDate, Pageable pageable) {
 
         // 1. Determine date range
         LocalDate today = LocalDate.now();
@@ -345,13 +343,14 @@ public class AttendanceServiceImpl implements AttendanceService {
             }
         }
 
-        // 2. Fetch and filter students
+        // 2. Fetch students of the classroom
         List<StudentEntity> students = studentRepository.findAllByClassroomId(classroomId);
 
+        // 3. Apply filter on students (by rollNo or name)
         if (filter != null) {
             if (filter.getRollNo() != null) {
                 students = students.stream()
-                        .filter(s -> s.getRollNo() == filter.getRollNo())
+                        .filter(s -> Objects.equals(s.getRollNo(), filter.getRollNo()))
                         .toList();
             }
             if (filter.getStudentName() != null && !filter.getStudentName().isBlank()) {
@@ -362,20 +361,17 @@ public class AttendanceServiceImpl implements AttendanceService {
             }
         }
 
-        // 3. Fetch attendance records for the filtered date range
         Specification<StudentAttendance> spec = StudentAttendanceSpecification.build(
                 filter, classroomId, timeFrame, customStartDate, customEndDate
         );
         List<StudentAttendance> attendanceList = attendanceRepository.findAll(spec);
 
-        // 4. Map (rollNo + date) to attendance record
         Map<String, StudentAttendance> attendanceMap = attendanceList.stream()
                 .collect(Collectors.toMap(
                         a -> a.getRollNo() + "_" + a.getDate(),
                         a -> a
                 ));
 
-        // 5. Build DTO list: present + absent
         List<StudentAttendaceDTO> combinedList = new ArrayList<>();
 
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
@@ -383,39 +379,55 @@ public class AttendanceServiceImpl implements AttendanceService {
                 String key = student.getRollNo() + "_" + date;
                 StudentAttendance att = attendanceMap.get(key);
 
-                StudentAttendaceDTO dto = (att != null)
-                        ? new StudentAttendaceDTO(
-                        att.getId(),
-                        att.getRollNo(),
-                        att.getBranchCode(),
-                        att.getClassroomId(),
-                        att.getStudentName(),
-                        att.getSystemName(),
-                        att.getDate(),
-                        att.getLoginTime(),
-                        att.getLogoutTime(),
-                        att.getWorkingMinutes(),
-                        att.getStatus()
-                )
-                        : new StudentAttendaceDTO(
-                        null,
-                        student.getRollNo(),
-                        student.getBranchCode(),
-                        classroomId,
-                        student.getFullName(),
-                        null,
-                        date,
-                        null,
-                        null,
-                        0L,
-                        "Absent"
-                );
+                StudentAttendaceDTO dto;
+                if (date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                    dto = new StudentAttendaceDTO(
+                            null,
+                            student.getRollNo(),
+                            student.getBranchCode(),
+                            student.getClassRoom().getId(),
+                            student.getFullName(),
+                            date,
+                            null,
+                            null,
+                            0L,
+                            "Sunday",
+                            student.getId()
+                    );
+                } else if (att != null) {
+                    dto = new StudentAttendaceDTO(
+                            att.getId(),
+                            att.getRollNo(),
+                            att.getBranchCode(),
+                            att.getClassroomId(),
+                            att.getStudentName(),
+                            att.getDate(),
+                            att.getLoginTime(),
+                            att.getLogoutTime(),
+                            att.getWorkingMinutes(),
+                            att.getStatus(),
+                            student.getId()
+                    );
+                } else {
+                    dto = new StudentAttendaceDTO(
+                            null,
+                            student.getRollNo(),
+                            student.getBranchCode(),
+                            student.getClassRoom().getId(),
+                            student.getFullName(),
+                            date,
+                            null,
+                            null,
+                            0L,
+                            "Absent",
+                            student.getId()
+                    );
+                }
 
                 combinedList.add(dto);
             }
         }
 
-        // 6. Apply `status` filter manually after combining data
         if (filter != null && filter.getStatus() != null && !filter.getStatus().equalsIgnoreCase("All")) {
             String status = filter.getStatus().toLowerCase();
             combinedList = combinedList.stream()
@@ -423,13 +435,14 @@ public class AttendanceServiceImpl implements AttendanceService {
                     .toList();
         }
 
-        // 7. Return paginated result
+        // 8. Paginate manually
         int start = (int) pageable.getOffset();
         int end = Math.min(start + pageable.getPageSize(), combinedList.size());
-        List<StudentAttendaceDTO> paged = combinedList.subList(start, end);
+        List<StudentAttendaceDTO> pagedList = (start < end) ? combinedList.subList(start, end) : List.of();
 
-        return new PageImpl<>(paged, pageable, combinedList.size());
+        return new PageImpl<>(pagedList, pageable, combinedList.size());
     }
+
 
 
     @Override
@@ -476,6 +489,95 @@ public class AttendanceServiceImpl implements AttendanceService {
         long absentCount = expectedEntries - presentCount;
 
         return new AttendanceCountDTO(expectedEntries, presentCount, absentCount);
+    }
+
+
+    @Override
+    public Page<StudentAttendaceDTO> getAttendanceByStudentId(Long studentId, String filter,
+                                                              LocalDate startDate, LocalDate endDate,
+                                                              Pageable pageable) {
+
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with id: " + studentId));
+
+        LocalDate today = LocalDate.now();
+        LocalDate fromDate;
+        LocalDate toDate;
+
+        // Determine filter-based date range
+        switch (filter.toLowerCase()) {
+            case "today":
+                fromDate = toDate = today;
+                break;
+            case "7days":
+                fromDate = today.minusDays(6);
+                toDate = today;
+                break;
+            case "30days":
+                fromDate = today.minusDays(29);
+                toDate = today;
+                break;
+            case "365days":
+                fromDate = today.minusDays(364);
+                toDate = today;
+                break;
+            case "custom":
+                if (startDate == null || endDate == null) {
+                    throw new IllegalArgumentException("Start and end date must be provided for custom filter");
+                }
+                fromDate = startDate;
+                toDate = endDate;
+                break;
+            case "all":
+                fromDate = LocalDate.of(2000, 1, 1); // very early default
+                toDate = today;
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid filter: " + filter);
+        }
+
+        LocalDate classStartDate = student.getClassRoom().getCreatedDate();
+        if (classStartDate != null && fromDate.isBefore(classStartDate)) {
+            fromDate = classStartDate;
+        }
+
+        List<StudentAttendance> attendances = attendanceRepository.findAttendanceByStudentAndDateRange(
+                student.getRollNo(), student.getBranchCode(), student.getClassRoom().getId(), fromDate, toDate);
+
+        Map<LocalDate, StudentAttendance> attendanceMap = attendances.stream()
+                .collect(Collectors.toMap(StudentAttendance::getDate, att -> att));
+
+        List<StudentAttendaceDTO> fullResponseList = new ArrayList<>();
+
+        for (LocalDate date = fromDate; !date.isAfter(toDate); date = date.plusDays(1)) {
+            StudentAttendaceDTO dto = new StudentAttendaceDTO();
+            dto.setDate(date);
+            dto.setStudentName(student.getFullName());
+            dto.setRollNo(student.getRollNo());
+            dto.setBranchCode(student.getBranchCode());
+            dto.setClassroomId(student.getClassRoom().getId());
+            dto.setStudentId(student.getId());
+
+            if (date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                dto.setStatus("Sunday");
+            } else if (attendanceMap.containsKey(date)) {
+                StudentAttendance att = attendanceMap.get(date);
+                dto.setLoginTime(att.getLoginTime());
+                dto.setLogoutTime(att.getLogoutTime());
+                dto.setWorkingMinutes(att.getWorkingMinutes());
+                dto.setStatus("Present");
+            } else {
+                dto.setStatus("Absent");
+            }
+
+            fullResponseList.add(dto);
+        }
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), fullResponseList.size());
+        List<StudentAttendaceDTO> paginatedList = fullResponseList.subList(start, end);
+
+        return new PageImpl<>(paginatedList, pageable, fullResponseList.size());
     }
 
 

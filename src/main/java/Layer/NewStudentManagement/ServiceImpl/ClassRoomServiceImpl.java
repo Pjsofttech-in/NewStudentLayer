@@ -295,7 +295,6 @@ public class ClassRoomServiceImpl implements ClassRoomService
         return studentPhotoUrls;
     }
 
-
     private StudentClassRoomResponseDTO mapToResponseDTO(StudentClassRoom classroom) {
         List<StudentClassRoomTeacherSubject> mappings = Collections.emptyList();
         if (classroom != null && classroom.getId() != null) {

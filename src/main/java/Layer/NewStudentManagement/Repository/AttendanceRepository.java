@@ -39,6 +39,13 @@ long countByClassroomIdAndDateRange(@Param("classroomId") Long classroomId,
                                     @Param("startDate") LocalDate startDate,
                                     @Param("endDate") LocalDate endDate);
 
+    @Query("SELECT a FROM StudentAttendance a WHERE a.rollNo = :rollNo AND a.branchCode = :branchCode AND a.classroomId = :classroomId AND a.date BETWEEN :start AND :end")
+    List<StudentAttendance> findAttendanceByStudentAndDateRange(@Param("rollNo") int rollNo,
+                                                                @Param("branchCode") String branchCode,
+                                                                @Param("classroomId") Long classroomId,
+                                                                @Param("start") LocalDate start,
+                                                                @Param("end") LocalDate end);
+
 
 
 }
