@@ -20,4 +20,6 @@ public interface StudentPromotionRepository extends JpaRepository<StudentPromoti
     List<StudentPromotionRecord> findAllByStudentIdOrderByPromotionDate(@Param("studentId") Long studentId);
 
 
+//    List<StudentPromotionRecord> findAllByStudentIdOrderByPromotionDateDesc(Long studentId);
+
 }
