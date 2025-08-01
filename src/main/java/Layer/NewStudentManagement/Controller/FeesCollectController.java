@@ -37,7 +37,7 @@ public class FeesCollectController
         return ResponseEntity.ok(updated);
     }
 
-    @GetMapping("/getAllCollectedFeesBySFID")
+    @GetMapping("/getAllCollectedFeesByFID")
     public ResponseEntity<Iterable<FeesCollectDTO>> getAllCollectedFeesBySFID(@RequestParam Long fid,@RequestParam String role,
                                                                               @RequestParam String email)
     {
