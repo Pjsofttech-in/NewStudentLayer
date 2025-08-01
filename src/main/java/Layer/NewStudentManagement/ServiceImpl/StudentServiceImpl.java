@@ -656,6 +656,7 @@ public class StudentServiceImpl implements StudentService {
         }
         if (student.getDepartment() != null) {
             dto.setDepartmentId(student.getDepartment().getId());
+            dto.setDepartmentName(student.getDepartment().getDepartmentName());
         }
         if (student.getStream() != null) {
             dto.setStreamId(student.getStream().getId());
@@ -663,9 +664,12 @@ public class StudentServiceImpl implements StudentService {
         }
         if (student.getDegreeName() != null) {
             dto.setDegreeNameId(student.getDegreeName().getId());
+            dto.setDegreeName(student.getDegreeName().getDegreeName());
+
         }
         if (student.getGraduationType() != null) {
             dto.setGraduationTypeId(student.getGraduationType().getId());
+            dto.setGraduationType(student.getGraduationType().getGraduationType());
         }
         if (student.getAdditionalInfo() != null) {
             dto.setEarthquake(student.getAdditionalInfo().isEarthquake());
