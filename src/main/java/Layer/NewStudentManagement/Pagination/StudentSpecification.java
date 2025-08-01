@@ -75,6 +75,12 @@ public class StudentSpecification {
                     predicates.add(cb.equal(cb.lower(degreeJoin.get("degreeName")), filter.getDegreeName().toLowerCase()));
                 }
 
+                Join<StudentEntity, StudentDepartment> departmentJoin = root.join("departmentName", JoinType.LEFT);
+
+                if (filter.getDepartmentName() != null && !filter.getDepartmentName().isEmpty()) {
+                    predicates.add(cb.equal(cb.lower(departmentJoin.get("departmentName")), filter.getDepartmentName().toLowerCase()));
+                }
+
 
                 if (filter.getCastCategory() != null) {
                     predicates.add(cb.equal(religionJoin.get("castCategory"), filter.getCastCategory()));
