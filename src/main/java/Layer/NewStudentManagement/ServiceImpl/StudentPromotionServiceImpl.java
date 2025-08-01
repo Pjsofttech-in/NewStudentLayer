@@ -219,9 +219,11 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             throw new RuntimeException("You don't have permission to Get Promote Student");
         }
 
+        // Fetch student data
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
+        // Get promotion records for the student
         List<StudentPromotionRecord> promotions = promotionRecordRepository
                 .findAllByStudentIdOrderByPromotionDate(studentId);
 
@@ -229,31 +231,48 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             throw new RuntimeException("No promotion records found for this student.");
         }
 
+        // Convert promotion records to DTO
         List<PromotionInfoDTO> promotionDTOs = promotions.stream()
                 .map(this::mapToPromotionInfoDTO)
                 .collect(Collectors.toList());
 
-        // Try to find promotion with standardId == 6
+        // Extract the target standardId or streamId from the request
+        Long targetStandardId = student.getStandard() != null ? student.getStandard().getSid() : null;
+        Long targetStreamId = student.getStream() != null ? student.getStream().getId() : null;
+
+        // Find the current promotion based on dynamic standardId or streamId
         Optional<PromotionInfoDTO> optionalPromotion = promotionDTOs.stream()
-                .filter(dto -> dto.getStandardId() != null && dto.getStandardId() == 6)
+                .filter(dto -> {
+                    if (targetStandardId != null) {
+                        // Check for school promotions
+                        return dto.getStandardId() != null && dto.getStandardId().equals(targetStandardId);
+                    } else if (targetStreamId != null) {
+                        // Check for college promotions
+                        return dto.getStreamId() != null && dto.getStreamId().equals(targetStreamId);
+                    }
+                    return false;
+                })
                 .findFirst();
 
+        // Determine the current promotion (based on the target)
         PromotionInfoDTO currentPromotion;
-
         if (optionalPromotion.isPresent()) {
             currentPromotion = optionalPromotion.get();
         } else {
-            // fallback to latest promotion
+            // Fallback to the most recent promotion if no match is found
             currentPromotion = promotionDTOs.get(promotionDTOs.size() - 1);
         }
 
+        // Set the current promotion to true
         currentPromotion.setIsCurrent(true);
 
+        // Set the remaining promotions as historical
         List<PromotionInfoDTO> promotionHistory = promotionDTOs.stream()
                 .filter(dto -> !dto.equals(currentPromotion))
-                .peek(dto -> dto.setIsCurrent(false))
+                .peek(dto -> dto.setIsCurrent(false)) // Mark as historical
                 .collect(Collectors.toList());
 
+        // Return the response with current and historical promotion records
         return new StudentPromotionResponseDTO(
                 student.getId(),
                 student.getFullName(),
@@ -262,7 +281,6 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
                 promotionHistory
         );
     }
-
 
     private PromotionInfoDTO mapToPromotionInfoDTO(StudentPromotionRecord record) {
         PromotionInfoDTO dto = new PromotionInfoDTO();
