@@ -144,7 +144,7 @@ public class FeesServiceImpl implements FeesService
         }
 
         // Jr College check
-        if (isJrCollege && feesRepository.existsJrCollegeFees(student, fees.getStream().getStream())) {
+        if (isJrCollege && feesRepository.existsJrCollegeFees(student,fees.getStandard().getStandardName(), fees.getStream().getStream())) {
             throw new RuntimeException("Fees already assigned for this student and stream.");
         }
 

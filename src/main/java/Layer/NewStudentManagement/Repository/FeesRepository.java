@@ -32,10 +32,10 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
 
     // For Jr. College
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
-            "WHERE f.student = :student AND f.student.streamName = :streamName")
+            "WHERE f.student = :student AND f.standard.standardName = :standardName AND f.streamName = :streamName")
     boolean existsJrCollegeFees(@Param("student") StudentEntity student,
+                                @Param("standardName") String standardName,
                                 @Param("streamName") String streamName);
-
 
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
             "WHERE f.student = :student AND f.standard.sid = :standardId AND f.medium.mid = :mediumId")
