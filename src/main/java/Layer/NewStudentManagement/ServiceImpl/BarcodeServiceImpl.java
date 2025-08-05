@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
@@ -43,7 +44,25 @@ public class BarcodeServiceImpl implements BarcodeService
             throw new RuntimeException("Branch code not found for email: " + email);
         }
 
+        String instituteEmail = staffService.getInstituteEmailByBranchCode(branchCode).block();
+        if (instituteEmail == null || instituteEmail.isEmpty()) {
+            throw new RuntimeException("Institute email not found for branch code: " + branchCode);
+        }
+
+        instituteEmail = instituteEmail.replace("instituteEmail =", "")
+                .replace("\"", "")
+                .trim();
+
+
+        String encodedInstituteEmail = URLEncoder.encode(instituteEmail, StandardCharsets.UTF_8);
+
         String encodedBranchCode = Base64.getUrlEncoder().encodeToString(branchCode.getBytes(StandardCharsets.UTF_8));
+
+
+        System.out.println("Cleaned instituteEmail:"+ instituteEmail);
+
+
+        System.out.println("Institute email before encoding: " + instituteEmail);
 
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role.toUpperCase());
@@ -51,7 +70,7 @@ public class BarcodeServiceImpl implements BarcodeService
 
         String jwt = jwtUtil.generateTokenWithClaims("user@gmail.com", claims, Duration.ofDays(90));
 
-        String qrData = HR_INQUIRY_BASE_URL + "?token=" +jwt;
+        String qrData = HR_INQUIRY_BASE_URL + "?token=" + jwt + "&instituteEmail=" + encodedInstituteEmail;
 
         QRCodeWriter barcodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = barcodeWriter.encode(qrData, BarcodeFormat.QR_CODE, 300, 300);

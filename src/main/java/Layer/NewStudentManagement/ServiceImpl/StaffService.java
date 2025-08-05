@@ -255,5 +255,15 @@ public class StaffService
     }
 
 
+    public Mono<String> getInstituteEmailByBranchCode(String branchCode) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/instituteEmailByBranchCode")
+                        .queryParam("branchCode", branchCode)
+                        .build())
+                .retrieve()
+                .bodyToMono(String.class);
+    }
+
 
 }
