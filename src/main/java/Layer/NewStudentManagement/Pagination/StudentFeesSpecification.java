@@ -113,7 +113,28 @@ public class StudentFeesSpecification
                 predicate = cb.and(predicate, cb.equal(root.get("degreeName"), filters.getGraduationTypeName()));
             }
 
+            if (filters.getGroupName() != null && !filters.getGroupName().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(cb.lower(root.get("groupName")), filters.getGroupName().toLowerCase()));
+            }
+
+            if (filters.getDegreeName() != null && !filters.getDegreeName().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(cb.lower(root.get("degreeName")), filters.getDegreeName().toLowerCase()));
+            }
+
+            if (filters.getDepartmentName() != null && !filters.getDepartmentName().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(cb.lower(root.get("departmentName")), filters.getDepartmentName().toLowerCase()));
+            }
+
+            if (filters.getFeesStatus() != null && !filters.getFeesStatus().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(cb.lower(root.get("feesStatus")), filters.getFeesStatus().toLowerCase()));
+            }
+
+            if (filters.getFeesCollectionType() != null && !filters.getFeesCollectionType().isBlank()) {
+                predicate = cb.and(predicate, cb.equal(cb.lower(root.get("feesCollectionType")), filters.getFeesCollectionType().toLowerCase()));
+            }
+
             return predicate;
         };
     }
+
 }

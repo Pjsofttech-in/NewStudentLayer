@@ -66,25 +66,5 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
     @Query("SELECT f FROM StudentFees f WHERE f.student.id = :studentId")
     List<StudentFees> findFeesByStudentId(@Param("studentId") Long studentId);
 
-//    @Query("SELECT " +
-//            "SUM(s.totalamount) as totalFees, " +
-//            "SUM(s.paidAmount) as totalPaid, " +
-//            "SUM(s.pendingAmount) as totalPending " +
-//            "FROM StudentFees s " +
-//            "WHERE s.branchCode = :branchCode")
-//    FeesRevenueProjection getFeesRevenueSummaryByBranch(@Param("branchCode") String branchCode);
-//
-//    @Query("SELECT SUM(f.totalamount) AS totalFees, " +
-//            "       SUM(f.paidAmount) AS totalPaid, " +
-//            "       SUM(f.pendingAmount) AS totalPending " +
-//            "FROM StudentFees f " +
-//            "WHERE f.branchCode = :branchCode " +
-//            "AND (:startDate IS NULL OR f.approvalDate >= :startDate) " +
-//            "AND (:endDate IS NULL OR f.approvalDate <= :endDate)")
-//    FeesRevenueProjection getFeesRevenueByBranchAndDateRange(
-//            @Param("branchCode") String branchCode,
-//            @Param("startDate") LocalDate startDate,
-//            @Param("endDate") LocalDate endDate
-//    );
 
 }

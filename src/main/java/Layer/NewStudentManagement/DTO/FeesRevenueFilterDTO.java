@@ -13,4 +13,9 @@ public class FeesRevenueFilterDTO {
     private String mediumName;
     private String streamName;
     private String graduationTypeName;
+    private String groupName;
+    private String degreeName;         //  For UG/PG students
+    private String departmentName;
+    private String feesStatus;
+    private String feesCollectionType;
 }
