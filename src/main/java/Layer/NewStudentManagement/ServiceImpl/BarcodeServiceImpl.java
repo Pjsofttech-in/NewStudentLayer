@@ -59,11 +59,6 @@ public class BarcodeServiceImpl implements BarcodeService
         String encodedBranchCode = Base64.getUrlEncoder().encodeToString(branchCode.getBytes(StandardCharsets.UTF_8));
 
 
-        System.out.println("Cleaned instituteEmail:"+ instituteEmail);
-
-
-        System.out.println("Institute email before encoding: " + instituteEmail);
-
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role.toUpperCase());
         claims.put("branchCode", encodedBranchCode);

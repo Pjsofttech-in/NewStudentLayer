@@ -106,20 +106,7 @@ public class StaffService
 
     }
 
-    public List<String> getBranchCodesByInstituteEmail(String instituteEmail) {
-        List<List<String>> nestedList = webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/getBranchCodesByinstituteEmail")
-                        .queryParam("instituteEmail", instituteEmail)
-                        .build())
-                .retrieve()
-                .bodyToFlux(new ParameterizedTypeReference<List<String>>() {})
-                .collectList()
-                .block();
-        return nestedList.stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
-    }
+
 
     public List<InstituteLoginResponse> getInstituteDetailsOnly(String email) {
         InstituteClientWrapperResponse response = webClient.get()

@@ -49,7 +49,7 @@ public interface StudentService
 
     LoginResponse studentLogin(LoginRequest request);
 
-    GenderCountResponse getGenderCount(String role, String email, String institutionType,
-                                       Long graduationTypeId, Long streamId,
+    GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
+                                       Long graduationTypeId, Long streamId, String groupName,
                                        Long degreeNameId, Long departmentId);
 }

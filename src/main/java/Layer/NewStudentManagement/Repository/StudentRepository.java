@@ -136,15 +136,22 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "AND (:graduationTypeId IS NULL OR s.graduationType.id = :graduationTypeId) " +
             "AND (:streamId IS NULL OR s.stream.id = :streamId) " +
             "AND (:degreeNameId IS NULL OR s.degreeName.id = :degreeNameId) " +
-            "AND (:departmentId IS NULL OR s.department.id = :departmentId)")
+            "AND (:departmentId IS NULL OR s.department.id = :departmentId) " +
+            "AND (:standardId IS NULL OR s.standard.id = :standardId) " +
+            "AND (:mediumId IS NULL OR s.medium.id = :mediumId) " +
+            "AND (:groupName IS NULL OR s.groupName = :groupName)")
     GenderCountResponse getGenderCountByFilters(
             @Param("branchCode") String branchCode,
             @Param("institutionType") String institutionType,
             @Param("graduationTypeId") Long graduationTypeId,
             @Param("streamId") Long streamId,
             @Param("degreeNameId") Long degreeNameId,
-            @Param("departmentId") Long departmentId
+            @Param("departmentId") Long departmentId,
+            @Param("standardId") Long standardId,
+            @Param("mediumId") Long mediumId,
+            @Param("groupName") String groupName
     );
+
 
 
 }

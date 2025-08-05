@@ -222,13 +222,16 @@ public class StudentController
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam(required = false) String institutionType,
+            @RequestParam(required = false) Long standardId,
+            @RequestParam(required = false) Long mediumId,
             @RequestParam(required = false) Long graduationTypeId,
             @RequestParam(required = false) Long streamId,
+            @RequestParam(required = false) String groupName,
             @RequestParam(required = false) Long degreeNameId,
             @RequestParam(required = false) Long departmentId) {
 
-        return studentService.getGenderCount(role,email, institutionType,
-                graduationTypeId, streamId, degreeNameId, departmentId);
+        return studentService.getGenderCount(role,email, institutionType,standardId,mediumId,
+                graduationTypeId, streamId, groupName,degreeNameId, departmentId);
     }
 
 }

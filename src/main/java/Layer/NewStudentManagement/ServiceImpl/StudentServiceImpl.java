@@ -926,8 +926,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public GenderCountResponse getGenderCount(String role, String email, String institutionType,
-                                              Long graduationTypeId, Long streamId,
+    public GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
+                                              Long graduationTypeId, Long streamId, String groupName,
                                               Long degreeNameId, Long departmentId)
     {
 
@@ -935,7 +935,7 @@ public class StudentServiceImpl implements StudentService {
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        GenderCountResponse response = studentRepository.getGenderCountByFilters(branchCode, institutionType, graduationTypeId, streamId, degreeNameId, departmentId);
+        GenderCountResponse response = studentRepository.getGenderCountByFilters(branchCode, institutionType, graduationTypeId, streamId, degreeNameId, departmentId, standardId, mediumId, groupName);
 
 
         if (response == null) {
