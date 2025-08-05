@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Repository;
 
+import Layer.NewStudentManagement.DTO.GenderCountResponse;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -121,11 +122,29 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     boolean existsByEmail(@Param("email") String email);
 
 
-
     @Query("SELECT s FROM StudentEntity s WHERE s.email=:email")
     Optional<StudentEntity> findByEmail(@Param("email") String email);
 
 
+    @Query("SELECT new Layer.NewStudentManagement.DTO.GenderCountResponse(" +
+            "SUM(CASE WHEN s.gender = 'Male' THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN s.gender = 'Female' THEN 1 ELSE 0 END), " +
+            "SUM(CASE WHEN s.gender != 'Male' AND s.gender != 'Female' THEN 1 ELSE 0 END)) " +
+            "FROM StudentEntity s " +
+            "WHERE (:branchCode IS NULL OR s.branchCode = :branchCode) " +
+            "AND (:institutionType IS NULL OR s.institutionType = :institutionType) " +
+            "AND (:graduationTypeId IS NULL OR s.graduationType.id = :graduationTypeId) " +
+            "AND (:streamId IS NULL OR s.stream.id = :streamId) " +
+            "AND (:degreeNameId IS NULL OR s.degreeName.id = :degreeNameId) " +
+            "AND (:departmentId IS NULL OR s.department.id = :departmentId)")
+    GenderCountResponse getGenderCountByFilters(
+            @Param("branchCode") String branchCode,
+            @Param("institutionType") String institutionType,
+            @Param("graduationTypeId") Long graduationTypeId,
+            @Param("streamId") Long streamId,
+            @Param("degreeNameId") Long degreeNameId,
+            @Param("departmentId") Long departmentId
+    );
 
 
 }

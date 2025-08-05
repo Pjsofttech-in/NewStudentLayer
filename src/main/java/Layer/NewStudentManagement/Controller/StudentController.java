@@ -217,4 +217,18 @@ public class StudentController
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/genderCountByBranchCode")
+    public GenderCountResponse getGenderCount(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false) String institutionType,
+            @RequestParam(required = false) Long graduationTypeId,
+            @RequestParam(required = false) Long streamId,
+            @RequestParam(required = false) Long degreeNameId,
+            @RequestParam(required = false) Long departmentId) {
+
+        return studentService.getGenderCount(role,email, institutionType,
+                graduationTypeId, streamId, degreeNameId, departmentId);
+    }
+
 }

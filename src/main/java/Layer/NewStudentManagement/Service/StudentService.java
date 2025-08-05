@@ -48,4 +48,8 @@ public interface StudentService
     Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd);
 
     LoginResponse studentLogin(LoginRequest request);
+
+    GenderCountResponse getGenderCount(String role, String email, String institutionType,
+                                       Long graduationTypeId, Long streamId,
+                                       Long degreeNameId, Long departmentId);
 }

@@ -925,6 +925,24 @@ public class StudentServiceImpl implements StudentService {
         return new LoginResponse(token, studentData);
     }
 
+    @Override
+    public GenderCountResponse getGenderCount(String role, String email, String institutionType,
+                                              Long graduationTypeId, Long streamId,
+                                              Long degreeNameId, Long departmentId)
+    {
 
+        checkPermission(role,email,"Get");
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        GenderCountResponse response = studentRepository.getGenderCountByFilters(branchCode, institutionType, graduationTypeId, streamId, degreeNameId, departmentId);
+
+
+        if (response == null) {
+            return new GenderCountResponse(0L, 0L, 0L);
+        }
+
+        return response;
+    }
 
 }
