@@ -144,25 +144,25 @@ public class StudentSpecification {
                 predicates.add(cb.equal(root.get("institutionType"), institutionType));
             }
             if (standardId != null) {
-                predicates.add(cb.equal(root.get("standardId"), standardId));
+                predicates.add(cb.equal(root.get("standard").get("id"), standardId));
             }
             if (mediumId != null) {
-                predicates.add(cb.equal(root.get("mediumId"), mediumId));
+                predicates.add(cb.equal(root.get("medium").get("id"), mediumId));
             }
             if (graduationTypeId != null) {
-                predicates.add(cb.equal(root.get("graduationTypeId"), graduationTypeId));
+                predicates.add(cb.equal(root.get("graduationType").get("id"), graduationTypeId));
             }
             if (streamId != null) {
-                predicates.add(cb.equal(root.get("streamId"), streamId));
+                predicates.add(cb.equal(root.get("stream").get("id"), streamId));
             }
             if (groupName != null && !groupName.trim().isEmpty()) {
                 predicates.add(cb.like(cb.lower(root.get("groupName")), "%" + groupName.toLowerCase() + "%"));
             }
             if (degreeNameId != null) {
-                predicates.add(cb.equal(root.get("degreeNameId"), degreeNameId));
+                predicates.add(cb.equal(root.get("degreeName").get("id"), degreeNameId));
             }
             if (departmentId != null) {
-                predicates.add(cb.equal(root.get("departmentId"), departmentId));
+                predicates.add(cb.equal(root.get("department").get("id"), departmentId));
             }
             if (startDate != null && endDate != null) {
                 predicates.add(cb.between(root.get("enrollmentDate"), startDate, endDate));
@@ -171,4 +171,5 @@ public class StudentSpecification {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
 }
