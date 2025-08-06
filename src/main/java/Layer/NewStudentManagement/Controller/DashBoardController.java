@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.GenderCountResponse;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,11 +23,38 @@ public class DashBoardController
 
     @GetMapping("/getStudentCountForCards")
     public ResponseEntity<Map<String, Long>> getApplicationCounts(
-            @RequestParam String filter,
+            @RequestParam(required = false) String filter,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String institutionType,
+            @RequestParam(required = false) Long standardId,
+            @RequestParam(required = false) Long mediumId,
+            @RequestParam(required = false) Long graduationTypeId,
+            @RequestParam(required = false) Long streamId,
+            @RequestParam(required = false) String groupName,
+            @RequestParam(required = false) Long degreeNameId,
+            @RequestParam(required = false) Long departmentId) {
 
-        Map<String, Long> result = studentService.getApplicationCount(filter, startDate, endDate);
+        Map<String, Long> result = studentService.getApplicationCount(filter, startDate, endDate,institutionType,standardId,mediumId,
+                graduationTypeId, streamId, groupName,degreeNameId, departmentId);
         return ResponseEntity.ok(result);
+    }
+
+
+    @GetMapping("/genderCountByBranchCode")
+    public GenderCountResponse getGenderCount(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false) String institutionType,
+            @RequestParam(required = false) Long standardId,
+            @RequestParam(required = false) Long mediumId,
+            @RequestParam(required = false) Long graduationTypeId,
+            @RequestParam(required = false) Long streamId,
+            @RequestParam(required = false) String groupName,
+            @RequestParam(required = false) Long degreeNameId,
+            @RequestParam(required = false) Long departmentId) {
+
+        return studentService.getGenderCount(role,email, institutionType,standardId,mediumId,
+                graduationTypeId, streamId, groupName,degreeNameId, departmentId);
     }
 }

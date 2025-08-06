@@ -859,7 +859,11 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd) {
+    public Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd,
+                                                 String institutionType, Long standardId, Long mediumId,
+                                                 Long graduationTypeId, Long streamId, String groupName,
+                                                 Long degreeNameId, Long departmentId) {
+
         LocalDate today = LocalDate.now();
         LocalDate startDate;
         LocalDate endDate = today;
@@ -888,19 +892,31 @@ public class StudentServiceImpl implements StudentService {
                 throw new IllegalArgumentException("Invalid filter: " + filter);
         }
 
-        Long total = studentRepository.countTotalByDateRange(startDate, endDate);
-        Long approved = studentRepository.countByStatusAndDateRange("Approved", startDate, endDate);
-        Long rejected = studentRepository.countByStatusAndDateRange("Rejected", startDate, endDate);
-        Long pending = total - approved - rejected;
+        Specification<StudentEntity> baseSpec = StudentSpecification.withFilters(
+                institutionType, standardId, mediumId, graduationTypeId,
+                streamId, groupName, degreeNameId, departmentId, startDate, endDate
+        );
+
+        long total = studentRepository.count(baseSpec);
+
+        Specification<StudentEntity> approvedSpec = baseSpec.and((root, query, cb) ->
+                cb.equal(root.get("status"), "Approved"));
+
+        Specification<StudentEntity> rejectedSpec = baseSpec.and((root, query, cb) ->
+                cb.equal(root.get("status"), "Rejected"));
+
+        long approved = studentRepository.count(approvedSpec);
+        long rejected = studentRepository.count(rejectedSpec);
+        long pending = total - approved - rejected;
 
         Map<String, Long> result = new HashMap<>();
         result.put("total", total);
         result.put("approved", approved);
         result.put("rejected", rejected);
         result.put("pending", pending);
+
         return result;
     }
-
 
     @Override
     public LoginResponse studentLogin(LoginRequest request) {

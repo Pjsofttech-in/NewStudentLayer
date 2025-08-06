@@ -130,4 +130,45 @@ public class StudentSpecification {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
+
+    public static Specification<StudentEntity> withFilters(
+            String institutionType, Long standardId, Long mediumId,
+            Long graduationTypeId, Long streamId, String groupName,
+            Long degreeNameId, Long departmentId, LocalDate startDate, LocalDate endDate) {
+
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (institutionType != null) {
+                predicates.add(cb.equal(root.get("institutionType"), institutionType));
+            }
+            if (standardId != null) {
+                predicates.add(cb.equal(root.get("standardId"), standardId));
+            }
+            if (mediumId != null) {
+                predicates.add(cb.equal(root.get("mediumId"), mediumId));
+            }
+            if (graduationTypeId != null) {
+                predicates.add(cb.equal(root.get("graduationTypeId"), graduationTypeId));
+            }
+            if (streamId != null) {
+                predicates.add(cb.equal(root.get("streamId"), streamId));
+            }
+            if (groupName != null && !groupName.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("groupName")), "%" + groupName.toLowerCase() + "%"));
+            }
+            if (degreeNameId != null) {
+                predicates.add(cb.equal(root.get("degreeNameId"), degreeNameId));
+            }
+            if (departmentId != null) {
+                predicates.add(cb.equal(root.get("departmentId"), departmentId));
+            }
+            if (startDate != null && endDate != null) {
+                predicates.add(cb.between(root.get("enrollmentDate"), startDate, endDate));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 }

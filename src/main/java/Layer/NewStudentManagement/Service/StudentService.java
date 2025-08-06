@@ -45,8 +45,10 @@ public interface StudentService
 
     void deleteEducationById(String role, String email, Long educationId);
 
-    Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd);
-
+    Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd,
+                                          String institutionType, Long standardId, Long mediumId,
+                                          Long graduationTypeId, Long streamId, String groupName,
+                                          Long degreeNameId, Long departmentId);
     LoginResponse studentLogin(LoginRequest request);
 
     GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
