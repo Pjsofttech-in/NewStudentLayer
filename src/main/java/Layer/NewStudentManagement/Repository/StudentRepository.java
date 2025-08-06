@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Repository;
 
+import Layer.NewStudentManagement.DTO.DataForTcDTO;
 import Layer.NewStudentManagement.DTO.GenderCountResponse;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import org.springframework.data.domain.Page;
@@ -151,7 +152,5 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             @Param("mediumId") Long mediumId,
             @Param("groupName") String groupName
     );
-
-
 
 }

@@ -54,4 +54,8 @@ public interface StudentService
     GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                        Long graduationTypeId, Long streamId, String groupName,
                                        Long degreeNameId, Long departmentId);
+
+    DataForTcDTO getDataForTc(Long studentId,String role, String email);
+
+    void updateTcGeneratedStatus(Long studentId,String role, String email);
 }

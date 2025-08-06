@@ -63,6 +63,7 @@ public class StudentDTO
     private String reason;
     private double discount;
     private Long classsRoomId;
+    private boolean isTcGenrated;
 
     @Email
     private String createdByEmail;

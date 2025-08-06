@@ -51,6 +51,7 @@ public class StudentMapper
             dto.setFormStatus(student.getFormStatus());
             dto.setReason(student.getReason());
             dto.setDiscount(student.getDiscount());
+            dto.setTcGenrated(student.isTcGenrated());
             if (student.getClassRoom() != null) {
                 dto.setClasssRoomId(student.getClassRoom().getId());
             } else {
@@ -201,7 +202,6 @@ public class StudentMapper
             dto.setScholarshipName(additionalInfo.getScholarshipName());
             dto.setSpecialPercentage(additionalInfo.getSpecialPercentage());
             dto.setDisabilityType(additionalInfo.getDisabilityType());
-            dto.setTcGenrated(additionalInfo.isTcGenrated());
 
             return dto;
         }

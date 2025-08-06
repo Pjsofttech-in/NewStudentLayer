@@ -961,4 +961,67 @@ public class StudentServiceImpl implements StudentService {
         return response;
     }
 
+    @Override
+    public DataForTcDTO getDataForTc(Long studentId,String role, String email) {
+
+        checkPermission(role,email,"Get");
+
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        StudentAddress address = student.getAddress();
+        if (!student.isTcGenrated()) {
+            throw new RuntimeException("TC already generated. Please apply for duplicate TC.");
+        }
+
+        DataForTcDTO dto = new DataForTcDTO();
+        dto.setFullName(student.getFullName());
+        dto.setMotherName(address != null ? address.getMotherName() : null);
+        dto.setFathersName(address != null ? address.getFathersName() : null);
+        dto.setGender(student.getGender());
+        dto.setBloodGroup(student.getBloodGroup());
+        dto.setEmail(student.getEmail());
+        dto.setDateOfBirth(student.getDateOfBirth());
+        dto.setContact(student.getContact());
+        dto.setInstitutionType(student.getInstitutionType());
+        dto.setStandardId(student.getStandard() != null ? student.getStandard().getSid() : null);
+        dto.setStandardName(student.getStandardName());
+        dto.setMediumId(student.getMedium() != null ? student.getMedium().getMid() : null);
+        dto.setMediumName(student.getMediumName());
+        dto.setStreamName(student.getStreamName());
+        dto.setStreamId(student.getStream() != null ? student.getStream().getId() : null);
+        dto.setGroupName(student.getGroupName());
+        dto.setGraduationTypeId(student.getGraduationType() != null ? student.getGraduationType().getId() : null);
+        dto.setGraduationType(student.getGraduationType() != null ? student.getGraduationType().getGraduationType() : null);
+        dto.setDegreeNameId(student.getDegreeName() != null ? student.getDegreeName().getId() : null);
+        dto.setDegreeName(student.getDegreeName() != null ? student.getDegreeName().getDegreeName() : null);
+        dto.setDepartmentId(student.getDepartment() != null ? student.getDepartment().getId() : null);
+        dto.setDepartmentName(student.getDepartment() != null ? student.getDepartment().getDepartmentName() : null);
+        dto.setAcademicYear(student.getAcademicYear());
+        dto.setRegistrationNumber(student.getRegistrationNumber());
+        dto.setRollNo(student.getRollNo());
+        dto.setPermanentAddress(address != null ? address.getPermanentAddress() : null);
+
+        if (dto == null) {
+            throw new RuntimeException("Student data incomplete or missing for ID: " + studentId);
+        }
+
+        return dto;
+    }
+
+    @Override
+    public void updateTcGeneratedStatus(Long studentId,String role, String email)
+    {
+
+        checkPermission(role,email,"Put");
+
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        student.setTcGenrated(true);
+        studentRepository.save(student);
+    }
+
+
+
 }

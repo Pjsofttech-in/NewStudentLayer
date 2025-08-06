@@ -27,7 +27,6 @@ public class StudentAdditionalInfo
     private String scholarshipName;
     private String specialPercentage;
     private String disabilityType;
-    private boolean isTcGenrated = true;
 
     @OneToOne
     @JoinColumn(name = "student_id", nullable = false)

@@ -218,5 +218,26 @@ public class StudentController
     }
 
 
+    @GetMapping("/getDataForTc")
+    public ResponseEntity<?> getDataForTc(@RequestParam Long studentId,@RequestParam String role, @RequestParam String email) {
+        try {
+            DataForTcDTO dto = studentService.getDataForTc(studentId,role,email);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException ex) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ex.getMessage());
+        }
+    }
+
+    @PutMapping("/updateGenerateTcValue")
+    public ResponseEntity<String> generateTc(@RequestParam Long studentId,
+                                             @RequestParam String role,
+                                             @RequestParam String email) {
+        studentService.updateTcGeneratedStatus(studentId,role,email);
+        return ResponseEntity.ok("TC generated status updated to true");
+    }
+
+
 
 }
