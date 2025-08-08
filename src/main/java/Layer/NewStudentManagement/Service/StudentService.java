@@ -57,5 +57,4 @@ public interface StudentService
 
     DataForTcDTO getDataForTc(Long studentId,String role, String email);
 
-    void updateTcGeneratedStatus(Long studentId,String role, String email);
 }

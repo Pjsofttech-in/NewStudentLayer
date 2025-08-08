@@ -230,13 +230,6 @@ public class StudentController
         }
     }
 
-    @PutMapping("/updateGenerateTcValue")
-    public ResponseEntity<String> generateTc(@RequestParam Long studentId,
-                                             @RequestParam String role,
-                                             @RequestParam String email) {
-        studentService.updateTcGeneratedStatus(studentId,role,email);
-        return ResponseEntity.ok("TC generated status updated to true");
-    }
 
 
 

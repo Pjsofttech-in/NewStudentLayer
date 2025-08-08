@@ -1009,19 +1009,6 @@ public class StudentServiceImpl implements StudentService {
         return dto;
     }
 
-    @Override
-    public void updateTcGeneratedStatus(Long studentId,String role, String email)
-    {
-
-        checkPermission(role,email,"Put");
-
-        StudentEntity student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
-
-        student.setTcGenrated(true);
-        studentRepository.save(student);
-    }
-
 
 
 }
