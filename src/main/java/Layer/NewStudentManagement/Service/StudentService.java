@@ -6,6 +6,7 @@ import Layer.NewStudentManagement.Entity.StudentDocument;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
+import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -45,15 +46,18 @@ public interface StudentService
 
     void deleteEducationById(String role, String email, Long educationId);
 
-    Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd,
+    Map<String, Long> getApplicationCount(String role, String email, String filter, LocalDate customStart, LocalDate customEnd,
                                           String institutionType, Long standardId, Long mediumId,
                                           Long graduationTypeId, Long streamId, String groupName,
-                                          Long degreeNameId, Long departmentId,String academicYear);
+                                          Long degreeNameId, Long departmentId, String academicYear,
+                                          @Nullable String branchCodeFilter);
+
     LoginResponse studentLogin(LoginRequest request);
 
     GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                        Long graduationTypeId, Long streamId, String groupName,
-                                       Long degreeNameId, Long departmentId, String academicYear);
+                                       Long degreeNameId, Long departmentId, String academicYear,
+                                       @Nullable String branchCodeFilter);
 
     DataForTcDTO getDataForTc(Long studentId,String role, String email);
 

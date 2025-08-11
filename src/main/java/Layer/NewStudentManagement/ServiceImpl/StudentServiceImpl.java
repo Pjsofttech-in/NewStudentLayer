@@ -12,6 +12,7 @@ import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
 import io.jsonwebtoken.Claims;
+import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -861,55 +862,117 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd,
+    public Map<String, Long> getApplicationCount(String role, String email, String filter, LocalDate customStart, LocalDate customEnd,
                                                  String institutionType, Long standardId, Long mediumId,
                                                  Long graduationTypeId, Long streamId, String groupName,
-                                                 Long degreeNameId, Long departmentId ,String academicYear) {
+                                                 Long degreeNameId, Long departmentId, String academicYear,
+                                                 @Nullable String branchCodeFilter) {
+
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You do not have permission to get application count");
+        }
 
         LocalDate today = LocalDate.now();
         LocalDate startDate;
         LocalDate endDate = today;
 
         switch (filter.toLowerCase()) {
-            case "today":
-                startDate = today;
-                break;
-            case "7days":
-                startDate = today.minusDays(6);
-                break;
-            case "30days":
-                startDate = today.minusDays(29);
-                break;
-            case "365days":
-                startDate = today.minusDays(364);
-                break;
-            case "custom":
+            case "today" -> startDate = today;
+            case "7days" -> startDate = today.minusDays(6);
+            case "30days" -> startDate = today.minusDays(29);
+            case "365days" -> startDate = today.minusDays(364);
+            case "custom" -> {
                 if (customStart == null || customEnd == null) {
                     throw new IllegalArgumentException("Custom date range must be provided.");
                 }
                 startDate = customStart;
                 endDate = customEnd;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid filter: " + filter);
+            }
+            default -> throw new IllegalArgumentException("Invalid filter: " + filter);
         }
 
-        Specification<StudentEntity> baseSpec = StudentSpecification.withFilters(
-                institutionType, standardId, mediumId, graduationTypeId,
-                streamId, groupName, degreeNameId, departmentId, startDate, endDate, academicYear
-        );
+        List<String> branchCodes;
 
-        long total = studentRepository.count(baseSpec);
+        if ("superadmin".equalsIgnoreCase(role)) {
+            // Get all branch codes for the institute email
+            branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            System.out.println("SuperAdmin - branchCodes for " + email + ": " + branchCodes);
 
-        Specification<StudentEntity> approvedSpec = baseSpec.and((root, query, cb) ->
-                cb.equal(root.get("status"), "Approved"));
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                // No branches for this institute — return empty counts
+                return Map.of(
+                        "total", 0L,
+                        "approved", 0L,
+                        "rejected", 0L,
+                        "pending", 0L
+                );
+            }
 
-        Specification<StudentEntity> rejectedSpec = baseSpec.and((root, query, cb) ->
-                cb.equal(root.get("status"), "Rejected"));
+            // If branchCodeFilter is present, validate and restrict branchCodes to it
+            if (branchCodeFilter != null && !branchCodeFilter.isBlank()) {
+                boolean valid = branchCodes.stream()
+                        .anyMatch(bc -> bc.equalsIgnoreCase(branchCodeFilter.trim()));
 
-        long approved = studentRepository.count(approvedSpec);
-        long rejected = studentRepository.count(rejectedSpec);
-        long pending = total - approved - rejected;
+                if (!valid) {
+                    // invalid branchCode filter — return zero counts or throw error
+                    return Map.of(
+                            "total", 0L,
+                            "approved", 0L,
+                            "rejected", 0L,
+                            "pending", 0L
+                    );
+                }
+
+                branchCodes = List.of(branchCodeFilter.trim());
+            }
+
+        } else {
+            // For other roles, fetch single branch code normally
+            String userBranchCode = staffService.fetchBranchCodeByRole(role, email);
+
+            // If branchCodeFilter is provided and matches user's branch, accept it; else ignore
+            if (branchCodeFilter != null && !branchCodeFilter.isBlank()) {
+                if (branchCodeFilter.trim().equalsIgnoreCase(userBranchCode)) {
+                    branchCodes = List.of(branchCodeFilter.trim());
+                } else {
+                    branchCodes = List.of(userBranchCode);
+                }
+            } else {
+                branchCodes = List.of(userBranchCode);
+            }
+        }
+
+        long total = 0L, approved = 0L, rejected = 0L, pending = 0L;
+
+        for (String branchCode : branchCodes) {
+            Specification<StudentEntity> baseSpec = StudentSpecification.withFilters(
+                    institutionType, standardId, mediumId, graduationTypeId,
+                    streamId, groupName, degreeNameId, departmentId,
+                    startDate, endDate, academicYear);
+
+            // Add branchCode predicate dynamically:
+            Specification<StudentEntity> branchSpec = (root, query, cb) ->
+                    cb.equal(root.get("branchCode"), branchCode);
+
+            Specification<StudentEntity> combinedSpec = baseSpec.and(branchSpec);
+
+            long branchTotal = studentRepository.count(combinedSpec);
+
+            Specification<StudentEntity> approvedSpec = combinedSpec.and((root, query, cb) ->
+                    cb.equal(root.get("status"), "Approved"));
+
+            Specification<StudentEntity> rejectedSpec = combinedSpec.and((root, query, cb) ->
+                    cb.equal(root.get("status"), "Rejected"));
+
+            long branchApproved = studentRepository.count(approvedSpec);
+            long branchRejected = studentRepository.count(rejectedSpec);
+            long branchPending = branchTotal - branchApproved - branchRejected;
+
+            total += branchTotal;
+            approved += branchApproved;
+            rejected += branchRejected;
+            pending += branchPending;
+        }
 
         Map<String, Long> result = new HashMap<>();
         result.put("total", total);
@@ -919,6 +982,7 @@ public class StudentServiceImpl implements StudentService {
 
         return result;
     }
+
 
     @Override
     public LoginResponse studentLogin(LoginRequest request) {
@@ -943,24 +1007,88 @@ public class StudentServiceImpl implements StudentService {
         return new LoginResponse(token, studentData);
     }
 
+
     @Override
     public GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                               Long graduationTypeId, Long streamId, String groupName,
-                                              Long degreeNameId, Long departmentId, String academicYear)
-    {
+                                              Long degreeNameId, Long departmentId, String academicYear,
+                                              @Nullable String branchCodeFilter) {
 
-        checkPermission(role,email,"Get");
-
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
-
-        GenderCountResponse response = studentRepository.getGenderCountByFilters(branchCode, institutionType, graduationTypeId, streamId, degreeNameId, departmentId, standardId, mediumId, groupName,academicYear);
-
-        if (response == null) {
-            return new GenderCountResponse(0L, 0L, 0L);
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You do not have permission to get gender count");
         }
 
-        return response;
+        GenderCountResponse aggregatedResponse = new GenderCountResponse(0L, 0L, 0L);
+
+        if ("superadmin".equalsIgnoreCase(role)) {
+            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            System.out.println("SuperAdmin - branchCodes for " + email + ": " + branchCodes);
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                return aggregatedResponse;
+            }
+
+            if (branchCodeFilter != null && !branchCodeFilter.isBlank()) {
+                // Check if filter is valid branch for this institute
+                boolean valid = branchCodes.stream()
+                        .anyMatch(bc -> bc.equalsIgnoreCase(branchCodeFilter.trim()));
+                if (!valid) {
+                    // If invalid filter, return empty counts or throw exception as per your design
+                    return aggregatedResponse;
+                }
+                // Only query for the filtered branch code
+                branchCodes = List.of(branchCodeFilter.trim());
+            }
+
+            for (String branchCode : branchCodes) {
+                GenderCountResponse resp = studentRepository.getGenderCountByFilters(
+                        branchCode, institutionType, graduationTypeId, streamId,
+                        degreeNameId, departmentId, standardId, mediumId, groupName, academicYear);
+
+                if (resp != null) {
+                    aggregatedResponse.setMaleCount(safeSum(aggregatedResponse.getMaleCount(), resp.getMaleCount()));
+                    aggregatedResponse.setFemaleCount(safeSum(aggregatedResponse.getFemaleCount(), resp.getFemaleCount()));
+                    aggregatedResponse.setOtherCount(safeSum(aggregatedResponse.getOtherCount(), resp.getOtherCount()));
+                }
+            }
+
+        } else {
+            // For other roles, if branchCodeFilter is provided and matches user's branch, use it,
+            // else fall back to fetched branch code
+            String userBranchCode = staffService.fetchBranchCodeByRole(role, email);
+
+            String branchCodeToUse = userBranchCode;
+            if (branchCodeFilter != null && !branchCodeFilter.isBlank()) {
+                if (branchCodeFilter.trim().equalsIgnoreCase(userBranchCode)) {
+                    branchCodeToUse = branchCodeFilter.trim();
+                } else {
+                    // Optionally: throw exception or ignore filter if it does not belong to user branch
+                    // Here ignoring filter:
+                    branchCodeToUse = userBranchCode;
+                }
+            }
+
+            GenderCountResponse resp = studentRepository.getGenderCountByFilters(
+                    branchCodeToUse, institutionType, graduationTypeId, streamId,
+                    degreeNameId, departmentId, standardId, mediumId, groupName, academicYear);
+
+            if (resp != null) {
+                aggregatedResponse = new GenderCountResponse(
+                        safeSum(0L, resp.getMaleCount()),
+                        safeSum(0L, resp.getFemaleCount()),
+                        safeSum(0L, resp.getOtherCount())
+                );
+            }
+        }
+
+        return aggregatedResponse;
     }
+
+    private Long safeSum(Long a, Long b) {
+        return (a == null ? 0L : a) + (b == null ? 0L : b);
+    }
+
+
 
     @Override
     public DataForTcDTO getDataForTc(Long studentId,String role, String email) {

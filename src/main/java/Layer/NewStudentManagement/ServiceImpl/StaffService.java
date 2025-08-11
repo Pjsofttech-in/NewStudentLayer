@@ -19,6 +19,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -120,20 +121,30 @@ public class StaffService
     }
 
     public List<String> getBranchCodesByInstituteEmail(String instituteEmail) {
-        List<List<String>> nestedList = webClient.get()
+        Map<String, String> branchMap = webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/getBranchCodesByinstituteEmail")
                         .queryParam("instituteEmail", instituteEmail)
                         .build())
                 .retrieve()
-                .bodyToFlux(new ParameterizedTypeReference<List<String>>() {})
-                .collectList()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
                 .block();
-        return nestedList.stream()
-                .flatMap(List::stream)
-                .collect(Collectors.toList());
+
+        return branchMap != null
+                ? new ArrayList<>(branchMap.values())
+                : Collections.emptyList();
     }
 
+    public Map<String, String> getBranchCodesWithNameByInstituteEmail(String instituteEmail) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/getBranchCodesByinstituteEmail")
+                        .queryParam("instituteEmail", instituteEmail)
+                        .build())
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
+                .block();
+    }
 
     public boolean hasPermission(String role, String email, String action) {
         if (role == null || action == null) {
@@ -149,7 +160,7 @@ public class StaffService
                     try {
                         Boolean exists = webClient.get()
                                 .uri(uriBuilder -> uriBuilder
-                                        .path("/ClientEmailExist")
+                                        .path("/checkClientEmailExist")
                                         .queryParam("email", email)
                                         .build())
                                 .retrieve()

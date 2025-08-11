@@ -23,6 +23,8 @@ public class DashBoardController
 
     @GetMapping("/getStudentCountForCards")
     public ResponseEntity<Map<String, Long>> getApplicationCounts(
+            @RequestParam String role,
+            @RequestParam String email,
             @RequestParam(required = false) String filter,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
@@ -34,10 +36,11 @@ public class DashBoardController
             @RequestParam(required = false) String groupName,
             @RequestParam(required = false) Long degreeNameId,
             @RequestParam(required = false) Long departmentId,
-            @RequestParam(required = false) String academicYear) {
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String branchCode) {
 
-        Map<String, Long> result = studentService.getApplicationCount(filter, startDate, endDate,institutionType,standardId,mediumId,
-                graduationTypeId, streamId, groupName,degreeNameId, departmentId, academicYear);
+        Map<String, Long> result = studentService.getApplicationCount(role, email, filter, startDate, endDate,institutionType,standardId,mediumId,
+                graduationTypeId, streamId, groupName,degreeNameId, departmentId, academicYear, branchCode);
         return ResponseEntity.ok(result);
     }
 
@@ -54,9 +57,10 @@ public class DashBoardController
             @RequestParam(required = false) String groupName,
             @RequestParam(required = false) Long degreeNameId,
             @RequestParam(required = false) Long departmentId,
-            @RequestParam(required = false) String academicYear) {
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String branchCode) {
 
         return studentService.getGenderCount(role,email, institutionType,standardId,mediumId,
-                graduationTypeId, streamId, groupName,degreeNameId, departmentId, academicYear);
+                graduationTypeId, streamId, groupName,degreeNameId, departmentId, academicYear,branchCode);
     }
 }

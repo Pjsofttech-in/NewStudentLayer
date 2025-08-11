@@ -51,5 +51,12 @@ public class StaffController
         List<InstituteLoginResponse> response = staffLoginService.getInstituteDetailsOnly(instituteEmail);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/getBranchCodeByInstituteEmail")
+    public ResponseEntity<Map<String, String>> getBranchCodesByInstituteEmail(@RequestParam String instituteEmail)
+    {
+        Map<String, String> branchMap = staffLoginService.getBranchCodesWithNameByInstituteEmail(instituteEmail);
+        return ResponseEntity.ok(branchMap);
+    }
 }
 
