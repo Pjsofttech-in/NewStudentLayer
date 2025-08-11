@@ -560,6 +560,7 @@ public class StudentServiceImpl implements StudentService {
         if (incoming.getAge() != null) existing.setAge(incoming.getAge());
         if (incoming.getEmail() != null) existing.setEmail(incoming.getEmail());
         if (incoming.getDateOfBirth() != null) existing.setDateOfBirth(incoming.getDateOfBirth());
+        if (incoming.getDiscount() != null) existing.setDiscount(incoming.getDiscount());
         if (incoming.getBirthPlace() != null) existing.setBirthPlace(incoming.getBirthPlace());
         if (incoming.getBirthCountry() != null) existing.setBirthCountry(incoming.getBirthCountry());
         if (incoming.getPancardNumber() != null) existing.setPancardNumber(incoming.getPancardNumber());
@@ -619,6 +620,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setFormStatus(student.getFormStatus());
         dto.setReason(student.getReason());
         dto.setDiscount(student.getDiscount());
+        dto.setTcGenrated(student.isTcGenrated());
 
         if (student.getClassRoom() != null) {
             dto.setClasssRoomId(student.getClassRoom().getId());

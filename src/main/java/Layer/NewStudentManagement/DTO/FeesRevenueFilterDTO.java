@@ -18,4 +18,6 @@ public class FeesRevenueFilterDTO {
     private String departmentName;
     private String feesStatus;
     private String feesCollectionType;
+    private String month;
+    private Long year;
 }

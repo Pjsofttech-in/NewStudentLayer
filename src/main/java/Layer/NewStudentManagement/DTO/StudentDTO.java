@@ -61,7 +61,7 @@ public class StudentDTO
     private String registrationNumber;
     private String formStatus;
     private String reason;
-    private double discount;
+    private Double discount;
     private Long classsRoomId;
     private boolean isTcGenrated;
 

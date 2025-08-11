@@ -20,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -308,6 +309,23 @@ public class FeesServiceImpl implements FeesService
                 case "7days" -> calculatedStartDate = calculatedEndDate.minusDays(6);
                 case "30days" -> calculatedStartDate = calculatedEndDate.minusDays(29);
                 case "365days" -> calculatedStartDate = calculatedEndDate.minusDays(364);
+                case "month" -> {
+                    if (filters.getMonth() != null && filters.getYear() != null) {
+                        try {
+                            int monthValue = Month.valueOf(filters.getMonth().toUpperCase()).getValue();
+                            int yearValue = filters.getYear().intValue();
+
+                            LocalDate monthStart = LocalDate.of(yearValue, monthValue, 1);
+                            LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
+
+                            calculatedStartDate = monthStart;
+                            calculatedEndDate = monthEnd;
+                        } catch (IllegalArgumentException ex) {
+                            throw new RuntimeException("Invalid month name: " + filters.getMonth()
+                                    + ". Please use formats like Jan, Feb, Mar...");
+                        }
+                    }
+                }
                 case "all" -> calculatedStartDate = null; // No filter
                 default -> calculatedStartDate = null;    // Also no filter
             }

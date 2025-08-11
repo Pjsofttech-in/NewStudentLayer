@@ -62,7 +62,8 @@ public class StudentResponseDTO {
     private String registrationNumber;
     private String formStatus;
     private String reason;
-    private double discount;
+    private Double discount;
+    private boolean isTcGenrated;
     private Long classsRoomId;
 
     private boolean scholarship;
