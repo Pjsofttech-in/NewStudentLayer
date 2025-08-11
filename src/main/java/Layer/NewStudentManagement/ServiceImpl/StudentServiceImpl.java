@@ -864,7 +864,7 @@ public class StudentServiceImpl implements StudentService {
     public Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd,
                                                  String institutionType, Long standardId, Long mediumId,
                                                  Long graduationTypeId, Long streamId, String groupName,
-                                                 Long degreeNameId, Long departmentId) {
+                                                 Long degreeNameId, Long departmentId ,String academicYear) {
 
         LocalDate today = LocalDate.now();
         LocalDate startDate;
@@ -896,7 +896,7 @@ public class StudentServiceImpl implements StudentService {
 
         Specification<StudentEntity> baseSpec = StudentSpecification.withFilters(
                 institutionType, standardId, mediumId, graduationTypeId,
-                streamId, groupName, degreeNameId, departmentId, startDate, endDate
+                streamId, groupName, degreeNameId, departmentId, startDate, endDate, academicYear
         );
 
         long total = studentRepository.count(baseSpec);
@@ -946,15 +946,14 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                               Long graduationTypeId, Long streamId, String groupName,
-                                              Long degreeNameId, Long departmentId)
+                                              Long degreeNameId, Long departmentId, String academicYear)
     {
 
         checkPermission(role,email,"Get");
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        GenderCountResponse response = studentRepository.getGenderCountByFilters(branchCode, institutionType, graduationTypeId, streamId, degreeNameId, departmentId, standardId, mediumId, groupName);
-
+        GenderCountResponse response = studentRepository.getGenderCountByFilters(branchCode, institutionType, graduationTypeId, streamId, degreeNameId, departmentId, standardId, mediumId, groupName,academicYear);
 
         if (response == null) {
             return new GenderCountResponse(0L, 0L, 0L);

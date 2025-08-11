@@ -33,10 +33,11 @@ public class DashBoardController
             @RequestParam(required = false) Long streamId,
             @RequestParam(required = false) String groupName,
             @RequestParam(required = false) Long degreeNameId,
-            @RequestParam(required = false) Long departmentId) {
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) String academicYear) {
 
         Map<String, Long> result = studentService.getApplicationCount(filter, startDate, endDate,institutionType,standardId,mediumId,
-                graduationTypeId, streamId, groupName,degreeNameId, departmentId);
+                graduationTypeId, streamId, groupName,degreeNameId, departmentId, academicYear);
         return ResponseEntity.ok(result);
     }
 
@@ -52,9 +53,10 @@ public class DashBoardController
             @RequestParam(required = false) Long streamId,
             @RequestParam(required = false) String groupName,
             @RequestParam(required = false) Long degreeNameId,
-            @RequestParam(required = false) Long departmentId) {
+            @RequestParam(required = false) Long departmentId,
+            @RequestParam(required = false) String academicYear) {
 
         return studentService.getGenderCount(role,email, institutionType,standardId,mediumId,
-                graduationTypeId, streamId, groupName,degreeNameId, departmentId);
+                graduationTypeId, streamId, groupName,degreeNameId, departmentId, academicYear);
     }
 }

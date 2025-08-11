@@ -140,7 +140,8 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "AND (:departmentId IS NULL OR s.department.id = :departmentId) " +
             "AND (:standardId IS NULL OR s.standard.id = :standardId) " +
             "AND (:mediumId IS NULL OR s.medium.id = :mediumId) " +
-            "AND (:groupName IS NULL OR s.groupName = :groupName)")
+            "AND (:groupName IS NULL OR s.groupName = :groupName) " +
+            "AND (:academicYear IS NULL OR s.academicYear = :academicYear)") // academicYear filter added
     GenderCountResponse getGenderCountByFilters(
             @Param("branchCode") String branchCode,
             @Param("institutionType") String institutionType,
@@ -150,7 +151,9 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             @Param("departmentId") Long departmentId,
             @Param("standardId") Long standardId,
             @Param("mediumId") Long mediumId,
-            @Param("groupName") String groupName
+            @Param("groupName") String groupName,
+            @Param("academicYear") String academicYear // academicYear added here
     );
+
 
 }

@@ -48,12 +48,12 @@ public interface StudentService
     Map<String, Long> getApplicationCount(String filter, LocalDate customStart, LocalDate customEnd,
                                           String institutionType, Long standardId, Long mediumId,
                                           Long graduationTypeId, Long streamId, String groupName,
-                                          Long degreeNameId, Long departmentId);
+                                          Long degreeNameId, Long departmentId,String academicYear);
     LoginResponse studentLogin(LoginRequest request);
 
     GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                        Long graduationTypeId, Long streamId, String groupName,
-                                       Long degreeNameId, Long departmentId);
+                                       Long degreeNameId, Long departmentId, String academicYear);
 
     DataForTcDTO getDataForTc(Long studentId,String role, String email);
 

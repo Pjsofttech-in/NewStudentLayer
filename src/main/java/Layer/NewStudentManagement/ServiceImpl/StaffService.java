@@ -106,8 +106,6 @@ public class StaffService
 
     }
 
-
-
     public List<InstituteLoginResponse> getInstituteDetailsOnly(String email) {
         InstituteClientWrapperResponse response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
@@ -118,10 +116,23 @@ public class StaffService
                 .bodyToMono(InstituteClientWrapperResponse.class)
                 .block();
 
-        // Return only instituteResponseDTOS
         return response != null ? response.getInstituteResponseDTOS() : Collections.emptyList();
     }
 
+    public List<String> getBranchCodesByInstituteEmail(String instituteEmail) {
+        List<List<String>> nestedList = webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/getBranchCodesByinstituteEmail")
+                        .queryParam("instituteEmail", instituteEmail)
+                        .build())
+                .retrieve()
+                .bodyToFlux(new ParameterizedTypeReference<List<String>>() {})
+                .collectList()
+                .block();
+        return nestedList.stream()
+                .flatMap(List::stream)
+                .collect(Collectors.toList());
+    }
 
 
     public boolean hasPermission(String role, String email, String action) {
@@ -132,6 +143,25 @@ public class StaffService
         switch (role.toUpperCase()) {
             case "USER" -> {
                 return "POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action);
+            }
+            case "SUPERADMIN" -> {
+                if ("GET".equalsIgnoreCase(action)) {
+                    try {
+                        Boolean exists = webClient.get()
+                                .uri(uriBuilder -> uriBuilder
+                                        .path("/ClientEmailExist")
+                                        .queryParam("email", email)
+                                        .build())
+                                .retrieve()
+                                .bodyToMono(Boolean.class)
+                                .block();
+                        return Boolean.TRUE.equals(exists);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return false;
+                    }
+                }
+                return false;
             }
 
             case "STUDENT" -> {

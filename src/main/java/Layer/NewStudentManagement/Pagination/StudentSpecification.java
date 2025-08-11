@@ -135,7 +135,7 @@ public class StudentSpecification {
     public static Specification<StudentEntity> withFilters(
             String institutionType, Long standardId, Long mediumId,
             Long graduationTypeId, Long streamId, String groupName,
-            Long degreeNameId, Long departmentId, LocalDate startDate, LocalDate endDate) {
+            Long degreeNameId, Long departmentId, LocalDate startDate, LocalDate endDate, String academicYear) {
 
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -166,6 +166,9 @@ public class StudentSpecification {
             }
             if (startDate != null && endDate != null) {
                 predicates.add(cb.between(root.get("enrollmentDate"), startDate, endDate));
+            }
+            if (academicYear != null && !academicYear.trim().isEmpty()) { // <-- New filter for academicYear
+                predicates.add(cb.equal(root.get("academicYear"), academicYear));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
