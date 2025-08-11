@@ -61,4 +61,7 @@ public interface StudentService
 
     DataForTcDTO getDataForTc(Long studentId,String role, String email);
 
+    List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
+            String role, String email, String graduationType, String standardName,
+            String mediumName, String streamName, String degreeName, String departmentName, String institutionType);
 }

@@ -1138,6 +1138,28 @@ public class StudentServiceImpl implements StudentService {
         return dto;
     }
 
+    @Override
+    public List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
+            String role, String email, String graduationType, String standardName,
+            String mediumName, String streamName, String degreeName, String departmentName, String institutionType) {
 
+        checkPermission(role, email, "Get");
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        if (branchCode == null || branchCode.trim().isEmpty()) {
+            throw new RuntimeException("Branch code not found for the given role and email");
+        }
+
+        return studentRepository.getStudentCountByClassRoomWithFilters(
+                branchCode,
+                graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
+                standardName != null && !standardName.trim().isEmpty() ? standardName : null,
+                mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
+                streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
+                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null
+        );
+    }
 
 }

@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Repository;
 
+import Layer.NewStudentManagement.DTO.ClassRoomStudentCountProjection;
 import Layer.NewStudentManagement.DTO.DataForTcDTO;
 import Layer.NewStudentManagement.DTO.GenderCountResponse;
 import Layer.NewStudentManagement.Entity.StudentEntity;
@@ -155,6 +156,37 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             @Param("academicYear") String academicYear // academicYear added here
     );
 
+
+    @Query("""
+    SELECT c.id AS classRoomId,
+           COUNT(s.id) AS studentCount
+    FROM StudentEntity s
+    JOIN s.classRoom c
+    LEFT JOIN s.graduationType g
+    LEFT JOIN s.medium m
+    LEFT JOIN s.stream st
+    LEFT JOIN s.degreeName d
+    LEFT JOIN s.department dept
+    WHERE s.branchCode = :branchCode
+      AND (:graduationType IS NULL OR g.graduationType = :graduationType)
+      AND (:standardName IS NULL OR s.standardName = :standardName)
+      AND (:mediumName IS NULL OR m.mediumName = :mediumName)
+      AND (:streamName IS NULL OR st.stream = :streamName)
+      AND (:degreeName IS NULL OR d.degreeName = :degreeName)
+      AND (:departmentName IS NULL OR dept.departmentName = :departmentName)
+      AND (:institutionType IS NULL OR c.institutionType = :institutionType)
+    GROUP BY c.id
+""")
+    List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFilters(
+            @Param("branchCode") String branchCode,
+            @Param("graduationType") String graduationType,
+            @Param("standardName") String standardName,
+            @Param("mediumName") String mediumName,
+            @Param("streamName") String streamName,
+            @Param("degreeName") String degreeName,
+            @Param("departmentName") String departmentName,
+            @Param("institutionType") String institutionType
+    );
 
 
 }

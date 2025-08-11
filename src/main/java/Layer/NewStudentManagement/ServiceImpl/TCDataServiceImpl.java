@@ -140,7 +140,7 @@ public class TCDataServiceImpl implements TCDataService
         dto.setCreatedByEmail(entity.getCreatedByEmail());
         dto.setBranchCode(entity.getBranchCode());
         dto.setDuplicateTc(entity.isDuplicateTc());
-        dto.setStudentId(entity.getStudent().getId()); // assumes student is not null
+        dto.setStudentId(entity.getStudent().getId());
         return dto;
     }
 

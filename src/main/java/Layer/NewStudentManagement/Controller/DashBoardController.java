@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.ClassRoomStudentCountProjection;
 import Layer.NewStudentManagement.DTO.GenderCountResponse;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -62,5 +64,31 @@ public class DashBoardController
 
         return studentService.getGenderCount(role,email, institutionType,standardId,mediumId,
                 graduationTypeId, streamId, groupName,degreeNameId, departmentId, academicYear,branchCode);
+    }
+
+
+    @GetMapping("/getStudentCountByClassrooms")
+    public List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false) String graduationType,
+            @RequestParam(required = false) String standardName,
+            @RequestParam(required = false) String mediumName,
+            @RequestParam(required = false) String streamName,
+            @RequestParam(required = false) String degreeName,
+            @RequestParam(required = false) String departmentName,
+            @RequestParam(required = false) String institutionType
+    ) {
+        return studentService.getStudentCountByClassRoom(
+                role,
+                email,
+                graduationType,
+                standardName,
+                mediumName,
+                streamName,
+                degreeName,
+                departmentName,
+                institutionType
+        );
     }
 }
