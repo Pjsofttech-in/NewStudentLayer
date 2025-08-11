@@ -26,6 +26,7 @@ public class TCDataServiceImpl implements TCDataService
 
     @Autowired
     StaffService staffService;
+
     @Override
     public TCDTO generateTc(Long studentId, String role, String email) {
         if (!staffService.hasPermission(role, email, "Post")) {
@@ -35,6 +36,11 @@ public class TCDataServiceImpl implements TCDataService
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        if (Boolean.FALSE.equals(student.isTcGenrated())) {
+            throw new RuntimeException("TC is already generated. Apply for duplicate TC.");
+        }
+
 
         Optional<StudentTcData> existingTcOpt = tcDataRepository.findFirstByStudentIdOrderByTcDateAsc(studentId);
 
@@ -48,7 +54,7 @@ public class TCDataServiceImpl implements TCDataService
             tcNumber = generateTcNumber(branchCode);
             duplicate = false;
 
-            student.setTcGenrated(true);
+            student.setTcGenrated(false);
             studentRepository.save(student);
         }
 
