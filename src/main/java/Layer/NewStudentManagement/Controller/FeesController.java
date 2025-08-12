@@ -81,7 +81,7 @@ public class FeesController
 
     @PostMapping("/feesRevenewByBranch")
     public ResponseEntity<FeesRevenueProjection> getFeesRevenueByBranch(@RequestParam String role, @RequestParam String email,
-                                                                        @RequestParam String timeFrame,
+                                                                        @RequestParam(required = false) String timeFrame,
                                                                         @RequestParam(required = false) LocalDate startDate,
                                                                         @RequestParam(required = false) LocalDate endDate,
                                                                         @RequestBody FeesRevenueFilterDTO filters) {

@@ -9,8 +9,13 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class StudentFeesSpecification
 {
@@ -87,6 +92,25 @@ public class StudentFeesSpecification
 
             if (startDate != null && endDate != null) {
                 predicate = cb.and(predicate, cb.between(root.get("approvalDate"), startDate, endDate));
+            }
+            if (filters.getMonth() != null && !filters.getMonth().isBlank() && filters.getYear() != null) {
+                try {
+                    DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                            .parseCaseInsensitive()
+                            .appendPattern("MMM")
+                            .toFormatter(Locale.ENGLISH);
+
+                    Month month = Month.from(formatter.parse(filters.getMonth()));
+                    int monthValue = month.getValue();
+                    int yearValue = filters.getYear().intValue();
+
+                    LocalDate monthStart = LocalDate.of(yearValue, monthValue, 1);
+                    LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
+
+                    predicate = cb.and(predicate, cb.between(root.get("approvalDate"), monthStart, monthEnd));
+                } catch (DateTimeParseException ex) {
+                    throw new RuntimeException("Invalid month name: " + filters.getMonth() + ". Please use formats like Jan, Feb, Mar...");
+                }
             }
 
             if (filters.getInstitutionType() != null && !filters.getInstitutionType().isBlank()) {

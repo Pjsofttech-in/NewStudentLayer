@@ -291,7 +291,6 @@ public class FeesServiceImpl implements FeesService
     }
 
 
-
     @Override
     public FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters) {
         checkPermission(role, email, "Get");
@@ -300,35 +299,29 @@ public class FeesServiceImpl implements FeesService
         LocalDate calculatedStartDate = null;
         LocalDate calculatedEndDate = LocalDate.now();
 
-        if ("custom".equalsIgnoreCase(timeFrame) && startDate != null && endDate != null) {
-            calculatedStartDate = startDate;
-            calculatedEndDate = endDate;
-        } else {
-            switch (timeFrame.toLowerCase()) {
-                case "today" -> calculatedStartDate = calculatedEndDate;
-                case "7days" -> calculatedStartDate = calculatedEndDate.minusDays(6);
-                case "30days" -> calculatedStartDate = calculatedEndDate.minusDays(29);
-                case "365days" -> calculatedStartDate = calculatedEndDate.minusDays(364);
-                case "month" -> {
-                    if (filters.getMonth() != null && filters.getYear() != null) {
-                        try {
-                            int monthValue = Month.valueOf(filters.getMonth().toUpperCase()).getValue();
-                            int yearValue = filters.getYear().intValue();
-
-                            LocalDate monthStart = LocalDate.of(yearValue, monthValue, 1);
-                            LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
-
-                            calculatedStartDate = monthStart;
-                            calculatedEndDate = monthEnd;
-                        } catch (IllegalArgumentException ex) {
-                            throw new RuntimeException("Invalid month name: " + filters.getMonth()
-                                    + ". Please use formats like Jan, Feb, Mar...");
-                        }
+        if (timeFrame != null && !timeFrame.isBlank()) {
+            if ("custom".equalsIgnoreCase(timeFrame) && startDate != null && endDate != null) {
+                calculatedStartDate = startDate;
+                calculatedEndDate = endDate;
+            } else {
+                switch (timeFrame.toLowerCase()) {
+                    case "today" -> calculatedStartDate = calculatedEndDate;
+                    case "7days" -> calculatedStartDate = calculatedEndDate.minusDays(6);
+                    case "30days" -> calculatedStartDate = calculatedEndDate.minusDays(29);
+                    case "365days" -> calculatedStartDate = calculatedEndDate.minusDays(364);
+                    case "all" -> {
+                        calculatedStartDate = null; // no filter
+                        calculatedEndDate = null;
+                    }
+                    default -> {
+                        calculatedStartDate = null;
+                        calculatedEndDate = null;
                     }
                 }
-                case "all" -> calculatedStartDate = null; // No filter
-                default -> calculatedStartDate = null;    // Also no filter
             }
+        } else {
+            calculatedStartDate = startDate;
+            calculatedEndDate = endDate;
         }
 
         Specification<StudentFees> spec = StudentFeesSpecification.withFilters(branchCode, calculatedStartDate, calculatedEndDate, filters);
@@ -365,6 +358,7 @@ public class FeesServiceImpl implements FeesService
             }
         };
     }
+
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {
         StudentFeesDTO dto = new StudentFeesDTO();
