@@ -156,9 +156,9 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             @Param("academicYear") String academicYear // academicYear added here
     );
 
-
     @Query("""
     SELECT c.id AS classRoomId,
+           c.division.division AS division,
            COUNT(s.id) AS studentCount
     FROM StudentEntity s
     JOIN s.classRoom c
@@ -175,7 +175,8 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
       AND (:degreeName IS NULL OR d.degreeName = :degreeName)
       AND (:departmentName IS NULL OR dept.departmentName = :departmentName)
       AND (:institutionType IS NULL OR c.institutionType = :institutionType)
-    GROUP BY c.id
+      AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+    GROUP BY c.id, c.division.division
 """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFilters(
             @Param("branchCode") String branchCode,
@@ -185,8 +186,8 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             @Param("streamName") String streamName,
             @Param("degreeName") String degreeName,
             @Param("departmentName") String departmentName,
-            @Param("institutionType") String institutionType
+            @Param("institutionType") String institutionType,
+            @Param("academicYear") String academicYear
     );
-
 
 }

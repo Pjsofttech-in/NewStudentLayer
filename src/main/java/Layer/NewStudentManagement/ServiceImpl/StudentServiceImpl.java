@@ -1141,7 +1141,8 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
             String role, String email, String graduationType, String standardName,
-            String mediumName, String streamName, String degreeName, String departmentName, String institutionType) {
+            String mediumName, String streamName, String degreeName, String departmentName,
+            String institutionType, String academicYear) {
 
         checkPermission(role, email, "Get");
 
@@ -1158,7 +1159,8 @@ public class StudentServiceImpl implements StudentService {
                 streamName != null && !streamName.trim().isEmpty() ? streamName : null,
                 degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
                 departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
-                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null
+                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
         );
     }
 

@@ -63,5 +63,6 @@ public interface StudentService
 
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
             String role, String email, String graduationType, String standardName,
-            String mediumName, String streamName, String degreeName, String departmentName, String institutionType);
+            String mediumName, String streamName, String degreeName, String departmentName,
+            String institutionType, String academicYear);
 }
