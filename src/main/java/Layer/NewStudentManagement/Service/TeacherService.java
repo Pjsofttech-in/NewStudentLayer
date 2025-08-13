@@ -12,7 +12,7 @@ public interface TeacherService
 {
     StudentTeacherDTO createTeacher(String role, String email, TeacherRequestDTO dto);
     StudentTeacherDTO getTeacherById(Long id,String role,String email);
-    StudentTeacher updateTeacher(Long id,String role,String email,TeacherRequestDTO teacher);
+    StudentTeacherDTO updateTeacher(Long id,String role,String email,TeacherRequestDTO teacher);
     void deleteTeacherById(Long id,String role,String email);
     List<StudentTeacherDTO> getAllTeacher(String role, String email);
     LoginResponse login(LoginRequest request);
@@ -21,5 +21,6 @@ public interface TeacherService
     String verifyOtp(String email, String otp);
     String sendOtp(String email);
     List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName,String streamName,String degreeName, String departmentName);
+
 
 }

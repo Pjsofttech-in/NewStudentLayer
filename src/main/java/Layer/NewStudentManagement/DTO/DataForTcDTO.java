@@ -37,6 +37,8 @@ public class DataForTcDTO {
     private String registrationNumber;
     private Integer rollNo;
     private String permanentAddress;
+    private boolean duplicateTc;
+    private boolean isTcGenrated;
 
     public DataForTcDTO(String fullName, String motherName, String fathersName, String gender, String bloodGroup,
                         String email, LocalDate dateOfBirth, String contact, String institutionType,
@@ -44,7 +46,7 @@ public class DataForTcDTO {
                         String streamName, Long streamId, String groupName, Long graduationTypeId,
                         String graduationType, Long degreeNameId, String degreeName, Long departmentId,
                         String departmentName, String academicYear, String registrationNumber,
-                        Integer rollNo, String permanentAddress) {
+                        Integer rollNo, String permanentAddress,boolean duplicateTc,boolean isTcGenrated) {
         this.fullName = fullName;
         this.motherName = motherName;
         this.fathersName = fathersName;
@@ -71,7 +73,8 @@ public class DataForTcDTO {
         this.registrationNumber = registrationNumber;
         this.rollNo = rollNo;
         this.permanentAddress = permanentAddress;
+        this.duplicateTc = duplicateTc;
+        this.isTcGenrated = isTcGenrated;
     }
 
-    // Getters (or use Lombok's @Getter if preferred)
 }

@@ -32,5 +32,9 @@ public interface TCDataRepository extends JpaRepository<StudentTcData,Long>
     @Query("SELECT t FROM StudentTcData t WHERE t.student.id = :studentId")
     List<StudentTcData> findAllByStudentId(@Param("studentId") Long studentId);
 
+    @Query(value = "SELECT * FROM student_tc_data WHERE student_id = :studentId ORDER BY id DESC LIMIT 1", nativeQuery = true)
+    Optional<StudentTcData> findLatestByStudentId(@Param("studentId") Long studentId);
+
+
 
 }

@@ -67,6 +67,8 @@ public class StudentServiceImpl implements StudentService {
     private StreamRepository streamRepository;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private TCDataRepository tcDataRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
 
@@ -1089,16 +1091,20 @@ public class StudentServiceImpl implements StudentService {
     }
 
 
-
     @Override
-    public DataForTcDTO getDataForTc(Long studentId,String role, String email) {
+    public DataForTcDTO getDataForTc(Long studentId, String role, String email) {
 
-        checkPermission(role,email,"Get");
+        checkPermission(role, email, "Get");
 
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
+        StudentTcData tcData = tcDataRepository.findLatestByStudentId(studentId)
+                .orElse(null);
+
         StudentAddress address = student.getAddress();
+
+        // You had the logic reversed earlier — it should throw if already generated
         if (!student.isTcGenrated()) {
             throw new RuntimeException("TC already generated. Please apply for duplicate TC.");
         }
@@ -1131,12 +1137,13 @@ public class StudentServiceImpl implements StudentService {
         dto.setRollNo(student.getRollNo());
         dto.setPermanentAddress(address != null ? address.getPermanentAddress() : null);
 
-        if (dto == null) {
-            throw new RuntimeException("Student data incomplete or missing for ID: " + studentId);
-        }
+        dto.setTcGenrated(student.isTcGenrated());
+        dto.setDuplicateTc(tcData != null && tcData.isDuplicateTc());
+
 
         return dto;
     }
+
 
     @Override
     public List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(

@@ -63,8 +63,8 @@ public class AttendanceServiceImpl implements AttendanceService {
         String branchCode = classRoom.getBranchCode();
         String systemName = "student-sys";
         LocalTime classStartTime = classRoom.getStartTime();
-        LocalTime earliestAllowed = classStartTime.minusMinutes(10);
-        LocalTime latestAllowed = classStartTime.plusMinutes(20);
+        LocalTime earliestAllowed = classStartTime.minusMinutes(60);
+        LocalTime latestAllowed = classStartTime.plusMinutes(60);
         if (now.isBefore(earliestAllowed) || now.isAfter(latestAllowed)) {
             throw new RuntimeException("Attendance can only be marked between " +
                     earliestAllowed + " and " + latestAllowed + " for class starting at " + classStartTime);
@@ -210,8 +210,8 @@ public class AttendanceServiceImpl implements AttendanceService {
             StudentClassRoom classroom = classRoomRepository.findById(classroomIdLong)
                     .orElseThrow(() -> new RuntimeException("Classroom not found"));
             LocalTime classStartTime = classroom.getStartTime();
-            LocalTime earliestAllowed = classStartTime.minusMinutes(10);
-            LocalTime latestAllowed = classStartTime.plusMinutes(20);
+            LocalTime earliestAllowed = classStartTime.minusMinutes(60);
+            LocalTime latestAllowed = classStartTime.plusMinutes(60);
 
             StudentEntity student = studentRepository.findByClassRoomIdAndRollNo(classroomIdLong, Integer.parseInt(rollNo))
                     .orElseThrow(() -> new RuntimeException("Student not found"));

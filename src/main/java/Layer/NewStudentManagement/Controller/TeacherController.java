@@ -45,9 +45,9 @@ public class TeacherController
     }
 
     @PutMapping("/updateTeacher/{id}")
-    public ResponseEntity<StudentTeacher> updateTeacher(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody TeacherRequestDTO teacher)
+    public ResponseEntity<StudentTeacherDTO> updateTeacher(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody TeacherRequestDTO teacher)
     {
-        StudentTeacher updatedTeacher = teacherService.updateTeacher(id,role,email,teacher);
+        StudentTeacherDTO updatedTeacher = teacherService.updateTeacher(id,role,email,teacher);
         return ResponseEntity.ok(updatedTeacher);
     }
 

@@ -184,7 +184,7 @@ public class TeacherServiceImpl implements TeacherService
     }
 
     @Override
-    public StudentTeacher updateTeacher(Long id,String role,String email,TeacherRequestDTO teacher)
+    public StudentTeacherDTO updateTeacher(Long id,String role,String email,TeacherRequestDTO teacher)
     {
         if(!staffService.hasPermission(role,email,"Put"))
         {
@@ -212,7 +212,8 @@ public class TeacherServiceImpl implements TeacherService
             }
             existingTeacher.setSubjects(subjectEntities);
         }
-        return teacherRepository.save(existingTeacher);
+        StudentTeacher teacher1 = teacherRepository.save(existingTeacher);
+        return mapToResponseDTO(teacher1);
     }
 
     @Override
@@ -380,25 +381,21 @@ public class TeacherServiceImpl implements TeacherService
         responseDTO.setCreatedByEmail(teacher.getCreatedByEmail());
         responseDTO.setSubjects(subjectDTOs);
 
-        // Graduation Type
         if (teacher.getGraduationType() != null) {
             responseDTO.setGraduationTypeId(teacher.getGraduationType().getId());
             responseDTO.setGraduationType(teacher.getGraduationType().getGraduationType());
         }
 
-        // Stream
         if (teacher.getStream() != null) {
             responseDTO.setStreamId(teacher.getStream().getId());
             responseDTO.setStream(teacher.getStream().getStream());
         }
 
-        // Degree Name
         if (teacher.getDegree() != null) {
             responseDTO.setDegreeId(teacher.getDegree().getId());
             responseDTO.setDegreeName(teacher.getDegree().getDegreeName());
         }
 
-        // Department
         if (teacher.getDepartment() != null) {
             responseDTO.setDepartmentId(teacher.getDepartment().getId());
             responseDTO.setDepartmentName(teacher.getDepartment().getDepartmentName());
