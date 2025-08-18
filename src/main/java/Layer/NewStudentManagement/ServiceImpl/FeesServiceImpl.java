@@ -333,6 +333,7 @@ public class FeesServiceImpl implements FeesService
             List<FeeScheduleDTO> scheduleList = fees.getScheduleList().stream()
                     .map(s -> {
                         FeeScheduleDTO sdto = new FeeScheduleDTO();
+                        sdto.setId(s.getId());
                         sdto.setFeesType(s.getFeesType());
                         sdto.setMonth(s.getMonth());
                         sdto.setPaid(s.isPaid());

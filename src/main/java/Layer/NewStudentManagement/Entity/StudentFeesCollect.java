@@ -47,6 +47,10 @@ public class StudentFeesCollect
         @ManyToOne
         @JoinColumn(name = "student_fees_id")
         private StudentFees studentFees;
+        @ManyToOne
+        @JoinColumn(name = "schedule_id")
+        private StudentFeeSchedule studentFeeSchedule;
+
         @Email
         private String createdByEmail;
         private String branchCode;
