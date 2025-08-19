@@ -875,70 +875,63 @@ public class StudentServiceImpl implements StudentService {
         }
 
         LocalDate today = LocalDate.now();
-        LocalDate startDate;
-        LocalDate endDate = today;
+        LocalDate startDate = null;  // 👉 null means no date restriction
+        LocalDate endDate = null;
 
-        switch (filter.toLowerCase()) {
-            case "today" -> startDate = today;
-            case "7days" -> startDate = today.minusDays(6);
-            case "30days" -> startDate = today.minusDays(29);
-            case "365days" -> startDate = today.minusDays(364);
-            case "custom" -> {
-                if (customStart == null || customEnd == null) {
-                    throw new IllegalArgumentException("Custom date range must be provided.");
+        if (filter != null && !filter.isBlank()) {
+            switch (filter.toLowerCase()) {
+                case "today" -> {
+                    startDate = today;
+                    endDate = today;
                 }
-                startDate = customStart;
-                endDate = customEnd;
+                case "7days" -> {
+                    startDate = today.minusDays(6);
+                    endDate = today;
+                }
+                case "30days" -> {
+                    startDate = today.minusDays(29);
+                    endDate = today;
+                }
+                case "365days" -> {
+                    startDate = today.minusDays(364);
+                    endDate = today;
+                }
+                case "custom" -> {
+                    if (customStart == null || customEnd == null) {
+                        throw new IllegalArgumentException("Custom date range must be provided.");
+                    }
+                    startDate = customStart;
+                    endDate = customEnd;
+                }
+                default -> throw new IllegalArgumentException("Invalid filter: " + filter);
             }
-            default -> throw new IllegalArgumentException("Invalid filter: " + filter);
         }
+        // 👉 If filter is null → startDate & endDate remain null → get all data
 
         List<String> branchCodes;
 
         if ("superadmin".equalsIgnoreCase(role)) {
-            // Get all branch codes for the institute email
             branchCodes = staffService.getBranchCodesByInstituteEmail(email);
-            System.out.println("SuperAdmin - branchCodes for " + email + ": " + branchCodes);
 
             if (branchCodes == null || branchCodes.isEmpty()) {
-                // No branches for this institute — return empty counts
-                return Map.of(
-                        "total", 0L,
-                        "approved", 0L,
-                        "rejected", 0L,
-                        "pending", 0L
-                );
+                return Map.of("total", 0L, "approved", 0L, "rejected", 0L, "pending", 0L);
             }
 
-            // If branchCodeFilter is present, validate and restrict branchCodes to it
             if (branchCodeFilter != null && !branchCodeFilter.isBlank()) {
                 boolean valid = branchCodes.stream()
                         .anyMatch(bc -> bc.equalsIgnoreCase(branchCodeFilter.trim()));
 
                 if (!valid) {
-                    // invalid branchCode filter — return zero counts or throw error
-                    return Map.of(
-                            "total", 0L,
-                            "approved", 0L,
-                            "rejected", 0L,
-                            "pending", 0L
-                    );
+                    return Map.of("total", 0L, "approved", 0L, "rejected", 0L, "pending", 0L);
                 }
-
                 branchCodes = List.of(branchCodeFilter.trim());
             }
 
         } else {
-            // For other roles, fetch single branch code normally
             String userBranchCode = staffService.fetchBranchCodeByRole(role, email);
-
-            // If branchCodeFilter is provided and matches user's branch, accept it; else ignore
-            if (branchCodeFilter != null && !branchCodeFilter.isBlank()) {
-                if (branchCodeFilter.trim().equalsIgnoreCase(userBranchCode)) {
-                    branchCodes = List.of(branchCodeFilter.trim());
-                } else {
-                    branchCodes = List.of(userBranchCode);
-                }
+            if (branchCodeFilter != null && !branchCodeFilter.isBlank()
+                    && branchCodeFilter.trim().equalsIgnoreCase(userBranchCode)) {
+                branchCodes = List.of(branchCodeFilter.trim());
             } else {
                 branchCodes = List.of(userBranchCode);
             }
@@ -952,7 +945,6 @@ public class StudentServiceImpl implements StudentService {
                     streamId, groupName, degreeNameId, departmentId,
                     startDate, endDate, academicYear);
 
-            // Add branchCode predicate dynamically:
             Specification<StudentEntity> branchSpec = (root, query, cb) ->
                     cb.equal(root.get("branchCode"), branchCode);
 
@@ -984,6 +976,7 @@ public class StudentServiceImpl implements StudentService {
 
         return result;
     }
+
 
 
     @Override
@@ -1170,5 +1163,6 @@ public class StudentServiceImpl implements StudentService {
                 academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
         );
     }
+
 
 }
