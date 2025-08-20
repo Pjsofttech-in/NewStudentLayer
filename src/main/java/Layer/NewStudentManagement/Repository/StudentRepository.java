@@ -190,4 +190,6 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             @Param("academicYear") String academicYear
     );
 
+    @Query("SELECT s FROM StudentEntity s WHERE s.id = :studentId")
+    Optional<StudentEntity> findByStudentId(@Param("studentId") Long studentId);
 }

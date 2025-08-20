@@ -875,7 +875,7 @@ public class StudentServiceImpl implements StudentService {
         }
 
         LocalDate today = LocalDate.now();
-        LocalDate startDate = null;  // 👉 null means no date restriction
+        LocalDate startDate = null;
         LocalDate endDate = null;
 
         if (filter != null && !filter.isBlank()) {
@@ -906,8 +906,6 @@ public class StudentServiceImpl implements StudentService {
                 default -> throw new IllegalArgumentException("Invalid filter: " + filter);
             }
         }
-        // 👉 If filter is null → startDate & endDate remain null → get all data
-
         List<String> branchCodes;
 
         if ("superadmin".equalsIgnoreCase(role)) {
@@ -976,7 +974,6 @@ public class StudentServiceImpl implements StudentService {
 
         return result;
     }
-
 
 
     @Override

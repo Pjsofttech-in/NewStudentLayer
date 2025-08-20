@@ -582,5 +582,64 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
 
+    @Override
+    public Map<String, Long> getAttendanceCount(Long studentId, String filter,
+                                                LocalDate startDate, LocalDate endDate) {
+        // 1. Get student
+        StudentEntity student = studentRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        if (student.getClassRoom() == null || student.getClassRoom().getId() == null) {
+            throw new RuntimeException("Student is not assigned to any classroom.");
+        }
+
+        Long classroomId = student.getClassRoom().getId();
+        int rollNo = student.getRollNo();
+
+        LocalDate fromDate;
+        LocalDate toDate = LocalDate.now();
+
+        switch (filter.toLowerCase()) {
+            case "today":
+                fromDate = toDate;
+                break;
+            case "7days":
+                fromDate = toDate.minusDays(6);
+                break;
+            case "30days":
+                fromDate = LocalDate.of(toDate.getYear(), toDate.getMonth(), 1);
+                break;
+            case "365days":
+                fromDate = LocalDate.of(toDate.getYear(), 1, 1);
+                break;
+            case "custom":
+                if (startDate == null || endDate == null) {
+                    throw new RuntimeException("StartDate and EndDate must be provided for custom filter.");
+                }
+                fromDate = startDate;
+                toDate = endDate;
+                break;
+            default:
+                fromDate = student.getClassRoom().getCreatedDate();
+                break;
+        }
+        Long presentCount = attendanceRepository.countPresentByStudentAndDateRange(
+                rollNo, classroomId, fromDate, toDate);
+
+        long totalDays = fromDate.datesUntil(toDate.plusDays(1))
+                .filter(date -> date.getDayOfWeek() != java.time.DayOfWeek.SUNDAY)
+                .count();
+
+        long absentCount = totalDays - presentCount;
+
+        Map<String, Long> result = new HashMap<>();
+        result.put("presentCount", presentCount);
+        result.put("absentCount", absentCount);
+
+        return result;
+    }
+
+
+
 
 }

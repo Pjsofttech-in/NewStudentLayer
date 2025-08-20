@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface AttendanceService
 {
@@ -30,4 +31,6 @@ public interface AttendanceService
     Page<StudentAttendaceDTO> getAttendanceByStudentId(Long studentId, String filter,
                                                        LocalDate startDate, LocalDate endDate,
                                                        Pageable pageable);
+
+    Map<String, Long> getAttendanceCount(Long studentId, String filter, LocalDate startDate, LocalDate endDate);
 }

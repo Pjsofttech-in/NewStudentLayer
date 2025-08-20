@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.ClassRoomStudentCountProjection;
 import Layer.NewStudentManagement.DTO.GenderCountResponse;
+import Layer.NewStudentManagement.Service.AttendanceService;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,6 +23,8 @@ public class DashBoardController
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    AttendanceService attendanceService;
 
     @GetMapping("/getStudentCountForCards")
     public ResponseEntity<Map<String, Long>> getApplicationCounts(
@@ -82,5 +85,17 @@ public class DashBoardController
     {
         return studentService.getStudentCountByClassRoom(
                 role, email, graduationType, standardName, mediumName, streamName, degreeName, departmentName, institutionType,academicYear);
+    }
+
+
+    @GetMapping("/getAttendaceCountByStudentId")
+    public ResponseEntity<Map<String, Long>> getAttendanceCount(
+            @RequestParam Long studentId,
+            @RequestParam(required = false, defaultValue = "all") String filter,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+
+        Map<String, Long> counts = attendanceService.getAttendanceCount(studentId, filter, startDate, endDate);
+        return ResponseEntity.ok(counts);
     }
 }

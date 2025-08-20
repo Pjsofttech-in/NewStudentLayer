@@ -47,5 +47,13 @@ long countByClassroomIdAndDateRange(@Param("classroomId") Long classroomId,
                                                                 @Param("end") LocalDate end);
 
 
+    @Query("SELECT COUNT(sa) FROM StudentAttendance sa " +
+            "WHERE sa.rollNo = :rollNo AND sa.classroomId = :classroomId " +
+            "AND sa.date BETWEEN :startDate AND :endDate")
+    Long countPresentByStudentAndDateRange(@Param("rollNo") int rollNo,
+                                           @Param("classroomId") Long classroomId,
+                                           @Param("startDate") LocalDate startDate,
+                                           @Param("endDate") LocalDate endDate);
+
 
 }
