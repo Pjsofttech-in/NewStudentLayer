@@ -69,6 +69,8 @@ public class StudentServiceImpl implements StudentService {
     private JwtUtil jwtUtil;
     @Autowired
     private TCDataRepository tcDataRepository;
+    @Autowired
+    private FeesRepository feesRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
 
@@ -302,6 +304,14 @@ public class StudentServiceImpl implements StudentService {
         }
 
         StudentEntity savedStudent = studentRepository.save(existing);
+
+        if (request.getStudent().getFullName() != null) {
+            List<StudentFees> feesList = feesRepository.findFeesByStudentId(savedStudent.getId());
+            for (StudentFees fees : feesList) {
+                fees.setStudentName(savedStudent.getFullName()); // update name
+                feesRepository.save(fees);
+            }
+        }
 
         Optional.ofNullable(request.getAddress()).ifPresent(updatedAddr -> {
             StudentAddress existingAddress = addressRepo.findByStudentId(studentId)
