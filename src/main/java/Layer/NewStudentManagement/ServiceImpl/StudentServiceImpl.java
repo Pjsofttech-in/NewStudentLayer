@@ -307,9 +307,11 @@ public class StudentServiceImpl implements StudentService {
 
         if (request.getStudent().getFullName() != null) {
             List<StudentFees> feesList = feesRepository.findFeesByStudentId(savedStudent.getId());
-            for (StudentFees fees : feesList) {
-                fees.setStudentName(savedStudent.getFullName()); // update name
-                feesRepository.save(fees);
+            if (!feesList.isEmpty()) {
+                for (StudentFees fees : feesList) {
+                    fees.setStudentName(savedStudent.getFullName()); // update name
+                    feesRepository.save(fees);
+                }
             }
         }
 
