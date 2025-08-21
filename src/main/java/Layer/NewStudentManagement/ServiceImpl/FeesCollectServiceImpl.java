@@ -12,9 +12,13 @@ import Layer.NewStudentManagement.Service.FeesCollectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -208,6 +212,8 @@ public class FeesCollectServiceImpl implements FeesCollectService
         }
     }
 
+
+    @Override
     public FeesCollectDTO getCollectedFeesById(String role, String email, Long id)
     {
         if(!staffService.hasPermission(role,email,"Get"))
@@ -220,6 +226,85 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
         return mapToDTO(collectedFees);
 
+    }
+
+    @Override
+    public List<Map<String, Object>> getReportByYear(String role,String email)
+    {
+        if(!staffService.hasPermission(role,email,"Get"))
+        {
+            throw new RuntimeException("You don't have permission to Get Collected Fees by Year");
+        }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+
+        List<Object[]> results = feesCollectRepository.getPaidFeesReportByYear(branchCode);
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        for (Object[] row : results) {
+            Integer year = (Integer) row[0];
+            Double total = (Double) row[1];
+
+            String academicYear = year + "-" + (year + 1);
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("academicYear", academicYear);
+            map.put("totalPaid", total);
+            response.add(map);
+        }
+        return response;
+    }
+
+    @Override
+    public List<Map<String, Object>> getReportByMonth(String role, String email, int year) {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Collected Fees by Month");
+        }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        List<Object[]> results = feesCollectRepository.getPaidFeesReportByMonth(year, branchCode);
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        for (Object[] row : results) {
+            String monthName = row[0] != null ? (String) row[0] : "N/A";
+            Double totalPaid = row[1] != null ? (Double) row[1] : 0.0;
+
+            String shortName = monthName.length() >= 3 ? monthName.substring(0, 3) : monthName;
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("month", shortName);
+            map.put("totalPaid", totalPaid);
+
+            response.add(map);
+        }
+        return response;
+    }
+
+    @Override
+    public List<Map<String, Object>> getReportByStandard(String role,String email)
+    {  if(!staffService.hasPermission(role,email,"Get"))
+    {
+        throw new RuntimeException("You don't have permission to Get Collected Fees by Standard");
+    }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+
+        List<Object[]> results = feesCollectRepository.getPaidFeesReportByStandard(branchCode);
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        for (Object[] row : results) {
+            String standardName = row[0] != null ? (String) row[0] : "N/A"; // handle null
+            Integer year = (Integer) row[1];
+            Double totalPaid = (Double) row[2];
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("standardName", standardName);
+            map.put("academicYear", year + "-" + (year + 1));
+            map.put("totalPaid", totalPaid);
+            response.add(map);
+        }
+        return response;
     }
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {

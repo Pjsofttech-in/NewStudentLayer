@@ -43,12 +43,6 @@ public class FeesController
         return ResponseEntity.ok(feesDTO);
     }
 
-//    @GetMapping("/getAllStudentFees")
-//    public ResponseEntity<List<StudentFeesDTO>> getAllStudentFees(@RequestParam String role, @RequestParam String email)
-//    {
-//        List<StudentFeesDTO> feesDTO =feesService.getAllFees(role, email);
-//        return ResponseEntity.ok(feesDTO);
-//    }
 
     @DeleteMapping("/deleteStudentFees/{id}")
     public ResponseEntity<Void> deleteStudentFees(@RequestParam Long id,@RequestParam String role, @RequestParam String email)

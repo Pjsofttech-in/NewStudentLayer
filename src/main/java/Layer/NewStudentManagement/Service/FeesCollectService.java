@@ -4,6 +4,7 @@ import Layer.NewStudentManagement.DTO.FeesCollectDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 
 import java.util.List;
+import java.util.Map;
 
 public interface FeesCollectService
 {
@@ -12,5 +13,8 @@ public interface FeesCollectService
     List<FeesCollectDTO> getAllCollectDataByStudentFeesID(Long fid,String role,String email);
     List<FeesCollectDTO> getCollectedFeesByStudentId(String role, String email,Long studentId);
     FeesCollectDTO getCollectedFeesById(String role, String email, Long id);
+    List<Map<String, Object>> getReportByYear(String role, String email);
+    List<Map<String, Object>> getReportByMonth(String role, String email,int year);
+    List<Map<String, Object>> getReportByStandard(String role, String email);
 
 }

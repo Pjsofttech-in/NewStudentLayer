@@ -32,4 +32,39 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
 
     @Query("SELECT MAX(e.id) FROM StudentFeesCollect e")
     Long findMaxId();
+
+    @Query("SELECT YEAR(c.paymentDate) as year, SUM(c.amount) as totalPaid " +
+            "FROM StudentFeesCollect c " +
+            "WHERE c.paymentDate IS NOT NULL " +
+            "AND LOWER(c.status) IN ('paid','completed') " +
+            "AND c.branchCode = :branchCode " +
+            "GROUP BY YEAR(c.paymentDate) " +
+            "ORDER BY year ASC")
+    List<Object[]> getPaidFeesReportByYear(@Param("branchCode") String branchCode);
+
+
+    @Query("SELECT FUNCTION('MONTHNAME', c.paymentDate) as monthName, SUM(c.amount) as totalPaid " +
+            "FROM StudentFeesCollect c " +
+            "WHERE c.paymentDate IS NOT NULL " +
+            "AND LOWER(c.status) IN ('paid','complete','completed') " +
+            "AND c.branchCode = :branchCode " +
+            "AND YEAR(c.paymentDate) = :year " +
+            "GROUP BY FUNCTION('MONTHNAME', c.paymentDate), MONTH(c.paymentDate) " +
+            "ORDER BY MONTH(c.paymentDate) ASC")
+    List<Object[]> getPaidFeesReportByMonth(@Param("year") int year,
+                                            @Param("branchCode") String branchCode);
+
+    @Query("SELECT f.standardName, YEAR(c.paymentDate) as year, SUM(c.amount) as totalPaid " +
+            "FROM StudentFeesCollect c " +
+            "LEFT JOIN c.studentFees f ON f.fid = c.studentFees.fid " +
+            "WHERE c.paymentDate IS NOT NULL " +
+            "AND LOWER(c.status) IN ('paid','complete','completed') " +
+            "AND c.branchCode = :branchCode " +
+            "GROUP BY f.standardName, YEAR(c.paymentDate) " +
+            "ORDER BY f.standardName ASC")
+    List<Object[]> getPaidFeesReportByStandard(@Param("branchCode") String branchCode);
+
+
+
+
 }

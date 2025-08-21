@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.Controller;
 import Layer.NewStudentManagement.DTO.ClassRoomStudentCountProjection;
 import Layer.NewStudentManagement.DTO.GenderCountResponse;
 import Layer.NewStudentManagement.Service.AttendanceService;
+import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,6 +26,9 @@ public class DashBoardController
 
     @Autowired
     AttendanceService attendanceService;
+
+    @Autowired
+    FeesCollectService feesCollectService;
 
     @GetMapping("/getStudentCountForCards")
     public ResponseEntity<Map<String, Long>> getApplicationCounts(
@@ -98,4 +102,21 @@ public class DashBoardController
         Map<String, Long> counts = attendanceService.getAttendanceCount(studentId, filter, startDate, endDate);
         return ResponseEntity.ok(counts);
     }
+
+
+    @GetMapping("/getCollectedFeesByYear")
+    public List<Map<String, Object>> getReportByYear(@RequestParam String role, @RequestParam String email) {
+        return feesCollectService.getReportByYear(role, email);
+    }
+
+    @GetMapping("/getCollectedFeesByMonth")
+    public List<Map<String, Object>> getReportByMonth(@RequestParam String role, @RequestParam String email, @RequestParam int year) {
+        return feesCollectService.getReportByMonth(role,email,year);
+    }
+
+    @GetMapping("/getCollectedFeesByStandard")
+    public List<Map<String, Object>> getReportByStandard(@RequestParam String role, @RequestParam String email) {
+        return feesCollectService.getReportByStandard(role, email);
+    }
+
 }
