@@ -330,6 +330,10 @@ public class FeesCollectServiceImpl implements FeesCollectService
         dto.setLibraryFees(feesCollect.getLibraryFees());
         dto.setSportFees(feesCollect.getSportFees());
         dto.setTransactionId(feesCollect.getTransactionId());
+        dto.setBankName(feesCollect.getBankName());
+        dto.setBankBranchName(feesCollect.getBankBranchName());
+        dto.setIfscCode(feesCollect.getIfscCode());
+        dto.setAccountHolderName(feesCollect.getAccountHolderName());
 
         dto.setStudentFeesId(
                 feesCollect.getStudentFees() != null ? feesCollect.getStudentFees().getFid() : null

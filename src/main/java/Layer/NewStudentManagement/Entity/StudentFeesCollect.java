@@ -29,6 +29,10 @@ public class StudentFeesCollect
         private String feesPaymentType;
         private String status;
         private String transactionId;
+        private String bankName;        // Bank Name
+        private String bankBranchName;  // Branch Name
+        private String ifscCode;        // IFSC Code
+        private String accountHolderName;       // Bank Account Name
 
         private double tuitionFee;
         private double admissionFee;

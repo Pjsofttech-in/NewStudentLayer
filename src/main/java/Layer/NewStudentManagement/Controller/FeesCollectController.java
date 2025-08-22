@@ -18,7 +18,7 @@ public class FeesCollectController
     @Autowired
     FeesCollectService feesCollectService;
 
-    @PostMapping("/collegeFeesFromStudent")
+    @PostMapping("/collectFeesFromStudent")
     public ResponseEntity<FeesCollectDTO> saveCollection(@RequestBody StudentFeesCollect collect, @RequestParam String role,
                                                          @RequestParam String email)
     {

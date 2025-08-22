@@ -23,7 +23,10 @@ public class FeesCollectDTO
     private String feesPaymentType;
     private String status;
     private String transactionId;
-
+    private String bankName;
+    private String bankBranchName;
+    private String ifscCode;
+    private String accountHolderName;
     private double tuitionFee;
     private double admissionFee;
     private double practicalFee;
