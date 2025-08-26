@@ -23,10 +23,13 @@ public class StudentSpecification {
 
             predicates.add(cb.equal(root.get("branchCode"), branchCode));
 
+            predicates.add(cb.notEqual(root.get("status"), "Rejected"));
+
             // Joins to related tables
             Join<StudentEntity, StudentAdditionalInfo> additionalInfoJoin = root.join("additionalInfo", JoinType.LEFT);
             Join<StudentEntity, StudentReligion> religionJoin = root.join("religion", JoinType.LEFT);
             Join<StudentEntity, StudentSports> studentSportsJoin = root.join("sports", JoinType.LEFT);
+
 
             if (filter != null) {
                 if (filter.getFullName() != null) {
@@ -47,7 +50,8 @@ public class StudentSpecification {
                 if (filter.getMediumName() != null) {
                     predicates.add(cb.equal(root.get("mediumName"), filter.getMediumName()));
                 }
-                if (filter.getStatus() != null) {
+                if (filter.getStatus() != null && !"Rejected".equalsIgnoreCase(filter.getStatus())) {
+
                     predicates.add(cb.equal(root.get("status"), filter.getStatus()));
                 }
                 if (filter.getStreamName() != null) {
@@ -175,4 +179,31 @@ public class StudentSpecification {
         };
     }
 
+
+    public static Specification<StudentEntity> filter(String branchCode,
+                                                      String status,
+                                                      String fullName,
+                                                      String institutionType) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // branchCode (always required)
+            predicates.add(cb.equal(root.get("branchCode"), branchCode));
+
+            // ✅ Allow Rejected also (no exclusion here)
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+
+            if (fullName != null) {
+                predicates.add(cb.like(cb.lower(root.get("fullName")), "%" + fullName.toLowerCase() + "%"));
+            }
+
+            if (institutionType != null) {
+                predicates.add(cb.equal(root.get("institutionType"), institutionType));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
 }

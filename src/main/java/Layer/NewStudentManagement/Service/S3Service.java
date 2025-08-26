@@ -84,27 +84,6 @@ public class S3Service {
         }
     }
 
-//    public void deleteFileFromUrl(String fileUrl) {
-//        if (fileUrl == null || fileUrl.isBlank()) {
-//            return; // Nothing to delete
-//        }
-//
-//        try {
-//            String fileKey = fileUrl.startsWith("https://")
-//                    ? fileUrl.substring(fileUrl.indexOf(".com/") + 5)
-//                    : fileUrl;
-//
-//            DeleteObjectRequest deleteRequest = DeleteObjectRequest.builder()
-//                    .bucket(bucketName)
-//                    .key(fileKey)
-//                    .build();
-//
-//            s3Client.deleteObject(deleteRequest);
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to delete file from S3", e);
-//        }
-//    }
 
     public void deleteFileFromUrl(String fileUrl) {
         if (fileUrl == null || fileUrl.isBlank()) {

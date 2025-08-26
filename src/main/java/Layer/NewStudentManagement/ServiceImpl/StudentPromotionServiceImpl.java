@@ -289,7 +289,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         dto.setStandardName(record.getStandardName());
 
         dto.setMediumId(record.getMedium() != null ? record.getMedium().getMid() : null);
-        dto.setMediumName(record.getMediumName());
+        dto.setMediumName(record.getMediumName() != null ? record.getMedium().getMediumName() : null );
 
         dto.setRollNo(record.getRollNo());
         dto.setAcademicYear(record.getAcademicYear());
@@ -311,7 +311,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         dto.setDepartmentName(record.getDepartment() != null ? record.getDepartment().getDepartmentName() : null);
 
         dto.setStreamId(record.getStream() != null ? record.getStream().getId() : null);
-        dto.setStreamName(record.getStreamName());
+        dto.setStreamName(record.getStreamName() !=null ? record.getStream().getStream() :null);
 
         dto.setGraduationTypeId(record.getGraduationType() != null ? record.getGraduationType().getId() : null);
         dto.setGraduationTypeName(record.getGraduationType() != null ? record.getGraduationType().getGraduationType() : null);

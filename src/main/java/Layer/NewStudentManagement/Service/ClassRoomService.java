@@ -20,5 +20,6 @@ public interface ClassRoomService
     Map<Long, String> assignStudentsToClassroom(String role, String email, Long classroomId, List<Long> studentIds);
     List<StudentClassRoomResponseDTO> getClassroomDTOsByTeacherId(Long teacherId,String role, String email);
     List<StudentClassRoomResponseDTO> getClassRoomsByFilter(ClassRoomFilterRequest filter);
+    void removeStudentsFromClassroom(String role, String email, Long classroomId, List<Long> studentIds);
 
 }

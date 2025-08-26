@@ -337,6 +337,46 @@ public class ClassRoomServiceImpl implements ClassRoomService
     }
 
     @Override
+    public void removeStudentsFromClassroom(String role, String email, Long classroomId, List<Long> studentIds) {
+        if (!staffService.hasPermission(role, email, "Delete")) {
+            throw new RuntimeException("You don't have permission to Remove Student From ClassRoom");
+        }
+
+        StudentClassRoom classroom = classRoomRepository.findById(classroomId)
+                .orElseThrow(() -> new RuntimeException("Classroom not found"));
+
+        List<StudentEntity> students = studentRepository.findAllById(studentIds);
+
+        for (StudentEntity student : students) {
+            if (student.getClassRoom() == null || !student.getClassRoom().getId().equals(classroomId)) {
+                throw new RuntimeException("Student ID " + student.getId() + " is not assigned to this classroom.");
+            }
+
+            StudentDocument document = documentRepository.findByStudent(student.getId());
+
+            if (document != null && document.getStudentPhoto() != null) {
+                try {
+                    String attendancePhotoUrl = "https://" + bucketName + ".s3.amazonaws.com/"
+                            + student.getBranchCode() + "/student-sys/attendance_faces/"
+                            + classroomId + "/" + student.getRollNo()
+                            + document.getStudentPhoto().substring(document.getStudentPhoto().lastIndexOf("."));
+
+                    s3Service.deleteFileFromUrl(attendancePhotoUrl);
+
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to remove photo from classroom folder for student ID: " + student.getId(), e);
+                }
+            }
+
+            student.setClassRoom(null);
+            student.setRollNo(0);
+        }
+
+        studentRepository.saveAll(students);
+    }
+
+
+    @Override
     public List<StudentClassRoomResponseDTO> getClassroomDTOsByTeacherId(Long teacherId,String role, String email)
     {
         if (!staffService.hasPermission(role, email, "Get")) {

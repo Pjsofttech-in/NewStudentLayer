@@ -231,6 +231,21 @@ public class StudentController
     }
 
 
+    @GetMapping("/getAllStudentRequest")
+    public Page<StudentResponseDTO> getStudentsByBranchCode(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String fullName,
+            @RequestParam(required = false) String institutionType,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return studentService.getStudentsByBranchCode(role, email, status, fullName, institutionType, pageable);
+    }
+
+
 
 
 }

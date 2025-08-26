@@ -85,4 +85,15 @@ public class ClassRoomController
         return ResponseEntity.ok(classrooms);
     }
 
+
+    @DeleteMapping("/removeStudentFromClassRoom")
+    public ResponseEntity<String> removeStudentsFromClassroom(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam Long classroomId,
+            @RequestParam List<Long> studentIds) {
+        classRoomService.removeStudentsFromClassroom(role, email, classroomId, studentIds);
+        return ResponseEntity.ok("Students removed from classroom successfully.");
+    }
+
 }

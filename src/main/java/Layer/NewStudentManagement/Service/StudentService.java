@@ -65,4 +65,7 @@ public interface StudentService
             String role, String email, String graduationType, String standardName,
             String mediumName, String streamName, String degreeName, String departmentName,
             String institutionType, String academicYear);
+
+    Page<StudentResponseDTO> getStudentsByBranchCode(String role, String email, String status,
+                                                String fullName, String institutionType, Pageable pageable);
 }
