@@ -66,6 +66,9 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
         existing.setSchoolAddress(updatedProfile.getSchoolAddress());
         existing.setContactNumber(updatedProfile.getContactNumber());
         existing.setSchoolEmail(updatedProfile.getSchoolEmail());
+        existing.setPlace(updatedProfile.getPlace());
+        existing.setIndexNumber(updatedProfile.getIndexNumber());
+        existing.setSocietyName(updatedProfile.getSocietyName());
         existing.setRole(role);
         existing.setCreatedByEmail(email);
 

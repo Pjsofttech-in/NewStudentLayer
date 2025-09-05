@@ -25,6 +25,10 @@ public class StudentSchoolProfile
     private String schoolAddress;
     private Long contactNumber;
     private String schoolEmail;
+    private String place;
+    private String societyName;
+    private String indexNumber;
+
 
     @Email
     private String createdByEmail;
