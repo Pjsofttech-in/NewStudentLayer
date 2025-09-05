@@ -110,6 +110,7 @@ public class StudentServiceImpl implements StudentService {
         student.setBranchCode(branchCode);
         student.setCreatedByEmail(email);
         student.setRegistrationNumber(generateRegistrationNumber());
+        student.setApplicationNumber(generateApplicationNumber());
 
         if (request.getGraduationTypeId() != null) {
             StudentGraduationType gradType = graduationTypeRepository.findById(request.getGraduationTypeId())
@@ -853,6 +854,24 @@ public class StudentServiceImpl implements StudentService {
 
         return regNumber;
     }
+
+
+    @Transactional
+    public String generateApplicationNumber() {
+        String year = String.valueOf(LocalDate.now().getYear());
+        String regNumber;
+        int attempt = 0;
+
+        do {
+            attempt++;
+            Long count = studentRepository.countByApplicationNumberStartingWith(year);
+            String uniquePart = String.format("%08d", count + attempt);
+            regNumber = year + uniquePart;
+        } while (studentRepository.existsByApplicationNumber(regNumber));
+
+        return regNumber;
+    }
+
 
     @Override
     @Transactional

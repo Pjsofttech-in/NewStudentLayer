@@ -60,6 +60,7 @@ public class StudentEntity
     private boolean isTcGenrated = true;
     @Column(unique = true, length = 12)
     private String registrationNumber;
+    private String applicationNumber;
 //    private String university;
 //    private String board;
 

@@ -50,6 +50,8 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.registrationNumber LIKE ?1%")
     Long countByRegistrationNumberStartingWith(String year);
 
+    @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.applicationNumber LIKE ?1%")
+    Long countByApplicationNumberStartingWith(String year);
 
     @Query("SELECT s FROM StudentEntity s " +
             "LEFT JOIN FETCH s.address " +
@@ -114,6 +116,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
                                @Param("endDate") LocalDate endDate);
 
     boolean existsByRegistrationNumber(String registrationNumber);
+    boolean existsByApplicationNumber(String applicationNumber);
 
     @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.classRoom.id = :classroomId")
     Long countByClassRoomId(@Param("classroomId") Long classroomId);

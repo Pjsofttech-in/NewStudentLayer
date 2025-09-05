@@ -66,13 +66,11 @@ public class FeesCollectServiceImpl implements FeesCollectService
                 throw new RuntimeException("Fees already collected for schedule: " + schedule.getMonth());
             }
 
-            // Validate schedule match
             if (!schedule.getMonth().equalsIgnoreCase(collect.getMonth())) {
                 throw new RuntimeException("Schedule month mismatch. Expected: " + schedule.getMonth() + ", Found: " + collect.getMonth());
             }
         }
 
-        // Prevent duplicate collection
         if ("Completed".equalsIgnoreCase(collect.getStatus())) {
             List<StudentFeesCollect> alreadyCollected = feesCollectRepository
                     .findCompletedPaymentInMonth(fees.getFid(),
@@ -86,19 +84,16 @@ public class FeesCollectServiceImpl implements FeesCollectService
             }
         }
 
-        // Assign Invoice Number
         Long maxId = feesCollectRepository.findMaxId();
         String invoice = String.format("%06d", (maxId != null ? maxId + 1 : 1));
         collect.setInvoice(invoice);
 
-        // Set metadata
         collect.setCreatedByEmail(email);
         collect.setRole(role);
         collect.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
         collect.setFeesPaymentType(collectionType);
         collect.setPaymentDate(LocalDate.now());
 
-        // Payment logic if Completed
         if ("Completed".equalsIgnoreCase(collect.getStatus())) {
             double newPaidAmount = fees.getPaidAmount() + collect.getAmount();
             double newPending = fees.getTotalamount() - newPaidAmount;

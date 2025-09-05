@@ -239,7 +239,7 @@ public class StudentController
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String institutionType,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "25") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
         return studentService.getStudentsByBranchCode(role, email, status, fullName, institutionType, pageable);

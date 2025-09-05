@@ -28,6 +28,7 @@ public class StudentSchoolProfile
     private String place;
     private String societyName;
     private String indexNumber;
+    private String board;
 
 
     @Email
