@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.DTO.FeesCollectDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Service.FeesCollectService;
@@ -57,6 +58,13 @@ public class FeesCollectController
         FeesCollectDTO feesCollect =feesCollectService.getCollectedFeesById(role, email, id);
         return ResponseEntity.ok(feesCollect);
 
+    }
+
+    @GetMapping("/getFeesByPaymentMode")
+    public List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(
+            @RequestParam String role, @RequestParam String email,
+            @RequestParam String institutionType) {
+        return feesCollectService.getCollectedFeesByPaymentMode(role,email, institutionType);
     }
 
 

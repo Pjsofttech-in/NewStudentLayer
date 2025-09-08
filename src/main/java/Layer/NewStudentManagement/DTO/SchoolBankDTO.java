@@ -14,6 +14,10 @@ public class SchoolBankDTO
 {
     private Long id;
     private String bankName;
+    private String bankBranchName;  // Branch Name
+    private String ifscCode;        // IFSC Code
+    private String accountHolderName;       // Bank Account Name
+
     private String createdByEmail;
     private String branchCode;
     private String role;

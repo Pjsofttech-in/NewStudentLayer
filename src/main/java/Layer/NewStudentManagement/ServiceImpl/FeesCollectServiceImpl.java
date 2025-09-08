@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.DTO.FeesCollectDTO;
 import Layer.NewStudentManagement.DTO.StudentFeeScheduleDTO;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
@@ -278,7 +279,8 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
     @Override
     public List<Map<String, Object>> getReportByStandard(String role,String email)
-    {  if(!staffService.hasPermission(role,email,"Get"))
+    {
+        if(!staffService.hasPermission(role,email,"Get"))
     {
         throw new RuntimeException("You don't have permission to Get Collected Fees by Standard");
     }
@@ -300,6 +302,19 @@ public class FeesCollectServiceImpl implements FeesCollectService
             response.add(map);
         }
         return response;
+    }
+
+    @Override
+    public List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role,String email, String institutionType)
+    {
+        if(!staffService.hasPermission(role,email,"Get"))
+        {
+            throw new RuntimeException("You don't have permission to Get Collected Fees by Standard");
+        }
+        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+
+
+        return feesCollectRepository.getCollectedFeesByPaymentMode(branchCode, institutionType);
     }
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {

@@ -19,6 +19,9 @@ public class StudentSchoolBank
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String bankName;
+    private String bankBranchName;  // Branch Name
+    private String ifscCode;        // IFSC Code
+    private String accountHolderName;       // Bank Account Name
 
     @Email
     private String createdByEmail;

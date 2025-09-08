@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Repository;
 
+import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -65,6 +66,14 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
     List<Object[]> getPaidFeesReportByStandard(@Param("branchCode") String branchCode);
 
 
+
+    @Query("SELECT new Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO(s.paymentMode, SUM(s.amount)) " +
+            "FROM StudentFeesCollect s " +
+            "WHERE s.branchCode = :branchCode " +
+            "AND s.studentFees.institutionType = :institutionType " +
+            "GROUP BY s.paymentMode")
+    List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(@Param("branchCode") String branchCode,
+                                                             @Param("institutionType") String institutionType);
 
 
 }

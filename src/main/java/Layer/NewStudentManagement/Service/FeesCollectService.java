@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Service;
 
+import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.DTO.FeesCollectDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 
@@ -16,5 +17,7 @@ public interface FeesCollectService
     List<Map<String, Object>> getReportByYear(String role, String email);
     List<Map<String, Object>> getReportByMonth(String role, String email,int year);
     List<Map<String, Object>> getReportByStandard(String role, String email);
+
+    List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email, String institutionType);
 
 }

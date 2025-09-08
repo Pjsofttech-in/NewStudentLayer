@@ -62,6 +62,10 @@ public class SchoolBankServiceImpl implements SchoolBankService
 
         StudentSchoolBank existingBank = schoolBankRepository.findById(id).orElseThrow(()->new RuntimeException("Bank not found"));
         existingBank.setBankName(bank.getBankName());
+        existingBank.setBankBranchName(bank.getBankBranchName());
+        existingBank.setIfscCode(bank.getIfscCode());
+        existingBank.setAccountHolderName(bank.getAccountHolderName());
+
         StudentSchoolBank saved = schoolBankRepository.save(existingBank);
         return mapToBankDTO(saved);
 
@@ -98,6 +102,9 @@ public class SchoolBankServiceImpl implements SchoolBankService
         SchoolBankDTO dto = new SchoolBankDTO();
         dto.setId(bank.getId());
         dto.setBankName(bank.getBankName());
+        dto.setBankBranchName(bank.getBankBranchName());
+        dto.setIfscCode(bank.getIfscCode());
+        dto.setAccountHolderName(bank.getAccountHolderName());
         if (bank.getSchoolProfile() != null && bank.getSchoolProfile().getId() != null) {
             dto.setSchoolProfileId(bank.getSchoolProfile().getId());
         } else {
