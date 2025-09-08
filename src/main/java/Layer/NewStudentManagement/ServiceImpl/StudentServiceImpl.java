@@ -1210,4 +1210,48 @@ public class StudentServiceImpl implements StudentService {
         return students.map(this::mapToDTO);
     }
 
+
+    @Override
+    public List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(String role, String email, String institutionType)
+    {
+        checkPermission(role, email, "Get");
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        return religionRepo.getStudentCountByCastCategory(branchCode, institutionType);
+    }
+
+
+    @Override
+    public List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email) {
+        checkPermission(role, email, "Get");
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        List<Object[]> rawData = studentRepository.getRawStudentCountByGenderAndStandard(branchCode);
+
+        Map<String, StudentCountByGenderDTO> resultMap = new HashMap<>();
+
+        for (Object[] row : rawData) {
+            String standardName = (String) row[0];
+            String gender = (String) row[1];
+            Long count = (Long) row[2];
+
+            StudentCountByGenderDTO dto = resultMap.getOrDefault(
+                    standardName,
+                    new StudentCountByGenderDTO(standardName, 0L, 0L)
+            );
+
+            if ("Male".equalsIgnoreCase(gender)) {
+                dto.setMale(count);
+            } else if ("Female".equalsIgnoreCase(gender)) {
+                dto.setFemale(count);
+            }
+
+            resultMap.put(standardName, dto);
+        }
+
+        return new ArrayList<>(resultMap.values());
+    }
+
+
 }

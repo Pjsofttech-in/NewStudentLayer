@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.Repository;
 import Layer.NewStudentManagement.DTO.ClassRoomStudentCountProjection;
 import Layer.NewStudentManagement.DTO.DataForTcDTO;
 import Layer.NewStudentManagement.DTO.GenderCountResponse;
+import Layer.NewStudentManagement.DTO.StudentCountByGenderDTO;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -195,4 +196,11 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
 
     @Query("SELECT s FROM StudentEntity s WHERE s.id = :studentId")
     Optional<StudentEntity> findByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT s.standard.standardName, s.gender, COUNT(s) " +
+            "FROM StudentEntity s " +
+            "WHERE s.branchCode = :branchCode " +
+            "GROUP BY s.standard.standardName, s.gender")
+    List<Object[]> getRawStudentCountByGenderAndStandard(@Param("branchCode") String branchCode);
+
 }

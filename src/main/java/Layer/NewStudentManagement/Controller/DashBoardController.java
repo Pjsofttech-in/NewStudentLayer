@@ -1,8 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
-import Layer.NewStudentManagement.DTO.ClassRoomStudentCountProjection;
-import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
-import Layer.NewStudentManagement.DTO.GenderCountResponse;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Service.AttendanceService;
 import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Service.StudentService;
@@ -125,6 +123,21 @@ public class DashBoardController
             @RequestParam String role, @RequestParam String email,
             @RequestParam String institutionType) {
         return feesCollectService.getCollectedFeesByPaymentMode(role,email, institutionType);
+    }
+
+    @GetMapping("/getStudentCountByCastCategory")
+    public List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(
+            @RequestParam String role, @RequestParam String email,
+            @RequestParam String institutionType) {
+        return studentService.getStudentCountByCastCategory(role,email, institutionType);
+    }
+
+
+    @GetMapping("/getCountByGenderAllStandards")
+    public List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(
+            @RequestParam String role,
+            @RequestParam String email) {
+        return studentService.getStudentCountByGenderAndAllStandards(role, email);
     }
 
 }

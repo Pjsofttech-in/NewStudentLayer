@@ -68,4 +68,8 @@ public interface StudentService
 
     Page<StudentResponseDTO> getStudentsByBranchCode(String role, String email, String status,
                                                 String fullName, String institutionType, Pageable pageable);
+
+    List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(String role, String email, String institutionType);
+
+    List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email);
 }
