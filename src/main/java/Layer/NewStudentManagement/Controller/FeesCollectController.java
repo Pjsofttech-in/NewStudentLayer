@@ -60,12 +60,6 @@ public class FeesCollectController
 
     }
 
-    @GetMapping("/getFeesByPaymentMode")
-    public List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(
-            @RequestParam String role, @RequestParam String email,
-            @RequestParam String institutionType) {
-        return feesCollectService.getCollectedFeesByPaymentMode(role,email, institutionType);
-    }
 
 
 }
