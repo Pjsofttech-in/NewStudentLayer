@@ -139,4 +139,13 @@ public class DashBoardController
         return studentService.getStudentCountByGenderAndAllStandards(role, email);
     }
 
+    @GetMapping("/getFeesRevenueByBank")
+    public ResponseEntity<Map<String, Double>> getRevenueByBank(
+            @RequestParam String role,
+            @RequestParam String email) {
+
+        Map<String, Double> response = feesCollectService.getFeesRevenueByBank(role, email);
+        return ResponseEntity.ok(response);
+    }
+
 }

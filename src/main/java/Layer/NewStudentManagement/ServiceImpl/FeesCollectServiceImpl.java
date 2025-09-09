@@ -16,10 +16,7 @@ import org.springframework.stereotype.Service;
 import java.text.DateFormatSymbols;
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -316,6 +313,29 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
         return feesCollectRepository.getCollectedFeesByPaymentMode(branchCode, institutionType);
     }
+
+
+    @Override
+    public Map<String, Double> getFeesRevenueByBank(String role, String email) {
+
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Collected Fees by BankName");
+        }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        List<Object[]> results = feesCollectRepository.getFeesRevenueByBank(branchCode);
+
+        Map<String, Double> revenueMap = new LinkedHashMap<>();
+        for (Object[] row : results) {
+            String bankName = row[0] != null ? row[0].toString() : "Unknown"; // handle null bankName
+            Double amount = ((Number) row[1]).doubleValue();
+            revenueMap.put(bankName, amount);
+        }
+
+        return revenueMap;
+    }
+
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {
         FeesCollectDTO dto = new FeesCollectDTO();

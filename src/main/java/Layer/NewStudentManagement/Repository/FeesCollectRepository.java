@@ -76,4 +76,11 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
                                                              @Param("institutionType") String institutionType);
 
 
+
+    @Query("SELECT s.bankName, SUM(s.amount) " +
+            "FROM StudentFeesCollect s " +
+            "WHERE s.branchCode = :branchCode " +
+            "GROUP BY s.bankName")
+    List<Object[]> getFeesRevenueByBank(@Param("branchCode") String branchCode);
+
 }
