@@ -1297,6 +1297,19 @@ public class StudentServiceImpl implements StudentService {
         student.setRegistrationNumber(generateRegistrationNumber());
         student.setFormStatus(request.getFormStatus());
 
+        if (request.getGraduationTypeId() != null) {
+            StudentGraduationType gradType = graduationTypeRepository.findById(request.getGraduationTypeId())
+                    .orElseThrow(() -> new RuntimeException("GraduationType not found with ID: " + request.getGraduationTypeId()));
+            student.setGraduationType(gradType);
+        }
+
+        if (request.getStreamId() != null) {
+            StudentStream stream = streamRepository.findById(request.getStreamId())
+                    .orElseThrow(() -> new RuntimeException("Stream not found with ID: " + request.getStreamId()));
+            student.setStream(stream);
+            student.setStreamName(stream.getStream());
+        }
+
         // ---- Upload Photo ----
         if (oldRegisterPhoto != null && !oldRegisterPhoto.isEmpty()) {
             String fileUrl = s3Service.uploadFile(oldRegisterPhoto, branchCode);
