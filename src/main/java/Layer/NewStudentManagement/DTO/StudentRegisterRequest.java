@@ -30,6 +30,7 @@ public class StudentRegisterRequest
     private String academicYear;
     private Double discount;
 
+    private String formStatus ;
     private Long standardId;
     private Long mediumId;
     private Long streamId;

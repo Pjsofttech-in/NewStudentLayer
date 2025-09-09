@@ -1295,6 +1295,7 @@ public class StudentServiceImpl implements StudentService {
         student.setCreatedByEmail(email);
         student.setEnrollmentDate(LocalDate.now());
         student.setRegistrationNumber(generateRegistrationNumber());
+        student.setFormStatus(request.getFormStatus());
 
         // ---- Upload Photo ----
         if (oldRegisterPhoto != null && !oldRegisterPhoto.isEmpty()) {
