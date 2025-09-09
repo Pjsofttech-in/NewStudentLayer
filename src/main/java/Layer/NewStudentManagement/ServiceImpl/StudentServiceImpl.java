@@ -637,6 +637,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setReason(student.getReason());
         dto.setDiscount(student.getDiscount());
         dto.setTcGenrated(student.isTcGenrated());
+        dto.setOldRegisterPhoto(student.getOldRegisterPhoto());
 
         if (student.getClassRoom() != null) {
             dto.setClasssRoomId(student.getClassRoom().getId());
@@ -830,6 +831,7 @@ public class StudentServiceImpl implements StudentService {
         if ("Approved".equalsIgnoreCase(status))
         {
             student.setApprovalDate(LocalDate.now());
+            student.setApplicationNumber(generateApplicationNumber());
         }
         else
         {
@@ -1252,6 +1254,116 @@ public class StudentServiceImpl implements StudentService {
 
         return new ArrayList<>(resultMap.values());
     }
+
+
+    @Override
+    public StudentResponseDTO registerStudent(String role, String email,
+                                              StudentRegisterRequest request,
+                                              MultipartFile oldRegisterPhoto,
+                                              String token) {
+        String branchCode;
+        if ("USER".equalsIgnoreCase(role)) {
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+            if (encoded == null || encoded.isEmpty()) {
+                throw new RuntimeException("Invalid token: branchCode not found");
+            }
+            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+        } else {
+            checkPermission(role, email, "Post");
+            branchCode = staffService.fetchBranchCodeByRole(role, email);
+        }
+
+        if (studentRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Student with this email already exists.");
+        }
+
+        StudentEntity student = new StudentEntity();
+        student.setTitle(request.getTitle());
+        student.setFullName(request.getFullName());
+        student.setGender(request.getGender());
+        student.setContact(request.getContact());
+        student.setEmail(request.getEmail());
+        student.setDateOfBirth(request.getDateOfBirth());
+        student.setStatus(request.getStatus());
+        student.setPassword(passwordEncoder.encode(request.getPassword()));
+        student.setInstitutionType(request.getInstitutionType());
+        student.setAcademicYear(request.getAcademicYear());
+        student.setDiscount(request.getDiscount());
+        student.setRole(role);
+        student.setBranchCode(branchCode);
+        student.setCreatedByEmail(email);
+        student.setEnrollmentDate(LocalDate.now());
+        student.setRegistrationNumber(generateRegistrationNumber());
+
+        // ---- Upload Photo ----
+        if (oldRegisterPhoto != null && !oldRegisterPhoto.isEmpty()) {
+            String fileUrl = s3Service.uploadFile(oldRegisterPhoto, branchCode);
+            student.setOldRegisterPhoto(fileUrl);
+        }
+
+        if ("School".equalsIgnoreCase(student.getInstitutionType())) {
+            if (request.getStandardId() != null) {
+                StudentStandard standard = standardRepository.findById(request.getStandardId())
+                        .orElseThrow(() -> new RuntimeException("Standard not found"));
+                student.setStandard(standard);
+                student.setStandardName(standard.getStandardName());
+            }
+            if (request.getMediumId() != null) {
+                StudentMedium medium = mediumRepository.findById(request.getMediumId())
+                        .orElseThrow(() -> new RuntimeException("Medium not found"));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+            student.setDegreeName(null);
+            student.setDepartment(null);
+        } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
+                request.getGraduationTypeId() != null &&
+                "Jr.College".equalsIgnoreCase(
+                        graduationTypeRepository.findById(request.getGraduationTypeId())
+                                .orElseThrow(() -> new RuntimeException("GraduationType not found"))
+                                .getGraduationType())) {
+
+            if (request.getStandardId() != null) {
+                StudentStandard standard = standardRepository.findById(request.getStandardId())
+                        .orElseThrow(() -> new RuntimeException("Standard not found"));
+                student.setStandard(standard);
+                student.setStandardName(standard.getStandardName());
+            }
+            if (request.getMediumId() != null) {
+                StudentMedium medium = mediumRepository.findById(request.getMediumId())
+                        .orElseThrow(() -> new RuntimeException("Medium not found"));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+            student.setDegreeName(null);
+            student.setDepartment(null);
+        } else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
+            if (request.getDegreeNameId() != null) {
+                StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
+                        .orElseThrow(() -> new RuntimeException("DegreeName not found"));
+                student.setDegreeName(degree);
+            }
+            if (request.getDepartmentId() != null) {
+                StudentDepartment dept = departmentRepository.findById(request.getDepartmentId())
+                        .orElseThrow(() -> new RuntimeException("Department not found"));
+                student.setDepartment(dept);
+            }
+            if (request.getMediumId() != null) {
+                StudentMedium medium = mediumRepository.findById(request.getMediumId())
+                        .orElseThrow(() -> new RuntimeException("Medium not found"));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+            student.setStandard(null);
+            student.setStandardName(null);
+            student.setGroupName(null);
+        }
+
+        StudentEntity savedStudent = studentRepository.save(student);
+        return mapToDTO(savedStudent);
+    }
+
 
 
 }

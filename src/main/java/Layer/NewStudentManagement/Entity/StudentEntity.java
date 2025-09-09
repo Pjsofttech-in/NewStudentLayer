@@ -61,6 +61,7 @@ public class StudentEntity
     @Column(unique = true, length = 12)
     private String registrationNumber;
     private String applicationNumber;
+    private String oldRegisterPhoto;
 //    private String university;
 //    private String board;
 

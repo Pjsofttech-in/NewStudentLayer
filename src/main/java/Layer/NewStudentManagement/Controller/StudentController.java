@@ -9,12 +9,14 @@ import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -245,7 +247,31 @@ public class StudentController
         return studentService.getStudentsByBranchCode(role, email, status, fullName, institutionType, pageable);
     }
 
+    @PostMapping(value = "/registerStudent", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<StudentResponseDTO> registerStudent(
+            @RequestParam String role,
+            @RequestParam(required = false) String email,
+            @RequestPart("student") String studentJson,
+            @RequestPart(value = "oldRegisterPhoto", required = false) MultipartFile oldRegisterPhoto,
+            @RequestHeader(name = "Authorization", required = false) String authorizationHeader) {
 
+        String token = null;
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring(7);
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.findAndRegisterModules(); // handles LocalDate
+            StudentRegisterRequest request = mapper.readValue(studentJson, StudentRegisterRequest.class);
+
+            StudentResponseDTO response = studentService.registerStudent(role, email, request, oldRegisterPhoto, token);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse student JSON or register student", e);
+        }
+    }
 
 
 }

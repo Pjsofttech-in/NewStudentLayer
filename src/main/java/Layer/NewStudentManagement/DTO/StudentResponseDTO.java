@@ -70,6 +70,8 @@ public class StudentResponseDTO {
     private boolean projectDifferentiated;
     private Boolean sportYesNo;
 
+    private String oldRegisterPhoto;
+
     @Email
     private String createdByEmail;
     private String role;

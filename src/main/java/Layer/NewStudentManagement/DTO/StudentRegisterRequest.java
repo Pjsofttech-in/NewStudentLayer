@@ -1,0 +1,40 @@
+package Layer.NewStudentManagement.DTO;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class StudentRegisterRequest
+{
+    private String title;
+    private String fullName;
+    private String gender;
+    private String contact;
+    private String email;
+    private LocalDate dateOfBirth;
+    private String status;
+    private String standardName;
+    private String mediumName;
+    private String streamName;
+    private String groupName;
+    private String semister;
+    private String password;
+    private String institutionType;
+    private String academicYear;
+    private Double discount;
+
+    private Long standardId;
+    private Long mediumId;
+    private Long streamId;
+    private Long graduationTypeId;
+    private Long degreeNameId;
+    private Long departmentId;
+    private String oldRegisterPhoto;
+}

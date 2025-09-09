@@ -72,4 +72,5 @@ public interface StudentService
     List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(String role, String email, String institutionType);
 
     List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email);
+    StudentResponseDTO registerStudent(String role, String email, StudentRegisterRequest request, MultipartFile oldRegisterPhoto, String token);
 }
