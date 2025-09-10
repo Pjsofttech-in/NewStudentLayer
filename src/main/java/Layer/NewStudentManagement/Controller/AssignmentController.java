@@ -66,8 +66,8 @@ public class AssignmentController
     }
 
     @GetMapping("/getAssignmentByTeacher")
-    public List<AssignmentResponseDTO> getAssignmentsByCreator(@RequestParam String email,
-                                                               @RequestParam String role) {
-        return assignmentService.getAssignmentsByCreator(email, role);
+    public List<AssignmentResponseDTO> getAssignmentsByCreator(@RequestParam String role,
+                                                               @RequestParam String email) {
+        return assignmentService.getAssignmentsByCreator(role, email);
     }
 }

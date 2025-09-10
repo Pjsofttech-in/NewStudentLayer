@@ -18,5 +18,5 @@ public interface AssignmentService
 
     List<AssignmentResponseDTO> getAssignmentsByClassRoom(Long classRoomId,String role, String email);
 
-    List<AssignmentResponseDTO> getAssignmentsByCreator(String email, String role);
+    List<AssignmentResponseDTO> getAssignmentsByCreator(String role, String email);
 }

@@ -52,6 +52,7 @@ public class StudentMapper
             dto.setReason(student.getReason());
             dto.setDiscount(student.getDiscount());
             dto.setTcGenrated(student.isTcGenrated());
+            dto.setOldRegisterPhoto(student.getOldRegisterPhoto());
             if (student.getClassRoom() != null) {
                 dto.setClasssRoomId(student.getClassRoom().getId());
             } else {

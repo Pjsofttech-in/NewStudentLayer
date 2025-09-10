@@ -66,6 +66,7 @@ public class StudentResponseDTO {
     private boolean isTcGenrated;
     private Long classsRoomId;
 
+
     private boolean scholarship;
     private boolean projectDifferentiated;
     private Boolean sportYesNo;

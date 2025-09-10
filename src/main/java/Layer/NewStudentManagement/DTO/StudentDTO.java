@@ -64,6 +64,7 @@ public class StudentDTO
     private Double discount;
     private Long classsRoomId;
     private boolean isTcGenrated;
+    private String oldRegisterPhoto;
 
     @Email
     private String createdByEmail;
