@@ -21,7 +21,7 @@ public class StudentAssignmentSubmission
 
     private String fileUrl;
     private String remarks;
-    private LocalDate submittedDate = LocalDate.now();
+    private LocalDate submittedDate;
     private String status;
 
     @ManyToOne

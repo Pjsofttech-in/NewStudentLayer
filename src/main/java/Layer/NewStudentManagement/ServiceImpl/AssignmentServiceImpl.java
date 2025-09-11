@@ -119,7 +119,7 @@ public class AssignmentServiceImpl implements AssignmentService
 
     @Override
     public List<AssignmentResponseDTO> getAssignmentsByClassRoom(Long classRoomId,String role, String email) {
-        validateRole(role, "TEACHER");
+
         checkPermission(role, email, "Get");
         return assignmentRepository.findByClassRoomId(classRoomId)
                 .stream()
@@ -130,7 +130,7 @@ public class AssignmentServiceImpl implements AssignmentService
     @Override
     public List<AssignmentResponseDTO> getAssignmentsByCreator(String role, String email)
     {
-        validateRole(role, "TEACHER");
+
         checkPermission(role, email, "Get");
         return assignmentRepository.findAssignmentsByCreator(email, role)
                 .stream()
