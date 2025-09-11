@@ -74,6 +74,7 @@ public class AssignmentSubmissionController
     }
 
 
+
     @GetMapping("/getAllSubmittedAssignmentByStudent")
     public ResponseEntity<List<AssignmentSubmissionResponseDTO>> getByStudent(
             @RequestParam Long studentId,

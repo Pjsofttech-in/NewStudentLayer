@@ -64,7 +64,7 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
 
         if (file != null && !file.isEmpty()) {
             String fileUrl = s3Service.uploadFile(file, branchCode);
-            assignment.setImage(fileUrl);
+            request.setFileUrl(fileUrl);
         }
 
         StudentAssignmentSubmission saved = assSubmissionRepo.save(request);
@@ -103,7 +103,6 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
-
 
     @Override
     public AssignmentSubmissionResponseDTO updateSubmission(String role, String email, Long id, StudentAssignmentSubmission request) {
