@@ -233,19 +233,21 @@ public class StudentController
     }
 
 
-    @GetMapping("/getAllStudentRequest")
+    @PostMapping("/getAllStudentRequest")
     public Page<StudentResponseDTO> getStudentsByBranchCode(
             @RequestParam String role,
             @RequestParam String email,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String fullName,
-            @RequestParam(required = false) String institutionType,
+            @RequestParam(required = false) String timeFrame,
+            @RequestParam(required = false) LocalDate customStart,
+            @RequestParam(required = false) LocalDate customEnd,
+            @RequestBody(required = false) StudentFilterDTO filter, // ✅ send filters in body
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "25") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return studentService.getStudentsByBranchCode(role, email, status, fullName, institutionType, pageable);
+        return studentService.getStudentsByBranchCode(role, email, filter, timeFrame, customStart, customEnd, pageable);
     }
+
 
     @PostMapping(value = "/registerStudent", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StudentResponseDTO> registerStudent(

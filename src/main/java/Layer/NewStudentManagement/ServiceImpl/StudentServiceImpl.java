@@ -1200,21 +1200,16 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public Page<StudentResponseDTO> getStudentsByBranchCode(String role, String email, String status, String fullName,
-                                                            String institutionType, Pageable pageable)
-    {
-
-        checkPermission(role, email, "Get");
-
+    public Page<StudentResponseDTO> getStudentsByBranchCode(String role, String email, StudentFilterDTO filter, String timeFrame,
+                                                            LocalDate customStart, LocalDate customEnd, Pageable pageable) {
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        Page<StudentEntity> students = studentRepository.findAll(
-                StudentSpecification.filter(branchCode, status, fullName, institutionType),
-                pageable
-        );
+        Specification<StudentEntity> spec = StudentSpecification.filter(branchCode, filter, timeFrame, customStart, customEnd);
 
-        return students.map(this::mapToDTO);
+        return studentRepository.findAll(spec, pageable)
+                .map(this::mapToDTO);
     }
+
 
 
     @Override
