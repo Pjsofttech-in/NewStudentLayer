@@ -78,7 +78,7 @@ public class AssignmentServiceImpl implements AssignmentService
     @Override
     public AssignmentResponseDTO updateAssignment(Long id, String role, String email, StudentAssignment assignment) {
         validateRole(role, "TEACHER");
-        checkPermission(role, email, "Put");
+//        checkPermission(role, email, "Put");
         StudentAssignment existing = assignmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Assignment not found"));
 
