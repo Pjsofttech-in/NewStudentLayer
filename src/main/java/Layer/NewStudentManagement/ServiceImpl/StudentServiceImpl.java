@@ -638,6 +638,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setDiscount(student.getDiscount());
         dto.setTcGenrated(student.isTcGenrated());
         dto.setOldRegisterPhoto(student.getOldRegisterPhoto());
+        dto.setApplicationNumber(student.getApplicationNumber());
 
         if (student.getClassRoom() != null) {
             dto.setClasssRoomId(student.getClassRoom().getId());

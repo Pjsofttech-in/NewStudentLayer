@@ -67,6 +67,7 @@ public class StudentResponseDTO {
     private Long classsRoomId;
 
 
+    private String applicationNumber;
     private boolean scholarship;
     private boolean projectDifferentiated;
     private Boolean sportYesNo;

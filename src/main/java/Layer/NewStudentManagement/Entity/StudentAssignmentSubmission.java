@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,9 @@ public class StudentAssignmentSubmission
     private LocalDate submittedDate;
     private String status;
 
+    private String createdByEmail;
+    private String role;
+    private String branchCode;
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
     private StudentEntity student;
