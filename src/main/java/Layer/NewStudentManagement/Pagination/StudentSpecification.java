@@ -24,6 +24,8 @@ public class StudentSpecification {
             predicates.add(cb.equal(root.get("branchCode"), branchCode));
 
             predicates.add(cb.notEqual(root.get("status"), "Rejected"));
+            predicates.add(cb.notEqual(root.get("status"), "Pending"));
+
 
             // Joins to related tables
             Join<StudentEntity, StudentAdditionalInfo> additionalInfoJoin = root.join("additionalInfo", JoinType.LEFT);
