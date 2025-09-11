@@ -47,6 +47,7 @@ public class AssignmentServiceImpl implements AssignmentService
         dto.setDueDate(assignment.getDueDate());
         dto.setImage(assignment.getImage());
         dto.setCreatedDate(assignment.getCreatedDate());
+        dto.setClassRoomId(assignment.getClassRoom().getId());
         dto.setCreatedByEmail(assignment.getCreatedByEmail());
         dto.setRole(assignment.getRole());
         dto.setBranchCode(assignment.getBranchCode());

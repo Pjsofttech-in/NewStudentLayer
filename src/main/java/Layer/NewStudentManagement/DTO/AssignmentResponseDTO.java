@@ -19,6 +19,7 @@ public class AssignmentResponseDTO
     private LocalDate dueDate;
     private LocalDate createdDate;
     private String image;
+    private Long classRoomId;
     private String createdByEmail;
     private String role;
     private String branchCode;
