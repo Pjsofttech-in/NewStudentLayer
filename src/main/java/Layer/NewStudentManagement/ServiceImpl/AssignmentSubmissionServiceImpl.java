@@ -169,6 +169,17 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
 
     }
 
+    @Override
+    public List<AssignmentSubmissionResponseDTO> getSubmissionsByAssignmentId(Long assignmentId,String role, String email)
+    {
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to get Assignment Submissions!");
+        }
+        return assSubmissionRepo.findSubmissionsByAssignmentId(assignmentId).stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
     private AssignmentSubmissionResponseDTO mapToResponse(StudentAssignmentSubmission submission) {
         AssignmentSubmissionResponseDTO dto = new AssignmentSubmissionResponseDTO();
         dto.setId(submission.getId());

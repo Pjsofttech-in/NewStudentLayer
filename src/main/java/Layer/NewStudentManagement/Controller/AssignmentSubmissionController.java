@@ -74,7 +74,6 @@ public class AssignmentSubmissionController
     }
 
 
-
     @GetMapping("/getAllSubmittedAssignmentByStudent")
     public ResponseEntity<List<AssignmentSubmissionResponseDTO>> getByStudent(
             @RequestParam Long studentId,
@@ -82,6 +81,13 @@ public class AssignmentSubmissionController
             @RequestParam String email,
             @RequestParam(required = false) String filter) {
         return ResponseEntity.ok(submissionService.getSubmissionsByStudent(studentId, role, email, filter));
+    }
+
+    @GetMapping("/getSubmissionsByAssignmentId")
+    public ResponseEntity<List<AssignmentSubmissionResponseDTO>> getSubmissionsByAssignmentId(@RequestParam Long assignmentId,
+                                                                          @RequestParam String role,
+                                                                          @RequestParam String email) {
+        return ResponseEntity.ok(submissionService.getSubmissionsByAssignmentId(assignmentId, role, email));
     }
 
 }

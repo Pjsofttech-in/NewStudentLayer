@@ -14,5 +14,6 @@ public interface AssignmentSubmissionService
     void deleteSubmission(Long id,String role, String email);
     List<AssignmentSubmissionResponseDTO> getSubmissionsByClassRoom(Long classRoomId, String role, String email);
     List<AssignmentSubmissionResponseDTO> getSubmissionsByStudent(Long studentId, String role, String email, String filter);
+    List<AssignmentSubmissionResponseDTO> getSubmissionsByAssignmentId(Long assignmentId,String role, String email);
 }
 
