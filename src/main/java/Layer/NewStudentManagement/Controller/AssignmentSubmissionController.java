@@ -79,8 +79,9 @@ public class AssignmentSubmissionController
     public ResponseEntity<List<AssignmentSubmissionResponseDTO>> getByStudent(
             @RequestParam Long studentId,
             @RequestParam String role,
-            @RequestParam String email) {
-        return ResponseEntity.ok(submissionService.getSubmissionsByStudent(studentId, role, email));
+            @RequestParam String email,
+            @RequestParam(required = false) String filter) {
+        return ResponseEntity.ok(submissionService.getSubmissionsByStudent(studentId, role, email, filter));
     }
 
 }

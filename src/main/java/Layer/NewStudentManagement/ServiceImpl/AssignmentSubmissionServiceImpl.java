@@ -137,12 +137,36 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
     }
 
     @Override
-    public List<AssignmentSubmissionResponseDTO> getSubmissionsByStudent(Long studentId, String role, String email) {
-        if (!staffService.hasPermission(role, email, "Get")) {
-            throw new RuntimeException("You Don't have Permission to get Assignment Submissions!");
+    public List<AssignmentSubmissionResponseDTO> getSubmissionsByStudent(
+            Long studentId, String role, String email, String filter) {
+
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to get Assignment Submissions!");
         }
-        return assSubmissionRepo.findByStudentId(studentId)
-                .stream().map(this::mapToResponse).collect(Collectors.toList());
+
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        Long classRoomId = student.getClassRoom().getId();
+        List<StudentAssignment> assignments;
+
+        switch (filter == null ? "all" : filter.toLowerCase()) {
+            case "submitted":
+                assignments = assignmentRepository.findSubmittedAssignments(studentId, classRoomId);
+                break;
+            case "pending":
+                assignments = assignmentRepository.findPendingAssignments(studentId, classRoomId);
+                break;
+            case "all":
+            default:
+                assignments = assignmentRepository.findByClassRoomId(classRoomId);
+                break;
+        }
+
+        return assignments.stream()
+                .map(a -> mapAssignmentToResponse(a, studentId))
+                .collect(Collectors.toList());
+
     }
 
     private AssignmentSubmissionResponseDTO mapToResponse(StudentAssignmentSubmission submission) {
@@ -161,4 +185,46 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
         dto.setCreatedByEmail(submission.getCreatedByEmail());
         return dto;
     }
+
+    private AssignmentSubmissionResponseDTO mapAssignmentToResponse(StudentAssignment assignment, Long studentId) {
+        AssignmentSubmissionResponseDTO dto = new AssignmentSubmissionResponseDTO();
+
+        // Assignment info
+        dto.setAssignmentId(assignment.getId());
+        dto.setCreatedByEmail(assignment.getCreatedByEmail());
+        dto.setRole(assignment.getRole());
+        dto.setBranchCode(assignment.getBranchCode());
+
+        StudentEntity student = studentRepository.findById(studentId).
+                orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+
+        dto.setStudentId(studentId);
+        StudentAssignmentSubmission submission = assignment.getSubmissions()
+                .stream()
+                .filter(sub -> sub.getStudent().getId().equals(studentId))
+                .findFirst()
+                .orElse(null);
+
+        if (submission != null) {
+            // Submitted
+            dto.setStatus("Submitted");
+            dto.setFileUrl(submission.getFileUrl());
+            dto.setRemarks(submission.getRemarks());
+            dto.setSubmittedDate(submission.getSubmittedDate());
+            dto.setStudentName(submission.getStudent().getFullName());
+            dto.setRollNo(submission.getStudent().getRollNo());
+        } else {
+            // Pending
+            dto.setStatus("Pending");
+            dto.setFileUrl(null);
+            dto.setRemarks(null);
+            dto.setSubmittedDate(null);
+            dto.setStudentName(student.getFullName());
+            dto.setRollNo(student.getRollNo());
+        }
+
+        return dto;
+    }
+
 }

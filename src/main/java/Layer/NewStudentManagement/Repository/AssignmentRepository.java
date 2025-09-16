@@ -15,4 +15,13 @@ public interface AssignmentRepository extends JpaRepository<StudentAssignment,Lo
 
     @Query("SELECT a FROM StudentAssignment a WHERE a.classRoom.id = :classRoomId")
     List<StudentAssignment> findByClassRoomId(Long classRoomId);
+
+    @Query("SELECT s.assignment FROM StudentAssignmentSubmission s " +
+            "WHERE s.student.id = :studentId AND s.assignment.classRoom.id = :classRoomId")
+    List<StudentAssignment> findSubmittedAssignments(Long studentId, Long classRoomId);
+
+    @Query("SELECT a FROM StudentAssignment a " +
+            "WHERE a.classRoom.id = :classRoomId AND a.id NOT IN " +
+            "(SELECT s.assignment.id FROM StudentAssignmentSubmission s WHERE s.student.id = :studentId)")
+    List<StudentAssignment> findPendingAssignments(Long studentId, Long classRoomId);
 }

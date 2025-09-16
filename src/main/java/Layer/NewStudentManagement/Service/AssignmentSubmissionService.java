@@ -13,7 +13,6 @@ public interface AssignmentSubmissionService
     AssignmentSubmissionResponseDTO updateSubmission(String role, String email, Long id, StudentAssignmentSubmission request);
     void deleteSubmission(Long id,String role, String email);
     List<AssignmentSubmissionResponseDTO> getSubmissionsByClassRoom(Long classRoomId, String role, String email);
-    List<AssignmentSubmissionResponseDTO> getSubmissionsByStudent(Long studentId, String role, String email);
-
+    List<AssignmentSubmissionResponseDTO> getSubmissionsByStudent(Long studentId, String role, String email, String filter);
 }
 
