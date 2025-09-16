@@ -21,6 +21,8 @@ public class AssignmentSubmissionResponseDTO
     private LocalDate submittedDate;
     private String status;
     private Long studentId;
+    private String studentName;
+    private Integer rollNo;
     private Long assignmentId;
     private String createdByEmail;
     private String role;

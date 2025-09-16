@@ -153,6 +153,8 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
         dto.setSubmittedDate(submission.getSubmittedDate());
         dto.setStatus(submission.getStatus());
         dto.setStudentId(submission.getStudent().getId());
+        dto.setStudentName(submission.getStudent().getFullName());
+        dto.setRollNo(submission.getStudent().getRollNo());
         dto.setAssignmentId(submission.getAssignment().getId());
         dto.setBranchCode(submission.getBranchCode());
         dto.setRole(submission.getRole());
