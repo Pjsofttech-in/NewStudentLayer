@@ -180,6 +180,7 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
         dto.setStudentName(submission.getStudent().getFullName());
         dto.setRollNo(submission.getStudent().getRollNo());
         dto.setAssignmentId(submission.getAssignment().getId());
+        dto.setAssignmentTitle(submission.getAssignment().getAssignmentTitle());
         dto.setBranchCode(submission.getBranchCode());
         dto.setRole(submission.getRole());
         dto.setCreatedByEmail(submission.getCreatedByEmail());
@@ -191,6 +192,7 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
 
         // Assignment info
         dto.setAssignmentId(assignment.getId());
+        dto.setAssignmentTitle(assignment.getAssignmentTitle());
         dto.setCreatedByEmail(assignment.getCreatedByEmail());
         dto.setRole(assignment.getRole());
         dto.setBranchCode(assignment.getBranchCode());

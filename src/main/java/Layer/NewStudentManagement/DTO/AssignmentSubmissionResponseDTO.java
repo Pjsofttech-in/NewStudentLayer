@@ -24,6 +24,7 @@ public class AssignmentSubmissionResponseDTO
     private String studentName;
     private Integer rollNo;
     private Long assignmentId;
+    private String assignmentTitle;
     private String createdByEmail;
     private String role;
     private String branchCode;
