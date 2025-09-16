@@ -30,7 +30,6 @@ public class StudentClassRoom
     private String institutionType;
     private LocalDate createdDate;
 
-
     @Email
     private String createdByEmail;
     private String role;
