@@ -52,8 +52,17 @@ public class AssignmentSubmissionController
             @PathVariable Long id,
             @RequestParam String role,
             @RequestParam String email,
-            @RequestBody StudentAssignmentSubmission submission) {
-        return submissionService.updateSubmission(role, email, id, submission);
+            @RequestPart("submission") String submissionJson,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws Exception
+    {
+
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        StudentAssignmentSubmission assignmentSubmission = mapper.readValue(submissionJson, StudentAssignmentSubmission.class);
+
+        return submissionService.updateSubmission(role, email, id, file,assignmentSubmission);
     }
 
     @DeleteMapping("/deleteAssignmentSubmission/{id}")

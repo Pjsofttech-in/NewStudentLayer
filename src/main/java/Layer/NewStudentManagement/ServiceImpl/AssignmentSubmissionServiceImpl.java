@@ -123,7 +123,7 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
     }
 
     @Override
-    public AssignmentSubmissionResponseDTO updateSubmission(String role, String email, Long id, StudentAssignmentSubmission request) {
+    public AssignmentSubmissionResponseDTO updateSubmission(String role, String email, Long id, MultipartFile file, StudentAssignmentSubmission request) {
         if (!(role.equalsIgnoreCase("STUDENT") || role.equalsIgnoreCase("ADMIN") || role.equalsIgnoreCase("TEACHER"))) {
             throw new RuntimeException("Unauthorized: Cannot update submission!");
         }
@@ -136,9 +136,15 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
             throw new RuntimeException("Unauthorized: Cannot update another student's submission!");
         }
 
-        existing.setFileUrl(request.getFileUrl());
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
         existing.setRemarks(request.getRemarks());
         existing.setSubmittedDate(LocalDate.now());
+        if (file != null && !file.isEmpty()) {
+            String fileUrl = s3Service.uploadFile(file, branchCode);
+            existing.setFileUrl(fileUrl);
+        }
+
         existing.setStatus(request.getStatus() != null ? request.getStatus() : existing.getStatus());
 
 
