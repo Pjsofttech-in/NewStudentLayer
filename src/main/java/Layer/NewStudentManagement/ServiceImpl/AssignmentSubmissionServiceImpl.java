@@ -251,6 +251,7 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
             } else {
                 dto.setStatus("Submitted");
             }
+            dto.setId(submission.getId());
             dto.setFileUrl(submission.getFileUrl());
             dto.setRemarks(submission.getRemarks());
             dto.setSubmittedDate(submission.getSubmittedDate());
