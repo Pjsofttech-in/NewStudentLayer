@@ -1,15 +1,12 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.ScheduledPeriodResponseDTO;
 import Layer.NewStudentManagement.DTO.StudentPeriodResponseDTO;
 import Layer.NewStudentManagement.DTO.TimeTableRequestDTO;
 import Layer.NewStudentManagement.DTO.TimeTableResponceDTO;
-import Layer.NewStudentManagement.Entity.StudentClassRoom;
-import Layer.NewStudentManagement.Entity.StudentPeriod;
-import Layer.NewStudentManagement.Entity.StudentTimetable;
+import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Exception.ResourceNotFoundException;
-import Layer.NewStudentManagement.Repository.ClassRoomRepository;
-import Layer.NewStudentManagement.Repository.PeriodRepository;
-import Layer.NewStudentManagement.Repository.TimeTableRepository;
+import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.TimeTableService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +28,12 @@ public class TimeTableServiceImpl implements TimeTableService
     PeriodRepository periodRepository;
 
     @Autowired
+    TeacherRepository teacherRepository;
+
+    @Autowired
+    SubjectRepository subjectRepository;
+
+    @Autowired
     StaffService staffService;
 
 
@@ -50,15 +53,30 @@ public class TimeTableServiceImpl implements TimeTableService
         // Attach classroom
         StudentClassRoom classRoom = classRoomRepository.findById(dto.getClassRoomId())
                 .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
-        timetable.setClassRoom(classRoom);
+        timetable.setClassroom(classRoom);
 
-        List<StudentPeriod> attachedPeriods = periodRepository.findAllById(dto.getPeriodIds());
-        timetable.setPeriods(attachedPeriods);
+        dto.getScheduledPeriods().forEach(sp -> {
+            StudentPeriod periodSlot = periodRepository.findById(sp.getPeriodSlotId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Period slot not found"));
+
+            StudentTeacher teacher = teacherRepository.findById(sp.getTeacherId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
+
+            StudentSubject subject = subjectRepository.findById(sp.getSubjectId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Subject not found"));
+
+            StudentScheduledPeriod scheduled = new StudentScheduledPeriod();
+            scheduled.setTimetable(timetable);
+            scheduled.setPeriodSlot(periodSlot);
+            scheduled.setTeacher(teacher);
+            scheduled.setSubject(subject);
+
+            timetable.getScheduledPeriods().add(scheduled);
+        });
 
         StudentTimetable savedTimetable = timeTableRepository.save(timetable);
         return convertToDTO(savedTimetable);
     }
-
 
     @Override
     public TimeTableResponceDTO getTimeTableById(String role, String email, Long id) {
@@ -83,43 +101,12 @@ public class TimeTableServiceImpl implements TimeTableService
     }
 
     @Override
-    public TimeTableResponceDTO updateTimeTable(String role, String email, Long id, StudentTimetable timetable) {
-        if (!staffService.hasPermission(role, email, "Put")) {
-            throw new RuntimeException("You don't have permission to Update Timetable");
-        }
-        StudentTimetable existing = timeTableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Timetable not found with id " + id));
-
-
-        if (timetable.getDayOfWeek() != null) {
-            existing.setDayOfWeek(timetable.getDayOfWeek());
-        }
-
-        if (timetable.getClassRoom() != null) {
-            existing.setClassRoom(timetable.getClassRoom());
-        }
-
-        if (timetable.getPeriods() != null && !timetable.getPeriods().isEmpty()) {
-            existing.getPeriods().clear();
-            timetable.getPeriods().forEach(period -> {
-                period.setTimetable(existing);
-                existing.getPeriods().add(period);
-            });
-        }
-        existing.setCreatedByEmail(email);
-        existing.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
-        existing.setRole(role);
-
-        StudentTimetable timetable1 = timeTableRepository.save(existing);
-        return convertToDTO(timetable1);
-    }
-
-    @Override
     public void deleteTimeTable(String role, String email, Long id) {
         if (!staffService.hasPermission(role, email, "Delete")) {
             throw new RuntimeException("You don't have permission to Delete Timetable");
         }
-        StudentTimetable existing = timeTableRepository.getById(id);
+        StudentTimetable existing = timeTableRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Timetable not found"));
         timeTableRepository.delete(existing);
     }
 
@@ -135,43 +122,60 @@ public class TimeTableServiceImpl implements TimeTableService
     }
 
 
-    private TimeTableResponceDTO convertToDTO(StudentTimetable timetable)
-    {
+    private TimeTableResponceDTO convertToDTO(StudentTimetable timetable) {
+        if (timetable == null) {
+            return null;
+        }
+
         TimeTableResponceDTO dto = new TimeTableResponceDTO();
         dto.setId(timetable.getId());
         dto.setDayOfWeek(timetable.getDayOfWeek());
-        dto.setClassRoomId(timetable.getClassRoom() != null ? timetable.getClassRoom().getId() : null);
+        dto.setClassRoomId(
+                timetable.getClassroom() != null ? timetable.getClassroom().getId() : null
+        );
+        dto.setClassRoomName(
+                timetable.getClassroom() != null ? timetable.getClassroom().getDivision().getDivision() : null
+        );
 
-        if (timetable.getPeriods() != null) {
-            dto.setPeriods(
-                    timetable.getPeriods().stream().map(period -> {
-                        StudentPeriodResponseDTO pDto = new StudentPeriodResponseDTO();
-                        pDto.setId(period.getId());
-                        pDto.setPeriodNo(period.getPeriodNo());
-                        pDto.setStartTime(period.getStartTime() != null ? period.getStartTime().toString() : null);
-                        pDto.setEndTime(period.getEndTime() != null ? period.getEndTime().toString() : null);
+        dto.setScheduledPeriods(
+                timetable.getScheduledPeriods().stream().map(sp -> {
+                    ScheduledPeriodResponseDTO spDto = new ScheduledPeriodResponseDTO();
+                    spDto.setId(sp.getId());
 
-                        if (period.getSubject() != null) {
-                            pDto.setSubjectId(period.getSubject().getId());
-                            pDto.setSubjectName(period.getSubject().getSubject());
-                        }
+                    if (sp.getPeriodSlot() != null) {
+                        spDto.setPeriodNo(sp.getPeriodSlot().getPeriodNo());
+                        spDto.setStartTime(
+                                sp.getPeriodSlot().getStartTime() != null
+                                        ? sp.getPeriodSlot().getStartTime().toString()
+                                        : null
+                        );
+                        spDto.setEndTime(
+                                sp.getPeriodSlot().getEndTime() != null
+                                        ? sp.getPeriodSlot().getEndTime().toString()
+                                        : null
+                        );
+                    }
 
-                        if (period.getTeacher() != null) {
-                            pDto.setTeacherId(period.getTeacher().getId());
-                            pDto.setTeacherName(period.getTeacher().getTeacherName());
-                        }
+                    if (sp.getTeacher() != null) {
+                        spDto.setTeacherId(sp.getTeacher().getId());
+                        spDto.setTeacherName(sp.getTeacher().getTeacherName());
+                    }
 
-                        return pDto;
-                    }).toList()
-            );
-        } else {
-            dto.setPeriods(null);
-        }
+                    if (sp.getSubject() != null) {
+                        spDto.setSubjectId(sp.getSubject().getId());
+                        spDto.setSubjectName(sp.getSubject().getSubject());
+                    }
+
+                    return spDto;
+                }).toList()
+        );
+
         dto.setCreatedByEmail(timetable.getCreatedByEmail());
         dto.setBranchCode(timetable.getBranchCode());
         dto.setRole(timetable.getRole());
 
         return dto;
     }
+
 
 }

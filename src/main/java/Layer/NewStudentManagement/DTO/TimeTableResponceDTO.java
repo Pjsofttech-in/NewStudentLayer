@@ -16,8 +16,11 @@ public class TimeTableResponceDTO
     private Long id;
     private String dayOfWeek;
     private Long classRoomId;
-    private List<StudentPeriodResponseDTO> periods;
+    private String classRoomName;
+
     private String createdByEmail;
     private String branchCode;
     private String role;
+
+    private List<ScheduledPeriodResponseDTO> scheduledPeriods;
 }

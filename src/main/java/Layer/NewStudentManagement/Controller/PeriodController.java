@@ -18,11 +18,11 @@ public class PeriodController
     PeriodService periodService;
 
     @PostMapping("/createPeriod")
-    public StudentPeriodResponseDTO create(
+    public StudentPeriodResponseDTO createPeriod(
             @RequestParam String role,
             @RequestParam String email,
             @RequestBody StudentPeriod period) {
-        return periodService.create(role, email, period);
+        return periodService.createPeriod(role, email, period);
     }
 
     @GetMapping("/getPeriodById/{id}")
@@ -30,14 +30,14 @@ public class PeriodController
             @RequestParam String role,
             @RequestParam String email,
             @PathVariable Long id) {
-        return periodService.getById(role, email, id);
+        return periodService.getPeriodById(role, email, id);
     }
 
     @GetMapping("/getAllPeriod")
     public List<StudentPeriodResponseDTO> getAll(
             @RequestParam String role,
             @RequestParam String email) {
-        return periodService.getAll(role, email);
+        return periodService.getAllPeriod(role, email);
     }
 
     @PutMapping("/updatePeriod/{id}")
@@ -46,7 +46,7 @@ public class PeriodController
             @RequestParam String email,
             @PathVariable Long id,
             @RequestBody StudentPeriod period) {
-        return periodService.update(role, email, id, period);
+        return periodService.updatePeriod(role, email, id, period);
     }
 
     @DeleteMapping("/deletePeriod/{id}")
@@ -54,7 +54,7 @@ public class PeriodController
             @RequestParam String role,
             @RequestParam String email,
             @PathVariable Long id) {
-        periodService.delete(role, email, id);
+        periodService.deletePeriod(role, email, id);
         return "Period deleted successfully with ID: " + id;
     }
 }

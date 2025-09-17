@@ -5,16 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class TimeTableRequestDTO
+public class ScheduledPeriodRequestDTO
 {
-    private String dayOfWeek;
-    private Long classRoomId;
-    private List<ScheduledPeriodRequestDTO> scheduledPeriods;
-
+    private Long periodSlotId;
+    private Long teacherId;
+    private Long subjectId;
 }

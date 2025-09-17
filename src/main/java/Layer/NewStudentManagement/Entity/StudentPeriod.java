@@ -27,15 +27,5 @@ public class StudentPeriod
     private String branchCode;
     private String role;
 
-    @ManyToOne
-    @JoinColumn(name = "subject_id", nullable = false)
-    private StudentSubject subject;
 
-    @ManyToOne
-    @JoinColumn(name = "teacher_id", nullable = false)
-    private StudentTeacher teacher;
-
-    @ManyToOne
-    @JoinColumn(name = "timetable_id")
-    private StudentTimetable timetable;
 }

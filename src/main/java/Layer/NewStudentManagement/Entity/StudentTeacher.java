@@ -34,7 +34,7 @@ public class StudentTeacher
     private String createdByEmail;
     private String role;
     private String branchCode;
-      @ManyToMany
+    @ManyToMany
     @JoinTable(
             name = "student_teacher_subject",
             joinColumns = @JoinColumn(name = "teacher_id"),

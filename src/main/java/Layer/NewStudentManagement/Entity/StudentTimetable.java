@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -30,17 +31,11 @@ public class StudentTimetable
     private String branchCode;
     private String role;
 
-    @ManyToOne
-    @JoinColumn(name = "classroom_id", nullable = false)
-    private StudentClassRoom classRoom;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "classroom_id")
+    private StudentClassRoom classroom;
 
-    @ManyToMany
-    @JoinTable(
-            name = "timetable_periods",
-            joinColumns = @JoinColumn(name = "timetable_id"),
-            inverseJoinColumns = @JoinColumn(name = "period_id")
-    )
-    private List<StudentPeriod> periods;
-
+    @OneToMany(mappedBy = "timetable", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentScheduledPeriod> scheduledPeriods = new ArrayList<>();
 
 }

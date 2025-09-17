@@ -40,14 +40,14 @@ public class TimeTableController
         return timeTableService.getAllTimeTable(role, email);
     }
 
-    @PutMapping("/updateTimeTable/{id}")
-    public TimeTableResponceDTO updateTimeTable(
-            @RequestParam String role,
-            @RequestParam String email,
-            @PathVariable Long id,
-            @RequestBody StudentTimetable timetable) {
-        return timeTableService.updateTimeTable(role, email, id, timetable);
-    }
+//    @PutMapping("/updateTimeTable/{id}")
+//    public TimeTableResponceDTO updateTimeTable(
+//            @RequestParam String role,
+//            @RequestParam String email,
+//            @PathVariable Long id,
+//            @RequestBody StudentTimetable timetable) {
+//        return timeTableService.updateTimeTable(role, email, id, timetable);
+//    }
 
     @DeleteMapping("/deleteTimeTable/{id}")
     public String deleteTimeTable(

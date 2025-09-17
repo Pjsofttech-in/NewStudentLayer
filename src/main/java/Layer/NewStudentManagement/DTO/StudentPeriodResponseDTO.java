@@ -13,10 +13,7 @@ public class StudentPeriodResponseDTO
     private int periodNo;
     private String startTime;
     private String endTime;
-    private String subjectName;
-    private Long subjectId;
-    private String teacherName;
-    private Long teacherId;
+
     private String createdByEmail;
     private String branchCode;
     private String role;
