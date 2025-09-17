@@ -442,7 +442,6 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
 
-
     @Override
     public AttendanceCountDTO getAttendanceCountByTimeFrame(Long classroomId, String timeFrame,
                                                             LocalDate customStartDate, LocalDate customEndDate) {
@@ -470,12 +469,17 @@ public class AttendanceServiceImpl implements AttendanceService {
                 startDate = tempStart.isBefore(classroomCreatedDate) ? classroomCreatedDate : tempStart;
             }
             case "custom" -> {
-                startDate = classroomCreatedDate;
+                if (customStartDate == null || customEndDate == null) {
+                    throw new IllegalArgumentException("For 'custom' timeFrame, both customStartDate and customEndDate must be provided.");
+                }
+                startDate = customStartDate.isBefore(classroomCreatedDate) ? classroomCreatedDate : customStartDate;
+                endDate = customEndDate.isAfter(LocalDate.now()) ? LocalDate.now() : customEndDate;
             }
             default -> throw new IllegalArgumentException("Invalid timeFrame. Use 'today', '7days', '30days', '365days', or 'custom'.");
         }
 
         long numberOfDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        if (numberOfDays < 0) numberOfDays = 0; // prevent negative values
 
         List<StudentEntity> students = studentRepository.findByClassRoomId(classroomId);
         long totalStudents = students.size();
