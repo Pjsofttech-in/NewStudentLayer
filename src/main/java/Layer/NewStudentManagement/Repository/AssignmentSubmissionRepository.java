@@ -23,4 +23,11 @@ public interface AssignmentSubmissionRepository extends JpaRepository<StudentAss
     @Query("SELECT s FROM StudentAssignmentSubmission s WHERE s.assignment.id = :assignmentId")
     List<StudentAssignmentSubmission> findSubmissionsByAssignmentId(Long assignmentId);
 
+    @Query("SELECT s FROM StudentAssignmentSubmission s " +
+            "WHERE s.student.id = :studentId " +
+            "AND s.assignment.classRoom.id = :classRoomId " +
+            "AND s.submittedDate > s.assignment.dueDate")
+    List<StudentAssignmentSubmission> findLateAssignments(Long studentId, Long classRoomId);
+
+
 }

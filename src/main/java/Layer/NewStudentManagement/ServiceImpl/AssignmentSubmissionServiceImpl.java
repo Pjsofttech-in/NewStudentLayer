@@ -61,6 +61,15 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
         request.setCreatedByEmail(email);
         request.setRole(role);
 
+        if (assignment.getDueDate() != null) {
+            if (request.getSubmittedDate().isAfter(assignment.getDueDate())) {
+                request.setStatus("Late");
+            } else {
+                request.setStatus("Submitted");
+            }
+        } else {
+            request.setStatus("Submitted");
+        }
 
         if (file != null && !file.isEmpty()) {
             String fileUrl = s3Service.uploadFile(file, branchCode);
@@ -148,26 +157,35 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
         Long classRoomId = student.getClassRoom().getId();
-        List<StudentAssignment> assignments;
+        List<?> results;
 
         switch (filter == null ? "all" : filter.toLowerCase()) {
             case "submitted":
-                assignments = assignmentRepository.findSubmittedAssignments(studentId, classRoomId);
+                results = assignmentRepository.findSubmittedAssignments(studentId, classRoomId);
                 break;
             case "pending":
-                assignments = assignmentRepository.findPendingAssignments(studentId, classRoomId);
+                results = assignmentRepository.findPendingAssignments(studentId, classRoomId);
+                break;
+            case "late":
+                results = assSubmissionRepo.findLateAssignments(studentId, classRoomId);
                 break;
             case "all":
             default:
-                assignments = assignmentRepository.findByClassRoomId(classRoomId);
+                results = assignmentRepository.findByClassRoomId(classRoomId);
                 break;
         }
 
-        return assignments.stream()
-                .map(a -> mapAssignmentToResponse(a, studentId))
+        return results.stream()
+                .map(obj -> {
+                    if (obj instanceof StudentAssignment) {
+                        return mapAssignmentToResponse((StudentAssignment) obj, studentId);
+                    } else {
+                        return mapToResponse((StudentAssignmentSubmission) obj);
+                    }
+                })
                 .collect(Collectors.toList());
-
     }
+
 
     @Override
     public List<AssignmentSubmissionResponseDTO> getSubmissionsByAssignmentId(Long assignmentId,String role, String email)
@@ -201,7 +219,6 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
     private AssignmentSubmissionResponseDTO mapAssignmentToResponse(StudentAssignment assignment, Long studentId) {
         AssignmentSubmissionResponseDTO dto = new AssignmentSubmissionResponseDTO();
 
-        // Assignment info
         dto.setAssignmentId(assignment.getId());
         dto.setAssignmentTitle(assignment.getAssignmentTitle());
         dto.setCreatedByEmail(assignment.getCreatedByEmail());
@@ -220,15 +237,17 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
                 .orElse(null);
 
         if (submission != null) {
-            // Submitted
-            dto.setStatus("Submitted");
+            if (submission.getSubmittedDate().isAfter(assignment.getDueDate())) {
+                dto.setStatus("Late");
+            } else {
+                dto.setStatus("Submitted");
+            }
             dto.setFileUrl(submission.getFileUrl());
             dto.setRemarks(submission.getRemarks());
             dto.setSubmittedDate(submission.getSubmittedDate());
             dto.setStudentName(submission.getStudent().getFullName());
             dto.setRollNo(submission.getStudent().getRollNo());
         } else {
-            // Pending
             dto.setStatus("Pending");
             dto.setFileUrl(null);
             dto.setRemarks(null);
@@ -236,7 +255,6 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
             dto.setStudentName(student.getFullName());
             dto.setRollNo(student.getRollNo());
         }
-
         return dto;
     }
 
