@@ -100,7 +100,7 @@ public class PeriodServiceImpl implements PeriodService
         if (!staffService.hasPermission(role, email, "Delete")) {
             throw new RuntimeException("You don't have permission to Delete Period");
         }
-        StudentPeriod existing = periodRepository.getById(id);
+        StudentPeriod existing = periodRepository.findById(id).orElseThrow(() -> new RuntimeException("Period Not Found"));
         periodRepository.delete(existing);
     }
 

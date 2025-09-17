@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AssignmentSubmissionRepository extends JpaRepository<StudentAssignmentSubmission,Long>
@@ -28,6 +29,13 @@ public interface AssignmentSubmissionRepository extends JpaRepository<StudentAss
             "AND s.assignment.classRoom.id = :classRoomId " +
             "AND s.submittedDate > s.assignment.dueDate")
     List<StudentAssignmentSubmission> findLateAssignments(Long studentId, Long classRoomId);
+
+    @Query("SELECT s FROM StudentAssignmentSubmission s " +
+            "WHERE s.student.id = :studentId AND s.assignment.id = :assignmentId")
+    Optional<StudentAssignmentSubmission> findSubmissionByStudentAndAssignment(
+            @Param("studentId") Long studentId,
+            @Param("assignmentId") Long assignmentId
+    );
 
 
 }

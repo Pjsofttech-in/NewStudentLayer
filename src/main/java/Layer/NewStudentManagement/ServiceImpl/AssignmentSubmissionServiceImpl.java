@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +53,14 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
 
         StudentAssignment assignment = assignmentRepository.findById(request.getAssignment().getId())
                 .orElseThrow(() -> new RuntimeException("Assignment not found"));
+
+        Optional<StudentAssignmentSubmission> existingSubmission =
+                assSubmissionRepo.findSubmissionByStudentAndAssignment(student.getId(), assignment.getId());
+
+        if (existingSubmission.isPresent()) {
+            throw new RuntimeException("You have already submitted this assignment on: "
+                    + existingSubmission.get().getSubmittedDate());
+        }
 
         request.setStudent(student);
         request.setAssignment(assignment);

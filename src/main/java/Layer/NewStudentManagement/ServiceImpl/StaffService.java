@@ -168,7 +168,6 @@ public class StaffService
                                 .block();
                         return Boolean.TRUE.equals(exists);
                     } catch (Exception e) {
-                        e.printStackTrace();
                         return false;
                     }
                 }
@@ -209,7 +208,6 @@ public class StaffService
                             .block();
                     return Boolean.TRUE.equals(exists);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     return false;
                 }
             }

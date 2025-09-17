@@ -237,7 +237,6 @@ public class AttendanceServiceImpl implements AttendanceService {
             return "Attendance marked for Roll No: " + rollNo +"  Name:"+ attendance.getStudentName()+ " (" + status + ")";
 
         } catch (Exception e) {
-            e.printStackTrace();
             return "Failed to mark attendance: " + e.getMessage();
         }
     }
@@ -306,7 +305,6 @@ public class AttendanceServiceImpl implements AttendanceService {
             return "Logout successful for Roll No: " + rollNo+"  Name:"+ attendance.getStudentName();
 
         } catch (Exception e) {
-            e.printStackTrace();
             return "Failed to logout student: " + e.getMessage();
         }
     }
