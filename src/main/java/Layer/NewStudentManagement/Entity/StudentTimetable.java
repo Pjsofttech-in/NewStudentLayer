@@ -34,6 +34,13 @@ public class StudentTimetable
     @JoinColumn(name = "classroom_id", nullable = false)
     private StudentClassRoom classRoom;
 
-    @OneToMany(mappedBy = "timetable", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany
+    @JoinTable(
+            name = "timetable_periods",
+            joinColumns = @JoinColumn(name = "timetable_id"),
+            inverseJoinColumns = @JoinColumn(name = "period_id")
+    )
     private List<StudentPeriod> periods;
+
+
 }

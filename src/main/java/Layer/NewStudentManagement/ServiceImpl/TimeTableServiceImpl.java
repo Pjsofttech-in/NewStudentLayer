@@ -52,15 +52,11 @@ public class TimeTableServiceImpl implements TimeTableService
                 .orElseThrow(() -> new ResourceNotFoundException("Classroom not found"));
         timetable.setClassRoom(classRoom);
 
-        // Fetch periods
         List<StudentPeriod> attachedPeriods = periodRepository.findAllById(dto.getPeriodIds());
-        for (StudentPeriod period : attachedPeriods) {
-            period.setTimetable(timetable);
-        }
         timetable.setPeriods(attachedPeriods);
 
-        StudentTimetable timetable1 = timeTableRepository.save(timetable);
-        return convertToDTO(timetable1);
+        StudentTimetable savedTimetable = timeTableRepository.save(timetable);
+        return convertToDTO(savedTimetable);
     }
 
 
