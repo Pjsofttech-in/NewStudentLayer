@@ -142,7 +142,10 @@ public class TimeTableServiceImpl implements TimeTableService
                     ScheduledPeriodResponseDTO spDto = new ScheduledPeriodResponseDTO();
                     spDto.setId(sp.getId());
 
+
+
                     if (sp.getPeriodSlot() != null) {
+                        spDto.setPeriodSlotId(sp.getPeriodSlot().getId());
                         spDto.setPeriodNo(sp.getPeriodSlot().getPeriodNo());
                         spDto.setStartTime(
                                 sp.getPeriodSlot().getStartTime() != null
