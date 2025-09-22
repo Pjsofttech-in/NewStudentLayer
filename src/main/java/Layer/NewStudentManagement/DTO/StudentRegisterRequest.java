@@ -18,6 +18,7 @@ public class StudentRegisterRequest
     private String gender;
     private String contact;
     private String email;
+    private String password;
     private LocalDate dateOfBirth;
     private String status;
     private String standardName;
@@ -25,7 +26,6 @@ public class StudentRegisterRequest
     private String streamName;
     private String groupName;
     private String semister;
-    private String password;
     private String institutionType;
     private String academicYear;
     private Double discount;

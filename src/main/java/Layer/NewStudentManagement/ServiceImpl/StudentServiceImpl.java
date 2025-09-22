@@ -1349,6 +1349,7 @@ public class StudentServiceImpl implements StudentService {
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
             }
+            student.setGroupName(request.getGroupName());
             student.setDegreeName(null);
             student.setDepartment(null);
         } else if ("College".equalsIgnoreCase(student.getInstitutionType())) {

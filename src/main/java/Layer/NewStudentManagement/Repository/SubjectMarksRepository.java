@@ -1,0 +1,17 @@
+package Layer.NewStudentManagement.Repository;
+
+import Layer.NewStudentManagement.Entity.StudentStream;
+import Layer.NewStudentManagement.Entity.StudentSubjectMarks;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface SubjectMarksRepository extends JpaRepository<StudentSubjectMarks,Long>
+{
+    @Query("SELECT s FROM StudentSubjectMarks s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
+    List<StudentSubjectMarks> findSubjectByBranchCode(@Param("branchCode") String branchCode);
+}

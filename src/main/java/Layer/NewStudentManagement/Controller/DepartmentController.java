@@ -1,6 +1,5 @@
 package Layer.NewStudentManagement.Controller;
 
-import Layer.NewStudentManagement.DTO.StreamDTO;
 import Layer.NewStudentManagement.DTO.StudentDepartmentDTO;
 import Layer.NewStudentManagement.Entity.StudentDepartment;
 import Layer.NewStudentManagement.Service.DepartmentService;
@@ -8,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.Collections;
 import java.util.List;
+
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
