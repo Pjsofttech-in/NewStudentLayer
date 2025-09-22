@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.Entity.StudentAssignmentSubmission;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface AssignmentSubmissionService
 {
@@ -15,5 +16,6 @@ public interface AssignmentSubmissionService
     List<AssignmentSubmissionResponseDTO> getSubmissionsByClassRoom(Long classRoomId, String role, String email);
     List<AssignmentSubmissionResponseDTO> getSubmissionsByStudent(Long studentId, String role, String email, String filter);
     List<AssignmentSubmissionResponseDTO> getSubmissionsByAssignmentId(Long assignmentId,String role, String email);
+    Map<String, Long> getAssignmentCountsByStudent(String role, String email,Long studentId);
 }
 

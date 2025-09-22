@@ -36,6 +36,13 @@ public interface AssignmentSubmissionRepository extends JpaRepository<StudentAss
             @Param("studentId") Long studentId,
             @Param("assignmentId") Long assignmentId
     );
+    @Query("SELECT COUNT(s) FROM StudentAssignmentSubmission s WHERE s.student.id = :studentId AND s.status = 'Submitted'")
+    Long countSubmittedByStudent(@Param("studentId") Long studentId);
 
+    @Query("SELECT COUNT(a) FROM StudentAssignment a " +
+            "WHERE a.classRoom.id = :classRoomId AND a.id NOT IN " +
+            "(SELECT s.assignment.id FROM StudentAssignmentSubmission s WHERE s.student.id = :studentId)")
+    Long countPendingByStudent(@Param("studentId") Long studentId,
+                               @Param("classRoomId") Long classRoomId);
 
 }

@@ -66,5 +66,11 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
     @Query("SELECT f FROM StudentFees f WHERE f.student.id = :studentId")
     List<StudentFees> findFeesByStudentId(@Param("studentId") Long studentId);
 
-
+    @Query("SELECT " +
+            "SUM(f.totalamount) AS totalFees, " +
+            "SUM(f.paidAmount) AS totalPaid, " +
+            "SUM(f.pendingAmount) AS totalPending " +
+            "FROM StudentFees f " +
+            "WHERE f.student.id = :studentId")
+    FeesRevenueProjection getFeesRevenueByStudentId(@Param("studentId") Long studentId);
 }

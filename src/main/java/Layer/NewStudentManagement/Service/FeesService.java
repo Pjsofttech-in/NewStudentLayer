@@ -18,4 +18,5 @@ public interface FeesService
     List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email);
     Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size);
     FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters);
+    FeesRevenueProjection getFeesRevenueByStudentId(String role, String email,Long studentId);
 }

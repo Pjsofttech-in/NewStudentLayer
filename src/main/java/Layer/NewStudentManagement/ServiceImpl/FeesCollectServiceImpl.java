@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.DTO.FeesCollectDTO;
+import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.DTO.StudentFeeScheduleDTO;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
@@ -335,6 +336,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
         return revenueMap;
     }
+
 
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {

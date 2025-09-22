@@ -1,16 +1,11 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.*;
-import Layer.NewStudentManagement.Service.AttendanceService;
-import Layer.NewStudentManagement.Service.FeesCollectService;
-import Layer.NewStudentManagement.Service.StudentService;
+import Layer.NewStudentManagement.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,6 +23,12 @@ public class DashBoardController
 
     @Autowired
     FeesCollectService feesCollectService;
+
+    @Autowired
+    FeesService feesService;
+
+    @Autowired
+    AssignmentSubmissionService assignmentSubmissionService;
 
     @GetMapping("/getStudentCountForCards")
     public ResponseEntity<Map<String, Long>> getApplicationCounts(
@@ -147,5 +148,21 @@ public class DashBoardController
         Map<String, Double> response = feesCollectService.getFeesRevenueByBank(role, email);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/revenueByStudent")
+    public FeesRevenueProjection getFeesRevenueByStudent(@RequestParam String role,
+                                                          @RequestParam String email,
+                                                          @RequestParam Long studentId) {
+        return feesService.getFeesRevenueByStudentId(role, email, studentId);
+    }
+
+    @GetMapping("/assignmentsCountByStudent")
+    public ResponseEntity<Map<String, Long>> getAssignmentCounts(@RequestParam String role,
+                                                                 @RequestParam String email,
+                                                                 @RequestParam Long studentId) {
+        Map<String, Long> counts = assignmentSubmissionService.getAssignmentCountsByStudent(role, email, studentId);
+        return ResponseEntity.ok(counts);
+    }
+
 
 }

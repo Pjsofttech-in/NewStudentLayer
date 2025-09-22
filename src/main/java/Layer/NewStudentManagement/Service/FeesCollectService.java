@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Service;
 
 import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.DTO.FeesCollectDTO;
+import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 
 import java.util.List;
@@ -20,4 +21,5 @@ public interface FeesCollectService
 
     List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email, String institutionType);
     Map<String, Double> getFeesRevenueByBank(String role,String email);
+
 }

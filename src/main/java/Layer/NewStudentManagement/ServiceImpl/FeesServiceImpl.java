@@ -359,6 +359,12 @@ public class FeesServiceImpl implements FeesService
         };
     }
 
+    @Override
+    public FeesRevenueProjection getFeesRevenueByStudentId(String role, String email,Long studentId)
+    {
+        checkPermission(role, email, "Get");
+        return feesRepository.getFeesRevenueByStudentId(studentId);
+    }
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {
         StudentFeesDTO dto = new StudentFeesDTO();

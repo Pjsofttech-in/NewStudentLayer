@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -200,6 +202,25 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public Map<String, Long> getAssignmentCountsByStudent(String role, String email,Long studentId) {
+
+        StudentEntity student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+
+        Long classRoomId = student.getClassRoom().getId();
+
+        Long submittedCount = assSubmissionRepo.countSubmittedByStudent(studentId);
+        Long pendingCount = assSubmissionRepo.countPendingByStudent(studentId, classRoomId);
+
+        Map<String, Long> counts = new HashMap<>();
+        counts.put("submitted", submittedCount);
+        counts.put("pending", pendingCount);
+
+        return counts;
+    }
+
 
 
     @Override
