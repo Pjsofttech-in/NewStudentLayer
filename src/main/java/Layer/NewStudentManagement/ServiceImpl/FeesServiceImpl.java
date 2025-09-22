@@ -22,7 +22,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,6 +59,12 @@ public class FeesServiceImpl implements FeesService
 
     @Autowired
     private GroupRepository groupRepository;
+
+    @Autowired
+    private FeesScheduleRepository feesScheduleRepository;
+
+    @Autowired
+    private FeesCollectRepository feesCollectRepository;
 
 
     private void checkPermission(String role, String email, String action) {
@@ -360,10 +368,43 @@ public class FeesServiceImpl implements FeesService
     }
 
     @Override
-    public FeesRevenueProjection getFeesRevenueByStudentId(String role, String email,Long studentId)
+    public FeesRevenueProjection getFeesRevenueByStudentId(String role, String email, Long studentId)
     {
         checkPermission(role, email, "Get");
         return feesRepository.getFeesRevenueByStudentId(studentId);
+    }
+
+    @Override
+    public Map<String, Object> getMonthlyFeesStatus(String role, String email,String month)
+    {
+        checkPermission(role, email, "Get");
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        List<StudentFeeSchedule> schedules = feesScheduleRepository.findByMonthAndBranchCode(month,branchCode);
+
+        double totalScheduled = 0.0;
+        double totalPaid = 0.0;
+        double totalPending = 0.0;
+
+        for (StudentFeeSchedule schedule : schedules) {
+            double scheduleAmount = schedule.getCollectAmount() != null ? schedule.getCollectAmount() : 0.0;
+            totalScheduled += scheduleAmount;
+
+            List<StudentFeesCollect> collects = feesCollectRepository.findByScheduleAndBranchCode(schedule,branchCode);
+            double paidAmount = collects.stream()
+                    .mapToDouble(c -> c.getAmount() != null ? c.getAmount() : 0.0)
+                    .sum();
+
+            totalPaid += paidAmount;
+            totalPending += (scheduleAmount - paidAmount);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("month", month);
+        response.put("totalScheduled", totalScheduled);
+        response.put("totalPaid", totalPaid);
+        response.put("totalPending", totalPending);
+
+        return response;
     }
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {

@@ -1,7 +1,9 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.SubjectMarksDTO;
+import Layer.NewStudentManagement.Entity.StudentClassRoom;
 import Layer.NewStudentManagement.Entity.StudentSubjectMarks;
+import Layer.NewStudentManagement.Repository.ClassRoomRepository;
 import Layer.NewStudentManagement.Repository.SubjectMarksRepository;
 import Layer.NewStudentManagement.Service.SubjectMarksService;
 import jakarta.transaction.Transactional;
@@ -21,6 +23,8 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
     @Autowired
     StaffService staffService;
 
+    @Autowired
+    ClassRoomRepository classRoomRepository;
 
     @Override
     @Transactional
@@ -32,7 +36,9 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
         subject.setRole(role);
         subject.setCreatedByEmail(email);
         subject.setBranchCode(branchCode);
-
+        StudentClassRoom classRoom = classRoomRepository.findById(subject.getClassRoom().getId())
+                .orElseThrow(() -> new RuntimeException("ClassRoom not found with id: " + subject.getClassRoom().getId()));
+        subject.setClassRoom(classRoom);
         StudentSubjectMarks subjectMarks = subjectMarksRepository.save(subject);
         return subjectMapToDto(subjectMarks);
     }
@@ -61,6 +67,22 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
 
         return subjectMapToDto(existing);
+    }
+    @Override
+    public List<SubjectMarksDTO> getSubjectsByClassroomId(Long classroomId, String role, String email) {
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to view Subjects");
+        }
+
+        List<StudentSubjectMarks> subjects = subjectMarksRepository.findByClassRoomId(classroomId);
+
+        if (subjects.isEmpty()) {
+            throw new RuntimeException("No subjects found for classroom id: " + classroomId);
+        }
+
+        return subjects.stream()
+                .map(this::subjectMapToDto)
+                .toList();
     }
 
     @Override
@@ -98,6 +120,11 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
         dto.setSubjectName(subject.getSubjectName());
         dto.setMaxMarks(subject.getMaxMarks());
         dto.setCreatedByEmail(subject.getCreatedByEmail());
+        if (subject.getClassRoom() != null) {
+            dto.setClassRoomId(subject.getClassRoom().getId());
+        } else {
+            dto.setClassRoomId(null);
+        }
         dto.setRole(subject.getRole());
         dto.setBranchCode(subject.getBranchCode());
         return dto;

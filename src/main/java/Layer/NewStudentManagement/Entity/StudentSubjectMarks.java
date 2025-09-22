@@ -27,7 +27,9 @@ public class StudentSubjectMarks
     private String createdByEmail;
     private String role;
     private String branchCode;
-
+    @ManyToOne
+    @JoinColumn(name = "classroom_id", nullable = false)
+    private StudentClassRoom classRoom;
     @OneToMany(mappedBy = "subject", cascade = CascadeType.ALL)
     private List<StudentExamSubject> examSubjects;
 }

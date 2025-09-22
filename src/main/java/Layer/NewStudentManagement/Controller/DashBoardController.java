@@ -164,5 +164,10 @@ public class DashBoardController
         return ResponseEntity.ok(counts);
     }
 
+    @GetMapping("/getFeesRevenewByMonth")
+    public Map<String, Object> getMonthlyFees(@RequestParam String role,
+                                              @RequestParam String email,@RequestParam String month) {
+        return feesService.getMonthlyFeesStatus(role, email, month);
+    }
 
 }

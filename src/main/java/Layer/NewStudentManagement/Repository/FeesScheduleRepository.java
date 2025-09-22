@@ -23,4 +23,10 @@ public interface FeesScheduleRepository extends JpaRepository<StudentFeeSchedule
 
     List<StudentFeeSchedule> findByStudentFees_Fid(Long fid);
 
+    @Query("SELECT s FROM StudentFeeSchedule s " +
+            "WHERE s.month = :month AND s.studentFees.branchCode = :branchCode")
+    List<StudentFeeSchedule> findByMonthAndBranchCode(@Param("month") String month,
+                                                      @Param("branchCode") String branchCode);
+
+
 }

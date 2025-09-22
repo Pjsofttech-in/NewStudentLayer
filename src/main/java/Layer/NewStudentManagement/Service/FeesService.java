@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface FeesService
 {
@@ -19,4 +20,5 @@ public interface FeesService
     Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size);
     FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters);
     FeesRevenueProjection getFeesRevenueByStudentId(String role, String email,Long studentId);
+    Map<String, Object> getMonthlyFeesStatus(String role, String email, String month);
 }

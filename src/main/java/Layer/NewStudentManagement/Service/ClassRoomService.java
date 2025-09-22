@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.Service;
 import Layer.NewStudentManagement.DTO.ClassRoomFilterRequest;
 import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
 import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
+import Layer.NewStudentManagement.DTO.TeacherWithSubjectsDTO;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
 import Layer.NewStudentManagement.Entity.StudentClassRoomTeacherSubject;
 
@@ -21,5 +22,5 @@ public interface ClassRoomService
     List<StudentClassRoomResponseDTO> getClassroomDTOsByTeacherId(Long teacherId,String role, String email);
     List<StudentClassRoomResponseDTO> getClassRoomsByFilter(ClassRoomFilterRequest filter);
     void removeStudentsFromClassroom(String role, String email, Long classroomId, List<Long> studentIds);
-
+    List<TeacherWithSubjectsDTO> getTeachersWithSubjectsByClassroom(String role, String email, Long classroomId);
 }

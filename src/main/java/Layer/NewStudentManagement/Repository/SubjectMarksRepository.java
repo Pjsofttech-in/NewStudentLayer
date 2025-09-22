@@ -14,4 +14,7 @@ public interface SubjectMarksRepository extends JpaRepository<StudentSubjectMark
 {
     @Query("SELECT s FROM StudentSubjectMarks s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentSubjectMarks> findSubjectByBranchCode(@Param("branchCode") String branchCode);
+
+    @Query("SELECT s FROM StudentSubjectMarks s WHERE s.classRoom.id = :classRoomId")
+    List<StudentSubjectMarks> findByClassRoomId(@Param("classRoomId") Long classRoomId);
 }

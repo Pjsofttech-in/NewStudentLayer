@@ -432,6 +432,25 @@ public class ClassRoomServiceImpl implements ClassRoomService
         return new ArrayList<>(classroomMap.values());
     }
 
+    @Override
+    public List<TeacherWithSubjectsDTO> getTeachersWithSubjectsByClassroom(String role, String email,Long classroomId)
+    {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Teacher and Subject by ClassRoom");
+        }
+
+        List<StudentClassRoomTeacherSubject> assignments = classRoomTeacherSubjectRepository.findByClassRoomIdWithSubjects(classroomId);
+
+        return assignments.stream().map(a -> {
+            TeacherWithSubjectsDTO dto = new TeacherWithSubjectsDTO();
+            dto.setTeacherId(a.getTeacher().getId());
+            dto.setTeacherName(a.getTeacher().getTeacherName());
+            dto.setTeacherEmail(a.getTeacher().getTeacherEmail());
+            dto.setSubjects(a.getSubjects().stream().map(s -> s.getSubject()).toList());
+            return dto;
+        }).toList();
+    }
+
 
     @Override
     public List<StudentClassRoomResponseDTO> getClassRoomsByFilter(ClassRoomFilterRequest filter) {

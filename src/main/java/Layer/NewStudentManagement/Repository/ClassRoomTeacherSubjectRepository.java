@@ -22,4 +22,10 @@ public interface ClassRoomTeacherSubjectRepository extends JpaRepository<Student
             "WHERE t.id = :teacherId")
     List<StudentClassRoomTeacherSubject> findAssignmentsByTeacherId(@Param("teacherId") Long teacherId);
 
+    @Query("SELECT s FROM StudentClassRoomTeacherSubject s " +
+            "JOIN FETCH s.teacher t " +
+            "JOIN FETCH s.subjects sub " +
+            "WHERE s.classRoom.id = :classroomId")
+    List<StudentClassRoomTeacherSubject> findByClassRoomIdWithSubjects(@Param("classroomId") Long classroomId);
+
 }

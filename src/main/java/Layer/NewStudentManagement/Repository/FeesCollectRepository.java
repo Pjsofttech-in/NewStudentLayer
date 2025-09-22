@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Repository;
 
 import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
+import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -77,12 +78,15 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
                                                              @Param("institutionType") String institutionType);
 
 
-
     @Query("SELECT s.bankName, SUM(s.amount) " +
             "FROM StudentFeesCollect s " +
             "WHERE s.branchCode = :branchCode " +
             "GROUP BY s.bankName")
     List<Object[]> getFeesRevenueByBank(@Param("branchCode") String branchCode);
 
+    @Query("SELECT c FROM StudentFeesCollect c " +
+            "WHERE c.studentFeeSchedule = :schedule AND c.branchCode = :branchCode")
+    List<StudentFeesCollect> findByScheduleAndBranchCode(@Param("schedule") StudentFeeSchedule schedule,
+                                                         @Param("branchCode") String branchCode);
 
 }

@@ -35,6 +35,12 @@ public class SubjectMarksContoller
         return subjectMarksService.getSubjectsById(id,role, email);
     }
 
+    @GetMapping("/getSubjectMarksByClassroomId")
+    public List<SubjectMarksDTO> getAllSubjectMarksByClassRoom(@RequestParam Long classroomId,@RequestParam String role,
+                                              @RequestParam String email) {
+        return subjectMarksService.getSubjectsByClassroomId(classroomId,role, email);
+    }
+
 
     @PutMapping("/updateSubjectMarks/{id}")
     public SubjectMarksDTO updateSubjectMarks(@PathVariable Long id,
