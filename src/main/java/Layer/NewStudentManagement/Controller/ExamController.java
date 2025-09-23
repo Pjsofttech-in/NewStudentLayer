@@ -69,4 +69,12 @@ public class ExamController
         examService.removeSubjectFromExam(examId, subjectId, role, email);
         return ResponseEntity.ok("Subject removed from exam successfully");
     }
+
+    @GetMapping("/getExamByClassId")
+    public ResponseEntity<List<StudentExamDTO>> getExamsByClassId(@RequestParam Long classId,
+                                                @RequestParam String role,
+                                                @RequestParam String email) {
+        return ResponseEntity.ok(examService.getExamsByClassId(classId, role, email));
+    }
+
 }

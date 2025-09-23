@@ -89,4 +89,5 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
     List<StudentFeesCollect> findByScheduleAndBranchCode(@Param("schedule") StudentFeeSchedule schedule,
                                                          @Param("branchCode") String branchCode);
 
+
 }

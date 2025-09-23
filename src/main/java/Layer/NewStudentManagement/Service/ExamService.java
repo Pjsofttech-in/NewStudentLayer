@@ -18,4 +18,5 @@ public interface ExamService
     void deleteExam(Long id, String role, String email);
 
     void removeSubjectFromExam(Long examId, Long subjectId, String role, String email);
+    List<StudentExamDTO> getExamsByClassId(Long classId,String role, String email);
 }

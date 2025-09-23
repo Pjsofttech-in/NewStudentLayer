@@ -155,6 +155,18 @@ public class ExamServiceImpl implements ExamService
     }
 
     @Override
+    public List<StudentExamDTO> getExamsByClassId(Long classId,String role, String email)
+    {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Exam");
+        }
+        List<StudentExam> exams = examRepository.findExamsWithSubjectsByClassId(classId);
+        return exams.stream()
+                .map(this::exammapToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public void removeSubjectFromExam(Long examId, Long subjectId, String role, String email) {
         if (!staffService.hasPermission(role, email, "DELETE")) {

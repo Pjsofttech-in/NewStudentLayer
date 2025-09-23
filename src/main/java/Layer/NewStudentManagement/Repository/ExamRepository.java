@@ -14,4 +14,10 @@ public interface ExamRepository extends JpaRepository<StudentExam,Long>
 {
     @Query("SELECT s FROM StudentExam s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentExam> findExamByBranchCode(@Param("branchCode") String branchCode);
+
+
+    @Query("SELECT DISTINCT e FROM StudentExam e " +
+            "LEFT JOIN FETCH e.subjects s " +
+            "WHERE e.classRoom.id = :classId")
+    List<StudentExam> findExamsWithSubjectsByClassId(@Param("classId") Long classId);
 }
