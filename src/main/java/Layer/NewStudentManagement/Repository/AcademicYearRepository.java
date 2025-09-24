@@ -14,4 +14,10 @@ public interface AcademicYearRepository extends JpaRepository<StudentAcademicYea
 
     @Query("SELECT a FROM StudentAcademicYear a WHERE a.branchCode=:branchCode ORDER BY a.id DESC")
     List<StudentAcademicYear> findAllByBranchCode(@Param("branchCode")String branchCode);
+
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END " +
+            "FROM StudentAcademicYear a " +
+            "WHERE a.academicYear = :academicYear AND a.branchCode = :branchCode")
+    boolean existsByAcademicYearAndBranchCode(@Param("academicYear") String academicYear,
+                                              @Param("branchCode") String branchCode);
 }

@@ -67,4 +67,12 @@ public class SubjectController
         return ResponseEntity.ok(subjects);
     }
 
+
+    @GetMapping("/getSubjectByTeacher")
+    public ResponseEntity<List<StudentSubjectDTO>> getSubjectsByTeacherId( @RequestParam String role,
+                                                                        @RequestParam String email,
+                                                                        @RequestParam Long teacherId) {
+        List<StudentSubjectDTO> subjects = subjectService.getSubjectsByTeacherId(role, email, teacherId);
+        return ResponseEntity.ok(subjects);
+    }
 }

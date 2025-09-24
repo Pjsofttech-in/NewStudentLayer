@@ -238,6 +238,20 @@ public class SubjectServiceImpl implements SubjectService
     }
 
 
+    @Override
+    public List<StudentSubjectDTO> getSubjectsByTeacherId(String role, String email,Long teacherId)
+    {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to get subject");
+        }
+
+        List<StudentSubject> subjects = subjectRepository.findSubjectsByTeacherId(teacherId);
+        return subjects.stream()
+                .map(this::mapToSubjectDTO)
+                .collect(Collectors.toList());
+    }
+
+
     private StudentSubjectDTO mapToSubjectDTO(StudentSubject subject) {
         StudentSubjectDTO dto = new StudentSubjectDTO();
 

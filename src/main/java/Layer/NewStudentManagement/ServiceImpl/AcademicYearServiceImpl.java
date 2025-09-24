@@ -35,6 +35,13 @@ public class AcademicYearServiceImpl implements AcademicYearService
         academicYear.setBranchCode(branchCode);
         academicYear.setRole(role);
         academicYear.setCreatedByEmail(email);
+        boolean exists = academicYearRepository.existsByAcademicYearAndBranchCode(
+                academicYear.getAcademicYear(), branchCode);
+
+        if (exists) {
+            throw new IllegalArgumentException("Academic Year '" + academicYear.getAcademicYear() + "' already exists in this branch");
+        }
+
         return academicYearRepository.save(academicYear);
 
     }

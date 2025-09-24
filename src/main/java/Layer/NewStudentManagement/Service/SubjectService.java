@@ -16,4 +16,5 @@ public interface SubjectService
     List<StudentSubjectDTO> getSubjects(String role, String email, String institutionType,
                                         String graduationTypeName, String streamName,
                                         String degreeName, String departmentName);
+    List<StudentSubjectDTO> getSubjectsByTeacherId(String role, String email,Long teacherId);
 }
