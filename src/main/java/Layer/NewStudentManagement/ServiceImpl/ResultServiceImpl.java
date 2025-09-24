@@ -2,18 +2,18 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.StudentResultDTO;
 import Layer.NewStudentManagement.DTO.StudentResultDetailDTO;
-import Layer.NewStudentManagement.Entity.StudentResult;
-import Layer.NewStudentManagement.Entity.StudentResultDetail;
-import Layer.NewStudentManagement.Entity.StudentSubjectMarks;
-import Layer.NewStudentManagement.Repository.ResultRepository;
-import Layer.NewStudentManagement.Repository.SubjectMarksRepository;
+import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ResultService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +24,15 @@ public class ResultServiceImpl implements ResultService
 
     @Autowired
     private StaffService staffService;
+
+    @Autowired
+    private ExamSubjectRepository examSubjectRepository;
+
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
+    private ExamRepository examRepository;
 
 
     @Autowired
@@ -187,19 +196,59 @@ public class ResultServiceImpl implements ResultService
     }
 
 
+//    @Override
+//    public List<StudentResultDTO> getResultsByClassRoom(Long classRoomId, String role, String email)
+//    {
+//        if (!staffService.hasPermission(role, email, "GET")) {
+//            throw new RuntimeException("You don't have permission to view student results");
+//        }
+//        if (role.equalsIgnoreCase("STUDENT")) {
+//            throw new RuntimeException("Students are not allowed to view results For class!");
+//        }
+//        List<StudentResult> results = resultRepository.findByClassRoomId(classRoomId);
+//        return results.stream()
+//                .map(this::mapToResultDto)
+//                .collect(Collectors.toList());
+//    }
+
     @Override
-    public List<StudentResultDTO> getResultsByClassRoom(Long classRoomId, String role, String email)
-    {
+    public List<StudentResultDTO> getResultsByClassRoom(String role, String email, Long examId, Long classRoomId) {
+
         if (!staffService.hasPermission(role, email, "GET")) {
             throw new RuntimeException("You don't have permission to view student results");
         }
-        if (role.equalsIgnoreCase("STUDENT")) {
-            throw new RuntimeException("Students are not allowed to view results For class!");
-        }
-        List<StudentResult> results = resultRepository.findByClassRoomId(classRoomId);
-        return results.stream()
-                .map(this::mapToResultDto)
-                .collect(Collectors.toList());
+
+        // 1. Fetch all students in the classroom
+        List<StudentEntity> students = studentRepository.findByClassRoomId(classRoomId);
+
+        // 2. Fetch all results for this exam & classroom
+        List<StudentResult> results = resultRepository.findByExamAndClassRoom(examId, classRoomId);
+
+        // 3. Map results by studentId for quick lookup
+        Map<Long, StudentResult> resultMap = results.stream()
+                .collect(Collectors.toMap(r -> r.getStudent().getId(), r -> r));
+
+        // 4. Build final list
+        return students.stream().map(student -> {
+            StudentResultDTO dto = new StudentResultDTO();
+            dto.setStudentId(student.getId());
+            dto.setStudentName(student.getFullName());
+
+            if (resultMap.containsKey(student.getId())) {
+                // student has result → map normally
+                StudentResult result = resultMap.get(student.getId());
+                dto = mapToResultDto(result); // use your existing mapper
+            } else {
+                // student has no result → return empty/default
+                dto.setExamId(examId);
+                dto.setExamName(""); // optional if you want to include exam name
+                dto.setTotalObtained(0);
+                dto.setTotalMax(0);
+                dto.setPercentage(0.0);
+                dto.setDetails(Collections.emptyList());
+            }
+            return dto;
+        }).toList();
     }
 
 
@@ -229,5 +278,73 @@ public class ResultServiceImpl implements ResultService
 
         return dto;
     }
+
+    @Override
+    @Transactional
+    public StudentResultDTO submitMark(Long studentId, Long examId, Long subjectId,
+                                       Integer obtainedMarks, String role, String email) {
+        if (!staffService.hasPermission(role, email, "POST")) {
+            throw new RuntimeException("No permission");
+        }
+
+        // validate teacher teaches this subject
+        StudentExamSubject examSubject = examSubjectRepository
+                .findByExamIdAndSubjectIdAndCreatedByEmail(examId, subjectId, email)
+                .orElseThrow(() -> new RuntimeException("You are not assigned to this subject"));
+
+        // find or create StudentResult
+        StudentResult result = resultRepository.findByStudentIdAndExamId(studentId, examId)
+                .orElseGet(() -> {
+                    StudentResult r = new StudentResult();
+                    r.setStudent(studentRepository.findById(studentId).orElseThrow());
+                    r.setExam(examRepository.findById(examId).orElseThrow());
+                    r.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
+                    r.setCreatedByEmail(email);
+                    r.setRole(role);
+                    r.setDetails(new ArrayList<>());   // ✅ init here
+                    return r;
+                });
+
+        // safeguard
+        if (result.getDetails() == null) {
+            result.setDetails(new ArrayList<>());
+        }
+
+        // check if detail already exists for this subject
+        StudentResultDetail detail = result.getDetails().stream()
+                .filter(d -> d.getSubject().getId().equals(subjectId))
+                .findFirst()
+                .orElseGet(() -> {
+                    StudentResultDetail d = new StudentResultDetail();
+                    d.setSubject(examSubject.getSubject());
+                    d.setStudentResult(result);
+                    d.setBranchCode(result.getBranchCode());
+                    d.setCreatedByEmail(email);
+                    d.setRole(role);
+                    result.getDetails().add(d);  // ✅ safe now
+                    return d;
+                });
+
+        detail.setObtainedMarks(obtainedMarks);
+
+        resultRepository.save(result);
+
+        int examSubjectsCount = examSubjectRepository.countByExamId(examId);
+        if (result.getDetails().size() == examSubjectsCount) {
+            int totalObtained = result.getDetails().stream()
+                    .mapToInt(d -> d.getObtainedMarks() != null ? d.getObtainedMarks() : 0)
+                    .sum();
+            int totalMax = result.getDetails().stream()
+                    .mapToInt(d -> d.getSubject().getMaxMarks())
+                    .sum();
+            result.setTotalObtained(totalObtained);
+            result.setTotalMax(totalMax);
+            result.setPercentage(totalMax > 0 ? (totalObtained * 100.0 / totalMax) : 0.0);
+            resultRepository.save(result);
+        }
+
+        return mapToResultDto(result);
+    }
+
 
 }

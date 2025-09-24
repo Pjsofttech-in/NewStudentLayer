@@ -9,11 +9,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExamSubjectDto
+public class SubmitMarkRequest
 {
-    private Long id;
+    private Long studentId;
+    private Long examId;
     private Long subjectId;
-    private String subjectName;
-    private Integer maxMarks;
-
+    private Integer obtainedMarks;
 }

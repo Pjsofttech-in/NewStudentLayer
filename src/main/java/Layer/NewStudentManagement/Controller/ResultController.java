@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.StudentResultDTO;
+import Layer.NewStudentManagement.DTO.SubmitMarkRequest;
 import Layer.NewStudentManagement.Entity.StudentResult;
 import Layer.NewStudentManagement.Service.ResultService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,11 +79,40 @@ public class ResultController
         return resultService.getLatestResultByStudentId(studentId, role, email);
     }
 
+//    @GetMapping("/getResultByClassroom")
+//    public ResponseEntity<List<StudentResultDTO>> getResultsByClassRoom(
+//            @RequestParam Long classRoomId,
+//            @RequestParam String role,
+//            @RequestParam String email) {
+//        return ResponseEntity.ok(resultService.getResultsByClassRoom(classRoomId, role, email));
+//    }
+
+    @PostMapping("/submitMarkByTeacher")
+    public ResponseEntity<StudentResultDTO> submitMark(
+            @RequestBody SubmitMarkRequest request,
+            @RequestParam String role,
+            @RequestParam String email)
+    {
+        StudentResultDTO dto = resultService.submitMark(
+                request.getStudentId(),
+                request.getExamId(),
+                request.getSubjectId(),
+                request.getObtainedMarks(),
+                role,
+                email
+        );
+        return ResponseEntity.ok(dto);
+    }
+
+
     @GetMapping("/getResultByClassroom")
     public ResponseEntity<List<StudentResultDTO>> getResultsByClassRoom(
+            @RequestParam Long examId,
             @RequestParam Long classRoomId,
             @RequestParam String role,
             @RequestParam String email) {
-        return ResponseEntity.ok(resultService.getResultsByClassRoom(classRoomId, role, email));
+
+        List<StudentResultDTO> results = resultService.getResultsByClassRoom(role,email,examId, classRoomId);
+        return ResponseEntity.ok(results);
     }
 }

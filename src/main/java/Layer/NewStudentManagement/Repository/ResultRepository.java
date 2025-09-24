@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ResultRepository extends JpaRepository<StudentResult,Long>
@@ -36,4 +37,18 @@ public interface ResultRepository extends JpaRepository<StudentResult,Long>
             "WHERE r.exam.classRoom.id = :classRoomId")
     List<StudentResult> findByClassRoomId(@Param("classRoomId") Long classRoomId);
 
+
+    @Query("SELECT r FROM StudentResult r " +
+            "WHERE r.student.id = :studentId " +
+            "AND r.exam.id = :examId")
+    Optional<StudentResult> findByStudentIdAndExamId(
+            @Param("studentId") Long studentId,
+            @Param("examId") Long examId
+    );
+
+
+    @Query("SELECT r FROM StudentResult r " +
+            "WHERE r.exam.id = :examId AND r.student.classRoom.id = :classRoomId")
+    List<StudentResult> findByExamAndClassRoom(@Param("examId") Long examId,
+                                               @Param("classRoomId") Long classRoomId);
 }

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -37,5 +38,6 @@ public class StudentResult
     private String branchCode;
 
     @OneToMany(mappedBy = "studentResult", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StudentResultDetail> details;
+    private List<StudentResultDetail> details = new ArrayList<>();
+
 }
