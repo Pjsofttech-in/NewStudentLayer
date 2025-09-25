@@ -114,6 +114,20 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
         subjectMarksRepository.delete(existing);
     }
 
+
+
+    @Override
+    public List<SubjectMarksDTO> getSubjectsByExamId(String role, String email,Long examId)
+    {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Subject");
+        }
+        List<StudentSubjectMarks> subjects = subjectMarksRepository.findSubjectsByExamId(examId);
+        return subjects.stream()
+                .map(this::subjectMapToDto)
+                .toList();
+    }
+
     private SubjectMarksDTO subjectMapToDto(StudentSubjectMarks subject) {
         SubjectMarksDTO dto = new SubjectMarksDTO();
         dto.setId(subject.getId());

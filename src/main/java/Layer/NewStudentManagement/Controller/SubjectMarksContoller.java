@@ -4,6 +4,7 @@ import Layer.NewStudentManagement.DTO.SubjectMarksDTO;
 import Layer.NewStudentManagement.Entity.StudentSubjectMarks;
 import Layer.NewStudentManagement.Service.SubjectMarksService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,5 +57,14 @@ public class SubjectMarksContoller
                          @RequestParam String email) {
         subjectMarksService.deleteSubject(id, role, email);
         return "Subject deleted successfully";
+    }
+
+
+    @GetMapping("/getSubjectbyExamId")
+    public ResponseEntity<List<SubjectMarksDTO>> getSubjectsByExamId(@RequestParam String role,
+                                                                     @RequestParam String email,
+                                                                     @RequestParam Long examId) {
+        List<SubjectMarksDTO> subjects = subjectMarksService.getSubjectsByExamId(role, email, examId);
+        return ResponseEntity.ok(subjects);
     }
 }

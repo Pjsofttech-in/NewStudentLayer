@@ -13,5 +13,5 @@ public interface SubjectMarksService
     void deleteSubject(Long id, String role, String email);
     SubjectMarksDTO getSubjectsById(Long id, String role, String email);
     List<SubjectMarksDTO> getSubjectsByClassroomId(Long classroomId, String role, String email);
-
+    List<SubjectMarksDTO> getSubjectsByExamId(String role, String email,Long examId);
 }

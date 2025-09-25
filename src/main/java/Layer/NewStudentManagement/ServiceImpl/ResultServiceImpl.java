@@ -289,8 +289,8 @@ public class ResultServiceImpl implements ResultService
 
         // validate teacher teaches this subject
         StudentExamSubject examSubject = examSubjectRepository
-                .findByExamIdAndSubjectIdAndCreatedByEmail(examId, subjectId, email)
-                .orElseThrow(() -> new RuntimeException("You are not assigned to this subject"));
+                .findByExamIdAndSubjectId(examId, subjectId)
+                .orElseThrow(() -> new RuntimeException("Exam or subject not found"));
 
         // find or create StudentResult
         StudentResult result = resultRepository.findByStudentIdAndExamId(studentId, examId)

@@ -17,4 +17,7 @@ public interface SubjectMarksRepository extends JpaRepository<StudentSubjectMark
 
     @Query("SELECT s FROM StudentSubjectMarks s WHERE s.classRoom.id = :classRoomId")
     List<StudentSubjectMarks> findByClassRoomId(@Param("classRoomId") Long classRoomId);
+
+    @Query("SELECT s.subject FROM Layer.NewStudentManagement.Entity.StudentExamSubject s WHERE s.exam.id = :examId")
+    List<StudentSubjectMarks> findSubjectsByExamId(@Param("examId") Long examId);
 }
