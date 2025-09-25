@@ -169,14 +169,23 @@ public class ResultServiceImpl implements ResultService
             throw new RuntimeException("You don't have permission to update Result");
         }
 
-        String[] years = academicYear.split("-");
-        int startYear = Integer.parseInt(years[0]);
-        int endYear = Integer.parseInt(years[1]);
+        List<StudentResult> results;
 
-        LocalDate startDate = LocalDate.of(startYear, 6, 1);  // June 1, 2023 (start)
-        LocalDate endDate = LocalDate.of(endYear, 5, 31);    // May 31, 2024 (end)
+        if (academicYear == null || academicYear.isEmpty()) {
+            // fetch all results for the student
+            results = resultRepository.findAllByStudentId(studentId);
+        } else {
+            // parse academic year
+            String[] years = academicYear.split("-");
+            int startYear = Integer.parseInt(years[0]);
+            int endYear = Integer.parseInt(years[1]);
 
-        List<StudentResult> results = resultRepository.findResultsForAcademicYear(studentId, startDate, endDate);
+            LocalDate startDate = LocalDate.of(startYear, 6, 1);  // June 1
+            LocalDate endDate = LocalDate.of(endYear, 5, 31);     // May 31
+
+            results = resultRepository.findResultsForAcademicYear(studentId, startDate, endDate);
+        }
+
         return results.stream()
                 .map(this::mapToResultDto)
                 .collect(Collectors.toList());

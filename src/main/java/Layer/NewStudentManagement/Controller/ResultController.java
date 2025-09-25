@@ -66,7 +66,7 @@ public class ResultController
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam Long studentId,
-            @RequestParam String academicYear
+            @RequestParam(required = false) String academicYear
     ) {
         List<StudentResultDTO> results = resultService.getAcademicYearResults(role,email,studentId, academicYear);
         return ResponseEntity.ok(results);

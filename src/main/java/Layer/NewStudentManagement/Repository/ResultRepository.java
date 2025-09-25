@@ -46,6 +46,9 @@ public interface ResultRepository extends JpaRepository<StudentResult,Long>
             @Param("examId") Long examId
     );
 
+    @Query("SELECT r FROM Layer.NewStudentManagement.Entity.StudentResult r WHERE r.student.id = :studentId")
+    List<StudentResult> findAllByStudentId(@Param("studentId") Long studentId);
+
 
     @Query("SELECT r FROM StudentResult r " +
             "WHERE r.exam.id = :examId AND r.student.classRoom.id = :classRoomId")
