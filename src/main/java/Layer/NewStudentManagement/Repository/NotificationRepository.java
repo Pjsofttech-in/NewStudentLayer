@@ -12,7 +12,7 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<StudentNotification,Long>
 {
 
-    @Query("SELECT n FROM StudentNotification n WHERE n.branchCode = :branchCode")
+    @Query("SELECT n FROM StudentNotification n WHERE n.branchCode = :branchCode AND n.classRoomId IS NULL")
     List<StudentNotification> getNoticesByBranchCode(@Param("branchCode") String branchCode);
 
 
