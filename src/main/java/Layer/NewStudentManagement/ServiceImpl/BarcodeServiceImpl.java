@@ -33,13 +33,11 @@ public class BarcodeServiceImpl implements BarcodeService
 
     @Override
     public byte[] generateQRCodeForHRInquiry(String role, String email) throws IOException, WriterException {
-        if (!staffService.hasPermission(role, email, "Get"))
-        {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to generate QR code for inquiry");
-
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
         if (branchCode == null || branchCode.isEmpty()) {
             throw new RuntimeException("Branch code not found for email: " + email);
         }
@@ -53,16 +51,17 @@ public class BarcodeServiceImpl implements BarcodeService
                 .replace("\"", "")
                 .trim();
 
-
         String encodedInstituteEmail = URLEncoder.encode(instituteEmail, StandardCharsets.UTF_8);
 
+        // ✅ Encode all 3 values
         String encodedBranchCode = Base64.getUrlEncoder().encodeToString(branchCode.getBytes(StandardCharsets.UTF_8));
-
+        String encodedRole = Base64.getUrlEncoder().encodeToString(role.getBytes(StandardCharsets.UTF_8));
+        String encodedEmail = Base64.getUrlEncoder().encodeToString(email.getBytes(StandardCharsets.UTF_8));
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role.toUpperCase());
+        claims.put("role", encodedRole);
         claims.put("branchCode", encodedBranchCode);
-        claims.put("email", email);
+        claims.put("email", encodedEmail);
 
         String jwt = jwtUtil.generateTokenWithClaims("user@gmail.com", claims, Duration.ofDays(90));
 
@@ -74,6 +73,6 @@ public class BarcodeServiceImpl implements BarcodeService
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
         return outputStream.toByteArray();
-
     }
+
 }

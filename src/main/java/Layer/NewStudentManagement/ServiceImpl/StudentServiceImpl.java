@@ -1260,30 +1260,52 @@ public class StudentServiceImpl implements StudentService {
                                               StudentRegisterRequest request,
                                               MultipartFile oldRegisterPhoto,
                                               String token) {
-        String branchCode;
+        String decodedBranchCode;
+        String decodedRole;
+        String decodedEmail;
+
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
-            String encoded = claims.get("branchCode", String.class);
-            if (encoded == null || encoded.isEmpty()) {
+
+            String encodedBranchCode = claims.get("branchCode", String.class);
+            if (encodedBranchCode == null || encodedBranchCode.isEmpty()) {
                 throw new RuntimeException("Invalid token: branchCode not found");
             }
-            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+            decodedBranchCode = new String(Base64.getUrlDecoder().decode(encodedBranchCode), StandardCharsets.UTF_8);
 
-            String decodedBranchCode = new String(Base64.getUrlDecoder().decode(branchCode), StandardCharsets.UTF_8);
+            String encodedRole = claims.get("role", String.class);
+            decodedRole = encodedRole != null
+                    ? new String(Base64.getUrlDecoder().decode(encodedRole), StandardCharsets.UTF_8)
+                    : "USER";
 
-            // Extract role and email from token
-            String decodedRole = claims.get("role", String.class);
-            String decodedEmail = claims.get("email", String.class);
+            // Decode createdByEmail
+            String encodedEmail = claims.get("email", String.class);
+            decodedEmail = encodedEmail != null
+                    ? new String(Base64.getUrlDecoder().decode(encodedEmail), StandardCharsets.UTF_8)
+                    : email;
 
-            // Set values in form
             request.setBranchCode(decodedBranchCode);
-            request.setRole(decodedRole != null ? decodedRole : "USER");
+            request.setRole(decodedRole);
             request.setCreatedByEmail(decodedEmail);
+
         } else {
             checkPermission(role, email, "Post");
-            branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+            String branchCode = staffService.fetchBranchCodeByRole(role, email);
+            if (branchCode == null || branchCode.isEmpty()) {
+                throw new RuntimeException("BranchCode not found for email: " + email);
+            }
+
+            decodedBranchCode = branchCode;
+            decodedRole = role;
+            decodedEmail = email;
+
+            request.setBranchCode(decodedBranchCode);
+            request.setRole(decodedRole);
+            request.setCreatedByEmail(decodedEmail);
         }
 
+        // --- Duplicate email check ---
         if (studentRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Student with this email already exists.");
         }
@@ -1300,13 +1322,17 @@ public class StudentServiceImpl implements StudentService {
         student.setInstitutionType(request.getInstitutionType());
         student.setAcademicYear(request.getAcademicYear());
         student.setDiscount(request.getDiscount());
-        student.setRole(role);
-        student.setBranchCode(branchCode);
-        student.setCreatedByEmail(email);
+
+        // Store decoded values (same as branchCode)
+        student.setRole(decodedRole);
+        student.setBranchCode(decodedBranchCode);
+        student.setCreatedByEmail(decodedEmail);
+
         student.setEnrollmentDate(LocalDate.now());
         student.setRegistrationNumber(generateRegistrationNumber());
         student.setFormStatus(request.getFormStatus());
 
+        // GraduationType, Stream, Standard, Medium, Degree, Department setup (unchanged)
         if (request.getGraduationTypeId() != null) {
             StudentGraduationType gradType = graduationTypeRepository.findById(request.getGraduationTypeId())
                     .orElseThrow(() -> new RuntimeException("GraduationType not found with ID: " + request.getGraduationTypeId()));
@@ -1322,10 +1348,11 @@ public class StudentServiceImpl implements StudentService {
 
         // ---- Upload Photo ----
         if (oldRegisterPhoto != null && !oldRegisterPhoto.isEmpty()) {
-            String fileUrl = s3Service.uploadFile(oldRegisterPhoto, branchCode);
+            String fileUrl = s3Service.uploadFile(oldRegisterPhoto, decodedBranchCode);
             student.setOldRegisterPhoto(fileUrl);
         }
 
+        // ---- Handle School / College logic ----
         if ("School".equalsIgnoreCase(student.getInstitutionType())) {
             if (request.getStandardId() != null) {
                 StudentStandard standard = standardRepository.findById(request.getStandardId())
@@ -1341,6 +1368,7 @@ public class StudentServiceImpl implements StudentService {
             }
             student.setDegreeName(null);
             student.setDepartment(null);
+
         } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
                 request.getGraduationTypeId() != null &&
                 "Jr.College".equalsIgnoreCase(
@@ -1363,6 +1391,7 @@ public class StudentServiceImpl implements StudentService {
             student.setGroupName(request.getGroupName());
             student.setDegreeName(null);
             student.setDepartment(null);
+
         } else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
             if (request.getDegreeNameId() != null) {
                 StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
@@ -1388,7 +1417,6 @@ public class StudentServiceImpl implements StudentService {
         StudentEntity savedStudent = studentRepository.save(student);
         return mapToDTO(savedStudent);
     }
-
 
 
 }
