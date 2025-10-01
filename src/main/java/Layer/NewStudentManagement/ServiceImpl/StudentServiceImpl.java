@@ -1268,6 +1268,17 @@ public class StudentServiceImpl implements StudentService {
                 throw new RuntimeException("Invalid token: branchCode not found");
             }
             branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+
+            String decodedBranchCode = new String(Base64.getUrlDecoder().decode(branchCode), StandardCharsets.UTF_8);
+
+            // Extract role and email from token
+            String decodedRole = claims.get("role", String.class);
+            String decodedEmail = claims.get("email", String.class);
+
+            // Set values in form
+            request.setBranchCode(decodedBranchCode);
+            request.setRole(decodedRole != null ? decodedRole : "USER");
+            request.setCreatedByEmail(decodedEmail);
         } else {
             checkPermission(role, email, "Post");
             branchCode = staffService.fetchBranchCodeByRole(role, email);

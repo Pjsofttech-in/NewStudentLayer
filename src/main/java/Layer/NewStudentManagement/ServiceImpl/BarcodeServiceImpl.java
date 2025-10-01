@@ -62,6 +62,7 @@ public class BarcodeServiceImpl implements BarcodeService
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role.toUpperCase());
         claims.put("branchCode", encodedBranchCode);
+        claims.put("email", email);
 
         String jwt = jwtUtil.generateTokenWithClaims("user@gmail.com", claims, Duration.ofDays(90));
 

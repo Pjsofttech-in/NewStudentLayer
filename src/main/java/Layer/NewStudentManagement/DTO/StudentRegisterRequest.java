@@ -38,4 +38,8 @@ public class StudentRegisterRequest
     private Long degreeNameId;
     private Long departmentId;
     private String oldRegisterPhoto;
+
+    private String createdByEmail;
+    private String role;
+    private String branchCode;
 }
