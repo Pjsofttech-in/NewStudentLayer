@@ -1,12 +1,15 @@
 package Layer.NewStudentManagement.Entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -23,6 +26,14 @@ public class StudentTeacher
     @Column(unique = true)
     private String teacherEmail;
     private String password;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dob;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate joiningDate;
     private String institutionType;
     private String streamName;
     private String otp;
@@ -30,6 +41,10 @@ public class StudentTeacher
     private String graduationTypeName;
     private String degreeName;
     private String departmentName;
+    private String profilePhoto;
+    private String education;
+    private String experience;
+    private String reserch;
     @Email
     private String createdByEmail;
     private String role;

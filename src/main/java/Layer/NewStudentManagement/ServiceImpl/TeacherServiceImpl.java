@@ -9,10 +9,12 @@ import Layer.NewStudentManagement.Security.EmailService;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
+import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +29,9 @@ public class TeacherServiceImpl implements TeacherService
 
     @Autowired
     private SubjectRepository subjectRepository;
+
+    @Autowired
+    S3Service s3Service;
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -50,7 +55,7 @@ public class TeacherServiceImpl implements TeacherService
     JwtUtil jwtUtil;
 
     @Override
-    public StudentTeacherDTO createTeacher(String role, String email, TeacherRequestDTO dto) {
+    public StudentTeacherDTO createTeacher(String role, String email,MultipartFile profilePhoto, TeacherRequestDTO dto) {
         if (!staffService.hasPermission(role, email, "Post")) {
             throw new RuntimeException("You don't have permission to create teacher");
         }
@@ -137,7 +142,12 @@ public class TeacherServiceImpl implements TeacherService
         StudentTeacher teacher = new StudentTeacher();
         teacher.setTeacherName(dto.getTeacherName());
         teacher.setTeacherEmail(dto.getTeacherEmail());
+        teacher.setExperience(dto.getExperience());
+        teacher.setEducation(dto.getEducation());
+        teacher.setReserch(dto.getReserch());
         teacher.setInstitutionType(institutionType);
+        teacher.setDob(dto.getDob());
+        teacher.setJoiningDate(dto.getJoiningDate());
         teacher.setBranchCode(branchCode);
         teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
         teacher.setRole(role);
@@ -165,6 +175,12 @@ public class TeacherServiceImpl implements TeacherService
             teacher.setDepartmentName(department.getDepartmentName());
         }
 
+
+        if (profilePhoto != null && !profilePhoto.isEmpty()) {
+            String uploadedUrl = s3Service.uploadFile(profilePhoto, branchCode);
+            teacher.setProfilePhoto(uploadedUrl);
+        }
+
         // Save and return
         StudentTeacher savedTeacher = teacherRepository.save(teacher);
         return mapToResponseDTO(savedTeacher);
@@ -184,27 +200,54 @@ public class TeacherServiceImpl implements TeacherService
     }
 
     @Override
-    public StudentTeacherDTO updateTeacher(Long id,String role,String email,TeacherRequestDTO teacher)
-    {
-        if(!staffService.hasPermission(role,email,"Put"))
-        {
+    public StudentTeacherDTO updateTeacher(Long id, String role, String email, MultipartFile profilePhoto, TeacherRequestDTO teacher) {
+
+        if (!staffService.hasPermission(role, email, "Put")) {
             throw new RuntimeException("You don't have permission to update teacher");
         }
-        StudentTeacher existingTeacher = teacherRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Teacher not found"));
 
-        if (teacher.getTeacherName() != null) {
-            existingTeacher.setTeacherName(teacher.getTeacherName());
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        StudentTeacher existingTeacher = teacherRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+
+        if (profilePhoto != null && !profilePhoto.isEmpty()) {
+            String uploadedUrl = s3Service.uploadFile(profilePhoto, branchCode);
+            existingTeacher.setProfilePhoto(uploadedUrl);
         }
-        if (teacher.getTeacherEmail() != null) {
-            existingTeacher.setTeacherEmail(teacher.getTeacherEmail());
+
+        if (teacher.getTeacherName() != null) existingTeacher.setTeacherName(teacher.getTeacherName());
+        if (teacher.getTeacherEmail() != null) existingTeacher.setTeacherEmail(teacher.getTeacherEmail());
+        if (teacher.getPassword() != null) existingTeacher.setPassword(teacher.getPassword());
+        if (teacher.getInstitutionType() != null) existingTeacher.setInstitutionType(teacher.getInstitutionType());
+        if (teacher.getEducation() != null) existingTeacher.setEducation(teacher.getEducation());
+        if (teacher.getExperience() != null) existingTeacher.setExperience(teacher.getExperience());
+        if (teacher.getReserch() != null) existingTeacher.setReserch(teacher.getReserch());
+        if (teacher.getDob() != null) existingTeacher.setDob(teacher.getDob());
+        if (teacher.getJoiningDate() != null) existingTeacher.setJoiningDate(teacher.getJoiningDate());
+
+        // 5️⃣ Update relationships if IDs provided
+        if (teacher.getGraduationTypeId() != null) {
+            StudentGraduationType gradType = graduationTypeRepository.findById(teacher.getGraduationTypeId()).orElse(null);
+            existingTeacher.setGraduationType(gradType);
         }
-        if (teacher.getPassword() != null) {
-            existingTeacher.setPassword(teacher.getPassword());
+
+        if (teacher.getStreamId() != null) {
+            StudentStream stream = streamRepository.findById(teacher.getStreamId()).orElse(null);
+            existingTeacher.setStream(stream);
         }
+
+        if (teacher.getDegreeId() != null) {
+            StudentDegreeName degree = degreeRepository.findById(teacher.getDegreeId()).orElse(null);
+            existingTeacher.setDegree(degree);
+        }
+
+        if (teacher.getDepartmentId() != null) {
+            StudentDepartment dept = departmentRepository.findById(teacher.getDepartmentId()).orElse(null);
+            existingTeacher.setDepartment(dept);
+        }
+
         if (teacher.getSubjectIds() != null && !teacher.getSubjectIds().isEmpty()) {
             List<StudentSubject> subjectEntities = subjectRepository.findAllById(teacher.getSubjectIds());
-
             for (StudentSubject subject : subjectEntities) {
                 if (!subject.getBranchCode().equals(existingTeacher.getBranchCode())) {
                     throw new RuntimeException("Subject " + subject.getSubject() + " doesn't belong to your branch.");
@@ -212,9 +255,11 @@ public class TeacherServiceImpl implements TeacherService
             }
             existingTeacher.setSubjects(subjectEntities);
         }
-        StudentTeacher teacher1 = teacherRepository.save(existingTeacher);
-        return mapToResponseDTO(teacher1);
+
+        StudentTeacher updatedTeacher = teacherRepository.save(existingTeacher);
+        return mapToResponseDTO(updatedTeacher);
     }
+
 
     @Override
     public void deleteTeacherById(Long id,String role,String email)
@@ -376,7 +421,13 @@ public class TeacherServiceImpl implements TeacherService
         responseDTO.setTeacherName(teacher.getTeacherName());
         responseDTO.setTeacherEmail(teacher.getTeacherEmail());
         responseDTO.setInstitutionType(teacher.getInstitutionType());
+        responseDTO.setProfilePhoto(teacher.getProfilePhoto());
+        responseDTO.setEducation(teacher.getEducation());
+        responseDTO.setReserch(teacher.getReserch());
+        responseDTO.setExperience(teacher.getExperience());
         responseDTO.setBranchCode(teacher.getBranchCode());
+        responseDTO.setDob(teacher.getDob());
+        responseDTO.setJoiningDate(teacher.getJoiningDate());
         responseDTO.setRole(teacher.getRole());
         responseDTO.setCreatedByEmail(teacher.getCreatedByEmail());
         responseDTO.setSubjects(subjectDTOs);

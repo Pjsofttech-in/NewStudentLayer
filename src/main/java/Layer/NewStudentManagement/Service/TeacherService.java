@@ -5,14 +5,15 @@ import Layer.NewStudentManagement.DTO.TeacherRequestDTO;
 import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface TeacherService
 {
-    StudentTeacherDTO createTeacher(String role, String email, TeacherRequestDTO dto);
+    StudentTeacherDTO createTeacher(String role, String email, MultipartFile profilePhoto, TeacherRequestDTO dto);
     StudentTeacherDTO getTeacherById(Long id,String role,String email);
-    StudentTeacherDTO updateTeacher(Long id,String role,String email,TeacherRequestDTO teacher);
+    StudentTeacherDTO updateTeacher(Long id,String role,String email,MultipartFile profilePhoto,TeacherRequestDTO teacher);
     void deleteTeacherById(Long id,String role,String email);
     List<StudentTeacherDTO> getAllTeacher(String role, String email);
     LoginResponse login(LoginRequest request);

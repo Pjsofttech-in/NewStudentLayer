@@ -6,15 +6,21 @@ import Layer.NewStudentManagement.Repository.TeacherRepository;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.TeacherService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,14 +32,23 @@ public class TeacherController
     @Autowired
     private TeacherService teacherService;
 
-    @PostMapping("/createTeacher")
+    @PostMapping(value = "/createTeacher", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StudentTeacherDTO> createTeacher(
-            @RequestParam String role,
+            @RequestPart("dto") String dtoJson,
+            @RequestPart(value = "image", required = false) MultipartFile image,
             @RequestParam String email,
-            @RequestBody TeacherRequestDTO dto) {
+            @RequestParam String role
+    ) throws JsonProcessingException {
 
-        StudentTeacherDTO createdTeacher = teacherService.createTeacher(role, email, dto);
-        return new ResponseEntity<>(createdTeacher, HttpStatus.CREATED);
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule()); // support LocalDate
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        TeacherRequestDTO dto = objectMapper.readValue(dtoJson, TeacherRequestDTO.class);
+
+        StudentTeacherDTO savedTeacher = teacherService.createTeacher(role,email,image,dto);
+
+        return ResponseEntity.ok(savedTeacher);
     }
 
 
@@ -44,10 +59,23 @@ public class TeacherController
         return ResponseEntity.ok(teacher);
     }
 
-    @PutMapping("/updateTeacher/{id}")
-    public ResponseEntity<StudentTeacherDTO> updateTeacher(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody TeacherRequestDTO teacher)
-    {
-        StudentTeacherDTO updatedTeacher = teacherService.updateTeacher(id,role,email,teacher);
+    @PutMapping(value = "/updateTeacher/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<StudentTeacherDTO> updateTeacher(
+            @PathVariable("id") Long id,
+            @RequestParam("role") String role,
+            @RequestParam("email") String email,
+            @RequestPart(value = "profilePhoto", required = false) MultipartFile profilePhoto,
+            @RequestPart("dto") String dtoJson
+    ) throws JsonProcessingException {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        TeacherRequestDTO teacherDTO = objectMapper.readValue(dtoJson, TeacherRequestDTO.class);
+
+        StudentTeacherDTO updatedTeacher = teacherService.updateTeacher(id, role, email, profilePhoto, teacherDTO);
+
         return ResponseEntity.ok(updatedTeacher);
     }
 

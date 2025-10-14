@@ -1,9 +1,11 @@
 package Layer.NewStudentManagement.DTO;
 
 import Layer.NewStudentManagement.Entity.StudentTeacher;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -17,7 +19,13 @@ public class TeacherRequestDTO
     private Long streamId;
     private Long degreeId;
     private Long departmentId;
-
+    private String education;
+    private String experience;
+    private String reserch;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dob;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate joiningDate;
     private String password;
     private List<Long> subjectIds;
 
