@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -32,4 +34,8 @@ public class StudentScheduledPeriod
     @ManyToOne(optional = false)
     @JoinColumn(name = "subject_id")
     private StudentSubject subject;
+
+    private LocalDate periodDate; // date of that scheduled period
+
+    private String status; // e.g. "Scheduled", "Off", "Completed"
 }

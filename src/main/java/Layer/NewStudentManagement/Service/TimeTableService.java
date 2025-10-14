@@ -4,6 +4,7 @@ import Layer.NewStudentManagement.DTO.TimeTableRequestDTO;
 import Layer.NewStudentManagement.DTO.TimeTableResponceDTO;
 import Layer.NewStudentManagement.Entity.StudentTimetable;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface TimeTableService
@@ -14,4 +15,6 @@ public interface TimeTableService
 //    TimeTableResponceDTO updateTimeTable(String role, String email, Long id, StudentTimetable timetable);
     void deleteTimeTable(String role, String email, Long id);
     List<TimeTableResponceDTO> getTimeTableByClassId(String role, String email, Long classId);
+    String markPeriodOff(String role, String email, Long timetableId,
+                          Long subjectId, Long teacherId, Long slotId);
 }

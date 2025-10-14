@@ -5,8 +5,11 @@ import Layer.NewStudentManagement.DTO.TimeTableResponceDTO;
 import Layer.NewStudentManagement.Entity.StudentTimetable;
 import Layer.NewStudentManagement.Service.TimeTableService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:3000")
@@ -65,4 +68,20 @@ public class TimeTableController
             @RequestParam Long classId) {
         return timeTableService.getTimeTableByClassId(role, email, classId);
     }
+
+
+
+    @PostMapping("/markPeriodOff")
+    public ResponseEntity<String> markPeriodOff(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam Long timetableId,
+            @RequestParam Long subjectId,
+            @RequestParam Long teacherId,
+            @RequestParam Long slotId
+    ) {
+        String message = timeTableService.markPeriodOff(role, email, timetableId, subjectId, teacherId, slotId);
+        return ResponseEntity.ok(message);
+    }
+
 }

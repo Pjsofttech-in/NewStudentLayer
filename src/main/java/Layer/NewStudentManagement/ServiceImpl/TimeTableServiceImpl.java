@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -29,6 +30,9 @@ public class TimeTableServiceImpl implements TimeTableService
 
     @Autowired
     TeacherRepository teacherRepository;
+
+    @Autowired
+    ScheduledPeriodRepository scheduledPeriodRepository;
 
     @Autowired
     SubjectRepository subjectRepository;
@@ -122,6 +126,52 @@ public class TimeTableServiceImpl implements TimeTableService
     }
 
 
+    @Override
+    public String markPeriodOff(String role, String email, Long timetableId,
+                                Long subjectId, Long teacherId, Long slotId) {
+
+        // Permission check
+        if (!staffService.hasPermission(role, email, "Post")) {
+            throw new RuntimeException("You don't have permission to modify timetable");
+        }
+
+        LocalDate date =LocalDate.now();
+
+        // 1️⃣ Check if this date already has an override
+        var existing = scheduledPeriodRepository
+                .findByDateEntry(timetableId, subjectId, teacherId, slotId, date);
+
+        if (existing.isPresent()) {
+            StudentScheduledPeriod period = existing.get();
+            if ("Off".equalsIgnoreCase(period.getStatus())) {
+                return "Period already marked as Off for " + date;
+            } else {
+                period.setStatus("Off");
+                scheduledPeriodRepository.save(period);
+                return "Period updated as Off for " + date;
+            }
+        }
+
+        // 2️⃣ Get the base (weekly) period to clone from
+        StudentScheduledPeriod base = scheduledPeriodRepository
+                .findBasePeriod(timetableId, subjectId, teacherId, slotId)
+                .orElseThrow(() ->
+                        new RuntimeException("Base timetable period not found for the given parameters"));
+
+        // 3️⃣ Create a new date-specific record
+        StudentScheduledPeriod offPeriod = new StudentScheduledPeriod();
+        offPeriod.setTimetable(base.getTimetable());
+        offPeriod.setPeriodSlot(base.getPeriodSlot());
+        offPeriod.setTeacher(base.getTeacher());
+        offPeriod.setSubject(base.getSubject());
+        offPeriod.setPeriodDate(date);
+        offPeriod.setStatus("Off");
+
+        scheduledPeriodRepository.save(offPeriod);
+
+        return "New period marked as Off for " + date;
+    }
+
     private TimeTableResponceDTO convertToDTO(StudentTimetable timetable) {
         if (timetable == null) {
             return null;
@@ -141,8 +191,8 @@ public class TimeTableServiceImpl implements TimeTableService
                 timetable.getScheduledPeriods().stream().map(sp -> {
                     ScheduledPeriodResponseDTO spDto = new ScheduledPeriodResponseDTO();
                     spDto.setId(sp.getId());
-
-
+                    spDto.setStatus(sp.getStatus());
+                    spDto.setPeriodDate(sp.getPeriodDate());
 
                     if (sp.getPeriodSlot() != null) {
                         spDto.setPeriodSlotId(sp.getPeriodSlot().getId());

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @AllArgsConstructor
 @Setter
@@ -20,6 +22,9 @@ public class ScheduledPeriodResponseDTO
 
     private Long teacherId;
     private String teacherName;
+
+    private LocalDate periodDate;  // add this
+    private String status;
 
     private Long subjectId;
     private String subjectName;
