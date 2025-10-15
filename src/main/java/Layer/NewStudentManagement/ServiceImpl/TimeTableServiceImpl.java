@@ -125,13 +125,12 @@ public class TimeTableServiceImpl implements TimeTableService
             throw new RuntimeException("You don't have permission to View Timetable by Class");
         }
 
-        LocalDate today = LocalDate.now(); // system date
+        LocalDate today = LocalDate.now();
 
-        // 1️⃣ Get all timetables for the class
         List<StudentTimetable> timetables = timeTableRepository.findByClassId(classId);
 
         for (StudentTimetable timetable : timetables) {
-            // Separate base periods and overrides
+
             List<StudentScheduledPeriod> basePeriods = timetable.getScheduledPeriods().stream()
                     .filter(p -> p.getPeriodDate() == null)
                     .toList();
@@ -143,14 +142,14 @@ public class TimeTableServiceImpl implements TimeTableService
                             Function.identity()
                     ));
 
-            // Merge: use override if exists, otherwise base
             List<StudentScheduledPeriod> mergedPeriods = new ArrayList<>();
             for (StudentScheduledPeriod base : basePeriods) {
                 String key = base.getPeriodSlot().getId() + "-" + base.getSubject().getId() + "-" + base.getTeacher().getId();
-                mergedPeriods.add(overrideMap.getOrDefault(key, base));
+
+                StudentScheduledPeriod periodToShow = overrideMap.getOrDefault(key, base);
+                mergedPeriods.add(periodToShow);
             }
 
-            // Replace scheduledPeriods with merged
             timetable.setScheduledPeriods(mergedPeriods);
         }
 
@@ -158,6 +157,7 @@ public class TimeTableServiceImpl implements TimeTableService
                 .map(this::convertToDTO)
                 .toList();
     }
+
 
 
     @Override
