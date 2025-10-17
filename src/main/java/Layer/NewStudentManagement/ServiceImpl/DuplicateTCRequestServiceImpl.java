@@ -44,6 +44,7 @@ public class DuplicateTCRequestServiceImpl implements DuplicteTCRequestService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         request.setStudentId(studentId);
+        request.setStudentName(request.getStudentName());
         request.setTcNumber(tcData.get(0).getTcNumber());
         request.setRequestDate(LocalDate.now());
         request.setStatus("PENDING");
@@ -65,6 +66,7 @@ public class DuplicateTCRequestServiceImpl implements DuplicteTCRequestService
                 .orElseThrow(() -> new RuntimeException("Duplicate TC Request not found"));
 
         request.setStatus("Approved");
+        request.setApprovedDate(LocalDate.now());
 
         StudentEntity student = studentRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));

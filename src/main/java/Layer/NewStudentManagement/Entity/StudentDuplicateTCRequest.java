@@ -23,6 +23,7 @@ public class StudentDuplicateTCRequest
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long studentId;
+    private String studentName;
     private String tcNumber;
     private LocalDate requestDate;
     private String status;
