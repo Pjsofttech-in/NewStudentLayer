@@ -42,7 +42,14 @@ public class TCDataServiceImpl implements TCDataService
         }
 
 
-        Optional<StudentTcData> existingTcOpt = tcDataRepository.findFirstByStudentIdOrderByTcDateAsc(studentId);
+        Optional<StudentTcData> existingTcOpt;// = tcDataRepository.findFirstByStudentIdOrderByTcDateAsc(studentId);
+
+        try {
+            existingTcOpt = tcDataRepository.findFirstByStudentIdOrderByTcDateAsc(studentId);
+        } catch (org.springframework.dao.IncorrectResultSizeDataAccessException ex) {
+            // When multiple records found
+            throw new RuntimeException("Duplicate TC generated twice already.");
+        }
 
         String tcNumber;
         boolean duplicate;
