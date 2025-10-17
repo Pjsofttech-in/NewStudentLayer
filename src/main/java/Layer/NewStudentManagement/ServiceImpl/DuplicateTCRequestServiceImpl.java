@@ -44,7 +44,7 @@ public class DuplicateTCRequestServiceImpl implements DuplicteTCRequestService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         request.setStudentId(studentId);
-        request.setStudentName(request.getStudentName());
+        request.setFullName(request.getFullName());
         request.setTcNumber(tcData.get(0).getTcNumber());
         request.setRequestDate(LocalDate.now());
         request.setStatus("PENDING");
