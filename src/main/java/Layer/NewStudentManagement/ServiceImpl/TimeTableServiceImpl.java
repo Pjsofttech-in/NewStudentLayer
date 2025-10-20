@@ -13,7 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class TimeTableServiceImpl implements TimeTableService
@@ -119,8 +124,37 @@ public class TimeTableServiceImpl implements TimeTableService
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to View Timetable by Class");
         }
-        return timeTableRepository.findByClassId(classId)
-                .stream()
+
+        LocalDate today = LocalDate.now(); // system date
+
+        // 1️⃣ Get all timetables for the class
+        List<StudentTimetable> timetables = timeTableRepository.findByClassId(classId);
+
+        for (StudentTimetable timetable : timetables) {
+            // Separate base periods and overrides
+            List<StudentScheduledPeriod> basePeriods = timetable.getScheduledPeriods().stream()
+                    .filter(p -> p.getPeriodDate() == null)
+                    .toList();
+
+            Map<String, StudentScheduledPeriod> overrideMap = timetable.getScheduledPeriods().stream()
+                    .filter(p -> today.equals(p.getPeriodDate()))
+                    .collect(Collectors.toMap(
+                            p -> p.getPeriodSlot().getId() + "-" + p.getSubject().getId() + "-" + p.getTeacher().getId(),
+                            Function.identity()
+                    ));
+
+            // Merge: use override if exists, otherwise base
+            List<StudentScheduledPeriod> mergedPeriods = new ArrayList<>();
+            for (StudentScheduledPeriod base : basePeriods) {
+                String key = base.getPeriodSlot().getId() + "-" + base.getSubject().getId() + "-" + base.getTeacher().getId();
+                mergedPeriods.add(overrideMap.getOrDefault(key, base));
+            }
+
+            // Replace scheduledPeriods with merged
+            timetable.setScheduledPeriods(mergedPeriods);
+        }
+
+        return timetables.stream()
                 .map(this::convertToDTO)
                 .toList();
     }
