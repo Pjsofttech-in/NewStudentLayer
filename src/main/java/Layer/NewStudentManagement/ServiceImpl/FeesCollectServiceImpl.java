@@ -338,6 +338,28 @@ public class FeesCollectServiceImpl implements FeesCollectService
     }
 
 
+    @Override
+   public List<Map<String, Object>> getTotalFeesByPaymentMode(String role,String email)
+   {
+       if(!staffService.hasPermission(role,email,"Get"))
+       {
+           throw new RuntimeException("You don't have permission to Get Collected Fees");
+       }
+
+       String branchCode = staffService.fetchBranchCodeByRole(role, email);
+       List<Object[]> results = feesCollectRepository.getTotalFeesByPaymentMode(branchCode);
+       List<Map<String, Object>> response = new ArrayList<>();
+
+       for (Object[] row : results) {
+           Map<String, Object> map = new HashMap<>();
+           map.put("paymentMode", row[0]);
+           map.put("totalAmount", row[1]);
+           response.add(map);
+       }
+
+       return response;
+   }
+
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {
         FeesCollectDTO dto = new FeesCollectDTO();
@@ -385,6 +407,8 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
         return dto;
     }
+
+
 
 
 }

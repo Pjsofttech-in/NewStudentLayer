@@ -21,5 +21,5 @@ public interface FeesCollectService
 
     List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email, String institutionType);
     Map<String, Double> getFeesRevenueByBank(String role,String email);
-
+    List<Map<String, Object>> getTotalFeesByPaymentMode(String role,String email);
 }

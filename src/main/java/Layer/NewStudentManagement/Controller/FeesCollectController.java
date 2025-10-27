@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 //@CrossOrigin(origins = "http://localhost:3000")
@@ -58,6 +59,11 @@ public class FeesCollectController
         FeesCollectDTO feesCollect =feesCollectService.getCollectedFeesById(role, email, id);
         return ResponseEntity.ok(feesCollect);
 
+    }
+
+    @GetMapping("/totalFeesByPaymentMode")
+    public List<Map<String, Object>> getTotalFeesByPaymentMode(@RequestParam String role, @RequestParam String email) {
+        return feesCollectService.getTotalFeesByPaymentMode(role,email);
     }
 
 
