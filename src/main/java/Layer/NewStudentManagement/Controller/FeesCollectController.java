@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -62,10 +63,14 @@ public class FeesCollectController
     }
 
     @GetMapping("/totalFeesByPaymentMode")
-    public List<Map<String, Object>> getTotalFeesByPaymentMode(@RequestParam String role, @RequestParam String email) {
-        return feesCollectService.getTotalFeesByPaymentMode(role,email);
+    public List<Map<String, Object>> getTotalFeesByPaymentMode(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false, defaultValue = "all") String timeFrame,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate) {
+
+        return feesCollectService.getTotalFeesByPaymentMode(role, email, timeFrame, startDate, endDate);
     }
-
-
 
 }

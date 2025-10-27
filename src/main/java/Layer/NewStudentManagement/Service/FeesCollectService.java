@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.DTO.FeesCollectDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -21,5 +22,6 @@ public interface FeesCollectService
 
     List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email, String institutionType);
     Map<String, Double> getFeesRevenueByBank(String role,String email);
-    List<Map<String, Object>> getTotalFeesByPaymentMode(String role,String email);
+    List<Map<String, Object>> getTotalFeesByPaymentMode(String role,String email, String timeFrame,
+                                                        LocalDate startDate, LocalDate endDate);
 }

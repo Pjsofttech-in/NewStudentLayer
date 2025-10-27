@@ -339,15 +339,48 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
 
     @Override
-   public List<Map<String, Object>> getTotalFeesByPaymentMode(String role,String email)
+   public List<Map<String, Object>> getTotalFeesByPaymentMode(String role, String email, String timeFrame,
+                                                              LocalDate customStartDate, LocalDate customEndDate)
    {
+
        if(!staffService.hasPermission(role,email,"Get"))
        {
            throw new RuntimeException("You don't have permission to Get Collected Fees");
        }
-
        String branchCode = staffService.fetchBranchCodeByRole(role, email);
-       List<Object[]> results = feesCollectRepository.getTotalFeesByPaymentMode(branchCode);
+
+       LocalDate today = LocalDate.now();
+       LocalDate startDate = null;
+       LocalDate endDate = null;
+       // ✅ Determine time frame
+       switch (timeFrame != null ? timeFrame.toLowerCase() : "all") {
+           case "today" -> {
+               startDate = today;
+               endDate = today;
+           }
+           case "7days" -> {
+               startDate = today.minusDays(6);
+               endDate = today;
+           }
+           case "30days" -> {
+               startDate = today.minusDays(29);
+               endDate = today;
+           }
+           case "365days" -> {
+               startDate = today.minusDays(364);
+               endDate = today;
+           }
+           case "custom" -> {
+               startDate = customStartDate;
+               endDate = customEndDate;
+           }
+           default -> { // "all" or invalid
+               startDate = null;
+               endDate = null;
+           }
+       }
+
+       List<Object[]> results = feesCollectRepository.getTotalFeesByPaymentModeAndDateRange(branchCode, startDate, endDate);
        List<Map<String, Object>> response = new ArrayList<>();
 
        for (Object[] row : results) {
