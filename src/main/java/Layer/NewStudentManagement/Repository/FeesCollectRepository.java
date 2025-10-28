@@ -89,15 +89,4 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
     List<StudentFeesCollect> findByScheduleAndBranchCode(@Param("schedule") StudentFeeSchedule schedule,
                                                          @Param("branchCode") String branchCode);
 
-
-    @Query("SELECT s.paymentMode AS paymentMode, SUM(s.amount) AS totalAmount " +
-            "FROM StudentFeesCollect s " +
-            "WHERE s.branchCode = :branchCode " +
-            "AND s.status = 'Completed' " +
-            "AND (:startDate IS NULL OR s.paymentDate >= :startDate) " +
-            "AND (:endDate IS NULL OR s.paymentDate <= :endDate) " +
-            "GROUP BY s.paymentMode")
-    List<Object[]> getTotalFeesByPaymentModeAndDateRange(@Param("branchCode") String branchCode,
-                                                         @Param("startDate") LocalDate startDate,
-                                                         @Param("endDate") LocalDate endDate);
 }

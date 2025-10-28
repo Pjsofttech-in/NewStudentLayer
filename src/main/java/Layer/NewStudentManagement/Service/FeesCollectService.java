@@ -1,9 +1,8 @@
 package Layer.NewStudentManagement.Service;
 
-import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
-import Layer.NewStudentManagement.DTO.FeesCollectDTO;
-import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +21,6 @@ public interface FeesCollectService
 
     List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email, String institutionType);
     Map<String, Double> getFeesRevenueByBank(String role,String email);
-    List<Map<String, Object>> getTotalFeesByPaymentMode(String role,String email, String timeFrame,
-                                                        LocalDate startDate, LocalDate endDate);
+    Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(String role, String email,
+                                                            FeesFilterDTO filterDTO, int page, int size);
 }

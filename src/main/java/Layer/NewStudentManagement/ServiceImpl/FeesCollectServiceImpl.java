@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
-import Layer.NewStudentManagement.DTO.FeesCollectDTO;
-import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
-import Layer.NewStudentManagement.DTO.StudentFeeScheduleDTO;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
@@ -11,7 +8,12 @@ import Layer.NewStudentManagement.Repository.FeesCollectRepository;
 import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Service.FeesCollectService;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.text.DateFormatSymbols;
@@ -337,61 +339,93 @@ public class FeesCollectServiceImpl implements FeesCollectService
         return revenueMap;
     }
 
-
     @Override
-   public List<Map<String, Object>> getTotalFeesByPaymentMode(String role, String email, String timeFrame,
-                                                              LocalDate customStartDate, LocalDate customEndDate)
-   {
+    public Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(String role, String email,
+                                                                   FeesFilterDTO filterDTO, int page, int size)
+    {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Collected Fees History");
+        }
 
-       if(!staffService.hasPermission(role,email,"Get"))
-       {
-           throw new RuntimeException("You don't have permission to Get Collected Fees");
-       }
-       String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        Pageable pageable = PageRequest.of(page, size);
 
-       LocalDate today = LocalDate.now();
-       LocalDate startDate = null;
-       LocalDate endDate = null;
-       // ✅ Determine time frame
-       switch (timeFrame != null ? timeFrame.toLowerCase() : "all") {
-           case "today" -> {
-               startDate = today;
-               endDate = today;
-           }
-           case "7days" -> {
-               startDate = today.minusDays(6);
-               endDate = today;
-           }
-           case "30days" -> {
-               startDate = today.minusDays(29);
-               endDate = today;
-           }
-           case "365days" -> {
-               startDate = today.minusDays(364);
-               endDate = today;
-           }
-           case "custom" -> {
-               startDate = customStartDate;
-               endDate = customEndDate;
-           }
-           default -> { // "all" or invalid
-               startDate = null;
-               endDate = null;
-           }
-       }
+        // ✅ Fetch paginated student fees by branch
+        Page<StudentFees> studentFeesPage = feesRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
 
-       List<Object[]> results = feesCollectRepository.getTotalFeesByPaymentModeAndDateRange(branchCode, startDate, endDate);
-       List<Map<String, Object>> response = new ArrayList<>();
+            predicates.add(cb.equal(root.get("branchCode"), branchCode));
 
-       for (Object[] row : results) {
-           Map<String, Object> map = new HashMap<>();
-           map.put("paymentMode", row[0]);
-           map.put("totalAmount", row[1]);
-           response.add(map);
-       }
+            if (filterDTO != null) {
+                if (filterDTO.getStandardName() != null && !filterDTO.getStandardName().isEmpty())
+                    predicates.add(cb.equal(root.get("standardName"), filterDTO.getStandardName()));
 
-       return response;
-   }
+                if (filterDTO.getMediumName() != null && !filterDTO.getMediumName().isEmpty())
+                    predicates.add(cb.equal(root.get("mediumName"), filterDTO.getMediumName()));
+
+                if (filterDTO.getStreamName() != null && !filterDTO.getStreamName().isEmpty())
+                    predicates.add(cb.equal(root.get("streamName"), filterDTO.getStreamName()));
+
+                if (filterDTO.getGroupName() != null && !filterDTO.getGroupName().isEmpty())
+                    predicates.add(cb.equal(root.get("groupName"), filterDTO.getGroupName()));
+
+                if (filterDTO.getDegreeName() != null && !filterDTO.getDegreeName().isEmpty())
+                    predicates.add(cb.equal(root.get("degreeName"), filterDTO.getDegreeName()));
+
+                if (filterDTO.getDepartmentName() != null && !filterDTO.getDepartmentName().isEmpty())
+                    predicates.add(cb.equal(root.get("departmentName"), filterDTO.getDepartmentName()));
+
+                if (filterDTO.getInstitutionType() != null && !filterDTO.getInstitutionType().isEmpty())
+                    predicates.add(cb.equal(root.get("institutionType"), filterDTO.getInstitutionType()));
+
+                if (filterDTO.getFeesCollectionType() != null && !filterDTO.getFeesCollectionType().isEmpty())
+                    predicates.add(cb.equal(root.get("feesCollectionType"), filterDTO.getFeesCollectionType()));
+
+                if (filterDTO.getFeesStatus() != null && !filterDTO.getFeesStatus().isEmpty())
+                    predicates.add(cb.equal(root.get("feesStatus"), filterDTO.getFeesStatus()));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        }, pageable);
+
+        List<StudentFeesHistoryDTO> result = new ArrayList<>();
+
+        for (StudentFees sf : studentFeesPage.getContent()) {
+            List<StudentFeesCollect> collections = feesCollectRepository.findAllStudentFeesCollected(sf.getFid());
+
+            List<FeesCollectionDetailDTO> collectionHistory = collections.stream()
+                    .map(c -> new FeesCollectionDetailDTO(
+                            c.getAmount(),
+                            c.getPaymentDate(),
+                            c.getPaymentMode(),
+                            c.getFeesType(),
+                            c.getMonth(),
+                            c.getTransactionId()
+                    ))
+                    .collect(Collectors.toList());
+
+            StudentFeesHistoryDTO dto = new StudentFeesHistoryDTO();
+            dto.setStudentId(sf.getStudent().getId());
+            dto.setStudentName(sf.getStudentName());
+            dto.setRollNo(sf.getRollNo());
+            dto.setStandardName(sf.getStandardName());
+            dto.setMediumName(sf.getMediumName());
+            dto.setBranchCode(sf.getBranchCode());
+            dto.setStreamName(sf.getStreamName());
+            dto.setGroupName(sf.getGroupName());
+            dto.setDegreeName(sf.getDegreeName());
+            dto.setDepartmentName(sf.getDepartmentName());
+            dto.setInstitutionType(sf.getInstitutionType());
+            dto.setTotalPaidAmount(sf.getPaidAmount());
+            dto.setPendingAmount(sf.getPendingAmount());
+            dto.setPaymentHistory(collectionHistory);
+
+            result.add(dto);
+        }
+
+        return new PageImpl<>(result, pageable, studentFeesPage.getTotalElements());
+    }
+
 
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {

@@ -2,9 +2,12 @@ package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.DTO.FeesCollectDTO;
+import Layer.NewStudentManagement.DTO.FeesFilterDTO;
+import Layer.NewStudentManagement.DTO.StudentFeesHistoryDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Service.FeesCollectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,15 +65,18 @@ public class FeesCollectController
 
     }
 
-    @GetMapping("/totalFeesByPaymentMode")
-    public List<Map<String, Object>> getTotalFeesByPaymentMode(
+    @PostMapping("/getAllCollectedFeesByBranchForFeesHistory")
+    public ResponseEntity<Page<StudentFeesHistoryDTO>> getAllCollectedFeesByBranch(
             @RequestParam String role,
             @RequestParam String email,
-            @RequestParam(required = false, defaultValue = "all") String timeFrame,
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate) {
-
-        return feesCollectService.getTotalFeesByPaymentMode(role, email, timeFrame, startDate, endDate);
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestBody(required = false) FeesFilterDTO filterDTO)
+    {
+        Page<StudentFeesHistoryDTO> response = feesCollectService.getAllCollectedFeesByBranch(role, email, filterDTO, page, size);
+        return ResponseEntity.ok(response);
     }
+
+
 
 }
