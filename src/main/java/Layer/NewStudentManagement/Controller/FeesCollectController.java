@@ -8,6 +8,7 @@ import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Service.FeesCollectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -71,11 +72,16 @@ public class FeesCollectController
             @RequestParam String email,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "all") String timeFrame,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestBody(required = false) FeesFilterDTO filterDTO)
     {
-        Page<StudentFeesHistoryDTO> response = feesCollectService.getAllCollectedFeesByBranch(role, email, filterDTO, page, size);
+        Page<StudentFeesHistoryDTO> response = feesCollectService.getAllCollectedFeesByBranch(
+                role, email, filterDTO, timeFrame, startDate, endDate, page, size);
         return ResponseEntity.ok(response);
     }
+
 
 
 

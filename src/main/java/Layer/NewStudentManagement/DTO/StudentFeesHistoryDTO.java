@@ -31,6 +31,6 @@ public class StudentFeesHistoryDTO {
 
     private Long departmentId;
     private String departmentName;
-
+    private String feesCollectionType;
     private List<FeesCollectionDetailDTO> paymentHistory;
 }

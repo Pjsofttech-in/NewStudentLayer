@@ -21,6 +21,7 @@ public interface FeesCollectService
 
     List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email, String institutionType);
     Map<String, Double> getFeesRevenueByBank(String role,String email);
-    Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(String role, String email,
-                                                            FeesFilterDTO filterDTO, int page, int size);
+    Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(
+            String role, String email, FeesFilterDTO filterDTO, String timeFrame, LocalDate startDate, LocalDate endDate, int page, int size);
+
 }

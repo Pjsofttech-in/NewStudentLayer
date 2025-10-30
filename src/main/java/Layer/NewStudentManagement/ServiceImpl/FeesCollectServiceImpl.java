@@ -340,8 +340,14 @@ public class FeesCollectServiceImpl implements FeesCollectService
     }
 
     @Override
-    public Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(String role, String email,
-                                                                   FeesFilterDTO filterDTO, int page, int size)
+    public Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(
+            String role, String email,
+            FeesFilterDTO filterDTO,
+            String timeFrame,
+            LocalDate startDate,
+            LocalDate endDate,
+            int page,
+            int size)
     {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees History");
@@ -350,10 +356,44 @@ public class FeesCollectServiceImpl implements FeesCollectService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         Pageable pageable = PageRequest.of(page, size);
 
-        // ✅ Fetch paginated student fees by branch
+        LocalDate today = LocalDate.now();
+        LocalDate fromDate = null;
+        LocalDate toDate = null;
+
+        switch (timeFrame != null ? timeFrame.toLowerCase() : "all") {
+            case "today" -> {
+                fromDate = today;
+                toDate = today;
+            }
+            case "7days", "last7days" -> {
+                fromDate = today.minusDays(7);
+                toDate = today;
+            }
+            case "30days", "last30days" -> {
+                fromDate = today.minusDays(30);
+                toDate = today;
+            }
+            case "365days", "year", "last365days" -> {
+                fromDate = today.minusDays(365);
+                toDate = today;
+            }
+            case "custom" -> {
+                if (startDate == null || endDate == null)
+                    throw new RuntimeException("Start date and end date are required for custom range");
+                fromDate = startDate;
+                toDate = endDate;
+            }
+            default -> {
+                fromDate = null; // all
+                toDate = null;
+            }
+        }
+
+        final LocalDate finalFromDate = fromDate;
+        final LocalDate finalToDate = toDate;
+
         Page<StudentFees> studentFeesPage = feesRepository.findAll((root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
             predicates.add(cb.equal(root.get("branchCode"), branchCode));
 
             if (filterDTO != null) {
@@ -385,15 +425,27 @@ public class FeesCollectServiceImpl implements FeesCollectService
                     predicates.add(cb.equal(root.get("feesStatus"), filterDTO.getFeesStatus()));
             }
 
+            if (finalFromDate != null && finalToDate != null) {
+                predicates.add(cb.between(root.get("approvalDate"), finalFromDate, finalToDate));
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         }, pageable);
 
         List<StudentFeesHistoryDTO> result = new ArrayList<>();
 
         for (StudentFees sf : studentFeesPage.getContent()) {
-            List<StudentFeesCollect> collections = feesCollectRepository.findAllStudentFeesCollected(sf.getFid());
+            List<StudentFeesCollect> collections =
+                    feesCollectRepository.findAllStudentFeesCollected(sf.getFid());
 
             List<FeesCollectionDetailDTO> collectionHistory = collections.stream()
+                    .filter(c -> {
+                        if (finalFromDate != null && finalToDate != null && c.getPaymentDate() != null) {
+                            return !c.getPaymentDate().isBefore(finalFromDate) &&
+                                    !c.getPaymentDate().isAfter(finalToDate);
+                        }
+                        return true;
+                    })
                     .map(c -> new FeesCollectionDetailDTO(
                             c.getAmount(),
                             c.getPaymentDate(),
@@ -410,14 +462,15 @@ public class FeesCollectServiceImpl implements FeesCollectService
             dto.setRollNo(sf.getRollNo());
             dto.setStandardName(sf.getStandardName());
             dto.setMediumName(sf.getMediumName());
-            dto.setBranchCode(sf.getBranchCode());
             dto.setStreamName(sf.getStreamName());
             dto.setGroupName(sf.getGroupName());
             dto.setDegreeName(sf.getDegreeName());
             dto.setDepartmentName(sf.getDepartmentName());
             dto.setInstitutionType(sf.getInstitutionType());
+            dto.setBranchCode(sf.getBranchCode());
             dto.setTotalPaidAmount(sf.getPaidAmount());
             dto.setPendingAmount(sf.getPendingAmount());
+            dto.setFeesCollectionType(sf.getFeesCollectionType());
             dto.setPaymentHistory(collectionHistory);
 
             result.add(dto);
@@ -425,7 +478,6 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
         return new PageImpl<>(result, pageable, studentFeesPage.getTotalElements());
     }
-
 
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {
