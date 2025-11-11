@@ -11,5 +11,5 @@ public interface StandardService
     StandardDTO getStandardById(Long id, String role, String email);
     StandardDTO updateStandard(Long id, String role, String email, StandardDTO standardDTO);
     void deleteStandardById(Long id,String role,String email);
-    List<StandardDTO> getAllStandard(String role, String email,String token);
+    List<StandardDTO> getAllStandard(String role, String email,String token,String branchCode);
 }

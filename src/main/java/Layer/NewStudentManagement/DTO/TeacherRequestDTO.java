@@ -24,6 +24,7 @@ public class TeacherRequestDTO
     private String reserch;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dob;
+    private String gender;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate joiningDate;
     private String password;

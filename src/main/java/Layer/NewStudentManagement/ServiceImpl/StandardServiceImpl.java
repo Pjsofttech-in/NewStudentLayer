@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,9 +85,10 @@ public class StandardServiceImpl implements StandardService
     }
 
     @Override
-    public List<StandardDTO> getAllStandard(String role, String email, String token)
+    public List<StandardDTO> getAllStandard(String role, String email, String token, String branchCode)
     {
-        String branchCode;
+        String branchCodeToUse;
+
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
@@ -95,20 +97,51 @@ public class StandardServiceImpl implements StandardService
                 throw new RuntimeException("Invalid token: branchCode not found");
             }
 
-            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-        }
-        else {
+            branchCodeToUse = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
 
-            if (!staffService.hasPermission(role, email, "Get")) {
-                throw new RuntimeException("You don't have permission to get standard");
-            }
-            branchCode = staffService.fetchBranchCodeByRole(role, email);
+            List<StudentStandard> standards = standardRepository.getAllStandardByBranchCode(branchCodeToUse);
+            return standards.stream()
+                    .map(this::mapToStandardDTO)
+                    .collect(Collectors.toList());
         }
-        List<StudentStandard> standards = standardRepository.getAllStandardByBranchCode(branchCode);
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+            boolean hasPerm = staffService.hasPermission(role, email, "GET");
+            if (!hasPerm) {
+                throw new RuntimeException("You don't have permission or email does not exist for SuperAdmin");
+            }
+
+            List<String> instituteBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            if (branchCode != null && !branchCode.isBlank()) {
+                String requested = branchCode.trim();
+                if (instituteBranchCodes.contains(requested)) {
+                    instituteBranchCodes = Collections.singletonList(requested);
+                } else {
+                    return Collections.emptyList();
+                }
+            }
+
+            List<StudentStandard> standards = standardRepository.getAllStandardByBranchCodeIn(instituteBranchCodes);
+            return standards.stream()
+                    .map(this::mapToStandardDTO)
+                    .collect(Collectors.toList());
+        }
+
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to get standard");
+        }
+        branchCodeToUse = staffService.fetchBranchCodeByRole(role, email);
+
+        List<StudentStandard> standards = standardRepository.getAllStandardByBranchCode(branchCodeToUse);
         return standards.stream()
-            .map(this::mapToStandardDTO)
-            .collect(Collectors.toList());
+                .map(this::mapToStandardDTO)
+                .collect(Collectors.toList());
     }
+
 
 
     private StandardDTO mapToStandardDTO(StudentStandard standard) {

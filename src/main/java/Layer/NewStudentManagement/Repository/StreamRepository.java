@@ -24,5 +24,7 @@ public interface StreamRepository extends JpaRepository<StudentStream,Long>
     @Query("SELECT s FROM StudentStream s WHERE LOWER(s.stream) = LOWER(:stream)")
     Optional<StudentStream> findByStreamName(@Param("stream") String stream);
 
+    @Query("SELECT s FROM StudentStream s WHERE s.branchCode IN :branchCodes")
+    List<StudentStream> findAllByBranchCodeIn(@Param("branchCodes") List<String> branchCodes);
 
 }

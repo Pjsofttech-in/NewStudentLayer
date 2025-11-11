@@ -5,11 +5,14 @@ import Layer.NewStudentManagement.Repository.AcademicYearRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.AcademicYearService;
 import io.jsonwebtoken.Claims;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -83,26 +86,57 @@ public class AcademicYearServiceImpl implements AcademicYearService
     }
 
     @Override
-    public List<StudentAcademicYear> getAllAcademicYear(String role, String email, String token) {
-        String branchCode;
+    public List<StudentAcademicYear> getAllAcademicYear(String role, String email,
+                                                        @Nullable String branchCode, String token) {
+
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
-            String encoded = claims.get("branchCode", String.class);
+            String encodedBranch = claims.get("branchCode", String.class);
 
-            if (encoded == null || encoded.isEmpty()) {
+            if (encodedBranch == null || encodedBranch.isEmpty()) {
                 throw new RuntimeException("Invalid token: branchCode not found");
             }
 
-            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-        } else {
-            if (!staffService.hasPermission(role, email, "Get")) {
-                throw new RuntimeException("You don't have permission to get AcademicYear");
-            }
-            branchCode = staffService.fetchBranchCodeByRole(role, email);
+            String decodedBranch = new String(Base64.getUrlDecoder().decode(encodedBranch), StandardCharsets.UTF_8);
+            return academicYearRepository.findAllByBranchCode(decodedBranch);
         }
 
-        return academicYearRepository.findAllByBranchCode(branchCode);
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
 
+            if (!staffService.hasPermission(role, email, "GET")) {
+                throw new RuntimeException("You don't have permission to get AcademicYear");
+            }
+
+            List<String> instituteBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                throw new RuntimeException("No branches found for this institute email: " + email);
+            }
+
+            if (branchCode != null && !branchCode.isBlank()) {
+                if (!instituteBranchCodes.contains(branchCode)) {
+                    throw new RuntimeException("Filtered branchCode does not belong to your institute");
+                }
+                return academicYearRepository.findAllByBranchCode(branchCode);
+            }
+
+            try {
+                return academicYearRepository.findAllByBranchCodeIn(instituteBranchCodes);
+            } catch (Exception e) {
+                List<StudentAcademicYear> result = new ArrayList<>();
+                for (String code : instituteBranchCodes) {
+                    result.addAll(academicYearRepository.findAllByBranchCode(code));
+                }
+                return result;
+            }
+        }
+
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to get AcademicYear");
+        }
+
+        String resolvedBranch = staffService.fetchBranchCodeByRole(role, email);
+        return academicYearRepository.findAllByBranchCode(resolvedBranch);
     }
+
 }
 

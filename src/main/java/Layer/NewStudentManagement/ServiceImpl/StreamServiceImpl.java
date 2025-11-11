@@ -8,11 +8,14 @@ import Layer.NewStudentManagement.Repository.StreamRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.StreamService;
 import io.jsonwebtoken.Claims;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,9 +83,8 @@ public class StreamServiceImpl implements StreamService
     }
 
     @Override
-    public List<StreamDTO> getAllStream(String role, String email, String token)
-    {
-        String branchCode;
+    public List<StreamDTO> getAllStream(String role, String email, @Nullable String branchCode, String token) {
+
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
@@ -91,20 +93,64 @@ public class StreamServiceImpl implements StreamService
                 throw new RuntimeException("Invalid token: branchCode not found");
             }
 
-            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-        }
-        else {
-            if (!staffService.hasPermission(role, email, "Get")) {
-                throw new RuntimeException("You don't have permission to get stream");
-            }
-            branchCode = staffService.fetchBranchCodeByRole(role, email);
+            String decodedBranch = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+
+            List<StudentStream> saved = streamRepository.findAllByBranchCode(decodedBranch);
+            return saved.stream()
+                    .map(this::mapToStreamDTO)
+                    .collect(Collectors.toList());
         }
 
-        List<StudentStream> saved = streamRepository.findAllByBranchCode(branchCode);
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to get stream");
+        }
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+            if (branchCode != null && !branchCode.trim().isEmpty()) {
+                String bc = branchCode.trim();
+                List<StudentStream> saved = streamRepository.findAllByBranchCode(bc);
+                return saved.stream()
+                        .map(this::mapToStreamDTO)
+                        .collect(Collectors.toList());
+            }
+
+            Claims claims = jwtUtil.extractAllClaims(token);
+            String encoded = claims.get("branchCode", String.class);
+            if (encoded != null && !encoded.isEmpty()) {
+                String decodedBranch = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+                List<StudentStream> saved = streamRepository.findAllByBranchCode(decodedBranch);
+                return saved.stream()
+                        .map(this::mapToStreamDTO)
+                        .collect(Collectors.toList());
+            }
+
+            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<StudentStream> saved;
+            try {
+                saved = streamRepository.findAllByBranchCodeIn(branchCodes);
+            } catch (NoSuchMethodError | UnsupportedOperationException | AbstractMethodError ex) {
+                saved = new ArrayList<>();
+                for (String bc : branchCodes) {
+                    saved.addAll(streamRepository.findAllByBranchCode(bc));
+                }
+            }
+
+            return saved.stream()
+                    .map(this::mapToStreamDTO)
+                    .collect(Collectors.toList());
+        }
+
+        String branchCodeForRole = staffService.fetchBranchCodeByRole(role, email);
+        List<StudentStream> saved = streamRepository.findAllByBranchCode(branchCodeForRole);
         return saved.stream()
                 .map(this::mapToStreamDTO)
                 .collect(Collectors.toList());
     }
+
 
     private StreamDTO mapToStreamDTO(StudentStream stream) {
         return new StreamDTO(

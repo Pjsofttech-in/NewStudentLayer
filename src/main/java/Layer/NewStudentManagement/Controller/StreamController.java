@@ -36,6 +36,7 @@ public class StreamController
 
     @GetMapping("/getAllStream")
     public ResponseEntity<Iterable<StreamDTO>> getAllStream(@RequestParam String role, @RequestParam(required = false) String email,
+                                                            @RequestParam(required = false) String branchCode,
                                                             @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
         try {
@@ -44,7 +45,7 @@ public class StreamController
                 token = authorizationHeader.substring(7);  // Extract token after "Bearer "
             }
 
-            List<StreamDTO> academicYear = streamService.getAllStream(role, email, token);
+            List<StreamDTO> academicYear = streamService.getAllStream(role, email, branchCode,token);
             return ResponseEntity.ok(academicYear);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());

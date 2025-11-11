@@ -36,6 +36,7 @@ public class AcademicYearController
     @GetMapping("/getAllAcademicYear")
     public ResponseEntity<Iterable<StudentAcademicYear>> getAllAcademicYear(@RequestParam String role,
                                                                             @RequestParam(required = false) String email,
+                                                                            @RequestParam(required = false) String branchCode,
                                                                             @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
         try {
@@ -44,7 +45,7 @@ public class AcademicYearController
                 token = authorizationHeader.substring(7);  // Extract token after "Bearer "
             }
 
-            List<StudentAcademicYear> academicYear = academicYearService.getAllAcademicYear(role, email, token);
+            List<StudentAcademicYear> academicYear = academicYearService.getAllAcademicYear(role, email,branchCode, token);
             return ResponseEntity.ok(academicYear);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());

@@ -20,4 +20,7 @@ public interface AcademicYearRepository extends JpaRepository<StudentAcademicYea
             "WHERE a.academicYear = :academicYear AND a.branchCode = :branchCode")
     boolean existsByAcademicYearAndBranchCode(@Param("academicYear") String academicYear,
                                               @Param("branchCode") String branchCode);
+
+    @Query("SELECT s FROM StudentAcademicYear s WHERE s.branchCode IN :branchCodes")
+    List<StudentAcademicYear> findAllByBranchCodeIn(@Param("branchCodes") List<String> branchCodes);
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,5 +21,8 @@ public interface StandardRepository extends JpaRepository<StudentStandard,Long>
     List<Long> findIdsByName(@Param("standardName") String standardName,@Param("branchCode") String branchCode);
 
     boolean existsByStandardNameIgnoreCaseAndBranchCode(String standardName, String branchCode);
+
+    @Query("SELECT s FROM StudentStandard s WHERE s.branchCode IN :branchCodes")
+    List<StudentStandard> getAllStandardByBranchCodeIn(@Param("branchCodes") Collection<String> branchCodes);
 
 }

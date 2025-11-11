@@ -26,6 +26,7 @@ public class StudentTeacher
     @Column(unique = true)
     private String teacherEmail;
     private String password;
+    private String gender;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")

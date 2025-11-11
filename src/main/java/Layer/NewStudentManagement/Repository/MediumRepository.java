@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,10 @@ public interface MediumRepository extends JpaRepository<StudentMedium,Long>
 
 
     boolean existsByMediumNameIgnoreCaseAndBranchCode(String mediumName, String branchCode);
+
+    @Query("SELECT m FROM StudentMedium m WHERE m.branchCode IN :branchCodes")
+    List<StudentMedium> findAllByBranchCodeIn(@Param("branchCodes") Collection<String> branchCodes);
+
 
 
 }

@@ -29,6 +29,7 @@ public class StudentTeacherDTO
     private String profilePhoto;
     private String education;
     private String experience;
+    private String gender;
     private String reserch;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dob;

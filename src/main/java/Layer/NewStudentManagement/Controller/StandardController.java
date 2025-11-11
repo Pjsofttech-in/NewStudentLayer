@@ -30,6 +30,7 @@ public class StandardController
 
     @GetMapping("/getAllStandard")
     public ResponseEntity<Iterable<StandardDTO>> getAllStandard(@RequestParam String role, @RequestParam(required = false) String email,
+                                                                @RequestParam(required = false) String branchCode,
                                                                 @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
         try {
@@ -38,7 +39,7 @@ public class StandardController
                 token = authorizationHeader.substring(7);  // Extract token after "Bearer "
             }
 
-            Iterable<StandardDTO> standard = standardService.getAllStandard(role, email, token);
+            Iterable<StandardDTO> standard = standardService.getAllStandard(role, email, token, branchCode);
             return ResponseEntity.ok(standard);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());

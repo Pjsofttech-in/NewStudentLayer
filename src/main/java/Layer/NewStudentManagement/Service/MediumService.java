@@ -11,5 +11,5 @@ public interface MediumService
     MediumDTO getMediumById(Long id, String role, String email);
     StudentMedium updateMedium(Long id,String role,String email,StudentMedium medium);
     void deleteMediumById(Long id,String role,String email);
-    List<MediumDTO> getAllMedium(String role, String email,String token);
+    List<MediumDTO> getAllMedium(String role, String email, String token, String branchCode);
 }

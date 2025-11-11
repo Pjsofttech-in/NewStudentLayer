@@ -217,6 +217,7 @@ public class TeacherServiceImpl implements TeacherService
 
         if (teacher.getTeacherName() != null) existingTeacher.setTeacherName(teacher.getTeacherName());
         if (teacher.getTeacherEmail() != null) existingTeacher.setTeacherEmail(teacher.getTeacherEmail());
+        if(teacher.getGender() !=null) existingTeacher.setGender(teacher.getGender());
         if (teacher.getPassword() != null) existingTeacher.setPassword(teacher.getPassword());
         if (teacher.getInstitutionType() != null) existingTeacher.setInstitutionType(teacher.getInstitutionType());
         if (teacher.getEducation() != null) existingTeacher.setEducation(teacher.getEducation());
@@ -421,6 +422,7 @@ public class TeacherServiceImpl implements TeacherService
         responseDTO.setTeacherName(teacher.getTeacherName());
         responseDTO.setTeacherEmail(teacher.getTeacherEmail());
         responseDTO.setInstitutionType(teacher.getInstitutionType());
+        responseDTO.setGender(teacher.getGender());
         responseDTO.setProfilePhoto(teacher.getProfilePhoto());
         responseDTO.setEducation(teacher.getEducation());
         responseDTO.setReserch(teacher.getReserch());

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -80,9 +81,10 @@ public class MediumServiceImpl implements MediumService
     }
 
     @Override
-    public List<MediumDTO> getAllMedium(String role, String email, String token)
+    public List<MediumDTO> getAllMedium(String role, String email, String token, String branchCode)
     {
-        String branchCode;
+        String branchCodeToUse;
+
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
@@ -91,17 +93,47 @@ public class MediumServiceImpl implements MediumService
                 throw new RuntimeException("Invalid token: branchCode not found");
             }
 
-            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-        }else {
+            branchCodeToUse = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+            return mediumRepository.findAllByBranchCode(branchCodeToUse).stream()
+                    .map(this::mapToMediumDTO)
+                    .collect(Collectors.toList());
+
+        } else if ("SUPERADMIN".equalsIgnoreCase(role)) {
+            boolean hasPerm = staffService.hasPermission(role, email, "GET");
+            if (!hasPerm) {
+                throw new RuntimeException("You don't have permission or email does not exist for SuperAdmin");
+            }
+
+            List<String> instituteBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            if (branchCode != null && !branchCode.isBlank()) {
+                String requested = branchCode.trim();
+                if (instituteBranchCodes.contains(requested)) {
+                    instituteBranchCodes = Collections.singletonList(requested);
+                } else {
+                    return Collections.emptyList();
+                }
+            }
+
+            // fetch all mediums for the branch codes list
+            return mediumRepository.findAllByBranchCodeIn(instituteBranchCodes).stream()
+                    .map(this::mapToMediumDTO)
+                    .collect(Collectors.toList());
+
+        } else {
             if (!staffService.hasPermission(role, email, "Get")) {
                 throw new RuntimeException("You don't have permission to view Industry");
             }
-            branchCode = staffService.fetchBranchCodeByRole(role, email);
+            branchCodeToUse = staffService.fetchBranchCodeByRole(role, email);
+            return mediumRepository.findAllByBranchCode(branchCodeToUse).stream()
+                    .map(this::mapToMediumDTO)
+                    .collect(Collectors.toList());
         }
-        return mediumRepository.findAllByBranchCode(branchCode).stream()
-                .map(this::mapToMediumDTO)
-                .collect(Collectors.toList());
     }
+
 
     private MediumDTO mapToMediumDTO(StudentMedium medium) {
         return new MediumDTO(

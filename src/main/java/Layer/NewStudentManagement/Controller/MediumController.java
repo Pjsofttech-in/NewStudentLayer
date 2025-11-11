@@ -27,22 +27,25 @@ public class MediumController
     }
 
     @GetMapping("/getAllMedium")
-    public ResponseEntity<Iterable<MediumDTO>> getAllMedium(@RequestParam String role,
-                                                            @RequestParam(required = false) String email,
-                                                            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
+    public ResponseEntity<Iterable<MediumDTO>> getAllMedium(
+            @RequestParam String role,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String branchCode,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
         try {
             String token = null;
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+                token = authorizationHeader.substring(7);
             }
 
-            List<MediumDTO> medium = mediumService.getAllMedium(role, email, token);
+            List<MediumDTO> medium = mediumService.getAllMedium(role, email, token, branchCode);
             return ResponseEntity.ok(medium);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
         }
     }
+
 
     @GetMapping("/getMediumById/{id}")
     public ResponseEntity<MediumDTO> getMediumById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
