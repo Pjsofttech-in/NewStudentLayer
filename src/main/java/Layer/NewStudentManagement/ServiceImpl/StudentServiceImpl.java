@@ -1176,10 +1176,50 @@ public class StudentServiceImpl implements StudentService {
     public List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
             String role, String email, String graduationType, String standardName,
             String mediumName, String streamName, String degreeName, String departmentName,
-            String institutionType, String academicYear) {
+            String institutionType, String academicYear, @Nullable String branchCodeFilter) {
 
         checkPermission(role, email, "Get");
 
+        List<ClassRoomStudentCountProjection> resultList = new ArrayList<>();
+
+        // --- SUPERADMIN LOGIC ---
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+            List<String> branchCodes;
+
+            // If branchCode filter is provided, use only that
+            if (branchCodeFilter != null && !branchCodeFilter.trim().isEmpty()) {
+                branchCodes = Collections.singletonList(branchCodeFilter.trim());
+            } else {
+                // Otherwise get all branchCodes under that instituteEmail
+                branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            }
+
+            if (branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for institute email: " + email);
+            }
+
+            // Collect data for each branchCode and merge results
+            for (String branchCode : branchCodes) {
+                List<ClassRoomStudentCountProjection> tempList =
+                        studentRepository.getStudentCountByClassRoomWithFilters(
+                                branchCode,
+                                graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
+                                standardName != null && !standardName.trim().isEmpty() ? standardName : null,
+                                mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
+                                streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                                degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                                departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
+                                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                                academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
+                        );
+
+                resultList.addAll(tempList);
+            }
+
+            return resultList;
+        }
+
+        // --- OTHER ROLES (Existing logic) ---
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         if (branchCode == null || branchCode.trim().isEmpty()) {
             throw new RuntimeException("Branch code not found for the given role and email");

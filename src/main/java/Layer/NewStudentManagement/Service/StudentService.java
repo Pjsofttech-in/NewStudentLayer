@@ -64,7 +64,7 @@ public interface StudentService
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
             String role, String email, String graduationType, String standardName,
             String mediumName, String streamName, String degreeName, String departmentName,
-            String institutionType, String academicYear);
+            String institutionType, String academicYear, @Nullable String branchCodeFilter);
 
     Page<StudentResponseDTO> getStudentsByBranchCode(String role, String email, StudentFilterDTO filter, String timeFrame,
                                                      LocalDate customStart, LocalDate customEnd, Pageable pageable);

@@ -54,21 +54,24 @@ public class GraduationTypeController
         return ResponseEntity.ok().build();
     }
 
+
     @GetMapping("/graduationTypesByStreamName")
     public ResponseEntity<List<StudentGraduationTypeDTO>> getGraduationTypesByStream(
             @RequestParam String role,
             @RequestParam(required = false) String email,
             @RequestParam String streamName,
+            @RequestParam(required = false) String branchCode,              // NEW optional filter
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
-
         try {
             String token = null;
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 token = authorizationHeader.substring(7);  // Extract token after "Bearer "
             }
 
-            List<StudentGraduationTypeDTO> graduationTypeDTOS = graduationTypeService.getGraduationTypesByStream(role, email,streamName, token);
+            List<StudentGraduationTypeDTO> graduationTypeDTOS =
+                    graduationTypeService.getGraduationTypesByStream(role, email, streamName, branchCode, token);
+
             return ResponseEntity.ok(graduationTypeDTOS);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());

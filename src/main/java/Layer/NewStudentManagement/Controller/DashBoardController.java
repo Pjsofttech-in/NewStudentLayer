@@ -85,11 +85,14 @@ public class DashBoardController
             @RequestParam(required = false) String degreeName,
             @RequestParam(required = false) String departmentName,
             @RequestParam(required = false) String institutionType,
-            @RequestParam(required = false) String academicYear)
-    {
+            @RequestParam(required = false) String academicYear,
+            @RequestParam(required = false) String branchCode) {
+
         return studentService.getStudentCountByClassRoom(
-                role, email, graduationType, standardName, mediumName, streamName, degreeName, departmentName, institutionType,academicYear);
+                role, email, graduationType, standardName, mediumName, streamName,
+                degreeName, departmentName, institutionType, academicYear, branchCode);
     }
+
 
 
     @GetMapping("/getAttendaceCountByStudentId")
