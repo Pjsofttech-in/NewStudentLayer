@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -376,16 +377,57 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Page<StudentResponseDTO> getAllStudent(String role, String email, StudentFilterDTO filter,
-                                                  String timeFrame, LocalDate customStart, LocalDate customEnd,
-                                                  Pageable pageable) {
-        checkPermission(role, email, "Post");
+    public Page<StudentResponseDTO> getAllStudent(
+            String role, String email, StudentFilterDTO filter,
+            String timeFrame, LocalDate customStart, LocalDate customEnd,
+            Pageable pageable) {
+
+        checkPermission(role, email, "Get");
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+            List<String> branchCodes;
+
+            if (filter != null && filter.getBranchCode() != null && !filter.getBranchCode().trim().isEmpty()) {
+                branchCodes = Collections.singletonList(filter.getBranchCode().trim());
+            } else {
+                branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            }
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for institute email: " + email);
+            }
+
+            List<StudentEntity> allStudents = new ArrayList<>();
+
+            for (String branchCode : branchCodes) {
+                Specification<StudentEntity> spec =
+                        StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd);
+
+                List<StudentEntity> students = studentRepository.findAll(spec);
+                allStudents.addAll(students);
+            }
+
+            List<StudentResponseDTO> dtos = allStudents.stream()
+                    .map(this::mapToDTO)
+                    .toList();
+
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), dtos.size());
+            if (start >= dtos.size()) {
+                return new PageImpl<>(Collections.emptyList(), pageable, dtos.size());
+            }
+
+            List<StudentResponseDTO> paged = dtos.subList(start, end);
+            return new PageImpl<>(paged, pageable, dtos.size());
+        }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        Specification<StudentEntity> spec =
+                StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd);
 
-        Specification<StudentEntity> spec = StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd);
-
-        return studentRepository.findAll(spec, pageable).map(this::mapToDTO);
+        return studentRepository.findAll(spec, pageable)
+                .map(this::mapToDTO);
     }
+
 
 
     public StudentDocumentDTO uploadStudentDocuments(

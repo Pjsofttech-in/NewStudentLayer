@@ -32,5 +32,6 @@ public class StudentFilterDTO
     private String graduationType;
     private String degreeName;
     private String departmentName;
+    private String branchCode;
 
 }
