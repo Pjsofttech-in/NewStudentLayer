@@ -1253,12 +1253,46 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(String role, String email, String institutionType)
-    {
+    public List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(
+            String role, String email, String institutionType, @Nullable String branchCodeFilter) {
+
         checkPermission(role, email, "Get");
 
+        List<StudentCountByCastCategoryDTO> resultList = new ArrayList<>();
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+            List<String> branchCodes;
+
+            if (branchCodeFilter != null && !branchCodeFilter.trim().isEmpty()) {
+                branchCodes = Collections.singletonList(branchCodeFilter.trim());
+            } else {
+                branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            }
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for institute email: " + email);
+            }
+
+            for (String branchCode : branchCodes) {
+                List<StudentCountByCastCategoryDTO> tempList =
+                        religionRepo.getStudentCountByCastCategory(branchCode,
+                                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null);
+
+                resultList.addAll(tempList);
+            }
+
+            return resultList;
+        }
+
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        return religionRepo.getStudentCountByCastCategory(branchCode, institutionType);
+        if (branchCode == null || branchCode.trim().isEmpty()) {
+            throw new RuntimeException("Branch code not found for the given role and email");
+        }
+
+        return religionRepo.getStudentCountByCastCategory(
+                branchCode,
+                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null
+        );
     }
 
 

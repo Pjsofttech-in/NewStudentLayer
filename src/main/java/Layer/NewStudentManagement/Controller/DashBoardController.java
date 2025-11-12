@@ -131,9 +131,12 @@ public class DashBoardController
 
     @GetMapping("/getStudentCountByCastCategory")
     public List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(
-            @RequestParam String role, @RequestParam String email,
-            @RequestParam String institutionType) {
-        return studentService.getStudentCountByCastCategory(role,email, institutionType);
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam String institutionType,
+            @RequestParam(required = false) String branchCode) {
+
+        return studentService.getStudentCountByCastCategory(role, email, institutionType, branchCode);
     }
 
     @GetMapping("/getCountByGenderAllStandards")
