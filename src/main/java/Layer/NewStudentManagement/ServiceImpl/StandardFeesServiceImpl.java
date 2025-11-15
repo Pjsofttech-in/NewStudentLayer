@@ -5,9 +5,11 @@ import Layer.NewStudentManagement.DTO.StandardFeesRequestDTO;
 import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.StandardFeesService;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -197,17 +199,56 @@ public class StandardFeesServiceImpl implements StandardFeesService
     }
 
     @Override
-    public List<StandardFeesRequestDTO> getAllStandardFees(String role, String email)
+    public List<StandardFeesRequestDTO> getAllStandardFees(String role, String email, @Nullable String branchCodeFilter)
     {
-        checkPermission(role,email,"Get");
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+        checkPermission(role, email, "Get");
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for this Superadmin");
+            }
+
+            if (branchCodeFilter != null && !branchCodeFilter.isEmpty()) {
+
+                if (!branchCodes.contains(branchCodeFilter)) {
+                    throw new RuntimeException("Invalid branchCode for this Superadmin");
+                }
+
+                List<StudentStandardFees> list =
+                        standardFeesRepository.findAllByBranchCode(branchCodeFilter);
+
+                return list.stream()
+                        .map(this::mapToDto)
+                        .collect(Collectors.toList());
+            }
+
+            List<StandardFeesRequestDTO> finalList = new ArrayList<>();
+
+            for (String brCode : branchCodes) {
+
+                List<StudentStandardFees> list =
+                        standardFeesRepository.findAllByBranchCode(brCode);
+
+                list.stream()
+                        .map(this::mapToDto)
+                        .forEach(finalList::add);
+            }
+
+            return finalList;
+        }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         List<StudentStandardFees> standardFees = standardFeesRepository.findAllByBranchCode(branchCode);
+
         return standardFees.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
-
     }
+
 
     @Override
     public void deleteStandardFee(String role, String email, Long sfid)

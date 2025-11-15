@@ -25,9 +25,10 @@ public class StandardFeesController
     }
 
     @GetMapping("/getAllStandardFees")
-    public ResponseEntity<List<StandardFeesRequestDTO>> getAllStandardFees(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<List<StandardFeesRequestDTO>> getAllStandardFees(@RequestParam String role, @RequestParam String email,
+                                                                           @RequestParam(required = false) String branchCode)
     {
-        List<StandardFeesRequestDTO> standardFees = standardFeesService.getAllStandardFees(role,email);
+        List<StandardFeesRequestDTO> standardFees = standardFeesService.getAllStandardFees(role,email,branchCode);
         return ResponseEntity.ok(standardFees);
     }
 
