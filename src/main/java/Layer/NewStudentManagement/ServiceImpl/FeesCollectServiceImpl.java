@@ -8,6 +8,7 @@ import Layer.NewStudentManagement.Repository.FeesCollectRepository;
 import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Service.FeesCollectService;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -225,16 +226,58 @@ public class FeesCollectServiceImpl implements FeesCollectService
     }
 
     @Override
-    public List<Map<String, Object>> getReportByYear(String role,String email)
+    public List<Map<String, Object>> getReportByYear(String role, String email, @Nullable String branchCodeFilter)
     {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
+        if (!staffService.hasPermission(role, email, "GET")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees by Year");
         }
 
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+        String finalBranchCode = null;
+        List<String> branchCodes = new ArrayList<>();
 
-        List<Object[]> results = feesCollectRepository.getPaidFeesReportByYear(branchCode);
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for this Superadmin");
+            }
+
+            if (branchCodeFilter != null && !branchCodeFilter.isEmpty()) {
+
+                if (!branchCodes.contains(branchCodeFilter)) {
+                    throw new RuntimeException("Invalid branchCode for this Superadmin");
+                }
+
+                List<Object[]> results = feesCollectRepository.getPaidFeesReportByYear(branchCodeFilter);
+                return mapYearlyResults(results);
+            }
+
+            List<Map<String, Object>> finalResponse = new ArrayList<>();
+
+            for (String brCode : branchCodes) {
+                List<Object[]> results = feesCollectRepository.getPaidFeesReportByYear(brCode);
+
+                List<Map<String, Object>> yearlyData = mapYearlyResults(results);
+
+                for (Map<String, Object> map : yearlyData) {
+                    map.put("branchCode", brCode);
+                    finalResponse.add(map);
+                }
+            }
+
+            return finalResponse;
+        }
+
+
+        finalBranchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        List<Object[]> results = feesCollectRepository.getPaidFeesReportByYear(finalBranchCode);
+        return mapYearlyResults(results);
+    }
+
+    private List<Map<String, Object>> mapYearlyResults(List<Object[]> results) {
         List<Map<String, Object>> response = new ArrayList<>();
 
         for (Object[] row : results) {
@@ -246,17 +289,66 @@ public class FeesCollectServiceImpl implements FeesCollectService
             Map<String, Object> map = new HashMap<>();
             map.put("academicYear", academicYear);
             map.put("totalPaid", total);
+
             response.add(map);
         }
+
         return response;
     }
 
     @Override
-    public List<Map<String, Object>> getReportByMonth(String role, String email, int year) {
+    public List<Map<String, Object>> getReportByMonth(String role, String email, int year,
+                                                      @Nullable String branchCodeFilter) {
+
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees by Month");
         }
 
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for this Superadmin");
+            }
+
+            if (branchCodeFilter != null && !branchCodeFilter.isEmpty()) {
+
+                if (!branchCodes.contains(branchCodeFilter)) {
+                    throw new RuntimeException("Invalid branchCode for this Superadmin");
+                }
+
+                return convertMonthlyResults(
+                        feesCollectRepository.getPaidFeesReportByMonth(year, branchCodeFilter)
+                );
+            }
+            Map<String, Double> monthlyTotals = new LinkedHashMap<>();
+
+            for (String brCode : branchCodes) {
+                List<Object[]> results = feesCollectRepository.getPaidFeesReportByMonth(year, brCode);
+
+                for (Object[] row : results) {
+                    String monthName = row[0] != null ? (String) row[0] : "N/A";
+                    Double totalPaid = row[1] != null ? (Double) row[1] : 0.0;
+
+                    monthlyTotals.merge(monthName, totalPaid, Double::sum);
+                }
+            }
+
+            List<Map<String, Object>> finalResponse = new ArrayList<>();
+
+            for (Map.Entry<String, Double> entry : monthlyTotals.entrySet()) {
+                String monthName = entry.getKey();
+                String shortName = monthName.length() >= 3 ? monthName.substring(0, 3) : monthName;
+
+                Map<String, Object> map = new HashMap<>();
+                map.put("month", shortName);
+                map.put("totalPaid", entry.getValue());
+                finalResponse.add(map);
+            }
+
+            return finalResponse;
+        }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         List<Object[]> results = feesCollectRepository.getPaidFeesReportByMonth(year, branchCode);
@@ -274,8 +366,28 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
             response.add(map);
         }
+
         return response;
     }
+    private List<Map<String, Object>> convertMonthlyResults(List<Object[]> results) {
+        List<Map<String, Object>> response = new ArrayList<>();
+
+        for (Object[] row : results) {
+            String monthName = row[0] != null ? (String) row[0] : "N/A";
+            Double totalPaid = row[1] != null ? (Double) row[1] : 0.0;
+
+            String shortName = monthName.length() >= 3 ? monthName.substring(0, 3) : monthName;
+
+            Map<String, Object> map = new HashMap<>();
+            map.put("month", shortName);
+            map.put("totalPaid", totalPaid);
+
+            response.add(map);
+        }
+
+        return response;
+    }
+
 
     @Override
     public List<Map<String, Object>> getReportByStandard(String role,String email)
@@ -305,39 +417,103 @@ public class FeesCollectServiceImpl implements FeesCollectService
     }
 
     @Override
-    public List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role,String email, String institutionType)
-    {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
-            throw new RuntimeException("You don't have permission to Get Collected Fees by Standard");
+    public List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(
+            String role, String email, String branchCode, String institutionType, Integer year) {
+
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to Get Collected Fees by Payment Mode");
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
 
+        String finalBranchCode;
 
-        return feesCollectRepository.getCollectedFeesByPaymentMode(branchCode, institutionType);
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            if (branchCode != null && !branchCode.isEmpty()) {
+                finalBranchCode = branchCode;
+            } else {
+                finalBranchCode = null;
+            }
+
+        } else {
+            finalBranchCode = staffService.fetchBranchCodeByRole(role, email);
+        }
+
+        return feesCollectRepository.getCollectedFeesByPaymentMode(
+                finalBranchCode,
+                institutionType,
+                year  // null → all years
+        );
     }
 
 
     @Override
-    public Map<String, Double> getFeesRevenueByBank(String role, String email) {
+    public Map<String, Double> getFeesRevenueByBank(String role, String email, @Nullable String branchCodeFilter) {
 
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees by BankName");
         }
 
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for this Superadmin");
+            }
+
+            if (branchCodeFilter != null && !branchCodeFilter.isEmpty()) {
+
+                if (!branchCodes.contains(branchCodeFilter)) {
+                    throw new RuntimeException("Invalid branchCode for this Superadmin");
+                }
+
+                return convertBankRevenue(
+                        feesCollectRepository.getFeesRevenueByBank(branchCodeFilter)
+                );
+            }
+
+            Map<String, Double> combinedMap = new LinkedHashMap<>();
+
+            for (String brCode : branchCodes) {
+
+                List<Object[]> results = feesCollectRepository.getFeesRevenueByBank(brCode);
+
+                for (Object[] row : results) {
+
+                    String bankName = row[0] != null ? row[0].toString() : "Unknown";
+                    Double amount = ((Number) row[1]).doubleValue();
+
+                    combinedMap.merge(bankName, amount, Double::sum);
+                }
+            }
+
+            return combinedMap;
+        }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         List<Object[]> results = feesCollectRepository.getFeesRevenueByBank(branchCode);
 
         Map<String, Double> revenueMap = new LinkedHashMap<>();
         for (Object[] row : results) {
-            String bankName = row[0] != null ? row[0].toString() : "Unknown"; // handle null bankName
+            String bankName = row[0] != null ? row[0].toString() : "Unknown";
             Double amount = ((Number) row[1]).doubleValue();
             revenueMap.put(bankName, amount);
         }
 
         return revenueMap;
     }
+    private Map<String, Double> convertBankRevenue(List<Object[]> results) {
+        Map<String, Double> revenueMap = new LinkedHashMap<>();
+
+        for (Object[] row : results) {
+            String bankName = row[0] != null ? row[0].toString() : "Unknown";
+            Double amount = ((Number) row[1]).doubleValue();
+            revenueMap.put(bankName, amount);
+        }
+
+        return revenueMap;
+    }
+
 
     @Override
     public Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(

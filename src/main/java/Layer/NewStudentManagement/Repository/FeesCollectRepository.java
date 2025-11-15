@@ -67,15 +67,23 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
             "ORDER BY f.standardName ASC")
     List<Object[]> getPaidFeesReportByStandard(@Param("branchCode") String branchCode);
 
+    @Query("""
+    SELECT new Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO(
+        s.paymentMode,
+        SUM(s.amount)
+    )
+    FROM StudentFeesCollect s
+    WHERE (:branchCode IS NULL OR s.branchCode = :branchCode)
+      AND s.status = 'Completed'
+      AND s.studentFees.institutionType = :institutionType
+      AND (:year IS NULL OR YEAR(s.paymentDate) = :year)
+    GROUP BY s.paymentMode
+""")
+    List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(
+            @Param("branchCode") String branchCode,
+            @Param("institutionType") String institutionType,
+            @Param("year") Integer year);
 
-
-    @Query("SELECT new Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO(s.paymentMode, SUM(s.amount)) " +
-            "FROM StudentFeesCollect s " +
-            "WHERE s.branchCode = :branchCode " +
-            "AND s.studentFees.institutionType = :institutionType " +
-            "GROUP BY s.paymentMode")
-    List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(@Param("branchCode") String branchCode,
-                                                             @Param("institutionType") String institutionType);
 
 
     @Query("SELECT s.bankName, SUM(s.amount) " +

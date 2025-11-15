@@ -108,13 +108,14 @@ public class DashBoardController
 
 
     @GetMapping("/getCollectedFeesByYear")
-    public List<Map<String, Object>> getReportByYear(@RequestParam String role, @RequestParam String email) {
-        return feesCollectService.getReportByYear(role, email);
+    public List<Map<String, Object>> getReportByYear(@RequestParam String role, @RequestParam String email, @RequestParam(required = false) String branchCode) {
+        return feesCollectService.getReportByYear(role, email,branchCode);
     }
 
     @GetMapping("/getCollectedFeesByMonth")
-    public List<Map<String, Object>> getReportByMonth(@RequestParam String role, @RequestParam String email, @RequestParam int year) {
-        return feesCollectService.getReportByMonth(role,email,year);
+    public List<Map<String, Object>> getReportByMonth(@RequestParam String role, @RequestParam String email,
+                                                      @RequestParam int year,@RequestParam(required = false) String branchCode) {
+        return feesCollectService.getReportByMonth(role,email,year,branchCode);
     }
 
     @GetMapping("/getCollectedFeesByStandard")
@@ -124,9 +125,13 @@ public class DashBoardController
 
     @GetMapping("/getFeesByPaymentMode")
     public List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(
-            @RequestParam String role, @RequestParam String email,
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false) String branchCode,
+            @RequestParam(required = false) Integer year,
             @RequestParam String institutionType) {
-        return feesCollectService.getCollectedFeesByPaymentMode(role,email, institutionType);
+
+        return feesCollectService.getCollectedFeesByPaymentMode(role, email, branchCode, institutionType,year);
     }
 
     @GetMapping("/getStudentCountByCastCategory")
@@ -149,9 +154,10 @@ public class DashBoardController
     @GetMapping("/getFeesRevenueByBank")
     public ResponseEntity<Map<String, Double>> getRevenueByBank(
             @RequestParam String role,
-            @RequestParam String email) {
+            @RequestParam String email,
+            @RequestParam(required = false) String branchCode) {
 
-        Map<String, Double> response = feesCollectService.getFeesRevenueByBank(role, email);
+        Map<String, Double> response = feesCollectService.getFeesRevenueByBank(role, email,branchCode);
         return ResponseEntity.ok(response);
     }
 
@@ -172,8 +178,9 @@ public class DashBoardController
 
     @GetMapping("/getFeesRevenewByMonth")
     public Map<String, Object> getMonthlyFees(@RequestParam String role,
-                                              @RequestParam String email,@RequestParam String month) {
-        return feesService.getMonthlyFeesStatus(role, email, month);
+                                              @RequestParam String email,@RequestParam String month,
+                                              @RequestParam(required = false) String branchCode) {
+        return feesService.getMonthlyFeesStatus(role, email, month,branchCode);
     }
 
 }

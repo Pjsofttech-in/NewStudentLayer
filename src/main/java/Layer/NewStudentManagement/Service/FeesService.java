@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Service;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFees;
+import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,5 +21,5 @@ public interface FeesService
     Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size);
     FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters);
     FeesRevenueProjection getFeesRevenueByStudentId(String role, String email,Long studentId);
-    Map<String, Object> getMonthlyFeesStatus(String role, String email, String month);
+    Map<String, Object> getMonthlyFeesStatus(String role, String email, String month, @Nullable String branchCodeFilter);
 }

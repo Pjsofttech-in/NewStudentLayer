@@ -36,6 +36,7 @@ public class GroupController
 
     @GetMapping("/getAllGroup")
     public ResponseEntity<Iterable<StudentGroupDTO>> getAllGroup(@RequestParam String role, @RequestParam(required = false) String email,
+                                                                 @RequestParam(required = false) String branchCode,
                                                                  @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {try {
         String token = null;
@@ -43,7 +44,7 @@ public class GroupController
             token = authorizationHeader.substring(7);  // Extract token after "Bearer "
         }
 
-        List<StudentGroupDTO> academicYear = groupService.getAllGroupByName(role, email, token);
+        List<StudentGroupDTO> academicYear = groupService.getAllGroupByName(role, email, branchCode,token);
         return ResponseEntity.ok(academicYear);
     } catch (RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());

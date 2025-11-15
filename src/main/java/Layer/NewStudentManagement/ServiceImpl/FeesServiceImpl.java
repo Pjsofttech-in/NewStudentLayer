@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Pagination.StudentFeesSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.FeesService;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -301,8 +302,52 @@ public class FeesServiceImpl implements FeesService
 
     @Override
     public FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters) {
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            checkPermission(role, email, "GET");
+
+            if (filters.getBranchCode() != null && !filters.getBranchCode().isBlank()) {
+                return calculateRevenue(filters.getBranchCode(), timeFrame, startDate, endDate, filters);
+            }
+
+            List<String> allBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            Double totalFees = 0.0;
+            Double totalPaid = 0.0;
+            Double totalPending = 0.0;
+
+            for (String branch : allBranchCodes) {
+                FeesRevenueProjection rp = calculateRevenue(branch, timeFrame, startDate, endDate, filters);
+
+                totalFees += rp.getTotalFees() != null ? rp.getTotalFees() : 0.0;
+                totalPaid += rp.getTotalPaid() != null ? rp.getTotalPaid() : 0.0;
+                totalPending += rp.getTotalPending() != null ? rp.getTotalPending() : 0.0;
+            }
+
+            double finalFees = totalFees;
+            double finalPaid = totalPaid;
+            double finalPending = totalPending;
+
+            return new FeesRevenueProjection() {
+                @Override
+                public Double getTotalFees() { return finalFees; }
+
+                @Override
+                public Double getTotalPaid() { return finalPaid; }
+
+                @Override
+                public Double getTotalPending() { return finalPending; }
+            };
+        }
+
         checkPermission(role, email, "Get");
+
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        return calculateRevenue(branchCode, timeFrame, startDate, endDate, filters);
+    }
+    private FeesRevenueProjection calculateRevenue(String branchCode, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters) {
 
         LocalDate calculatedStartDate = null;
         LocalDate calculatedEndDate = LocalDate.now();
@@ -317,14 +362,8 @@ public class FeesServiceImpl implements FeesService
                     case "7days" -> calculatedStartDate = calculatedEndDate.minusDays(6);
                     case "30days" -> calculatedStartDate = calculatedEndDate.minusDays(29);
                     case "365days" -> calculatedStartDate = calculatedEndDate.minusDays(364);
-                    case "all" -> {
-                        calculatedStartDate = null; // no filter
-                        calculatedEndDate = null;
-                    }
-                    default -> {
-                        calculatedStartDate = null;
-                        calculatedEndDate = null;
-                    }
+                    case "all" -> { calculatedStartDate = null; calculatedEndDate = null; }
+                    default -> { calculatedStartDate = null; calculatedEndDate = null; }
                 }
             }
         } else {
@@ -332,7 +371,10 @@ public class FeesServiceImpl implements FeesService
             calculatedEndDate = endDate;
         }
 
-        Specification<StudentFees> spec = StudentFeesSpecification.withFilters(branchCode, calculatedStartDate, calculatedEndDate, filters);
+        filters.setBranchCode(branchCode);
+
+        Specification<StudentFees> spec =
+                StudentFeesSpecification.withFilters(branchCode, calculatedStartDate, calculatedEndDate, filters);
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Tuple> cq = cb.createTupleQuery();
@@ -352,20 +394,25 @@ public class FeesServiceImpl implements FeesService
         return new FeesRevenueProjection() {
             @Override
             public Double getTotalFees() {
-                return result.get("totalFees", Double.class);
+                Double v = result.get("totalFees", Double.class);
+                return v != null ? v : 0.0;
             }
 
             @Override
             public Double getTotalPaid() {
-                return result.get("totalPaid", Double.class);
+                Double v = result.get("totalPaid", Double.class);
+                return v != null ? v : 0.0;
             }
 
             @Override
             public Double getTotalPending() {
-                return result.get("totalPending", Double.class);
+                Double v = result.get("totalPending", Double.class);
+                return v != null ? v : 0.0;
             }
         };
     }
+
+
 
     @Override
     public FeesRevenueProjection getFeesRevenueByStudentId(String role, String email, Long studentId)
@@ -375,11 +422,50 @@ public class FeesServiceImpl implements FeesService
     }
 
     @Override
-    public Map<String, Object> getMonthlyFeesStatus(String role, String email,String month)
+    public Map<String, Object> getMonthlyFeesStatus(String role, String email, String month,
+                                                    @Nullable String branchCodeFilter)
     {
         checkPermission(role, email, "Get");
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branches found for this institute");
+            }
+            if (branchCodeFilter != null && !branchCodeFilter.isEmpty()) {
+
+                if (!branchCodes.contains(branchCodeFilter)) {
+                    throw new RuntimeException("Invalid branchCode for this Superadmin");
+                }
+
+                return calculateMonthlyStatusForBranch(month, branchCodeFilter);
+            }
+
+            double totalScheduled = 0.0;
+            double totalPaid = 0.0;
+            double totalPending = 0.0;
+
+            for (String brCode : branchCodes) {
+                Map<String, Object> singleBranchData = calculateMonthlyStatusForBranch(month, brCode);
+
+                totalScheduled += (double) singleBranchData.get("totalScheduled");
+                totalPaid += (double) singleBranchData.get("totalPaid");
+                totalPending += (double) singleBranchData.get("totalPending");
+            }
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("month", month);
+            response.put("totalScheduled", totalScheduled);
+            response.put("totalPaid", totalPaid);
+            response.put("totalPending", totalPending);
+
+            return response;
+        }
+
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        List<StudentFeeSchedule> schedules = feesScheduleRepository.findByMonthAndBranchCode(month,branchCode);
+        List<StudentFeeSchedule> schedules = feesScheduleRepository.findByMonthAndBranchCode(month, branchCode);
 
         double totalScheduled = 0.0;
         double totalPaid = 0.0;
@@ -389,7 +475,7 @@ public class FeesServiceImpl implements FeesService
             double scheduleAmount = schedule.getCollectAmount() != null ? schedule.getCollectAmount() : 0.0;
             totalScheduled += scheduleAmount;
 
-            List<StudentFeesCollect> collects = feesCollectRepository.findByScheduleAndBranchCode(schedule,branchCode);
+            List<StudentFeesCollect> collects = feesCollectRepository.findByScheduleAndBranchCode(schedule, branchCode);
             double paidAmount = collects.stream()
                     .mapToDouble(c -> c.getAmount() != null ? c.getAmount() : 0.0)
                     .sum();
@@ -406,6 +492,38 @@ public class FeesServiceImpl implements FeesService
 
         return response;
     }
+
+    private Map<String, Object> calculateMonthlyStatusForBranch(String month, String branchCode) {
+
+        List<StudentFeeSchedule> schedules = feesScheduleRepository.findByMonthAndBranchCode(month, branchCode);
+
+        double totalScheduled = 0.0;
+        double totalPaid = 0.0;
+        double totalPending = 0.0;
+
+        for (StudentFeeSchedule schedule : schedules) {
+            double scheduleAmount = schedule.getCollectAmount() != null ?
+                    schedule.getCollectAmount() : 0.0;
+            totalScheduled += scheduleAmount;
+
+            List<StudentFeesCollect> collects = feesCollectRepository.findByScheduleAndBranchCode(schedule, branchCode);
+            double paidAmount = collects.stream()
+                    .mapToDouble(c -> c.getAmount() != null ? c.getAmount() : 0.0)
+                    .sum();
+
+            totalPaid += paidAmount;
+            totalPending += (scheduleAmount - paidAmount);
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalScheduled", totalScheduled);
+        response.put("totalPaid", totalPaid);
+        response.put("totalPending", totalPending);
+
+        return response;
+    }
+
+
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {
         StudentFeesDTO dto = new StudentFeesDTO();

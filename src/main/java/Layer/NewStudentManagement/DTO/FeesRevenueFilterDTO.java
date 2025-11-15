@@ -20,4 +20,5 @@ public class FeesRevenueFilterDTO {
     private String feesCollectionType;
     private String month;
     private Long year;
+    private String branchCode;
 }

@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Service;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
+import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDate;
@@ -15,12 +16,12 @@ public interface FeesCollectService
     List<FeesCollectDTO> getAllCollectDataByStudentFeesID(Long fid,String role,String email);
     List<FeesCollectDTO> getCollectedFeesByStudentId(String role, String email,Long studentId);
     FeesCollectDTO getCollectedFeesById(String role, String email, Long id);
-    List<Map<String, Object>> getReportByYear(String role, String email);
-    List<Map<String, Object>> getReportByMonth(String role, String email,int year);
+    List<Map<String, Object>> getReportByYear(String role, String email, @Nullable String branchCodeFilter);
+    List<Map<String, Object>> getReportByMonth(String role, String email,int year,@Nullable String branchCodeFilter);
     List<Map<String, Object>> getReportByStandard(String role, String email);
 
-    List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email, String institutionType);
-    Map<String, Double> getFeesRevenueByBank(String role,String email);
+    List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email,@Nullable String branchCode, String institutionType, Integer year);
+    Map<String, Double> getFeesRevenueByBank(String role,String email,@Nullable String branchCodeFilter);
     Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(
             String role, String email, FeesFilterDTO filterDTO, String timeFrame, LocalDate startDate, LocalDate endDate, int page, int size);
 

@@ -10,14 +10,12 @@ import Layer.NewStudentManagement.Repository.GroupRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.GroupService;
 import io.jsonwebtoken.Claims;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,8 +97,8 @@ public class GroupServiceImpl implements GroupService
     }
 
     @Override
-    public List<StudentGroupDTO> getAllGroupByName(String role, String email,String token) {
-        String branchCode;
+    public List<StudentGroupDTO> getAllGroupByName(String role, String email, @Nullable String branchCode, String token) {
+        List<StudentGroup> groups = new ArrayList<>();
 
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
@@ -111,20 +109,41 @@ public class GroupServiceImpl implements GroupService
             }
 
             branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
+            groups = groupRepository.getAllByBranchCode(branchCode);
+
+        } else if ("SUPERADMIN".equalsIgnoreCase(role)) {
+            if (!staffService.hasPermission(role, email, "GET")) {
+                throw new RuntimeException("You don't have permission or email not found for SuperAdmin: " + email);
+            }
+
+            if (branchCode != null && !branchCode.trim().isEmpty()) {
+                groups = groupRepository.getAllByBranchCode(branchCode);
+            } else {
+                List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+                if (branchCodes == null || branchCodes.isEmpty()) {
+                    throw new RuntimeException("No branches found for institute email: " + email);
+                }
+
+                for (String code : branchCodes) {
+                    List<StudentGroup> branchGroups = groupRepository.getAllByBranchCode(code);
+                    if (branchGroups != null && !branchGroups.isEmpty()) {
+                        groups.addAll(branchGroups);
+                    }
+                }
+            }
 
         } else {
-            if (!staffService.hasPermission(role, email, "Get")) {
+            if (!staffService.hasPermission(role, email, "GET")) {
                 throw new RuntimeException("You don't have permission to get group");
             }
 
             branchCode = staffService.fetchBranchCodeByRole(role, email);
-        }
+            if (branchCode == null || branchCode.trim().isEmpty()) {
+                throw new RuntimeException("Branch code not found for given role and email.");
+            }
 
-        if (branchCode == null || branchCode.trim().isEmpty()) {
-            throw new RuntimeException("Branch code not found for given role and email.");
+            groups = groupRepository.getAllByBranchCode(branchCode);
         }
-
-        List<StudentGroup> groups = groupRepository.getAllByBranchCode(branchCode);
 
         if (groups == null || groups.isEmpty()) {
             return Collections.emptyList();
