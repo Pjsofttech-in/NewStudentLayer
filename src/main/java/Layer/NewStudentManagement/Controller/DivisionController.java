@@ -23,9 +23,10 @@ public class DivisionController
     }
 
     @GetMapping("/getAllDivision")
-    public ResponseEntity<Iterable<StudentDivisionDTO>> getAllDivision(@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<Iterable<StudentDivisionDTO>> getAllDivision(@RequestParam String role, @RequestParam String email,
+                                                                       @RequestParam(required = false) String branchCode)
     {
-        Iterable<StudentDivisionDTO> divisions = divisionService.getAllDivision(role,email);
+        Iterable<StudentDivisionDTO> divisions = divisionService.getAllDivision(role,email,branchCode);
         return ResponseEntity.ok(divisions);
     }
     @GetMapping("/getDivisionById/{id}")

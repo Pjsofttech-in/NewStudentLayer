@@ -4,9 +4,11 @@ import Layer.NewStudentManagement.DTO.StudentDivisionDTO;
 import Layer.NewStudentManagement.Entity.StudentDivision;
 import Layer.NewStudentManagement.Repository.DivisionRepository;
 import Layer.NewStudentManagement.Service.DivisionService;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,14 +73,52 @@ public class DivisionServiceImpl implements DivisionService
     }
 
     @Override
-    public List<StudentDivisionDTO> getAllDivision(String role, String email)
+    public List<StudentDivisionDTO> getAllDivision(String role, String email, @Nullable String branchCodeFilter)
     {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to get division");
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for this Superadmin");
+            }
+
+            if (branchCodeFilter != null && !branchCodeFilter.isBlank()) {
+
+                if (!branchCodes.contains(branchCodeFilter)) {
+                    throw new RuntimeException("Invalid branchCode for this Superadmin");
+                }
+
+                List<StudentDivision> filteredDivisions =
+                        divisionRepository.findAllByBranchCode(branchCodeFilter);
+
+                return filteredDivisions.stream()
+                        .map(this::mapToDivisionDTO)
+                        .collect(Collectors.toList());
+            }
+
+            List<StudentDivisionDTO> finalList = new ArrayList<>();
+
+            for (String brCode : branchCodes) {
+
+                List<StudentDivision> divisions =
+                        divisionRepository.findAllByBranchCode(brCode);
+
+                divisions.stream()
+                        .map(this::mapToDivisionDTO)
+                        .forEach(finalList::add);
+            }
+
+            return finalList;
+        }
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
         List<StudentDivision> divisions = divisionRepository.findAllByBranchCode(branchCode);
+
         return divisions.stream()
                 .map(this::mapToDivisionDTO)
                 .collect(Collectors.toList());
