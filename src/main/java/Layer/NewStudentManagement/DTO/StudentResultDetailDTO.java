@@ -14,5 +14,7 @@ public class StudentResultDetailDTO
     private Long subjectId;
     private String subjectName;
     private Integer maxMarks;
+    private Integer passingMarks;
     private Integer obtainedMarks;
+    private String status;
 }

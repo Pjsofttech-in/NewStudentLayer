@@ -14,6 +14,7 @@ public class SubjectMarksDTO
     private Long id;
     private String subjectName;
     private Integer maxMarks;
+    private Integer passingMarks;
     private Long classRoomId;
     private String createdByEmail;
     private String role;

@@ -20,6 +20,8 @@ public class StudentResultDetail
 
     private Integer obtainedMarks;
 
+    private String status;
+
     @Email
     private String createdByEmail;
     private String role;

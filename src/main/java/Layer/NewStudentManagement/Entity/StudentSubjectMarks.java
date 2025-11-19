@@ -20,7 +20,7 @@ public class StudentSubjectMarks
     private Long id;
 
     private String subjectName;
-
+    private Integer passingMarks;
     private Integer maxMarks;
 
     @Email

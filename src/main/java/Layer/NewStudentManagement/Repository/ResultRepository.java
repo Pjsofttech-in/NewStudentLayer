@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.Repository;
 import Layer.NewStudentManagement.Entity.StudentExam;
 import Layer.NewStudentManagement.Entity.StudentResult;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ResultRepository extends JpaRepository<StudentResult,Long>
+public interface ResultRepository extends JpaRepository<StudentResult,Long>, JpaSpecificationExecutor<StudentResult>
 {
 
     @Query("SELECT s FROM StudentResult s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")

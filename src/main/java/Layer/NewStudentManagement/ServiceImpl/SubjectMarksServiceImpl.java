@@ -97,6 +97,7 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
 
         existing.setSubjectName(updated.getSubjectName());
         existing.setMaxMarks(updated.getMaxMarks());
+        existing.setPassingMarks(updated.getPassingMarks());
         StudentSubjectMarks subjectMarks = subjectMarksRepository.save(existing);
         return subjectMapToDto(subjectMarks);
     }
@@ -133,6 +134,7 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
         dto.setId(subject.getId());
         dto.setSubjectName(subject.getSubjectName());
         dto.setMaxMarks(subject.getMaxMarks());
+        dto.setPassingMarks(subject.getPassingMarks());
         dto.setCreatedByEmail(subject.getCreatedByEmail());
         if (subject.getClassRoom() != null) {
             dto.setClassRoomId(subject.getClassRoom().getId());

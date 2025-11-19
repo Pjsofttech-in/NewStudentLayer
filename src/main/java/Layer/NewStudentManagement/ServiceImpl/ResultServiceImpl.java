@@ -3,10 +3,14 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.StudentResultDTO;
 import Layer.NewStudentManagement.DTO.StudentResultDetailDTO;
 import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Pagination.StudentResultSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ResultService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -63,15 +67,21 @@ public class ResultServiceImpl implements ResultService
 
                 int obtained = detail.getObtainedMarks() != null ? detail.getObtainedMarks() : 0;
                 totalObtained += obtained;
-
                 Long subjectId = detail.getSubject().getId();
                 StudentSubjectMarks subject = subjectMarksRepository.findById(subjectId)
                         .orElseThrow(() -> new RuntimeException("Subject not found with id: " + subjectId));
 
-                // set managed subject
                 detail.setSubject(subject);
 
                 totalMax += subject.getMaxMarks();
+
+                Integer passingMarks = subject.getPassingMarks() != null ? subject.getPassingMarks() : 0;
+
+                if (obtained >= passingMarks) {
+                    detail.setStatus("Pass");
+                } else {
+                    detail.setStatus("Fail");
+                }
             }
         }
 
@@ -205,21 +215,6 @@ public class ResultServiceImpl implements ResultService
     }
 
 
-//    @Override
-//    public List<StudentResultDTO> getResultsByClassRoom(Long classRoomId, String role, String email)
-//    {
-//        if (!staffService.hasPermission(role, email, "GET")) {
-//            throw new RuntimeException("You don't have permission to view student results");
-//        }
-//        if (role.equalsIgnoreCase("STUDENT")) {
-//            throw new RuntimeException("Students are not allowed to view results For class!");
-//        }
-//        List<StudentResult> results = resultRepository.findByClassRoomId(classRoomId);
-//        return results.stream()
-//                .map(this::mapToResultDto)
-//                .collect(Collectors.toList());
-//    }
-
     @Override
     public List<StudentResultDTO> getResultsByClassRoom(String role, String email, Long examId, Long classRoomId) {
 
@@ -261,6 +256,28 @@ public class ResultServiceImpl implements ResultService
     }
 
 
+    @Override
+    public Page<StudentResultDTO> getResults(Long classRoomId, String studentName, String examName,
+                                             String status, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<StudentResult> results = resultRepository.findAll(
+                StudentResultSpecification.filterBy(
+                        classRoomId, studentName, examName, status
+                ),
+                pageable
+        );
+
+        return mapToResultDto(results); // now correct
+    }
+
+
+
+    private Page<StudentResultDTO> mapToResultDto(Page<StudentResult> results) {
+        return results.map(this::mapToResultDto);
+    }
+
     private StudentResultDTO mapToResultDto(StudentResult result) {
         StudentResultDTO dto = new StudentResultDTO();
         dto.setId(result.getId());
@@ -278,7 +295,9 @@ public class ResultServiceImpl implements ResultService
                     d.setSubjectId(detail.getSubject().getId());
                     d.setSubjectName(detail.getSubject().getSubjectName());
                     d.setMaxMarks(detail.getSubject().getMaxMarks());
+                    d.setPassingMarks(detail.getSubject().getPassingMarks());
                     d.setObtainedMarks(detail.getObtainedMarks());
+                    d.setStatus(detail.getStatus());
                     return d;
                 })
                 .collect(Collectors.toList());
@@ -319,7 +338,6 @@ public class ResultServiceImpl implements ResultService
             result.setDetails(new ArrayList<>());
         }
 
-        // check if detail already exists for this subject
         StudentResultDetail detail = result.getDetails().stream()
                 .filter(d -> d.getSubject().getId().equals(subjectId))
                 .findFirst()
@@ -335,6 +353,7 @@ public class ResultServiceImpl implements ResultService
                 });
 
         detail.setObtainedMarks(obtainedMarks);
+
 
         resultRepository.save(result);
 

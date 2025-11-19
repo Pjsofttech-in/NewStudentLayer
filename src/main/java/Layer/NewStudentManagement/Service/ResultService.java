@@ -2,6 +2,8 @@ package Layer.NewStudentManagement.Service;
 
 import Layer.NewStudentManagement.DTO.StudentResultDTO;
 import Layer.NewStudentManagement.Entity.StudentResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,4 +20,7 @@ public interface ResultService
     StudentResultDTO submitMark(Long studentId, Long examId, Long subjectId,
                                 Integer obtainedMarks, String role, String email);
     List<StudentResultDTO> getResultsByClassRoom(String role, String email,Long examId, Long classRoomId);
+
+    Page<StudentResultDTO> getResults(Long classRoomId, String studentName, String examName,
+                                   String status, int page, int size);
 }

@@ -5,6 +5,9 @@ import Layer.NewStudentManagement.DTO.SubmitMarkRequest;
 import Layer.NewStudentManagement.Entity.StudentResult;
 import Layer.NewStudentManagement.Service.ResultService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -115,4 +118,18 @@ public class ResultController
         List<StudentResultDTO> results = resultService.getResultsByClassRoom(role,email,examId, classRoomId);
         return ResponseEntity.ok(results);
     }
+
+
+    @GetMapping("/getAllResultsByClassRoomAdmin")
+    public Page<StudentResultDTO> getResultsByClassRoom(
+            @RequestParam Long classRoomId,
+            @RequestParam(required = false) String studentName,
+            @RequestParam(required = false) String examName,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return resultService.getResults(classRoomId, studentName, examName, status, page, size);
+    }
+
 }
