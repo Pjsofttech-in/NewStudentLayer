@@ -1,6 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
-import Layer.NewStudentManagement.DTO.InstituteClientWrapperResponse;
+
 import Layer.NewStudentManagement.DTO.InstituteLoginResponse;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
