@@ -443,8 +443,14 @@ public class AttendanceServiceImpl implements AttendanceService {
 
 
     @Override
-    public AttendanceCountDTO getAttendanceCountByTimeFrame(Long classroomId, String timeFrame,
-                                                            LocalDate customStartDate, LocalDate customEndDate) {
+    public AttendanceCountDTO getAttendanceCountByTimeFrame(
+            Long classroomId, String timeFrame,
+            LocalDate customStartDate, LocalDate customEndDate) {
+
+        if (timeFrame == null) {
+            throw new IllegalArgumentException("timeFrame cannot be null.");
+        }
+
         LocalDate endDate = LocalDate.now();
         StudentClassRoom classroom = classRoomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found"));
@@ -457,7 +463,7 @@ public class AttendanceServiceImpl implements AttendanceService {
                 startDate = endDate.isBefore(classroomCreatedDate) ? classroomCreatedDate : endDate;
             }
             case "7days" -> {
-                LocalDate tempStart = endDate.minusDays(6); // last 7 days including today
+                LocalDate tempStart = endDate.minusDays(6);
                 startDate = tempStart.isBefore(classroomCreatedDate) ? classroomCreatedDate : tempStart;
             }
             case "30days" -> {
@@ -470,16 +476,20 @@ public class AttendanceServiceImpl implements AttendanceService {
             }
             case "custom" -> {
                 if (customStartDate == null || customEndDate == null) {
-                    throw new IllegalArgumentException("For 'custom' timeFrame, both customStartDate and customEndDate must be provided.");
+                    throw new IllegalArgumentException(
+                            "For 'custom' timeFrame, both customStartDate and customEndDate must be provided."
+                    );
                 }
                 startDate = customStartDate.isBefore(classroomCreatedDate) ? classroomCreatedDate : customStartDate;
                 endDate = customEndDate.isAfter(LocalDate.now()) ? LocalDate.now() : customEndDate;
             }
-            default -> throw new IllegalArgumentException("Invalid timeFrame. Use 'today', '7days', '30days', '365days', or 'custom'.");
+            default -> throw new IllegalArgumentException(
+                    "Invalid timeFrame. Use 'today', '7days', '30days', '365days', or 'custom'."
+            );
         }
 
         long numberOfDays = ChronoUnit.DAYS.between(startDate, endDate) + 1;
-        if (numberOfDays < 0) numberOfDays = 0; // prevent negative values
+        if (numberOfDays < 0) numberOfDays = 0;
 
         List<StudentEntity> students = studentRepository.findByClassRoomId(classroomId);
         long totalStudents = students.size();
