@@ -344,16 +344,16 @@ public class ResultServiceImpl implements ResultService
     @Transactional
     public StudentResultDTO submitMark(Long studentId, Long examId, Long subjectId,
                                        Integer obtainedMarks, String role, String email) {
+
         if (!staffService.hasPermission(role, email, "POST")) {
             throw new RuntimeException("No permission");
         }
 
-        // validate teacher teaches this subject
         StudentExamSubject examSubject = examSubjectRepository
                 .findByExamIdAndSubjectId(examId, subjectId)
                 .orElseThrow(() -> new RuntimeException("Exam or subject not found"));
 
-        // find or create StudentResult
+        // Fetch or create result
         StudentResult result = resultRepository.findByStudentIdAndExamId(studentId, examId)
                 .orElseGet(() -> {
                     StudentResult r = new StudentResult();
@@ -362,15 +362,15 @@ public class ResultServiceImpl implements ResultService
                     r.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
                     r.setCreatedByEmail(email);
                     r.setRole(role);
-                    r.setDetails(new ArrayList<>());   // ✅ init here
+                    r.setDetails(new ArrayList<>());
                     return r;
                 });
 
-        // safeguard
         if (result.getDetails() == null) {
             result.setDetails(new ArrayList<>());
         }
 
+        // Check if detail exists or create new
         StudentResultDetail detail = result.getDetails().stream()
                 .filter(d -> d.getSubject().getId().equals(subjectId))
                 .findFirst()
@@ -381,31 +381,47 @@ public class ResultServiceImpl implements ResultService
                     d.setBranchCode(result.getBranchCode());
                     d.setCreatedByEmail(email);
                     d.setRole(role);
-                    result.getDetails().add(d);  // ✅ safe now
+                    result.getDetails().add(d);
                     return d;
                 });
 
+        // Set obtained marks
         detail.setObtainedMarks(obtainedMarks);
 
+        Integer passingMarks = detail.getSubject().getPassingMarks() != null
+                ? detail.getSubject().getPassingMarks()
+                : 0;
+
+        if (obtainedMarks >= passingMarks) {
+            detail.setStatus("Pass");
+        } else {
+            detail.setStatus("Fail");
+        }
+
+        int totalObtained = result.getDetails().stream()
+                .mapToInt(d -> d.getObtainedMarks() != null ? d.getObtainedMarks() : 0)
+                .sum();
+
+        int totalMax = result.getDetails().stream()
+                .mapToInt(d -> d.getSubject().getMaxMarks())
+                .sum();
+
+        double percentage = totalMax > 0 ? (totalObtained * 100.0 / totalMax) : 0.0;
+
+        result.setTotalObtained(totalObtained);
+        result.setTotalMax(totalMax);
+        result.setPercentage(percentage);
+
+        boolean allPass = result.getDetails().stream()
+                .allMatch(d -> "Pass".equalsIgnoreCase(d.getStatus()));
+
+        result.setOverAllStatus(allPass ? "Pass" : "Fail");
 
         resultRepository.save(result);
 
-        int examSubjectsCount = examSubjectRepository.countByExamId(examId);
-        if (result.getDetails().size() == examSubjectsCount) {
-            int totalObtained = result.getDetails().stream()
-                    .mapToInt(d -> d.getObtainedMarks() != null ? d.getObtainedMarks() : 0)
-                    .sum();
-            int totalMax = result.getDetails().stream()
-                    .mapToInt(d -> d.getSubject().getMaxMarks())
-                    .sum();
-            result.setTotalObtained(totalObtained);
-            result.setTotalMax(totalMax);
-            result.setPercentage(totalMax > 0 ? (totalObtained * 100.0 / totalMax) : 0.0);
-            resultRepository.save(result);
-        }
-
         return mapToResultDto(result);
     }
+
 
 
 }
