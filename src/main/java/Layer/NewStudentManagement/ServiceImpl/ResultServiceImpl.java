@@ -229,35 +229,42 @@ public class ResultServiceImpl implements ResultService
             throw new RuntimeException("You don't have permission to view student results");
         }
 
-        // 1. Fetch all students in the classroom
         List<StudentEntity> students = studentRepository.findByClassRoomId(classRoomId);
-
-        // 2. Fetch all results for this exam & classroom
         List<StudentResult> results = resultRepository.findByExamAndClassRoom(examId, classRoomId);
 
-        // 3. Map results by studentId for quick lookup
         Map<Long, StudentResult> resultMap = results.stream()
                 .collect(Collectors.toMap(r -> r.getStudent().getId(), r -> r));
 
-        // 4. Build final list
         return students.stream().map(student -> {
+
+            // default dto
             StudentResultDTO dto = new StudentResultDTO();
             dto.setStudentId(student.getId());
             dto.setStudentName(student.getFullName());
+            dto.setExamId(examId);
+            dto.setExamName("");
+            dto.setTotalObtained(0);
+            dto.setTotalMax(0);
+            dto.setPercentage(0.0);
+            dto.setDetails(Collections.emptyList());
+            dto.setOverAllStatus("Not Attempted");
 
+            // If student has result
             if (resultMap.containsKey(student.getId())) {
-
                 StudentResult result = resultMap.get(student.getId());
-                dto = mapToResultDto(result); // use your existing mapper
-            } else {
-                // student has no result → return empty/default
-                dto.setExamId(examId);
-                dto.setExamName(""); // optional if you want to include exam name
-                dto.setTotalObtained(0);
-                dto.setTotalMax(0);
-                dto.setPercentage(0.0);
-                dto.setDetails(Collections.emptyList());
+
+                StudentResultDTO mapped = mapToResultDto(result);
+
+                // merge mapped fields
+                dto.setId(mapped.getId());
+                dto.setExamName(mapped.getExamName());
+                dto.setOverAllStatus(mapped.getOverAllStatus());
+                dto.setTotalObtained(mapped.getTotalObtained());
+                dto.setTotalMax(mapped.getTotalMax());
+                dto.setPercentage(mapped.getPercentage());
+                dto.setDetails(mapped.getDetails());
             }
+
             return dto;
         }).toList();
     }
