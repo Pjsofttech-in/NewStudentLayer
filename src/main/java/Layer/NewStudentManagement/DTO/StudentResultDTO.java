@@ -19,6 +19,9 @@ public class StudentResultDTO
     private String studentName;
     private Long examId;
     private String examName;
+    private String examType;
+    private Integer rollNo;
+    private String division;
     private String overAllStatus;
     private Integer totalObtained;
     private Integer totalMax;

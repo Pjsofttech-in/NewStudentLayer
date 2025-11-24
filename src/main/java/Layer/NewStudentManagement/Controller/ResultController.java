@@ -125,11 +125,11 @@ public class ResultController
             @RequestParam Long classRoomId,
             @RequestParam(required = false) String studentName,
             @RequestParam(required = false) String examName,
-            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String overAllStatus,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return resultService.getResults(classRoomId, studentName, examName, status, page, size);
+        return resultService.getResults(classRoomId, studentName, examName, overAllStatus, page, size);
     }
 
 }
