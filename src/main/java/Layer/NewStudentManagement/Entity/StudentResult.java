@@ -32,6 +32,7 @@ public class StudentResult
     private Integer totalObtained;
     private Integer totalMax;
     private Double percentage;
+    private String overAllStatus;
     @Email
     private String createdByEmail;
     private String role;

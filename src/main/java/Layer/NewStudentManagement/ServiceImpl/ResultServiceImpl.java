@@ -54,6 +54,7 @@ public class ResultServiceImpl implements ResultService
         result.setCreatedByEmail(email);
         result.setBranchCode(branchCode);
 
+        boolean allPass = true;
         int totalObtained = 0;
         int totalMax = 0;
 
@@ -81,6 +82,7 @@ public class ResultServiceImpl implements ResultService
                     detail.setStatus("Pass");
                 } else {
                     detail.setStatus("Fail");
+                    allPass = false;
                 }
             }
         }
@@ -89,6 +91,11 @@ public class ResultServiceImpl implements ResultService
         result.setTotalMax(totalMax);
         result.setPercentage(totalMax > 0 ? (totalObtained * 100.0 / totalMax) : 0.0);
 
+        if (allPass) {
+            result.setOverAllStatus("Pass");
+        } else {
+            result.setOverAllStatus("Fail");
+        }
         StudentResult result1 = resultRepository.save(result);
         return mapToResultDto(result1);
     }
@@ -239,7 +246,7 @@ public class ResultServiceImpl implements ResultService
             dto.setStudentName(student.getFullName());
 
             if (resultMap.containsKey(student.getId())) {
-                // student has result → map normally
+
                 StudentResult result = resultMap.get(student.getId());
                 dto = mapToResultDto(result); // use your existing mapper
             } else {
@@ -286,8 +293,27 @@ public class ResultServiceImpl implements ResultService
         dto.setExamId(result.getExam().getId());
         dto.setExamName(result.getExam().getExamName());
         dto.setTotalObtained(result.getTotalObtained());
+        dto.setOverAllStatus(result.getOverAllStatus());
         dto.setTotalMax(result.getTotalMax());
         dto.setPercentage(result.getPercentage());
+
+        String overallStatus = result.getOverAllStatus();
+
+        if (overallStatus == null || overallStatus.trim().isEmpty()) {
+            boolean allPass = true;
+
+            for (StudentResultDetail detail : result.getDetails()) {
+                if (!"Pass".equalsIgnoreCase(detail.getStatus())) {
+                    allPass = false;
+                    break;
+                }
+            }
+
+            overallStatus = allPass ? "Pass" : "Fail";
+        }
+
+        dto.setOverAllStatus(overallStatus);
+
 
         List<StudentResultDetailDTO> details = result.getDetails().stream()
                 .map(detail -> {

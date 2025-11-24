@@ -19,6 +19,7 @@ public class StudentResultDTO
     private String studentName;
     private Long examId;
     private String examName;
+    private String overAllStatus;
     private Integer totalObtained;
     private Integer totalMax;
     private Double percentage;
