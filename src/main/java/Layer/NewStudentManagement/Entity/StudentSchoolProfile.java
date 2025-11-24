@@ -30,7 +30,6 @@ public class StudentSchoolProfile
     private String indexNumber;
     private String board;
 
-
     @Email
     private String createdByEmail;
     private String branchCode;

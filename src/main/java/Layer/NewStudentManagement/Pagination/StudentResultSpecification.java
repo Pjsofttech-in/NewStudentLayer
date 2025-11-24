@@ -33,10 +33,8 @@ public class StudentResultSpecification
             // Join details for status
             if (status != null && !status.isBlank()) {
                 predicate = cb.and(predicate,
-                        cb.equal(
-                                root.join("details").get("status"),
-                                status
-                        ));
+                        cb.equal(cb.lower(root.get("overAllStatus")),
+                                status.toLowerCase()));
             }
 
             // Filter by classroom id
