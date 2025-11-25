@@ -8,6 +8,7 @@ import Layer.NewStudentManagement.Security.LoginResponse;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 public interface TeacherService
 {
@@ -22,6 +23,6 @@ public interface TeacherService
     String verifyOtp(String email, String otp);
     String sendOtp(String email);
     List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName,String streamName,String degreeName, String departmentName);
-
+    Map<String, Long> getPassFailCount(String role, String email, Long examId, Long classroomId);
 
 }

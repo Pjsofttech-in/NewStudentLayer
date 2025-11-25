@@ -55,4 +55,17 @@ public interface ResultRepository extends JpaRepository<StudentResult,Long>, Jpa
             "WHERE r.exam.id = :examId AND r.student.classRoom.id = :classRoomId")
     List<StudentResult> findByExamAndClassRoom(@Param("examId") Long examId,
                                                @Param("classRoomId") Long classRoomId);
+
+
+    @Query("""
+            SELECT r.overAllStatus, COUNT(r)
+            FROM StudentResult r
+            WHERE r.exam.id = :examId
+            AND r.student.classRoom.id = :classroomId
+            GROUP BY r.overAllStatus
+            """)
+    List<Object[]> getPassFailCountByExamAndClassroom(
+            @Param("examId") Long examId,
+            @Param("classroomId") Long classroomId
+    );
 }

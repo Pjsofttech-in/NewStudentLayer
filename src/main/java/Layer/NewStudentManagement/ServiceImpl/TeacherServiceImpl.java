@@ -46,6 +46,9 @@ public class TeacherServiceImpl implements TeacherService
     DepartmentRepository departmentRepository;
 
     @Autowired
+    ResultRepository resultRepository;
+
+    @Autowired
     private GraduationTypeRepository graduationTypeRepository;
 
     @Autowired
@@ -400,6 +403,35 @@ public class TeacherServiceImpl implements TeacherService
         return teachers.stream()
                 .map(this::mapToResponseDTO)
                 .toList();
+    }
+
+    @Override
+    public Map<String, Long> getPassFailCount(String role, String email,Long examId, Long classroomId)
+    {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to get Pass/Fail Count");
+        }
+
+        List<Object[]> results =
+                resultRepository.getPassFailCountByExamAndClassroom(examId, classroomId);
+
+        Map<String, Long> response = new HashMap<>();
+
+        response.put("passCount", 0L);
+        response.put("failCount", 0L);
+
+        for (Object[] row : results) {
+            String status = (String) row[0];
+            Long count = (Long) row[1];
+
+            if ("Pass".equalsIgnoreCase(status)) {
+                response.put("passCount", count);
+            } else if ("Fail".equalsIgnoreCase(status)) {
+                response.put("failCount", count);
+            }
+        }
+
+        return response;
     }
 
 

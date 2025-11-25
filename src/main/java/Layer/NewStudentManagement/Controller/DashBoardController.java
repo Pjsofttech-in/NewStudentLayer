@@ -25,6 +25,9 @@ public class DashBoardController
     FeesCollectService feesCollectService;
 
     @Autowired
+    TeacherService teacherService;
+
+    @Autowired
     FeesService feesService;
 
     @Autowired
@@ -181,6 +184,16 @@ public class DashBoardController
                                               @RequestParam String email,@RequestParam String month,
                                               @RequestParam(required = false) String branchCode) {
         return feesService.getMonthlyFeesStatus(role, email, month,branchCode);
+    }
+
+    @GetMapping("/getPassFailCount")
+    public Map<String, Long> getPassFailCount(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam Long examId,
+            @RequestParam Long classroomId
+    ) {
+        return teacherService.getPassFailCount(role,email,examId, classroomId);
     }
 
 }
