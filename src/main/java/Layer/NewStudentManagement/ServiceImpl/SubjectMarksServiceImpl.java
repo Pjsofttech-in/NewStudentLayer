@@ -95,9 +95,17 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
         StudentSubjectMarks existing = subjectMarksRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
 
-        existing.setSubjectName(updated.getSubjectName());
-        existing.setMaxMarks(updated.getMaxMarks());
-        existing.setPassingMarks(updated.getPassingMarks());
+        if (updated.getSubjectName() != null && !updated.getSubjectName().isEmpty()) {
+            existing.setSubjectName(updated.getSubjectName());
+        }
+
+        if (updated.getMaxMarks() != null) {
+            existing.setMaxMarks(updated.getMaxMarks());
+        }
+
+        if (updated.getPassingMarks() != null) {
+            existing.setPassingMarks(updated.getPassingMarks());
+        }
         StudentSubjectMarks subjectMarks = subjectMarksRepository.save(existing);
         return subjectMapToDto(subjectMarks);
     }
