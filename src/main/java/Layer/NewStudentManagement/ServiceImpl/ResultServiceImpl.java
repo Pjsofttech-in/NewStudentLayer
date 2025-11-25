@@ -300,7 +300,6 @@ public class ResultServiceImpl implements ResultService
         dto.setExamId(result.getExam().getId());
         dto.setRollNo(result.getStudent().getRollNo());
         dto.setExamType(result.getExam().getExamType());
-//        dto.setDivision(result.getClass(),;
         dto.setExamName(result.getExam().getExamName());
         dto.setTotalObtained(result.getTotalObtained());
         dto.setOverAllStatus(result.getOverAllStatus());
