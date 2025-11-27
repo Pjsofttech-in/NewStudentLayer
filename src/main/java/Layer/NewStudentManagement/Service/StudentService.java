@@ -73,4 +73,6 @@ public interface StudentService
 
     List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email);
     StudentResponseDTO registerStudent(String role, String email, StudentRegisterRequest request, MultipartFile oldRegisterPhoto, String token);
+    List<UpcomingBirthdayProjection> getUpcomingBirthdays(String role, String email) ;
+
 }

@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.Repository;
 
-import Layer.NewStudentManagement.DTO.ClassRoomStudentCountProjection;
-import Layer.NewStudentManagement.DTO.DataForTcDTO;
-import Layer.NewStudentManagement.DTO.GenderCountResponse;
-import Layer.NewStudentManagement.DTO.StudentCountByGenderDTO;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
@@ -202,5 +200,33 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "WHERE s.branchCode = :branchCode " +
             "GROUP BY s.standard.standardName, s.gender")
     List<Object[]> getRawStudentCountByGenderAndStandard(@Param("branchCode") String branchCode);
+
+    @Query(value = """
+        SELECT DISTINCT
+            s.id AS id,
+            s.full_name AS fullName,
+            s.gender AS gender,
+            CAST(s.date_of_birth AS CHAR) AS dateOfBirth,
+            s.roll_no AS rollNo,
+            s.stream_name AS streamName,
+            s.medium_name AS mediumName,
+            s.group_name AS groupName,
+            s.semister AS semister,
+            s.institution_type AS institutionType,
+            s.classroom_id AS classId,
+            d.division AS division
+        FROM layerstudent.student_entity s
+        JOIN layerstudent.student_class_room c ON c.id = s.classroom_id
+        JOIN layerstudent.student_division d ON d.did = c.division_id
+        JOIN layerstudent.student_class_room_teacher_subject ts ON ts.classroom_id = c.id
+        JOIN layerstudent.student_teacher t ON t.id = ts.teacher_id
+        WHERE t.teacher_email = :teacherEmail
+          AND DATE_FORMAT(s.date_of_birth, '%m-%d')
+              BETWEEN DATE_FORMAT(CURDATE(), '%m-%d')
+              AND DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 30 DAY), '%m-%d')
+        """, nativeQuery = true)
+    List<UpcomingBirthdayProjection> getUpcomingBirthdays(@Param("teacherEmail") String teacherEmail);
+
+
 
 }

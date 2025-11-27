@@ -28,4 +28,12 @@ public interface ClassRoomTeacherSubjectRepository extends JpaRepository<Student
             "WHERE s.classRoom.id = :classroomId")
     List<StudentClassRoomTeacherSubject> findByClassRoomIdWithSubjects(@Param("classroomId") Long classroomId);
 
+    @Query("""
+        SELECT DISTINCT m.classRoom.id
+        FROM StudentClassRoomTeacherSubject m
+        WHERE m.teacher.teacherEmail = :email
+    """)
+    List<Long> getClassroomIdsByTeacherEmail(@Param("email") String teacherEmail);
+
+
 }

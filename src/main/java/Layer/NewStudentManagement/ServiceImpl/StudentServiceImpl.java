@@ -72,6 +72,8 @@ public class StudentServiceImpl implements StudentService {
     private TCDataRepository tcDataRepository;
     @Autowired
     private FeesRepository feesRepository;
+    @Autowired
+    private ClassRoomTeacherSubjectRepository classRoomTeacherSubjectRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
 
@@ -1534,5 +1536,17 @@ public class StudentServiceImpl implements StudentService {
         return mapToDTO(savedStudent);
     }
 
+
+    @Override
+    public  List<UpcomingBirthdayProjection> getUpcomingBirthdays(String role, String email)
+    {
+        checkPermission(role,email,"GET");
+
+            if (email == null || email.isBlank()) {
+                throw new IllegalArgumentException("Teacher email cannot be empty");
+            }
+
+            return studentRepository.getUpcomingBirthdays(email);
+        }
 
 }

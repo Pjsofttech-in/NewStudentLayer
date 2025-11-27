@@ -196,4 +196,13 @@ public class DashBoardController
         return teacherService.getPassFailCount(role,email,examId, classroomId);
     }
 
+    @GetMapping("/getUpcommingBirthday")
+    public ResponseEntity<?> getUpcomingBirthdays(@RequestParam String role, @RequestParam String email)
+    {
+        List<UpcomingBirthdayProjection> list =
+                studentService.getUpcomingBirthdays(role, email);
+
+        return ResponseEntity.ok(list);
+    }
+
 }
