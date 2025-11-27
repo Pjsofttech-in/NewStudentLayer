@@ -15,6 +15,8 @@ public interface UpcomingBirthdayProjection
     String getInstitutionType();
     Long getClassId();
     String getDivision();
+    String getStandard();
+    String getGraduationType();
 
     // SQL returns date as string → Spring converts to LocalDate
     LocalDate getDateOfBirth();

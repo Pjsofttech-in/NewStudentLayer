@@ -202,31 +202,39 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     List<Object[]> getRawStudentCountByGenderAndStandard(@Param("branchCode") String branchCode);
 
     @Query(value = """
-        SELECT DISTINCT
-            s.id AS id,
-            s.full_name AS fullName,
-            s.gender AS gender,
-            CAST(s.date_of_birth AS CHAR) AS dateOfBirth,
-            s.roll_no AS rollNo,
-            s.stream_name AS streamName,
-            s.medium_name AS mediumName,
-            s.group_name AS groupName,
-            s.semister AS semister,
-            s.institution_type AS institutionType,
-            s.classroom_id AS classId,
-            d.division AS division
-        FROM layerstudent.student_entity s
-        JOIN layerstudent.student_class_room c ON c.id = s.classroom_id
-        JOIN layerstudent.student_division d ON d.did = c.division_id
-        JOIN layerstudent.student_class_room_teacher_subject ts ON ts.classroom_id = c.id
-        JOIN layerstudent.student_teacher t ON t.id = ts.teacher_id
-        WHERE t.teacher_email = :teacherEmail
-          AND DATE_FORMAT(s.date_of_birth, '%m-%d')
-              BETWEEN DATE_FORMAT(CURDATE(), '%m-%d')
-              AND DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 30 DAY), '%m-%d')
-        """, nativeQuery = true)
-    List<UpcomingBirthdayProjection> getUpcomingBirthdays(@Param("teacherEmail") String teacherEmail);
+    SELECT DISTINCT
+        s.id AS id,
+        s.full_name AS fullName,
+        s.gender AS gender,
+        CAST(s.date_of_birth AS CHAR) AS dateOfBirth,
+        s.roll_no AS rollNo,
+        s.stream_name AS streamName,
+        s.medium_name AS mediumName,
+        s.group_name AS groupName,
+        s.semister AS semister,
+        s.institution_type AS institutionType,
+        s.classroom_id AS classId,
+        d.division AS division,
+        st.standard_name AS standard,
+        gt.graduation_type AS graduationType      -- CORRECT COLUMN NAME
+    FROM student_entity s
+    JOIN student_class_room c ON c.id = s.classroom_id
+    JOIN student_division d ON d.did = c.division_id
+    JOIN student_class_room_teacher_subject ts ON ts.classroom_id = c.id
+    JOIN student_teacher t ON t.id = ts.teacher_id
 
+    LEFT JOIN student_standard st 
+        ON st.sid = s.standard_id     -- verify your standard table uses sid
+
+    LEFT JOIN student_graduation_type gt 
+        ON gt.id = s.graduation_type_id
+
+    WHERE t.teacher_email = :teacherEmail
+      AND DATE_FORMAT(s.date_of_birth, '%m-%d')
+          BETWEEN DATE_FORMAT(CURDATE(), '%m-%d')
+              AND DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 30 DAY), '%m-%d')
+""", nativeQuery = true)
+    List<UpcomingBirthdayProjection> getUpcomingBirthdays(@Param("teacherEmail") String teacherEmail);
 
 
 }
