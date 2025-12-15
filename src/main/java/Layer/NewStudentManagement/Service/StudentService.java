@@ -21,7 +21,7 @@ public interface StudentService
     StudentDTO getStudentById(Long id, String role, String email);
     StudentResponseDTO updateStudent(Long id, String role, String email, StudentRequest request);
     void deleteStudentById(Long id,String role,String email);
-    Page<StudentResponseDTO> getAllStudent(String role, String email, StudentFilterDTO filter,
+    Page<StudentResponseDTO> getAllStudent(String role, String email,String staffEmail, StudentFilterDTO filter,
                                            String timeFrame, LocalDate customStart, LocalDate customEnd,
                                            Pageable pageable);
     StudentDocumentDTO uploadStudentDocuments(Long studentId, String role, String email, MultipartFile studentPhoto, MultipartFile aadharcardPhoto, MultipartFile pancardPhoto,

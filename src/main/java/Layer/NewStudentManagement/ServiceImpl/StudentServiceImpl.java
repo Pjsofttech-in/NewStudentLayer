@@ -380,7 +380,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Page<StudentResponseDTO> getAllStudent(
-            String role, String email, StudentFilterDTO filter,
+            String role, String email,String staffEmail, StudentFilterDTO filter,
             String timeFrame, LocalDate customStart, LocalDate customEnd,
             Pageable pageable) {
 
@@ -403,7 +403,7 @@ public class StudentServiceImpl implements StudentService {
 
             for (String branchCode : branchCodes) {
                 Specification<StudentEntity> spec =
-                        StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd);
+                        StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd,staffEmail);
 
                 List<StudentEntity> students = studentRepository.findAll(spec);
                 allStudents.addAll(students);
@@ -424,7 +424,7 @@ public class StudentServiceImpl implements StudentService {
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         Specification<StudentEntity> spec =
-                StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd);
+                StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd,staffEmail);
 
         return studentRepository.findAll(spec, pageable)
                 .map(this::mapToDTO);

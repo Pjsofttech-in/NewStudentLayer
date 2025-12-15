@@ -23,10 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -68,22 +65,39 @@ public class StudentController
     }
 
     @PostMapping("/getAllStudents")
-    public ResponseEntity<Page<StudentResponseDTO>> getFilteredStudents(
+    public ResponseEntity<Map<String, Object>> getFilteredStudents(
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam(required = false) String timeFrame,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customStart,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customEnd,
+            @RequestParam(required = false) String staffEmail,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customStart,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customEnd,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "25") int size,
             @RequestBody(required = false) StudentFilterDTO filterDTO
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<StudentResponseDTO> students = studentService.getAllStudent(
-                role, email, filterDTO, timeFrame, customStart, customEnd, pageable
-        );
-        return ResponseEntity.ok(students);
+
+        Page<StudentResponseDTO> studentPage =
+                studentService.getAllStudent(
+                        role, email, staffEmail,
+                        filterDTO, timeFrame, customStart, customEnd, pageable
+                );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", studentPage.getContent());
+        response.put("totalStudentCount", studentPage.getTotalElements());
+        response.put("totalPages", studentPage.getTotalPages());
+        response.put("page", studentPage.getNumber());
+        response.put("size", studentPage.getSize());
+        response.put("first", studentPage.isFirst());
+        response.put("last", studentPage.isLast());
+
+        return ResponseEntity.ok(response); // ✅ FIXED
     }
+
 
 
     @PutMapping("/updateStudent/{id}")

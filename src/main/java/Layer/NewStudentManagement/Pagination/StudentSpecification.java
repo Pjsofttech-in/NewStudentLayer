@@ -17,7 +17,8 @@ public class StudentSpecification {
                                                      String branchCode,
                                                      String timeFrame,
                                                      LocalDate customStart,
-                                                     LocalDate customEnd) {
+                                                     LocalDate customEnd,
+                                                     String staffEmail) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -26,6 +27,12 @@ public class StudentSpecification {
             predicates.add(cb.notEqual(root.get("status"), "Rejected"));
             predicates.add(cb.notEqual(root.get("status"), "Pending"));
 
+            if (staffEmail != null && !staffEmail.trim().isEmpty()) {
+                predicates.add(cb.equal(
+                        root.get("createdByEmail"),
+                        staffEmail.trim()
+                ));
+            }
 
             // Joins to related tables
             Join<StudentEntity, StudentAdditionalInfo> additionalInfoJoin = root.join("additionalInfo", JoinType.LEFT);
