@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -1549,4 +1550,17 @@ public class StudentServiceImpl implements StudentService {
             return studentRepository.getUpcomingBirthdays(email);
         }
 
+    @Override
+    public List<Map<String, Object>> getStaffInfo(String role, String email,String deptEmail) {
+
+        checkPermission(role, email, "GET");
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        if(deptEmail != null  && !deptEmail.isEmpty())
+        {
+            branchCode =null;
+            return staffService.getStaffNamesAndEmails(branchCode,deptEmail);
+        }
+        return staffService.getStaffNamesAndEmails(branchCode,deptEmail);
+
+    }
 }

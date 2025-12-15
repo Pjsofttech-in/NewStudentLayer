@@ -75,4 +75,5 @@ public interface StudentService
     StudentResponseDTO registerStudent(String role, String email, StudentRegisterRequest request, MultipartFile oldRegisterPhoto, String token);
     List<UpcomingBirthdayProjection> getUpcomingBirthdays(String role, String email) ;
 
+    List<Map<String, Object>> getStaffInfo(String role, String email,String deptEmail);
 }

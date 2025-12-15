@@ -289,5 +289,13 @@ public class StudentController
         }
     }
 
+    @GetMapping("/getStaffInfoByBranchCode")
+    public List<Map<String, Object>> getStaffBasicInfo(
+            @RequestParam(required = false) String deptEmail,
+            @RequestParam String role,
+            @RequestParam String email) {
+
+        return studentService.getStaffInfo(role, email,deptEmail);
+    }
 
 }

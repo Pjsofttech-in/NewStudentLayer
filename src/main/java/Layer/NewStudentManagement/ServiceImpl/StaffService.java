@@ -291,4 +291,39 @@ public class StaffService
     }
 
 
+    public List<Map<String, Object>> getStaffNamesAndEmails(String branchCode, String departmentEmail) {
+
+        if ((branchCode == null || branchCode.isBlank()) &&
+                (departmentEmail == null || departmentEmail.isBlank())) {
+            throw new IllegalArgumentException("Either branchCode or departmentEmail must be provided");
+        }
+
+        WebClient.RequestHeadersSpec<?> request;
+
+        if (branchCode != null && !branchCode.isBlank()) {
+            request = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/getStaffbybranchCode")
+                            .queryParam("branchCode", branchCode)
+                            .build());
+        } else {
+            request = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/getStaffbyDeptEmail")
+                            .queryParam("departmentEmail", departmentEmail)
+                            .build());
+        }
+
+        return request
+                .retrieve()
+                .bodyToFlux(Map.class)
+                .map(staff -> Map.of(
+                        "name", staff.get("staffName"),
+                        "email", staff.get("staffEmail")
+                ))
+                .collectList()
+                .block();
+    }
+
+
 }
