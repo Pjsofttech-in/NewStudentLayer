@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -198,8 +199,10 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     @Query("SELECT s.standard.standardName, s.gender, COUNT(s) " +
             "FROM StudentEntity s " +
             "WHERE s.branchCode = :branchCode " +
+            "AND (:academicYear IS NULL OR s.academicYear = :academicYear)"+
             "GROUP BY s.standard.standardName, s.gender")
-    List<Object[]> getRawStudentCountByGenderAndStandard(@Param("branchCode") String branchCode);
+    List<Object[]> getRawStudentCountByGenderAndStandard(@Param("branchCode") String branchCode,
+                                                         @Param("academicYear") String academicYear);
 
     @Query(value = """
     SELECT DISTINCT

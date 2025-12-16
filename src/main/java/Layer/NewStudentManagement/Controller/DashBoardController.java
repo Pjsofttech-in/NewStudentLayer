@@ -142,16 +142,18 @@ public class DashBoardController
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam String institutionType,
-            @RequestParam(required = false) String branchCode) {
+            @RequestParam(required = false) String branchCode,
+            @RequestParam(required = false) String academicYear) {
 
-        return studentService.getStudentCountByCastCategory(role, email, institutionType, branchCode);
+        return studentService.getStudentCountByCastCategory(role, email, institutionType, branchCode,academicYear);
     }
 
     @GetMapping("/getCountByGenderAllStandards")
     public List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(
             @RequestParam String role,
-            @RequestParam String email) {
-        return studentService.getStudentCountByGenderAndAllStandards(role, email);
+            @RequestParam String email,
+            @RequestParam(required = false) String academicYear) {
+        return studentService.getStudentCountByGenderAndAllStandards(role, email,academicYear);
     }
 
     @GetMapping("/getFeesRevenueByBank")

@@ -68,10 +68,10 @@ public interface StudentService
 
     Page<StudentResponseDTO> getStudentsByBranchCode(String role, String email, StudentFilterDTO filter, String timeFrame,
                                                      LocalDate customStart, LocalDate customEnd, Pageable pageable);
-    List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(
-            String role, String email, String institutionType, @Nullable String branchCodeFilter);
+    List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(String role, String email, String institutionType,
+            @Nullable String branchCodeFilter, @Nullable String academicYear);
 
-    List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email);
+    List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email,String academicYear);
     StudentResponseDTO registerStudent(String role, String email, StudentRegisterRequest request, MultipartFile oldRegisterPhoto, String token);
     List<UpcomingBirthdayProjection> getUpcomingBirthdays(String role, String email) ;
 

@@ -1299,7 +1299,11 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(
-            String role, String email, String institutionType, @Nullable String branchCodeFilter) {
+            String role,
+            String email,
+            String institutionType,
+            @Nullable String branchCodeFilter,
+            @Nullable String academicYear) {
 
         checkPermission(role, email, "Get");
 
@@ -1320,8 +1324,11 @@ public class StudentServiceImpl implements StudentService {
 
             for (String branchCode : branchCodes) {
                 List<StudentCountByCastCategoryDTO> tempList =
-                        religionRepo.getStudentCountByCastCategory(branchCode,
-                                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null);
+                        religionRepo.getStudentCountByCastCategory(
+                                branchCode,
+                                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                                academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
+                        );
 
                 resultList.addAll(tempList);
             }
@@ -1336,18 +1343,24 @@ public class StudentServiceImpl implements StudentService {
 
         return religionRepo.getStudentCountByCastCategory(
                 branchCode,
-                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null
+                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
         );
     }
-
-
     @Override
-    public List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email) {
+    public List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email, @Nullable String academicYear)
+    {
         checkPermission(role, email, "Get");
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        List<Object[]> rawData = studentRepository.getRawStudentCountByGenderAndStandard(branchCode);
+        List<Object[]> rawData =
+                studentRepository.getRawStudentCountByGenderAndStandard(
+                        branchCode,
+                        academicYear != null && !academicYear.trim().isEmpty()
+                                ? academicYear
+                                : null
+                );
 
         Map<String, StudentCountByGenderDTO> resultMap = new HashMap<>();
 
