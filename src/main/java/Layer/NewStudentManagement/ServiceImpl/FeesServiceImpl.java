@@ -167,10 +167,9 @@ public class FeesServiceImpl implements FeesService
             }
         }
 
-        // Standard + Medium + Stream + Group check
         if (fees.getStandard() != null && fees.getMedium() != null &&
                 fees.getStream() != null && fees.getGroup() != null) {
-            if (feesRepository.existsByStandardMediumStreamGroup(student,
+            if (feesRepository.existsFees(student,
                     fees.getStandard().getSid(),
                     fees.getMedium().getMid(),
                     fees.getStream().getId(),

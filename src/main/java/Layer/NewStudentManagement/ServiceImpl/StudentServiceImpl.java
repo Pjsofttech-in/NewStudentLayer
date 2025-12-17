@@ -8,6 +8,7 @@ import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
+import Layer.NewStudentManagement.Service.CreatorClient;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
@@ -75,6 +76,9 @@ public class StudentServiceImpl implements StudentService {
     private FeesRepository feesRepository;
     @Autowired
     private ClassRoomTeacherSubjectRepository classRoomTeacherSubjectRepository;
+
+    @Autowired
+    private CreatorClient creatorClient;
 
     private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
 
@@ -200,29 +204,6 @@ public class StudentServiceImpl implements StudentService {
 
         StudentEntity savedStudent = studentRepository.save(student);
 
-//        // Save Address
-//        StudentAddress address = request.getAddress();
-//        address.setStudent(savedStudent);
-//        addressRepo.save(address);
-//
-//        // Save Education List
-//        List<StudentEducation> educationList = request.getEducationList();
-//        for (StudentEducation education : educationList) {
-//            education.setStudent(savedStudent);
-//            educationRepo.save(education);
-//        }
-//
-//        StudentAdditionalInfo additionalInfo = request.getAdditionalInfo();
-//        additionalInfo.setStudent(savedStudent);
-//        additionalInfoRepo.save(additionalInfo);
-//
-//        StudentReligion religion = request.getReligion();
-//        religion.setStudent(savedStudent);
-//        religionRepo.save(religion);
-//
-//        StudentSports sports = request.getSports();
-//        sports.setStudent(savedStudent);
-//        sportsRepo.save(sports);
         try {
             StudentAddress address = request.getAddress();
             if (address != null) {
@@ -710,6 +691,19 @@ public class StudentServiceImpl implements StudentService {
         dto.setCreatedByEmail(student.getCreatedByEmail());
         dto.setRole(student.getRole());
         dto.setBranchCode(student.getBranchCode());
+
+        if (student.getCreatedByEmail() != null && !student.getCreatedByEmail().isBlank()) {
+            try {
+                CreatedByResponseDTO creator =
+                        creatorClient.getCreatorByEmail(student.getCreatedByEmail());
+
+                if (creator != null) {
+                    dto.setCreatedByName(creator.getName());
+                }
+            } catch (Exception ex) {
+                dto.setCreatedByName(null);
+            }
+        }
         if (student.getStandard() != null) {
             dto.setStandardId(student.getStandard().getSid());
             dto.setStandardName(student.getStandard().getStandardName());

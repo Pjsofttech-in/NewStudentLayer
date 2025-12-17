@@ -65,13 +65,11 @@ public class StudentResponseDTO {
     private Double discount;
     private boolean isTcGenrated;
     private Long classsRoomId;
-
-
     private String applicationNumber;
     private boolean scholarship;
     private boolean projectDifferentiated;
     private Boolean sportYesNo;
-
+    private String createdByName;
     private String oldRegisterPhoto;
 
     @Email
