@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.CreatedByResponseDTO;
 import Layer.NewStudentManagement.DTO.InstituteClientWrapperResponse;
 import Layer.NewStudentManagement.DTO.InstituteLoginResponse;
 import Layer.NewStudentManagement.Entity.StudentEntity;
@@ -323,6 +324,26 @@ public class StaffService
                 ))
                 .collectList()
                 .block();
+    }
+
+    public Mono<CreatedByResponseDTO> getCreatorByEmail(String email) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/getNameByemail")
+                        .queryParam("email", email)
+                        .build())
+                .retrieve()
+                .onStatus(
+                        status -> status.value() == 404,
+                        response -> Mono.empty()
+                )
+                .bodyToMono(CreatedByResponseDTO.class);
+    }
+
+    public Mono<String> getCreatedByName(String email) {
+        return getCreatorByEmail(email)
+                .map(CreatedByResponseDTO::getName)
+                .defaultIfEmpty("Unknown");
     }
 
 

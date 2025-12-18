@@ -8,7 +8,6 @@ import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
-import Layer.NewStudentManagement.Service.CreatorClient;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,9 +74,6 @@ public class StudentServiceImpl implements StudentService {
     private FeesRepository feesRepository;
     @Autowired
     private ClassRoomTeacherSubjectRepository classRoomTeacherSubjectRepository;
-
-    @Autowired
-    private CreatorClient creatorClient;
 
     private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
 
@@ -695,7 +690,7 @@ public class StudentServiceImpl implements StudentService {
         if (student.getCreatedByEmail() != null && !student.getCreatedByEmail().isBlank()) {
             try {
                 CreatedByResponseDTO creator =
-                        creatorClient.getCreatorByEmail(student.getCreatedByEmail());
+                        staffService.getCreatorByEmail(student.getCreatedByEmail()).block();
 
                 if (creator != null) {
                     dto.setCreatedByName(creator.getName());

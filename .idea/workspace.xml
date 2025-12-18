@@ -1,11 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_TEST_SOURCES" value="false" />
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="create ClassRoom, Assign student">
+    <list default="true" id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="get createdByName in get all data">
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/NewStudentApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/NewStudentApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/CreatorClient.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StaffService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StaffService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -33,7 +42,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/Poojapatil403/NewStudentLayer.git&quot;,
-    &quot;accountId&quot;: &quot;b4823e08-02c2-4090-8ba2-0468def9e807&quot;
+    &quot;accountId&quot;: &quot;f94af7a0-0a0d-48fe-bb22-eade39507d64&quot;
   }
 }</component>
   <component name="MavenImportPreferences">
@@ -42,6 +51,9 @@
         <option name="mavenHomeTypeForPersistence" value="WRAPPER" />
       </MavenGeneralSettings>
     </option>
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
@@ -52,23 +64,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.NewStudentApplication.executor": "Run",
-    "Maven.NewStudent [clean].executor": "Run",
-    "Maven.NewStudent [install].executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/hp/Desktop/New Backend With Layer/NewStudent/.idea",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "vcs.Subversion"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.NewStudentApplication.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.NewStudent [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.NewStudent [compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.NewStudent [install].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/hp/Desktop/New Backend With Layer/NewHostelApplication&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\hp\Desktop\New Backend With Layer\NewStudent\.idea" />
@@ -84,276 +99,406 @@
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="" />
+      <changelist id="" name="revert" comment="" />
+      <changelist id="" name="revert" comment="" />
       <created>1748413855495</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1748413855495</updated>
     </task>
-    <task id="LOCAL-00001" summary="student form">
+    <task id="LOCAL-00191" summary="null">
       <option name="closed" value="true" />
-      <created>1749022424445</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
+      <created>1758103776125</created>
+      <option name="number" value="00191" />
+      <option name="presentableId" value="LOCAL-00191" />
       <option name="project" value="LOCAL" />
-      <updated>1749022424445</updated>
+      <updated>1758103776125</updated>
     </task>
-    <task id="LOCAL-00002" summary="classRoomLogic">
+    <task id="LOCAL-00192" summary="Time Table Correct">
       <option name="closed" value="true" />
-      <created>1749474368378</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
+      <created>1758112470591</created>
+      <option name="number" value="00192" />
+      <option name="presentableId" value="LOCAL-00192" />
       <option name="project" value="LOCAL" />
-      <updated>1749474368378</updated>
+      <updated>1758112470591</updated>
     </task>
-    <task id="LOCAL-00003" summary="classRoomLogic1">
+    <task id="LOCAL-00193" summary="id">
       <option name="closed" value="true" />
-      <created>1749474382265</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
+      <created>1758112777728</created>
+      <option name="number" value="00193" />
+      <option name="presentableId" value="LOCAL-00193" />
       <option name="project" value="LOCAL" />
-      <updated>1749474382265</updated>
+      <updated>1758112777728</updated>
     </task>
-    <task id="LOCAL-00004" summary="idea">
+    <task id="LOCAL-00194" summary="update">
       <option name="closed" value="true" />
-      <created>1749531026814</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
+      <created>1758114193745</created>
+      <option name="number" value="00194" />
+      <option name="presentableId" value="LOCAL-00194" />
       <option name="project" value="LOCAL" />
-      <updated>1749531026814</updated>
+      <updated>1758114193745</updated>
     </task>
-    <task id="LOCAL-00005" summary="Subject,Teacher,ClassRoom Relation">
+    <task id="LOCAL-00195" summary="periodSlotId">
       <option name="closed" value="true" />
-      <created>1749550601019</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
+      <created>1758173703739</created>
+      <option name="number" value="00195" />
+      <option name="presentableId" value="LOCAL-00195" />
       <option name="project" value="LOCAL" />
-      <updated>1749550601019</updated>
+      <updated>1758173703740</updated>
     </task>
-    <task id="LOCAL-00006" summary="attendace folder">
+    <task id="LOCAL-00196" summary="StudentResult">
       <option name="closed" value="true" />
-      <created>1749559631821</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
+      <created>1758518155859</created>
+      <option name="number" value="00196" />
+      <option name="presentableId" value="LOCAL-00196" />
       <option name="project" value="LOCAL" />
-      <updated>1749559631821</updated>
+      <updated>1758518155859</updated>
     </task>
-    <task id="LOCAL-00007" summary="folder">
+    <task id="LOCAL-00197" summary="Student dashbord api">
       <option name="closed" value="true" />
-      <created>1749561520731</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
+      <created>1758529688449</created>
+      <option name="number" value="00197" />
+      <option name="presentableId" value="LOCAL-00197" />
       <option name="project" value="LOCAL" />
-      <updated>1749561520731</updated>
+      <updated>1758529688449</updated>
     </task>
-    <task id="LOCAL-00008" summary="updateImage">
+    <task id="LOCAL-00198" summary="marks">
       <option name="closed" value="true" />
-      <created>1749794396622</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
+      <created>1758538851032</created>
+      <option name="number" value="00198" />
+      <option name="presentableId" value="LOCAL-00198" />
       <option name="project" value="LOCAL" />
-      <updated>1749794396622</updated>
+      <updated>1758538851033</updated>
     </task>
-    <task id="LOCAL-00009" summary="attendance">
+    <task id="LOCAL-00199" summary="result Done">
       <option name="closed" value="true" />
-      <created>1749809170846</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
+      <created>1758695452026</created>
+      <option name="number" value="00199" />
+      <option name="presentableId" value="LOCAL-00199" />
       <option name="project" value="LOCAL" />
-      <updated>1749809170846</updated>
+      <updated>1758695452026</updated>
     </task>
-    <task id="LOCAL-00010" summary="state,password">
+    <task id="LOCAL-00200" summary="getSubjectByTeacher">
       <option name="closed" value="true" />
-      <created>1750067760341</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
+      <created>1758713792861</created>
+      <option name="number" value="00200" />
+      <option name="presentableId" value="LOCAL-00200" />
       <option name="project" value="LOCAL" />
-      <updated>1750067760341</updated>
+      <updated>1758713792861</updated>
     </task>
-    <task id="LOCAL-00011" summary="getallWithPagination">
+    <task id="LOCAL-00201" summary="getsubjectMarksByExamId">
       <option name="closed" value="true" />
-      <created>1750137331889</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
+      <created>1758784466834</created>
+      <option name="number" value="00201" />
+      <option name="presentableId" value="LOCAL-00201" />
       <option name="project" value="LOCAL" />
-      <updated>1750137331889</updated>
+      <updated>1758784466834</updated>
     </task>
-    <task id="LOCAL-00012" summary="1">
+    <task id="LOCAL-00202" summary="notification get for student">
       <option name="closed" value="true" />
-      <created>1750137532504</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
+      <created>1758889807570</created>
+      <option name="number" value="00202" />
+      <option name="presentableId" value="LOCAL-00202" />
       <option name="project" value="LOCAL" />
-      <updated>1750137532504</updated>
+      <updated>1758889807570</updated>
     </task>
-    <task id="LOCAL-00013" summary="attendace">
+    <task id="LOCAL-00203" summary="notification by branchCode">
       <option name="closed" value="true" />
-      <created>1750145113885</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
+      <created>1759136553689</created>
+      <option name="number" value="00203" />
+      <option name="presentableId" value="LOCAL-00203" />
       <option name="project" value="LOCAL" />
-      <updated>1750145113885</updated>
+      <updated>1759136553689</updated>
     </task>
-    <task id="LOCAL-00014" summary="Count">
+    <task id="LOCAL-00204" summary="notification by branchCode">
       <option name="closed" value="true" />
-      <created>1750153591834</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
+      <created>1760421687721</created>
+      <option name="number" value="00204" />
+      <option name="presentableId" value="LOCAL-00204" />
       <option name="project" value="LOCAL" />
-      <updated>1750153591834</updated>
+      <updated>1760421687721</updated>
     </task>
-    <task id="LOCAL-00015" summary="updateStudentZaal,New Fileds add, Relation betweenStudent and stand,medium done">
+    <task id="LOCAL-00205" summary="period">
       <option name="closed" value="true" />
-      <created>1750228892715</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
+      <created>1760441798337</created>
+      <option name="number" value="00205" />
+      <option name="presentableId" value="LOCAL-00205" />
       <option name="project" value="LOCAL" />
-      <updated>1750228892715</updated>
+      <updated>1760441798337</updated>
     </task>
-    <task id="LOCAL-00016" summary="zaal tuz kaam sarfaraj">
+    <task id="LOCAL-00206" summary="period2.0">
       <option name="closed" value="true" />
-      <created>1750238253192</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
+      <created>1760962028334</created>
+      <option name="number" value="00206" />
+      <option name="presentableId" value="LOCAL-00206" />
       <option name="project" value="LOCAL" />
-      <updated>1750238253192</updated>
+      <updated>1760962028334</updated>
     </task>
-    <task id="LOCAL-00017" summary="FilterApi new Filed">
+    <task id="LOCAL-00207" summary="period2.2">
       <option name="closed" value="true" />
-      <created>1750245991997</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
+      <created>1760530582118</created>
+      <option name="number" value="00207" />
+      <option name="presentableId" value="LOCAL-00207" />
       <option name="project" value="LOCAL" />
-      <updated>1750245991997</updated>
+      <updated>1760530582118</updated>
     </task>
-    <task id="LOCAL-00018" summary="standard update">
+    <task id="LOCAL-00208" summary="tc1.3">
       <option name="closed" value="true" />
-      <created>1750246856004</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
+      <created>1760695218691</created>
+      <option name="number" value="00208" />
+      <option name="presentableId" value="LOCAL-00208" />
       <option name="project" value="LOCAL" />
-      <updated>1750246856004</updated>
+      <updated>1760695218692</updated>
     </task>
-    <task id="LOCAL-00019" summary="update Status">
+    <task id="LOCAL-00209" summary="tc1.4">
       <option name="closed" value="true" />
-      <created>1750250257382</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
+      <created>1760696844489</created>
+      <option name="number" value="00209" />
+      <option name="presentableId" value="LOCAL-00209" />
       <option name="project" value="LOCAL" />
-      <updated>1750250257382</updated>
+      <updated>1760696844489</updated>
     </task>
-    <task id="LOCAL-00020" summary="getStudentById responce">
+    <task id="LOCAL-00210" summary="tc1.5">
       <option name="closed" value="true" />
-      <created>1750311551140</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
+      <created>1760683801917</created>
+      <option name="number" value="00210" />
+      <option name="presentableId" value="LOCAL-00210" />
       <option name="project" value="LOCAL" />
-      <updated>1750311551140</updated>
+      <updated>1760683801920</updated>
     </task>
-    <task id="LOCAL-00021" summary="stand.medium required false">
+    <task id="LOCAL-00211" summary="feesBypaymentMode">
       <option name="closed" value="true" />
-      <created>1750317724315</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
+      <created>1761548137538</created>
+      <option name="number" value="00211" />
+      <option name="presentableId" value="LOCAL-00211" />
       <option name="project" value="LOCAL" />
-      <updated>1750317724315</updated>
+      <updated>1761548137538</updated>
     </task>
-    <task id="LOCAL-00022" summary="attendace data with absent student">
+    <task id="LOCAL-00212" summary="feesBypaymentMode2.1">
       <option name="closed" value="true" />
-      <created>1750325820234</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
+      <created>1761556939640</created>
+      <option name="number" value="00212" />
+      <option name="presentableId" value="LOCAL-00212" />
       <option name="project" value="LOCAL" />
-      <updated>1750325820234</updated>
+      <updated>1761556939640</updated>
     </task>
-    <task id="LOCAL-00023" summary="getByID">
+    <task id="LOCAL-00213" summary="feesData for all student">
       <option name="closed" value="true" />
-      <created>1750333616438</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
+      <created>1761633796573</created>
+      <option name="number" value="00213" />
+      <option name="presentableId" value="LOCAL-00213" />
       <option name="project" value="LOCAL" />
-      <updated>1750333616438</updated>
+      <updated>1761633796573</updated>
     </task>
-    <task id="LOCAL-00024" summary="getStudentByRegistrationNumber">
+    <task id="LOCAL-00214" summary="add filter">
       <option name="closed" value="true" />
-      <created>1750335393855</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
+      <created>1761801091193</created>
+      <option name="number" value="00214" />
+      <option name="presentableId" value="LOCAL-00214" />
       <option name="project" value="LOCAL" />
-      <updated>1750335393855</updated>
+      <updated>1761801091193</updated>
     </task>
-    <task id="LOCAL-00025" summary="acadamicYear">
+    <task id="LOCAL-00215" summary="superadmin2.0">
       <option name="closed" value="true" />
-      <created>1750396194090</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
+      <created>1762853003312</created>
+      <option name="number" value="00215" />
+      <option name="presentableId" value="LOCAL-00215" />
       <option name="project" value="LOCAL" />
-      <updated>1750396194090</updated>
+      <updated>1762853003312</updated>
     </task>
-    <task id="LOCAL-00026" summary="educationDeleteHot">
+    <task id="LOCAL-00216" summary="superadmin2.2">
       <option name="closed" value="true" />
-      <created>1750411305573</created>
-      <option name="number" value="00026" />
-      <option name="presentableId" value="LOCAL-00026" />
+      <created>1762929751824</created>
+      <option name="number" value="00216" />
+      <option name="presentableId" value="LOCAL-00216" />
       <option name="project" value="LOCAL" />
-      <updated>1750411305573</updated>
+      <updated>1762929751825</updated>
     </task>
-    <task id="LOCAL-00027" summary="filter">
+    <task id="LOCAL-00217" summary="superadmin2.3">
       <option name="closed" value="true" />
-      <created>1750657976672</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
+      <created>1762931064856</created>
+      <option name="number" value="00217" />
+      <option name="presentableId" value="LOCAL-00217" />
       <option name="project" value="LOCAL" />
-      <updated>1750657976672</updated>
+      <updated>1762931064856</updated>
     </task>
-    <task id="LOCAL-00028" summary="relation degree,depatment,graduationType">
+    <task id="LOCAL-00218" summary="superadmin2.4">
       <option name="closed" value="true" />
-      <created>1750746482823</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
+      <created>1762933994796</created>
+      <option name="number" value="00218" />
+      <option name="presentableId" value="LOCAL-00218" />
       <option name="project" value="LOCAL" />
-      <updated>1750746482823</updated>
+      <updated>1762933994796</updated>
     </task>
-    <task id="LOCAL-00029" summary="update degree,depatment,graduationType">
+    <task id="LOCAL-00219" summary="Fees DashBord api Done">
       <option name="closed" value="true" />
-      <created>1750747386453</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
+      <created>1763207409947</created>
+      <option name="number" value="00219" />
+      <option name="presentableId" value="LOCAL-00219" />
       <option name="project" value="LOCAL" />
-      <updated>1750747386453</updated>
+      <updated>1763207409948</updated>
     </task>
-    <task id="LOCAL-00030" summary="Stream">
+    <task id="LOCAL-00220" summary="Fees DashBord api Done2.1">
       <option name="closed" value="true" />
-      <created>1750753207257</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
+      <created>1763210012599</created>
+      <option name="number" value="00220" />
+      <option name="presentableId" value="LOCAL-00220" />
       <option name="project" value="LOCAL" />
-      <updated>1750753207257</updated>
+      <updated>1763210012599</updated>
     </task>
-    <task id="LOCAL-00031" summary="reasponce">
+    <task id="LOCAL-00221" summary="Fees DashBord api Done2.2">
       <option name="closed" value="true" />
-      <created>1750764741812</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
+      <created>1763378197820</created>
+      <option name="number" value="00221" />
+      <option name="presentableId" value="LOCAL-00221" />
       <option name="project" value="LOCAL" />
-      <updated>1750764741812</updated>
+      <updated>1763378197820</updated>
     </task>
-    <task id="LOCAL-00032" summary="reasponce2">
+    <task id="LOCAL-00222" summary="Rules For IdCard">
       <option name="closed" value="true" />
-      <created>1750765427266</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
+      <created>1763537100148</created>
+      <option name="number" value="00222" />
+      <option name="presentableId" value="LOCAL-00222" />
       <option name="project" value="LOCAL" />
-      <updated>1750765427266</updated>
+      <updated>1763537100149</updated>
     </task>
-    <task id="LOCAL-00033" summary="create ClassRoom, Assign student">
+    <task id="LOCAL-00223" summary="Result">
       <option name="closed" value="true" />
-      <created>1750834376753</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
+      <created>1763554904291</created>
+      <option name="number" value="00223" />
+      <option name="presentableId" value="LOCAL-00223" />
       <option name="project" value="LOCAL" />
-      <updated>1750834376753</updated>
+      <updated>1763554904291</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00224" summary="update12">
+      <option name="closed" value="true" />
+      <created>1763642202900</created>
+      <option name="number" value="00224" />
+      <option name="presentableId" value="LOCAL-00224" />
+      <option name="project" value="LOCAL" />
+      <updated>1763642202901</updated>
+    </task>
+    <task id="LOCAL-00225" summary="result">
+      <option name="closed" value="true" />
+      <created>1763965127558</created>
+      <option name="number" value="00225" />
+      <option name="presentableId" value="LOCAL-00225" />
+      <option name="project" value="LOCAL" />
+      <updated>1763965127558</updated>
+    </task>
+    <task id="LOCAL-00226" summary="result 2.0">
+      <option name="closed" value="true" />
+      <created>1763977076549</created>
+      <option name="number" value="00226" />
+      <option name="presentableId" value="LOCAL-00226" />
+      <option name="project" value="LOCAL" />
+      <updated>1763977076549</updated>
+    </task>
+    <task id="LOCAL-00227" summary="result 2.2">
+      <option name="closed" value="true" />
+      <created>1763979925572</created>
+      <option name="number" value="00227" />
+      <option name="presentableId" value="LOCAL-00227" />
+      <option name="project" value="LOCAL" />
+      <updated>1763979925572</updated>
+    </task>
+    <task id="LOCAL-00228" summary="result 2.3">
+      <option name="closed" value="true" />
+      <created>1763985517767</created>
+      <option name="number" value="00228" />
+      <option name="presentableId" value="LOCAL-00228" />
+      <option name="project" value="LOCAL" />
+      <updated>1763985517767</updated>
+    </task>
+    <task id="LOCAL-00229" summary="result 2.4">
+      <option name="closed" value="true" />
+      <created>1763989725773</created>
+      <option name="number" value="00229" />
+      <option name="presentableId" value="LOCAL-00229" />
+      <option name="project" value="LOCAL" />
+      <updated>1763989725773</updated>
+    </task>
+    <task id="LOCAL-00230" summary="result 2.5">
+      <option name="closed" value="true" />
+      <created>1764047582742</created>
+      <option name="number" value="00230" />
+      <option name="presentableId" value="LOCAL-00230" />
+      <option name="project" value="LOCAL" />
+      <updated>1764047582742</updated>
+    </task>
+    <task id="LOCAL-00231" summary="teacherDashbord 0.1">
+      <option name="closed" value="true" />
+      <created>1764051812380</created>
+      <option name="number" value="00231" />
+      <option name="presentableId" value="LOCAL-00231" />
+      <option name="project" value="LOCAL" />
+      <updated>1764051812381</updated>
+    </task>
+    <task id="LOCAL-00232" summary="update">
+      <option name="closed" value="true" />
+      <created>1764072375507</created>
+      <option name="number" value="00232" />
+      <option name="presentableId" value="LOCAL-00232" />
+      <option name="project" value="LOCAL" />
+      <updated>1764072375507</updated>
+    </task>
+    <task id="LOCAL-00233" summary="update semister">
+      <option name="closed" value="true" />
+      <created>1764140507552</created>
+      <option name="number" value="00233" />
+      <option name="presentableId" value="LOCAL-00233" />
+      <option name="project" value="LOCAL" />
+      <updated>1764140507552</updated>
+    </task>
+    <task id="LOCAL-00234" summary="upcomming birthday">
+      <option name="closed" value="true" />
+      <created>1764222384839</created>
+      <option name="number" value="00234" />
+      <option name="presentableId" value="LOCAL-00234" />
+      <option name="project" value="LOCAL" />
+      <updated>1764222384839</updated>
+    </task>
+    <task id="LOCAL-00235" summary="update">
+      <option name="closed" value="true" />
+      <created>1764232804309</created>
+      <option name="number" value="00235" />
+      <option name="presentableId" value="LOCAL-00235" />
+      <option name="project" value="LOCAL" />
+      <updated>1764232804309</updated>
+    </task>
+    <task id="LOCAL-00236" summary="update in get">
+      <option name="closed" value="true" />
+      <created>1765792342830</created>
+      <option name="number" value="00236" />
+      <option name="presentableId" value="LOCAL-00236" />
+      <option name="project" value="LOCAL" />
+      <updated>1765792342830</updated>
+    </task>
+    <task id="LOCAL-00237" summary="staff info">
+      <option name="closed" value="true" />
+      <created>1765802123144</created>
+      <option name="number" value="00237" />
+      <option name="presentableId" value="LOCAL-00237" />
+      <option name="project" value="LOCAL" />
+      <updated>1765802123144</updated>
+    </task>
+    <task id="LOCAL-00238" summary="add filter for academic year">
+      <option name="closed" value="true" />
+      <created>1765867108215</created>
+      <option name="number" value="00238" />
+      <option name="presentableId" value="LOCAL-00238" />
+      <option name="project" value="LOCAL" />
+      <updated>1765867108215</updated>
+    </task>
+    <task id="LOCAL-00239" summary="get createdByName in get all data">
+      <option name="closed" value="true" />
+      <created>1765962693896</created>
+      <option name="number" value="00239" />
+      <option name="presentableId" value="LOCAL-00239" />
+      <option name="project" value="LOCAL" />
+      <updated>1765962693897</updated>
+    </task>
+    <option name="localTasksCounter" value="240" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -361,38 +506,56 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="date">
+                    <value>
+                      <list>
+                        <option value="1765945763998" />
+                        <option value="" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="attendance" />
-    <MESSAGE value="state,password" />
-    <MESSAGE value="getallWithPagination" />
-    <MESSAGE value="1" />
-    <MESSAGE value="attendace" />
-    <MESSAGE value="Count" />
-    <MESSAGE value="updateStudentZaal,New Fileds add, Relation betweenStudent and stand,medium done" />
-    <MESSAGE value="zaal tuz kaam sarfaraj" />
-    <MESSAGE value="FilterApi new Filed" />
-    <MESSAGE value="standard update" />
-    <MESSAGE value="update Status" />
-    <MESSAGE value="getStudentById responce" />
-    <MESSAGE value="stand.medium required false" />
-    <MESSAGE value="attendace data with absent student" />
-    <MESSAGE value="getByID" />
-    <MESSAGE value="getStudentByRegistrationNumber" />
-    <MESSAGE value="acadamicYear" />
-    <MESSAGE value="educationDeleteHot" />
-    <MESSAGE value="filter" />
-    <MESSAGE value="relation degree,depatment,graduationType" />
-    <MESSAGE value="update degree,depatment,graduationType" />
-    <MESSAGE value="Stream" />
-    <MESSAGE value="reasponce" />
-    <MESSAGE value="reasponce2" />
-    <MESSAGE value="create ClassRoom, Assign student" />
-    <option name="LAST_COMMIT_MESSAGE" value="create ClassRoom, Assign student" />
+    <MESSAGE value="superadmin2.0" />
+    <MESSAGE value="superadmin2.2" />
+    <MESSAGE value="superadmin2.3" />
+    <MESSAGE value="superadmin2.4" />
+    <MESSAGE value="Fees DashBord api Done" />
+    <MESSAGE value="Fees DashBord api Done2.1" />
+    <MESSAGE value="Fees DashBord api Done2.2" />
+    <MESSAGE value="Rules For IdCard" />
+    <MESSAGE value="Result" />
+    <MESSAGE value="update12" />
+    <MESSAGE value="result" />
+    <MESSAGE value="result 2.0" />
+    <MESSAGE value="result 2.2" />
+    <MESSAGE value="result 2.3" />
+    <MESSAGE value="result 2.4" />
+    <MESSAGE value="result 2.5" />
+    <MESSAGE value="teacherDashbord 0.1" />
+    <MESSAGE value="update" />
+    <MESSAGE value="update semister" />
+    <MESSAGE value="upcomming birthday" />
+    <MESSAGE value="u" />
+    <MESSAGE value="update in get" />
+    <MESSAGE value="staff info" />
+    <MESSAGE value="add filter for academic year" />
+    <MESSAGE value="get createdByName in get all data" />
+    <option name="LAST_COMMIT_MESSAGE" value="get createdByName in get all data" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/NewStudent$NewStudentApplication.ic" NAME="NewStudentApplication Coverage Results" MODIFIED="1758091156171" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>Layer.NewStudentManagement.*</FILTER>
+    </SUITE>
   </component>
 </project>
