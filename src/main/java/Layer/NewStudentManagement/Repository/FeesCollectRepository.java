@@ -97,4 +97,43 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
     List<StudentFeesCollect> findByScheduleAndBranchCode(@Param("schedule") StudentFeeSchedule schedule,
                                                          @Param("branchCode") String branchCode);
 
+    @Query(value = """
+SELECT
+    cr.id AS classId,
+    divi.division AS division,
+    sf.standard_name AS standardName,
+    sf.degree_name AS degreeName,
+    sf.department_name AS departmentName,
+    sfc.payment_mode AS paymentMode,
+    SUM(sfc.amount) AS totalFeesRevenue
+FROM student_fees_collect sfc
+
+JOIN student_fees sf
+    ON sfc.student_fees_id = sf.fid
+
+LEFT JOIN student_class_room cr
+    ON sf.standard_id = cr.standard_id
+
+LEFT JOIN student_division divi
+    ON cr.division_id = divi.did
+
+WHERE sfc.branch_code = :branchCode
+  AND LOWER(TRIM(sfc.status)) = 'completed'
+
+GROUP BY
+    cr.id,
+    divi.division,
+    sf.standard_name,
+    sf.degree_name,
+    sf.department_name,
+    sfc.payment_mode
+
+ORDER BY cr.id
+""", nativeQuery = true)
+    List<Object[]> findClassWiseRevenueByPaymentMode(
+            @Param("branchCode") String branchCode
+    );
+
+
+
 }

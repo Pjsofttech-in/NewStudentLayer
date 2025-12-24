@@ -522,6 +522,37 @@ public class FeesServiceImpl implements FeesService
         return response;
     }
 
+        @Override
+        public List<ClassFeesRevenueDTO> getClassWiseRevenue(String role, String email) {
+
+            String branchCode =
+                    staffService.fetchBranchCodeByRole(role, email);
+
+            if (branchCode == null || branchCode.isBlank()) {
+                throw new IllegalStateException("Branch code not found");
+            }
+
+            List<Object[]> rows =
+                    feesCollectRepository.findClassWiseRevenueByPaymentMode(branchCode);
+
+            return rows.stream().map(row -> {
+                ClassFeesRevenueDTO dto = new ClassFeesRevenueDTO();
+                dto.setClassId(row[0] != null ? ((Number) row[0]).longValue() : null);
+                dto.setDivision((String) row[1]);
+                dto.setStandardName((String) row[2]);
+                dto.setDegreeName((String) row[3]);
+                dto.setDepartmentName((String) row[4]);
+                dto.setPaymentMode((String) row[5]);
+                dto.setTotalFeesRevenue(
+                        row[6] != null ? ((Number) row[6]).doubleValue() : 0.0
+                );
+                dto.setStatus("Completed");
+
+                return dto;
+            }).toList();
+        }
+
+
 
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {

@@ -207,4 +207,14 @@ public class DashBoardController
         return ResponseEntity.ok(list);
     }
 
+    @GetMapping("/getFeesByClass")
+    public ResponseEntity<List<ClassFeesRevenueDTO>> getClassWiseRevenue(
+            @RequestParam String role,
+            @RequestParam String email) {
+
+        return ResponseEntity.ok(
+                feesService.getClassWiseRevenue(role, email)
+        );
+    }
+
 }

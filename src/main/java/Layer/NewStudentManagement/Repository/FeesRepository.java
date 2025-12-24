@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Repository;
 
+import Layer.NewStudentManagement.DTO.ClassFeesRevenueDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentFees;
@@ -81,4 +82,5 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
             "FROM StudentFees f " +
             "WHERE f.student.id = :studentId")
     FeesRevenueProjection getFeesRevenueByStudentId(@Param("studentId") Long studentId);
+
 }
