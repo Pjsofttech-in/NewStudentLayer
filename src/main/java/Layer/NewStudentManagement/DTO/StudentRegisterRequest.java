@@ -40,6 +40,12 @@ public class StudentRegisterRequest
     private Long departmentId;
     private String oldRegisterPhoto;
 
+    private boolean entranceExam;
+    private String entranceExamName;
+    private Integer entranceMarks;
+    private Integer eMarksOutOff;
+    private String entranceMarkSheet;
+
     private String createdByEmail;
     private Role role;
     private String branchCode;

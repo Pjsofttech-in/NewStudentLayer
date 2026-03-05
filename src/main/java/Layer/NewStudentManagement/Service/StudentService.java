@@ -17,7 +17,7 @@ import java.util.Map;
 
 public interface StudentService
 {
-    StudentResponseDTO  saveStudent(String role, String email, StudentRequest request,String token);
+    StudentResponseDTO saveStudent(String role, String email, StudentRequest request,String token);
     StudentDTO getStudentById(Long id, String role, String email);
     StudentResponseDTO updateStudent(Long id, String role, String email, StudentRequest request);
     void deleteStudentById(Long id,String role,String email);
@@ -72,7 +72,9 @@ public interface StudentService
             @Nullable String branchCodeFilter, @Nullable String academicYear);
 
     List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email,String academicYear);
-    StudentResponseDTO registerStudent(String role, String email, StudentRegisterRequest request, MultipartFile oldRegisterPhoto, String token);
+    StudentResponseDTO registerStudent(String role, String email,
+                                       StudentRegisterRequest request, MultipartFile oldRegisterPhoto,
+                                       MultipartFile entranceMarkSheet, String token);
     List<UpcomingBirthdayProjection> getUpcomingBirthdays(String role, String email) ;
 
     List<Map<String, Object>> getStaffInfo(String role, String email,String deptEmail);

@@ -66,6 +66,12 @@ public class StudentEntity
 //    private String university;
 //    private String board;
 
+    private boolean entranceExam;
+    private String entranceExamName;
+    private Integer entranceMarks;
+    private Integer eMarksOutOff;
+    private String entranceMarkSheet;
+
     @Email
     private String createdByEmail;
     @Enumerated(EnumType.STRING)

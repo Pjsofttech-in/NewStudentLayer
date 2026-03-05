@@ -1379,9 +1379,8 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentResponseDTO registerStudent(String role, String email,
-                                              StudentRegisterRequest request,
-                                              MultipartFile oldRegisterPhoto,
-                                              String token) {
+                                              StudentRegisterRequest request, MultipartFile oldRegisterPhoto,
+                                              MultipartFile entranceMarkSheet, String token) {
         String decodedBranchCode;
         String decodedRole;
         String decodedEmail;
@@ -1445,6 +1444,11 @@ public class StudentServiceImpl implements StudentService {
         student.setAcademicYear(request.getAcademicYear());
         student.setDiscount(request.getDiscount());
 
+        student.setEntranceExam(request.isEntranceExam());
+        student.setEntranceExamName(request.getEntranceExamName());
+        student.setEntranceMarks(request.getEntranceMarks());
+        student.setEMarksOutOff(request.getEMarksOutOff());
+
         // Store decoded values (same as branchCode)
         request.setRole(Role.valueOf(decodedRole.toUpperCase()));
         student.setBranchCode(decodedBranchCode);
@@ -1472,6 +1476,10 @@ public class StudentServiceImpl implements StudentService {
         if (oldRegisterPhoto != null && !oldRegisterPhoto.isEmpty()) {
             String fileUrl = s3Service.uploadFile(oldRegisterPhoto, decodedBranchCode);
             student.setOldRegisterPhoto(fileUrl);
+        }
+        if (entranceMarkSheet != null && !entranceMarkSheet.isEmpty()) {
+            String marksheetUrl = s3Service.uploadFile(entranceMarkSheet, decodedBranchCode);
+            student.setEntranceMarkSheet(marksheetUrl);
         }
 
         // ---- Handle School / College logic ----

@@ -269,6 +269,7 @@ public class StudentController
             @RequestParam(required = false) String email,
             @RequestPart("student") String studentJson,
             @RequestPart(value = "oldRegisterPhoto", required = false) MultipartFile oldRegisterPhoto,
+            @RequestPart(value = "entranceMarkSheet", required = false) MultipartFile entranceMarkSheet,
             @RequestHeader(name = "Authorization", required = false) String authorizationHeader) {
 
         String token = null;
@@ -281,7 +282,7 @@ public class StudentController
             mapper.findAndRegisterModules(); // handles LocalDate
             StudentRegisterRequest request = mapper.readValue(studentJson, StudentRegisterRequest.class);
 
-            StudentResponseDTO response = studentService.registerStudent(role, email, request, oldRegisterPhoto, token);
+            StudentResponseDTO response = studentService.registerStudent(role, email, request, oldRegisterPhoto, entranceMarkSheet,token);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
