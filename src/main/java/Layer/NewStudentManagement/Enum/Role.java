@@ -2,11 +2,11 @@ package Layer.NewStudentManagement.Enum;
 
 public enum Role
 {
-    SUPERADMIN,
-    BRANCH,
-    STAFF,
-    DEPARTMENT,
-    USER,
-    STUDENT,
-    TEACHER
+    superAdmin,
+    branch,
+    staff,
+    department,
+    user,
+    student,
+    teacher
 }
