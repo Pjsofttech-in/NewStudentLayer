@@ -6,5 +6,7 @@ public enum Role
     BRANCH,
     STAFF,
     DEPARTMENT,
-    USER
+    USER,
+    STUDENT,
+    TEACHER
 }
