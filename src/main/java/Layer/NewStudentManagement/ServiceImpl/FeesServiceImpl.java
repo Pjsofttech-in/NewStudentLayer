@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Pagination.StudentFeesSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.FeesService;
@@ -198,7 +199,7 @@ public class FeesServiceImpl implements FeesService
         fees.setDiscount(fees.getDiscount());
         fees.setFeesStatus(fees.getFeesStatus());
         fees.setCreatedByEmail(email);
-        fees.setRole(role);
+        fees.setRole(Role.valueOf(role));
         fees.setBranchCode(branchCode);
         fees.setPendingAmount(fees.getTotalamount());
 
@@ -253,7 +254,7 @@ public class FeesServiceImpl implements FeesService
 //        if (updatedFees.getLateFeeCharges() != 0) existing.setLateFeeCharges(updatedFees.getLateFeeCharges());
         if (updatedFees.getSfid() != null) existing.setSfid(updatedFees.getSfid());
         if (updatedFees.getCreatedByEmail() != null) existing.setCreatedByEmail(updatedFees.getCreatedByEmail());
-        if (updatedFees.getRole() != null) existing.setRole(updatedFees.getRole());
+        if (updatedFees.getRole() != null) {existing.setRole(updatedFees.getRole());}
         if (updatedFees.getBranchCode() != null) existing.setBranchCode(updatedFees.getBranchCode());
 
         StudentFees fees = feesRepository.save(existing);
@@ -567,7 +568,7 @@ public class FeesServiceImpl implements FeesService
         dto.setGroupName(fees.getGroupName());
         dto.setDegreeName(fees.getDegreeName());
         dto.setDepartmentName(fees.getDepartmentName());
-//        dto.setFeesType(fees.getFeesType());
+//        dto.setFeesType (fees.getFeesType());
         dto.setApprovalDate(fees.getApprovalDate());
         dto.setFeesStatus(fees.getFeesStatus());
         dto.setFeesCollectionType(fees.getFeesCollectionType());

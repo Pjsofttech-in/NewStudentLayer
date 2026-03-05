@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentAcademicYear;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.AcademicYearRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.AcademicYearService;
@@ -36,7 +37,7 @@ public class AcademicYearServiceImpl implements AcademicYearService
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         academicYear.setBranchCode(branchCode);
-        academicYear.setRole(role);
+        academicYear.setRole(Role.valueOf(role));
         academicYear.setCreatedByEmail(email);
         boolean exists = academicYearRepository.existsByAcademicYearAndBranchCode(
                 academicYear.getAcademicYear(), branchCode);

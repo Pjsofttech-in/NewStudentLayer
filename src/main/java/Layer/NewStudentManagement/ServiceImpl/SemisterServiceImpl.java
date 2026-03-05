@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentSemister;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.SemisterRepository;
 import Layer.NewStudentManagement.Service.SemisterService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class SemisterServiceImpl implements SemisterService
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        semister.setRole(role);
+        semister.setRole(Role.valueOf(role));
         semister.setCreatedByEmail(email);
         semister.setBranchCode(branchCode);
 

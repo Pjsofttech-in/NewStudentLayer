@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
+import Layer.NewStudentManagement.Enum.Role;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +21,7 @@ public class SchoolBankDTO
 
     private String createdByEmail;
     private String branchCode;
-    private String role;
+    private Role role;
     private Long schoolProfileId;
 
 }

@@ -1,27 +1,26 @@
-package Layer.NewStudentManagement.DTO;
+package Layer.NewStudentManagement.Entity;
 
 import Layer.NewStudentManagement.Enum.Role;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class AssignmentResponseDTO
+@Entity
+public class StudentScholarship
 {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String assignmentTitle;
-    private String description;
-    private LocalDate dueDate;
-    private LocalDate createdDate;
-    private String image;
-    private Long classRoomId;
+    private String scholarshipName;
     private String createdByEmail;
+    @Enumerated(EnumType.STRING)
     private Role role;
     private String branchCode;
 }

@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
+import Layer.NewStudentManagement.Enum.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +37,7 @@ public class StudentTeacherDTO
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate joiningDate;
     private String branchCode;
-    private String role;
+    private Role role;
     private String createdByEmail;
     private List<StudentSubjectDTO> subjects;
 }

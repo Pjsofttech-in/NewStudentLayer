@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentNotification;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.NotificationRepository;
 import Layer.NewStudentManagement.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class NotificationServiceImpl implements NotificationService
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         notification.setCreatedByEmail(email);
-        notification.setRole(role);
+        notification.setRole(Role.valueOf(role));
         notification.setBranchCode(branchCode);
 
         return notificationRepository.save(notification);
@@ -53,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService
         existing.setNoticeName(notification.getNoticeName());
         existing.setNoticeDescription(notification.getNoticeDescription());
 
-        if ("TEACHER".equalsIgnoreCase(notification.getRole())) {
+        if ("TEACHER".equalsIgnoreCase(notification.getRole().name())) {
             existing.setClassRoomId(notification.getClassRoomId());
         } else {
             existing.setClassRoomId(null);

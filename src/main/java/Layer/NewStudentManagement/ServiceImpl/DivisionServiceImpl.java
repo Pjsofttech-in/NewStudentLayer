@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.StudentDivisionDTO;
 import Layer.NewStudentManagement.Entity.StudentDivision;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.DivisionRepository;
 import Layer.NewStudentManagement.Service.DivisionService;
 import jakarta.annotation.Nullable;
@@ -33,7 +34,7 @@ public class DivisionServiceImpl implements DivisionService
             throw new RuntimeException("Medium already exists for this branch");
         }
         division.setBranchCode(branchCode);
-        division.setRole(role);
+        division.setRole(Role.valueOf(role));
         division.setCreatedByEmail(email);
         return divisionRepository.save(division);
     }

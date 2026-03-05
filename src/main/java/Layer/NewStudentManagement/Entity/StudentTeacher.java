@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Entity;
 
+import Layer.NewStudentManagement.Enum.Role;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -48,7 +49,8 @@ public class StudentTeacher
     private String reserch;
     @Email
     private String createdByEmail;
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
     private String branchCode;
     @ManyToMany
     @JoinTable(

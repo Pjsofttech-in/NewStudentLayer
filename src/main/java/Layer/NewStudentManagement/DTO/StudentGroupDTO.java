@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
+import Layer.NewStudentManagement.Enum.Role;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,6 @@ public class StudentGroupDTO
     private Long graduationTypeId;
     @Email
     private String createdByEmail;
-    private String role;
+    private Role role;
     private String branchCode;
 }

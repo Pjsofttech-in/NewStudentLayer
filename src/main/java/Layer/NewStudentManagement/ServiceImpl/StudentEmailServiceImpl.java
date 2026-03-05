@@ -4,6 +4,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.EmailRequestDTO;
 import Layer.NewStudentManagement.Entity.StudentEmail;
 import Layer.NewStudentManagement.Entity.StudentEntity;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.StudentEmailRepository;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Service.StudentEmailService;
@@ -58,7 +59,7 @@ public class StudentEmailServiceImpl implements StudentEmailService {
         record.setBody(dto.getBody());
         record.setSentByEmail(dto.getSentByEmail());
         record.setCreatedByEmail(email);
-        record.setRole(role);
+        record.setRole(Role.valueOf(role));
         record.setBranchCode(branchCode);
         record.setStudentIds(new Gson().toJson(studentIds));
         record.setScheduledAt(dto.getScheduledAt());

@@ -7,15 +7,106 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="get createdByName in get all data">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+    <list default="true" id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="get fees data by branchCode6">
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Controller/ScholarshipController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentScholarship.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Enum/Role.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Repository/ScholarshipRepository.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/ScholarshipService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ScholarshipServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/NewStudentApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/NewStudentApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Service/CreatorClient.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StaffService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StaffService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/AssignmentResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/AssignmentResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/AssignmentSubmissionResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/AssignmentSubmissionResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/MediumDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/MediumDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/SchoolBankDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/SchoolBankDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StandardDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StandardDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StandardFeesRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StandardFeesRequestDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StreamDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StreamDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentClassRoomResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentClassRoomResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDegreeNameDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDegreeNameDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDepartmentDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDepartmentDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDivisionDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentDivisionDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentExamDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentExamDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentFeesDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentFeesDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentGraduationTypeDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentGraduationTypeDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentGroupDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentGroupDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentPeriodResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentPeriodResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentRegisterRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentRegisterRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentResponseDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentResponseDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentSportsDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentSportsDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentSubjectDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentSubjectDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentTeacherDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/StudentTeacherDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/SubjectMarksDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/SubjectMarksDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/TCDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/TCDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/TeacherRequestDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/TeacherRequestDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/TimeTableResponceDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/DTO/TimeTableResponceDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentAcademicYear.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentAcademicYear.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentAssignment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentAssignment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentAssignmentSubmission.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentAssignmentSubmission.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentClassRoom.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentClassRoom.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentDegreeName.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentDegreeName.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentDepartment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentDepartment.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentDivision.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentDivision.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentDuplicateTCRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentDuplicateTCRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentEmail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentEmail.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentExam.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentExam.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentExamSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentExamSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentFees.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentFees.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentFeesCollect.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentFeesCollect.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentGraduationType.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentGraduationType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentGroup.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentGroup.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentMedium.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentMedium.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentNotification.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentNotification.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentPeriod.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentPeriod.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentResult.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentResult.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentResultDetail.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentResultDetail.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentRules.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentRules.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSchoolBank.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSchoolBank.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSchoolProfile.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSchoolProfile.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSemister.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSemister.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSports.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSports.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentStandard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentStandard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentStandardFees.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentStandardFees.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentStream.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentStream.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSubject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSubject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSubjectMarks.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentSubjectMarks.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentTcData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentTcData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentTeacher.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentTeacher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentTimetable.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Entity/StudentTimetable.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Mapper/StudentMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/Mapper/StudentMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/AcademicYearServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/AcademicYearServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/AssignmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/AssignmentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/AssignmentSubmissionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/AssignmentSubmissionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ClassRoomServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ClassRoomServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DegreeNameServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DegreeNameServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DepartmentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DepartmentServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DivisionServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DivisionServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DuplicateTCRequestServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/DuplicateTCRequestServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ExamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ExamServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/FeesCollectServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/FeesCollectServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/FeesServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/FeesServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/GraduationTypeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/GraduationTypeServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/GroupServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/GroupServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/MediumServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/MediumServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/NotificationServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/NotificationServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/PeriodServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/PeriodServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ResultServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/ResultServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/RulesServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/RulesServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SchoolBankServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SchoolBankServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SchoolProfileServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SchoolProfileServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SemisterServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SemisterServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StandardFeesServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StandardFeesServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StandardServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StandardServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StreamServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StreamServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentEmailServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentEmailServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/StudentServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SubjectMarksServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SubjectMarksServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SubjectServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/SubjectServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/TCDataServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/TCDataServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/TeacherServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/TeacherServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/TimeTableServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Layer/NewStudentManagement/ServiceImpl/TimeTableServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,6 +118,7 @@
       <list>
         <option value="Interface" />
         <option value="Class" />
+        <option value="Enum" />
       </list>
     </option>
   </component>
@@ -99,28 +191,10 @@
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="ca57f803-5122-47e5-a76c-b9526c955ff5" name="Changes" comment="" />
-      <changelist id="" name="revert" comment="" />
-      <changelist id="" name="revert" comment="" />
       <created>1748413855495</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1748413855495</updated>
-    </task>
-    <task id="LOCAL-00191" summary="null">
-      <option name="closed" value="true" />
-      <created>1758103776125</created>
-      <option name="number" value="00191" />
-      <option name="presentableId" value="LOCAL-00191" />
-      <option name="project" value="LOCAL" />
-      <updated>1758103776125</updated>
-    </task>
-    <task id="LOCAL-00192" summary="Time Table Correct">
-      <option name="closed" value="true" />
-      <created>1758112470591</created>
-      <option name="number" value="00192" />
-      <option name="presentableId" value="LOCAL-00192" />
-      <option name="project" value="LOCAL" />
-      <updated>1758112470591</updated>
     </task>
     <task id="LOCAL-00193" summary="id">
       <option name="closed" value="true" />
@@ -498,7 +572,23 @@
       <option name="project" value="LOCAL" />
       <updated>1765962693897</updated>
     </task>
-    <option name="localTasksCounter" value="240" />
+    <task id="LOCAL-00240" summary="get createdByName in get all data2.1">
+      <option name="closed" value="true" />
+      <created>1766032828085</created>
+      <option name="number" value="00240" />
+      <option name="presentableId" value="LOCAL-00240" />
+      <option name="project" value="LOCAL" />
+      <updated>1766032828085</updated>
+    </task>
+    <task id="LOCAL-00241" summary="get fees data by branchCode">
+      <option name="closed" value="true" />
+      <created>1766568605162</created>
+      <option name="number" value="00241" />
+      <option name="presentableId" value="LOCAL-00241" />
+      <option name="project" value="LOCAL" />
+      <updated>1766568605163</updated>
+    </task>
+    <option name="localTasksCounter" value="242" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -526,8 +616,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="superadmin2.0" />
-    <MESSAGE value="superadmin2.2" />
     <MESSAGE value="superadmin2.3" />
     <MESSAGE value="superadmin2.4" />
     <MESSAGE value="Fees DashBord api Done" />
@@ -551,7 +639,9 @@
     <MESSAGE value="staff info" />
     <MESSAGE value="add filter for academic year" />
     <MESSAGE value="get createdByName in get all data" />
-    <option name="LAST_COMMIT_MESSAGE" value="get createdByName in get all data" />
+    <MESSAGE value="get createdByName in get all data2.1" />
+    <MESSAGE value="get fees data by branchCode" />
+    <option name="LAST_COMMIT_MESSAGE" value="get fees data by branchCode" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/NewStudent$NewStudentApplication.ic" NAME="NewStudentApplication Coverage Results" MODIFIED="1758091156171" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">

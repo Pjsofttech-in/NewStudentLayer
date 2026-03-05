@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Entity;
 
+import Layer.NewStudentManagement.Enum.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,8 @@ public class StudentSports
     private Long id;
     private String height;
     private String weight;
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
     private Boolean sportYesNo;
     private String sportsName;
     private Boolean sportParticipation;

@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
+import Layer.NewStudentManagement.Enum.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ public class StudentExamDTO
     private LocalDate examDate;
     private String examType;
     private String createdByEmail;
-    private String role;
+    private Role role;
     private String branchCode;
     private Long classRoomId;
     private List<ExamSubjectDto> subjects;

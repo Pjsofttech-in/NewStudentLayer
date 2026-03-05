@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.AssignmentResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentAssignment;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.AssignmentRepository;
 import Layer.NewStudentManagement.Service.AssignmentService;
 import Layer.NewStudentManagement.Service.S3Service;
@@ -63,7 +64,7 @@ public class AssignmentServiceImpl implements AssignmentService
 
         assignment.setCreatedByEmail(email);
         assignment.setCreatedDate(LocalDate.now());
-        assignment.setRole(role);
+        assignment.setRole(Role.valueOf(role));
         assignment.setBranchCode(branchCode);
 
         if (image != null && !image.isEmpty()) {

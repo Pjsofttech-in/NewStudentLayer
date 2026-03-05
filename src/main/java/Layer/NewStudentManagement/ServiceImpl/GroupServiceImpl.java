@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.DTO.StudentGroupDTO;
 import Layer.NewStudentManagement.Entity.StudentDepartment;
 import Layer.NewStudentManagement.Entity.StudentGraduationType;
 import Layer.NewStudentManagement.Entity.StudentGroup;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.GraduationTypeRepository;
 import Layer.NewStudentManagement.Repository.GroupRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
@@ -50,7 +51,7 @@ public class GroupServiceImpl implements GroupService
             group.setGraduationType(null);
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        group.setRole(role);
+        group.setRole(Role.valueOf(role));
         group.setBranchCode(branchCode);
         group.setGraduationTypeName(graduationType.getGraduationType());
         group.setCreatedByEmail(email);

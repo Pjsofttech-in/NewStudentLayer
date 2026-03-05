@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.StandardDTO;
 import Layer.NewStudentManagement.Entity.StudentStandard;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.StandardRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.StandardService;
@@ -40,7 +41,7 @@ public class StandardServiceImpl implements StandardService
             throw new RuntimeException("Standard already exists for this branch");
         }
         standard.setBranchCode(branchCode);
-        standard.setRole(role);
+        standard.setRole(Role.valueOf(role));
         standard.setCreatedByEmail(email);
 
         return standardRepository.save(standard);

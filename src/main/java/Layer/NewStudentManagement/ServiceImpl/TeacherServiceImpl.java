@@ -4,6 +4,7 @@ import Layer.NewStudentManagement.DTO.StudentSubjectDTO;
 import Layer.NewStudentManagement.DTO.StudentTeacherDTO;
 import Layer.NewStudentManagement.DTO.TeacherRequestDTO;
 import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Security.EmailService;
 import Layer.NewStudentManagement.Security.JwtUtil;
@@ -153,7 +154,7 @@ public class TeacherServiceImpl implements TeacherService
         teacher.setJoiningDate(dto.getJoiningDate());
         teacher.setBranchCode(branchCode);
         teacher.setPassword(passwordEncoder.encode(dto.getPassword()));
-        teacher.setRole(role);
+        teacher.setRole(Role.valueOf(role));
         teacher.setCreatedByEmail(email);
         teacher.setSubjects(subjectEntities);
 
@@ -322,7 +323,7 @@ public class TeacherServiceImpl implements TeacherService
         teacherData.put("id", teacher.getId());
         teacherData.put("name", teacher.getTeacherName());
         teacherData.put("email", teacher.getTeacherEmail());
-        teacherData.put("role", teacher.getRole());
+        teacherData.put("role", teacher.getRole().name());
         teacherData.put("branchCode", teacher.getBranchCode());
 
         return new LoginResponse(token, teacherData);

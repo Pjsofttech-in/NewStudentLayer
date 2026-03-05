@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
+import Layer.NewStudentManagement.Enum.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,6 @@ public class SubjectMarksDTO
     private Integer passingMarks;
     private Long classRoomId;
     private String createdByEmail;
-    private String role;
+    private Role role;
     private String branchCode;
 }

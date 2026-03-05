@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.StudentResultDTO;
 import Layer.NewStudentManagement.DTO.StudentResultDetailDTO;
 import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Pagination.StudentResultSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ResultService;
@@ -50,7 +51,7 @@ public class ResultServiceImpl implements ResultService
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        result.setRole(role);
+        result.setRole(Role.valueOf(role));
         result.setCreatedByEmail(email);
         result.setBranchCode(branchCode);
 
@@ -62,7 +63,7 @@ public class ResultServiceImpl implements ResultService
             for (StudentResultDetail detail : result.getDetails()) {
                 // ensure child is linked to parent
                 detail.setStudentResult(result);
-                detail.setRole(role);
+                detail.setRole(Role.valueOf(role));
                 detail.setCreatedByEmail(email);
                 detail.setBranchCode(branchCode);
 
@@ -121,7 +122,7 @@ public class ResultServiceImpl implements ResultService
             existing.getDetails().clear();
             for (StudentResultDetail detail : updated.getDetails()) {
                 detail.setStudentResult(existing);
-                detail.setRole(role);
+                detail.setRole(Role.valueOf(role));
                 detail.setCreatedByEmail(email);
                 detail.setBranchCode(existing.getBranchCode());
                 existing.getDetails().add(detail);
@@ -363,7 +364,7 @@ public class ResultServiceImpl implements ResultService
                     r.setExam(examRepository.findById(examId).orElseThrow());
                     r.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
                     r.setCreatedByEmail(email);
-                    r.setRole(role);
+                    r.setRole(Role.valueOf(role));
                     r.setDetails(new ArrayList<>());
                     return r;
                 });
@@ -382,7 +383,7 @@ public class ResultServiceImpl implements ResultService
                     d.setStudentResult(result);
                     d.setBranchCode(result.getBranchCode());
                     d.setCreatedByEmail(email);
-                    d.setRole(role);
+                    d.setRole(Role.valueOf(role));
                     result.getDetails().add(d);
                     return d;
                 });

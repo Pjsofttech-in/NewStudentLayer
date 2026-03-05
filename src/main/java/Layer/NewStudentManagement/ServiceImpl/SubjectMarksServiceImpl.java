@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.SubjectMarksDTO;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
 import Layer.NewStudentManagement.Entity.StudentSubjectMarks;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.ClassRoomRepository;
 import Layer.NewStudentManagement.Repository.SubjectMarksRepository;
 import Layer.NewStudentManagement.Service.SubjectMarksService;
@@ -33,7 +34,7 @@ public class SubjectMarksServiceImpl implements SubjectMarksService
             throw new RuntimeException("You don't have permission to create Subject");
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        subject.setRole(role);
+        subject.setRole(Role.valueOf(role));
         subject.setCreatedByEmail(email);
         subject.setBranchCode(branchCode);
         StudentClassRoom classRoom = classRoomRepository.findById(subject.getClassRoom().getId())

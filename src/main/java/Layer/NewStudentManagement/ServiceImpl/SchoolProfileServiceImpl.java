@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentSchoolProfile;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.SchoolProfileRepository;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.SchoolProfileService;
@@ -41,7 +42,7 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
             profile.setSchoolLogo(uploadedUrl);
         }
         profile.setCreatedByEmail(email);
-        profile.setRole(role);
+        profile.setRole(Role.valueOf(role));
 
         return schoolProfileRepository.save(profile);
     }
@@ -70,7 +71,7 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
         existing.setIndexNumber(updatedProfile.getIndexNumber());
         existing.setSocietyName(updatedProfile.getSocietyName());
         existing.setBoard(updatedProfile.getBoard());
-        existing.setRole(role);
+        existing.setRole(Role.valueOf(role));
         existing.setCreatedByEmail(email);
 
         if (logo != null && !logo.isEmpty()) {

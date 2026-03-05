@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.StudentGraduationTypeDTO;
 import Layer.NewStudentManagement.Entity.StudentGraduationType;
 import Layer.NewStudentManagement.Entity.StudentStream;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.GraduationTypeRepository;
 import Layer.NewStudentManagement.Repository.StreamRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
@@ -47,7 +48,7 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
         graduationType.setGraduationType(request.getGraduationType());
         graduationType.setStream(stream);
         graduationType.setCreatedByEmail(email);
-        graduationType.setRole(role);
+        graduationType.setRole(Role.valueOf(role));
         graduationType.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
 
 

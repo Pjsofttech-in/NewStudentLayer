@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.DTO.StudentExamDTO;
 import Layer.NewStudentManagement.Entity.StudentExam;
 import Layer.NewStudentManagement.Entity.StudentExamSubject;
 import Layer.NewStudentManagement.Entity.StudentSubjectMarks;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.ExamRepository;
 import Layer.NewStudentManagement.Repository.ExamSubjectRepository;
 import Layer.NewStudentManagement.Repository.SubjectMarksRepository;
@@ -41,7 +42,7 @@ public class ExamServiceImpl implements ExamService
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        exam.setRole(role);
+        exam.setRole(Role.valueOf(role));
         exam.setCreatedByEmail(email);
         exam.setBranchCode(branchCode);
 
@@ -54,7 +55,7 @@ public class ExamServiceImpl implements ExamService
             StudentExamSubject examSubject = new StudentExamSubject();
             examSubject.setExam(exam);
             examSubject.setSubject(subject);
-            examSubject.setRole(role);
+            examSubject.setRole(Role.valueOf(role));
             examSubject.setCreatedByEmail(email);
             examSubject.setBranchCode(branchCode);
 
@@ -100,7 +101,7 @@ public class ExamServiceImpl implements ExamService
                 StudentExamSubject examSubject = new StudentExamSubject();
                 examSubject.setExam(existing);
                 examSubject.setSubject(subject);
-                examSubject.setRole(role);
+                examSubject.setRole(Role.valueOf(role));
                 examSubject.setCreatedByEmail(email);
                 examSubject.setBranchCode(existing.getBranchCode());
 

@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Entity;
 
+import Layer.NewStudentManagement.Enum.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,8 @@ public class StudentTcData
     @Column(length = 12)
     private String tcNumber;
     private String studentEmail;
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
     private String createdByEmail;
     private String branchCode;
     private boolean duplicateTc = false;

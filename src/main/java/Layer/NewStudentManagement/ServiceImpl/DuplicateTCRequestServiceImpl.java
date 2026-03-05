@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.Entity.StudentDuplicateTCRequest;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentTcData;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.DuplicateTCRequestRepository;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Repository.TCDataRepository;
@@ -50,7 +51,7 @@ public class DuplicateTCRequestServiceImpl implements DuplicteTCRequestService
         request.setStatus("PENDING");
         request.setReason(request.getReason());
         request.setCreatedByEmail(email);
-        request.setRole(role);
+        request.setRole(Role.valueOf(role));
         request.setBranchCode(branchCode);
 
         return duplicateTCRequestRepository.save(request);

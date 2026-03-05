@@ -1,9 +1,7 @@
 package Layer.NewStudentManagement.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import Layer.NewStudentManagement.Enum.Role;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +24,7 @@ public class StudentRules
     @Email
     private String createdByEmail;
     private String branchCode;
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 }

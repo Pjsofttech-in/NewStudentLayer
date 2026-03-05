@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
+import Layer.NewStudentManagement.Enum.Role;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +27,7 @@ public class StudentClassRoomResponseDTO {
     private String degreeName;
     private String branchCode;
     private String email;
-    private String role;
+    private Role role;
     private List<TeacherWithSubjectsDTO> teacherSubjectMappings;
 
 

@@ -4,6 +4,7 @@ import Layer.NewStudentManagement.DTO.AssignmentSubmissionResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentAssignment;
 import Layer.NewStudentManagement.Entity.StudentAssignmentSubmission;
 import Layer.NewStudentManagement.Entity.StudentEntity;
+import Layer.NewStudentManagement.Enum.Role;
 import Layer.NewStudentManagement.Repository.AssignmentRepository;
 import Layer.NewStudentManagement.Repository.AssignmentSubmissionRepository;
 import Layer.NewStudentManagement.Repository.StudentRepository;
@@ -70,7 +71,7 @@ public class AssignmentSubmissionServiceImpl implements AssignmentSubmissionServ
 //        request.setStatus("Submitted");
         request.setBranchCode(branchCode);
         request.setCreatedByEmail(email);
-        request.setRole(role);
+        request.setRole(Role.valueOf(role));
 
         if (assignment.getDueDate() != null) {
             if (request.getSubmittedDate().isAfter(assignment.getDueDate())) {
