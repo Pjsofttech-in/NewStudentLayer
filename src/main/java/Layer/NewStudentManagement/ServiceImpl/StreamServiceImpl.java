@@ -4,7 +4,7 @@ import Layer.NewStudentManagement.DTO.StreamDTO;
 import Layer.NewStudentManagement.DTO.StudentDivisionDTO;
 import Layer.NewStudentManagement.Entity.StudentDivision;
 import Layer.NewStudentManagement.Entity.StudentStream;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.StreamRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.StreamService;
@@ -41,7 +41,7 @@ public class StreamServiceImpl implements StreamService
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         stream.setBranchCode(branchCode);
-        stream.setRole(Role.valueOf(role));
+        stream.setRole(role);
         stream.setCreatedByEmail(email);
         return streamRepository.save(stream);
 

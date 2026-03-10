@@ -2,7 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.MediumDTO;
 import Layer.NewStudentManagement.Entity.StudentMedium;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.MediumRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.MediumService;
@@ -41,7 +41,7 @@ public class MediumServiceImpl implements MediumService
             throw new RuntimeException("Medium already exists for this branch");
         }
         medium.setBranchCode(branchCode);
-        medium.setRole(Role.valueOf(role));
+        medium.setRole(role);
         medium.setCreatedByEmail(email);
         return mediumRepository.save(medium);
     }

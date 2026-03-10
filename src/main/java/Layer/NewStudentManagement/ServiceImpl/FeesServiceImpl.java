@@ -2,7 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Pagination.StudentFeesSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.FeesService;
@@ -199,7 +199,7 @@ public class FeesServiceImpl implements FeesService
         fees.setDiscount(fees.getDiscount());
         fees.setFeesStatus(fees.getFeesStatus());
         fees.setCreatedByEmail(email);
-        fees.setRole(Role.valueOf(role));
+        fees.setRole(role);
         fees.setBranchCode(branchCode);
         fees.setPendingAmount(fees.getTotalamount());
 

@@ -1,7 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentEntranceExam;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.EntranceExamRepository;
 import Layer.NewStudentManagement.Service.EntranceExamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class EntranceExamServiceImpl implements EntranceExamService
         }
 
         exam.setBranchCode(branchCode);
-        exam.setRole(Role.valueOf(role));
+        exam.setRole(role);
         exam.setCreatedByEmail(email);
 
         return entranceExamRepository.save(exam);

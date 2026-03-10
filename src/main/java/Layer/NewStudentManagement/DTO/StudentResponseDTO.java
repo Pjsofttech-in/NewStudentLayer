@@ -1,6 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
-import Layer.NewStudentManagement.Enum.Role;
+
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -81,6 +81,6 @@ public class StudentResponseDTO {
 
     @Email
     private String createdByEmail;
-    private Role role;
+    private String role;
     private String branchCode;
 }

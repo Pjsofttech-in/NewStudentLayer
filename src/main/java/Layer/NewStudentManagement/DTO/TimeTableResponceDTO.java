@@ -1,6 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
-import Layer.NewStudentManagement.Enum.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +22,7 @@ public class TimeTableResponceDTO
 
     private String createdByEmail;
     private String branchCode;
-    private Role role;
+    private String role;
 
     private List<ScheduledPeriodResponseDTO> scheduledPeriods;
 }

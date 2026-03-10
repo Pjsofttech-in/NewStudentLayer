@@ -5,7 +5,7 @@ import Layer.NewStudentManagement.DTO.StudentPeriodResponseDTO;
 import Layer.NewStudentManagement.DTO.TimeTableRequestDTO;
 import Layer.NewStudentManagement.DTO.TimeTableResponceDTO;
 import Layer.NewStudentManagement.Entity.*;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Exception.ResourceNotFoundException;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.TimeTableService;
@@ -56,7 +56,7 @@ public class TimeTableServiceImpl implements TimeTableService
 
         StudentTimetable timetable = new StudentTimetable();
         timetable.setDayOfWeek(dto.getDayOfWeek());
-        timetable.setRole(Role.valueOf(role));
+        timetable.setRole(role);
         timetable.setCreatedByEmail(email);
         timetable.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
 

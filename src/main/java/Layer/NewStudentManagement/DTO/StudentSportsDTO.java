@@ -1,7 +1,7 @@
 package Layer.NewStudentManagement.DTO;
 
 
-import Layer.NewStudentManagement.Enum.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ public class StudentSportsDTO
     private Long id;
     private String height;
     private String weight;
-    private Role role;
+    private String role;
     private Boolean sportYesNo;
     private String sportsName;
     private Boolean sportParticipation;

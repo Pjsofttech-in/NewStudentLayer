@@ -1,6 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
-import Layer.NewStudentManagement.Enum.Role;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,6 +38,6 @@ public class StandardFeesRequestDTO
     private String groupName;
     private String academicYear;
     private String createdByEmail;
-    private Role role;
+    private String role;
     private String branchCode;
 }

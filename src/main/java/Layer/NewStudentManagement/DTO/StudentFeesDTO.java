@@ -1,6 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
-import Layer.NewStudentManagement.Enum.Role;
+
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -60,7 +60,7 @@ public class StudentFeesDTO
     //    private String feesType;
     @Email
     private String createdByEmail;
-    private Role role;
+    private String role;
     private String branchCode;
 
 }

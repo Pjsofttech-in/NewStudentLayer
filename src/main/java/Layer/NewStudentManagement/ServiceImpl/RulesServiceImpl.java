@@ -2,7 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentRules;
 import Layer.NewStudentManagement.Entity.StudentSchoolBank;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.RulesRepository;
 import Layer.NewStudentManagement.Service.RulesService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class RulesServiceImpl implements RulesService
         String branchCode =staffService.fetchBranchCodeByRole(role, email);
 
         rules.setBranchCode(branchCode);
-        rules.setRole(Role.valueOf(role));
+        rules.setRole(role);
         rules.setCreatedByEmail(email);
         return rulesRepository.save(rules);
 

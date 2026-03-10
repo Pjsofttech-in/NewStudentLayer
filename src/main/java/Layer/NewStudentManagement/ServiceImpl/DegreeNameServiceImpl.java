@@ -3,7 +3,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.StudentDegreeNameDTO;
 import Layer.NewStudentManagement.Entity.StudentDegreeName;
 import Layer.NewStudentManagement.Entity.StudentGraduationType;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.DegreeNameRepository;
 import Layer.NewStudentManagement.Repository.GraduationTypeRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
@@ -46,7 +46,7 @@ public class DegreeNameServiceImpl implements DegreeNameService
         degreeName.setDegreeName(request.getDegreeName());
         degreeName.setGraduationType(graduationType);
         degreeName.setCreatedByEmail(email);
-        degreeName.setRole(Role.valueOf(role));
+        degreeName.setRole(role);
         degreeName.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
 
         StudentDegreeName saved = degreeNameRepository.save(degreeName);

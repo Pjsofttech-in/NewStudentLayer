@@ -4,7 +4,7 @@ import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.FeesCollectRepository;
 import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
@@ -92,7 +92,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
         collect.setInvoice(invoice);
 
         collect.setCreatedByEmail(email);
-        collect.setRole(Role.valueOf(role));
+        collect.setRole(role);
         collect.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
         collect.setFeesPaymentType(collectionType);
         collect.setPaymentDate(LocalDate.now());

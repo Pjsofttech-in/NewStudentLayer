@@ -2,7 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.SchoolBankDTO;
 import Layer.NewStudentManagement.Entity.StudentSchoolBank;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.SchoolBankRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.SchoolBankService;
@@ -36,7 +36,7 @@ public class SchoolBankServiceImpl implements SchoolBankService
         String branchCode =staffService.fetchBranchCodeByRole(role, email);
 
         bank.setBranchCode(branchCode);
-        bank.setRole(Role.valueOf(role));
+        bank.setRole(role);
         bank.setCreatedByEmail(email);
         StudentSchoolBank save = schoolBankRepository.save(bank);
         return mapToBankDTO(save);

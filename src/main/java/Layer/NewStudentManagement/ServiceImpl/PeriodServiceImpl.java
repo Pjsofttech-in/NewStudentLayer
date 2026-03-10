@@ -2,7 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.StudentPeriodResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentPeriod;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Exception.ResourceNotFoundException;
 import Layer.NewStudentManagement.Repository.PeriodRepository;
 import Layer.NewStudentManagement.Service.PeriodService;
@@ -27,7 +27,7 @@ public class PeriodServiceImpl implements PeriodService
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        period.setRole(Role.valueOf(role));
+        period.setRole(role);
         period.setCreatedByEmail(email);
         period.setBranchCode(branchCode);
 

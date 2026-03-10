@@ -1,6 +1,6 @@
 package Layer.NewStudentManagement.Entity;
 
-import Layer.NewStudentManagement.Enum.Role;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -63,8 +63,8 @@ public class StudentFees
     private String institutionType;
     @Email
     private String createdByEmail;
-    @Enumerated(EnumType.STRING)
-    private Role role;
+
+    private String role;
     private String branchCode;
 
     @ManyToOne(optional = false)

@@ -3,7 +3,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.StudentDepartmentDTO;
 import Layer.NewStudentManagement.Entity.StudentDegreeName;
 import Layer.NewStudentManagement.Entity.StudentDepartment;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.DegreeNameRepository;
 import Layer.NewStudentManagement.Repository.DepartmentRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
@@ -46,7 +46,7 @@ public class DepartmentServiceImpl implements DepartmentService
         department.setDepartmentName(request.getDepartmentName());
         department.setDegreeName(degreeName);
         department.setCreatedByEmail(email);
-        department.setRole(Role.valueOf(role));
+        department.setRole(role);
         department.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
 
         StudentDepartment saved = departmentRepository.save(department);

@@ -1,7 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentScholarship;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.ScholarshipRepository;
 import Layer.NewStudentManagement.Service.ScholarshipService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class ScholarshipServiceImpl implements ScholarshipService
         }
 
         scholarship.setBranchCode(branchCode);
-        scholarship.setRole(Role.valueOf(role));
+        scholarship.setRole(role);
         scholarship.setCreatedByEmail(email);
 
         return scholarshipRepository.save(scholarship);

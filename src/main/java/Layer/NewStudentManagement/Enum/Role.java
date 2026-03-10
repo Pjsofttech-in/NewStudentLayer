@@ -1,12 +1,12 @@
-package Layer.NewStudentManagement.Enum;
-
-public enum Role
-{
-    superAdmin,
-    branch,
-    staff,
-    department,
-    user,
-    student,
-    teacher
-}
+//package Layer.NewStudentManagement.Enum;
+//
+//public enum Role
+//{
+//    superAdmin,
+//    branch,
+//    staff,
+//    department,
+//    user,
+//    student,
+//    teacher
+//}

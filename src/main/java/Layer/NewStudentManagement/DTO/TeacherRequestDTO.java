@@ -1,7 +1,7 @@
 package Layer.NewStudentManagement.DTO;
 
 import Layer.NewStudentManagement.Entity.StudentTeacher;
-import Layer.NewStudentManagement.Enum.Role;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +32,6 @@ public class TeacherRequestDTO
     private List<Long> subjectIds;
 
     private String createdByEmail;
-    private Role role;
+    private String role;
     private String branchCode;
 }

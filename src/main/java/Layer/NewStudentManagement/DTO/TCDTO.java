@@ -1,7 +1,7 @@
 package Layer.NewStudentManagement.DTO;
 
 import Layer.NewStudentManagement.Entity.StudentEntity;
-import Layer.NewStudentManagement.Enum.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
@@ -22,7 +22,7 @@ public class TCDTO
     private LocalDate tcDate;
     private String tcNumber;
     private String studentEmail;
-    private Role role;
+    private String role;
     private String createdByEmail;
     private String branchCode;
     private boolean duplicateTc;

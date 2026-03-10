@@ -5,7 +5,7 @@ import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
 import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
 import Layer.NewStudentManagement.DTO.TeacherWithSubjectsDTO;
 import Layer.NewStudentManagement.Entity.*;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ClassRoomService;
 import Layer.NewStudentManagement.Service.S3Service;
@@ -103,7 +103,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
         classRoom.setInstitutionType(dto.getInstitutionType());
         classRoom.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
         classRoom.setCreatedByEmail(email);
-        classRoom.setRole(Role.valueOf(role));
+        classRoom.setRole(role);
         classRoom.setMedium(medium);
         classRoom.setDivision(division);
         classRoom.setCreatedDate(LocalDate.now());

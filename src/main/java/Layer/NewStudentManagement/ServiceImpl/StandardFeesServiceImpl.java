@@ -3,7 +3,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.StandardFeesRequestDTO;
 import Layer.NewStudentManagement.Entity.*;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.StandardFeesService;
 import jakarta.annotation.Nullable;
@@ -62,7 +62,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
         standardFees.setMediumName(medium.getMediumName());
 
         standardFees.setCreatedByEmail(email);
-        standardFees.setRole(Role.valueOf(role));
+        standardFees.setRole(role);
         standardFees.setBranchCode(branchCode);
 
         String institutionType = standardFees.getInstitutionType();

@@ -2,7 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.StudentSubjectDTO;
 import Layer.NewStudentManagement.Entity.*;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.SubjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class SubjectServiceImpl implements SubjectService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         subject.setBranchCode(branchCode);
-        subject.setRole(Role.valueOf(role));
+        subject.setRole(role);
         subject.setCreatedByEmail(email);
         subject.setInstitutionType(dto.getInstitutionType());
         subject.setSubject(dto.getSubject());

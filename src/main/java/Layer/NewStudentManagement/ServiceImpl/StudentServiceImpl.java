@@ -2,7 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Mapper.StudentMapper;
 import Layer.NewStudentManagement.Pagination.StudentSpecification;
 import Layer.NewStudentManagement.Repository.*;
@@ -110,7 +110,7 @@ public class StudentServiceImpl implements StudentService {
         StudentEntity student = request.getStudent();
         student.setEnrollmentDate(LocalDate.now());
         student.setPassword(passwordEncoder.encode(student.getPassword()));
-        student.setRole(Role.valueOf(role));
+        student.setRole(role);
         student.setBranchCode(branchCode);
         student.setCreatedByEmail(email);
         student.setRegistrationNumber(generateRegistrationNumber());
@@ -1406,7 +1406,7 @@ public class StudentServiceImpl implements StudentService {
                     : email;
 
             request.setBranchCode(decodedBranchCode);
-            request.setRole(Role.valueOf(decodedRole.toUpperCase()));
+            request.setRole(decodedRole);
             request.setCreatedByEmail(decodedEmail);
 
         } else {
@@ -1422,7 +1422,7 @@ public class StudentServiceImpl implements StudentService {
             decodedEmail = email;
 
             request.setBranchCode(decodedBranchCode);
-            request.setRole(Role.valueOf(decodedRole.toUpperCase()));
+            request.setRole(decodedRole);
             request.setCreatedByEmail(decodedEmail);
         }
 
@@ -1450,7 +1450,7 @@ public class StudentServiceImpl implements StudentService {
         student.setEMarksOutOff(request.getEMarksOutOff());
 
         // Store decoded values (same as branchCode)
-        request.setRole(Role.valueOf(decodedRole.toUpperCase()));
+        request.setRole(decodedRole);
         student.setBranchCode(decodedBranchCode);
         student.setCreatedByEmail(decodedEmail);
 

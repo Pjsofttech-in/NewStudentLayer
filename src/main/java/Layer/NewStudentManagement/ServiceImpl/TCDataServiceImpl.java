@@ -3,7 +3,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.TCDTO;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentTcData;
-import Layer.NewStudentManagement.Enum.Role;
+
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Repository.TCDataRepository;
 import Layer.NewStudentManagement.Service.TCDataService;
@@ -73,7 +73,7 @@ public class TCDataServiceImpl implements TCDataService
         newTcData.setStudentEmail(student.getEmail());
         newTcData.setCreatedByEmail(email);
         newTcData.setBranchCode(branchCode);
-        newTcData.setRole(Role.valueOf(role));
+        newTcData.setRole(role);
         newTcData.setStudent(student);
 
         StudentTcData savedTc = tcDataRepository.save(newTcData);

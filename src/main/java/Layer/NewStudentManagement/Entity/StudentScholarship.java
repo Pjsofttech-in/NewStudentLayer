@@ -1,6 +1,6 @@
 package Layer.NewStudentManagement.Entity;
 
-import Layer.NewStudentManagement.Enum.Role;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +20,7 @@ public class StudentScholarship
     private Long id;
     private String scholarshipName;
     private String createdByEmail;
-    @Enumerated(EnumType.STRING)
-    private Role role;
+
+    private String role;
     private String branchCode;
 }
