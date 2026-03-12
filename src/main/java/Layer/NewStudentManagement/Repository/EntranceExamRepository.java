@@ -16,6 +16,9 @@ public interface EntranceExamRepository extends JpaRepository<StudentEntranceExa
     @Query("SELECT s FROM StudentEntranceExam s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentEntranceExam> findAllByBranchCode(@Param("branchCode") String branchCode);
 
+    @Query("SELECT e FROM StudentEntranceExam e WHERE e.branchCode IN :branchCodes")
+    List<StudentEntranceExam> findAllByBranchCodeIn(@Param("branchCodes") List<String> branchCodes);
+
     @Query("""
             SELECT COUNT(e) > 0
             FROM StudentEntranceExam e

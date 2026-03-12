@@ -21,4 +21,7 @@ public interface ScholarshipRepository extends JpaRepository<StudentScholarship,
                               @Param("branchCode") String branchCode);
 
 
+    @Query("SELECT s FROM StudentScholarship s WHERE s.branchCode IN :branchCodes")
+    List<StudentScholarship> findAllByBranchCodeIn(@Param("branchCodes") List<String> branchCodes);
+
 }

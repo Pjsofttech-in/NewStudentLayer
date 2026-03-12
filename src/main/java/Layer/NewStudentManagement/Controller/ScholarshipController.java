@@ -3,8 +3,11 @@ package Layer.NewStudentManagement.Controller;
 import Layer.NewStudentManagement.Entity.StudentScholarship;
 import Layer.NewStudentManagement.Service.ScholarshipService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -34,11 +37,23 @@ public class ScholarshipController
     }
 
     @GetMapping("/getAllScholarships")
-    public List<StudentScholarship> getAll(
+    public ResponseEntity<List<StudentScholarship>> getAll(
             @RequestParam String role,
-            @RequestParam String email)
+            @RequestParam String email,
+            @RequestParam(required = false) String branchCode,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
-        return scholarshipService.getAllScholarships(role,email);
+        try {
+            String token = null;
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            }
+
+            List<StudentScholarship> scholarships = scholarshipService.getAllScholarships(role, email,branchCode, token);
+            return ResponseEntity.ok(scholarships);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+        }
     }
 
     @PutMapping("/updateScholarship/{id}")

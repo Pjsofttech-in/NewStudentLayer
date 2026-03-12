@@ -3,9 +3,11 @@ package Layer.NewStudentManagement.Controller;
 import Layer.NewStudentManagement.Entity.StudentEntranceExam;
 import Layer.NewStudentManagement.Service.EntranceExamService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000")
 @CrossOrigin(origins = "https://pjsofttech.in")
@@ -27,10 +29,21 @@ public class EntranceExamController
     }
 
     @GetMapping("/getAllEnranceExam")
-    public ResponseEntity<List<StudentEntranceExam>> getEntranceExam (@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<List<StudentEntranceExam>> getEntranceExam (@RequestParam String role, @RequestParam String email,
+                                                                      @RequestParam(required = false) String branchCode,
+                                                                      @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
-        List<StudentEntranceExam> entranceExam = entranceExamService.getAllIntranceExams(role, email);
-        return ResponseEntity.ok(entranceExam);
+        try {
+            String token = null;
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            }
+
+            List<StudentEntranceExam> entranceExam = entranceExamService.getAllIntranceExams(role, email,branchCode, token);
+            return ResponseEntity.ok(entranceExam);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+        }
     }
 
     @GetMapping("/getEntranceExamById/{id}")

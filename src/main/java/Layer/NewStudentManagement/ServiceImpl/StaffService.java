@@ -153,7 +153,7 @@ public class StaffService
 
         switch (role.toUpperCase()) {
             case "USER" -> {
-                return "POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action);
+                return "POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action) || "PUT".equalsIgnoreCase(action);
             }
             case "SUPERADMIN" -> {
                 if ("GET".equalsIgnoreCase(action)) {

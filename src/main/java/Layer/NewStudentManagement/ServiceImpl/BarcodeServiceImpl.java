@@ -42,16 +42,16 @@ public class BarcodeServiceImpl implements BarcodeService
             throw new RuntimeException("Branch code not found for email: " + email);
         }
 
-        String instituteEmail = staffService.getInstituteEmailByBranchCode(branchCode).block();
-        if (instituteEmail == null || instituteEmail.isEmpty()) {
-            throw new RuntimeException("Institute email not found for branch code: " + branchCode);
-        }
+//        String instituteEmail = staffService.getInstituteEmailByBranchCode(branchCode).block();
+//        if (instituteEmail == null || instituteEmail.isEmpty()) {
+//            throw new RuntimeException("Institute email not found for branch code: " + branchCode);
+//        }
 
-        instituteEmail = instituteEmail.replace("instituteEmail =", "")
-                .replace("\"", "")
-                .trim();
+//        instituteEmail = instituteEmail.replace("instituteEmail =", "")
+//                .replace("\"", "")
+//                .trim();
 
-        String encodedInstituteEmail = URLEncoder.encode(instituteEmail, StandardCharsets.UTF_8);
+//        String encodedInstituteEmail = URLEncoder.encode(instituteEmail, StandardCharsets.UTF_8);
 
         // ✅ Encode all 3 values
         String encodedBranchCode = Base64.getUrlEncoder().encodeToString(branchCode.getBytes(StandardCharsets.UTF_8));
@@ -65,7 +65,7 @@ public class BarcodeServiceImpl implements BarcodeService
 
         String jwt = jwtUtil.generateTokenWithClaims("user@gmail.com", claims, Duration.ofDays(90));
 
-        String qrData = HR_INQUIRY_BASE_URL + "?token=" + jwt + "&instituteEmail=" + encodedInstituteEmail;
+        String qrData = HR_INQUIRY_BASE_URL + "?token=" + jwt;
 
         QRCodeWriter barcodeWriter = new QRCodeWriter();
         BitMatrix bitMatrix = barcodeWriter.encode(qrData, BarcodeFormat.QR_CODE, 300, 300);

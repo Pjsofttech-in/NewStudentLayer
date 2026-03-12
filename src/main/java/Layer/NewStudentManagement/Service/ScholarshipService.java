@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.Service;
 
 import Layer.NewStudentManagement.Entity.StudentScholarship;
+import jakarta.annotation.Nullable;
 
 import java.util.List;
 
@@ -11,7 +12,9 @@ public interface ScholarshipService
 
     StudentScholarship getScholarshipById(Long id, String role, String email);
 
-    List<StudentScholarship> getAllScholarships(String role, String email);
+    List<StudentScholarship> getAllScholarships(String role, String email,
+                                                @Nullable String branchCode,
+                                                String token);
 
     StudentScholarship updateScholarship(Long id, String role, String email, StudentScholarship scholarship);
 
