@@ -69,7 +69,7 @@ public class StudentClassRoom
     @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
     private List<StudentEntity> students;
 
-    @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentClassRoomTeacherSubject> teacherSubjectAssignments;
 
 

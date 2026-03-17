@@ -27,10 +27,16 @@ public class ClassRoomController
     }
 
     @PutMapping("/updateClassRoom/{id}")
-    public ResponseEntity<StudentClassRoomResponseDTO> updateClassRoom(@PathVariable Long id,@RequestParam String role, @RequestParam String email, @RequestBody StudentClassRoom classRoom)
-    {
-        StudentClassRoomResponseDTO studentClassRoom = classRoomService.updateClassRoom(id, role, email, classRoom);
-        return ResponseEntity.ok(studentClassRoom);
+    public ResponseEntity<StudentClassRoomResponseDTO> updateClassRoom(
+            @PathVariable Long id,
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestBody StudentClassRoomRequestDTO request
+    ) {
+
+        StudentClassRoomResponseDTO response = classRoomService.updateClassRoom(id, role, email, request);
+
+        return ResponseEntity.ok(response);
     }
 
 

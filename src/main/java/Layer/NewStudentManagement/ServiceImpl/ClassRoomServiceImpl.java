@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.DTO.ClassRoomFilterRequest;
-import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
-import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
-import Layer.NewStudentManagement.DTO.TeacherWithSubjectsDTO;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
 
 import Layer.NewStudentManagement.Repository.*;
@@ -185,28 +182,64 @@ public class ClassRoomServiceImpl implements ClassRoomService
         return mapToResponseDTO(savedClassRoom);
     }
 
-
     @Override
-    public StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, StudentClassRoom updateClassRoom) {
+    public StudentClassRoomResponseDTO updateClassRoom(Long id, String role,
+                                                       String email, StudentClassRoomRequestDTO request) {
+
         if (!staffService.hasPermission(role, email, "Put")) {
-            throw new RuntimeException("You don't have permission to update ClassRoom");
+            throw new RuntimeException("No permission");
         }
 
-        StudentClassRoom existingClassRoom = classRoomRepository.findById(id)
+        StudentClassRoom existing = classRoomRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ClassRoom not found"));
 
-        if (updateClassRoom.getStartTime() != null) {
-            existingClassRoom.setStartTime(updateClassRoom.getStartTime());
+        // ===============================
+        // ✅ BASIC UPDATE
+        // ===============================
+        existing.setStartTime(request.getStartTime());
+        existing.setEndTime(request.getEndTime());
+        existing.setGroupName(request.getGroupName());
+
+        // ===============================
+        // 🔥 TEACHER-SUBJECT LOGIC
+        // ===============================
+        if (request.getTeacherSubjectMap() != null) {
+
+            List<StudentClassRoomTeacherSubject> finalList = new ArrayList<>();
+
+            for (Map.Entry<Long, List<Long>> entry : request.getTeacherSubjectMap().entrySet()) {
+
+                Long teacherId = entry.getKey();
+                List<Long> subjectIds = entry.getValue();
+
+                // ✅ Fetch Teacher
+                StudentTeacher teacher = teacherRepository.findById(teacherId)
+                        .orElseThrow(() -> new RuntimeException("Teacher not found: " + teacherId));
+
+                // ✅ Fetch Subjects
+                List<StudentSubject> subjects = subjectRepository.findAllById(subjectIds);
+
+                // ✅ Create Mapping
+                StudentClassRoomTeacherSubject mapping = new StudentClassRoomTeacherSubject();
+
+                mapping.setTeacher(teacher);
+                mapping.setSubjects(subjects);
+                mapping.setClassRoom(existing); // 🔥 VERY IMPORTANT
+
+                finalList.add(mapping);
+            }
+
+            // ===============================
+            // 🔥 REMOVE + ADD (SYNC)
+            // ===============================
+            existing.getTeacherSubjectAssignments().clear(); // remove old
+            existing.getTeacherSubjectAssignments().addAll(finalList); // add new
         }
 
-        if (updateClassRoom.getEndTime() != null) {
-            existingClassRoom.setEndTime(updateClassRoom.getEndTime());
-        }
+        StudentClassRoom saved = classRoomRepository.save(existing);
 
-        StudentClassRoom updated = classRoomRepository.save(existingClassRoom);
-        return mapToResponseDTO(updated);
+        return mapToResponseDTO(saved);
     }
-
 
     @Override
     public StudentClassRoomResponseDTO getClassRoomById(Long id, String role, String email)

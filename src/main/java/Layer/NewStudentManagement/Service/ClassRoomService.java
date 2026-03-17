@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.Service;
 
-import Layer.NewStudentManagement.DTO.ClassRoomFilterRequest;
-import Layer.NewStudentManagement.DTO.ClassRoomRequestDTO;
-import Layer.NewStudentManagement.DTO.StudentClassRoomResponseDTO;
-import Layer.NewStudentManagement.DTO.TeacherWithSubjectsDTO;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentClassRoom;
 import Layer.NewStudentManagement.Entity.StudentClassRoomTeacherSubject;
 
@@ -14,7 +11,8 @@ public interface ClassRoomService
 {
 
     StudentClassRoomResponseDTO createClassRoom(String role, String email, ClassRoomRequestDTO dto);
-    StudentClassRoomResponseDTO updateClassRoom(Long id, String role, String email, StudentClassRoom classRoom);
+    StudentClassRoomResponseDTO updateClassRoom(Long id, String role,
+                                                String email, StudentClassRoomRequestDTO request);
     StudentClassRoomResponseDTO getClassRoomById(Long id, String role, String email);
     void deleteClassRoomById(Long id, String role, String email);
     List<StudentClassRoomResponseDTO> getAllClassRoom(String role, String email);
