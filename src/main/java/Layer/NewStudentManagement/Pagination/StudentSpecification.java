@@ -296,7 +296,6 @@ public class StudentSpecification {
                         break;
                 }
             }
-
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

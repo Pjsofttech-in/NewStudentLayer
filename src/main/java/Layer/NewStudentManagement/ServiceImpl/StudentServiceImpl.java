@@ -1286,6 +1286,7 @@ public class StudentServiceImpl implements StudentService {
 
         Specification<StudentEntity> spec = StudentSpecification.filter(branchCode, filter, timeFrame, customStart, customEnd);
 
+
         return studentRepository.findAll(spec, pageable)
                 .map(this::mapToDTO);
     }
