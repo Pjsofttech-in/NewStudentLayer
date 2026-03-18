@@ -54,6 +54,10 @@ public class StudentMapper
             dto.setTcGenrated(student.isTcGenrated());
             dto.setOldRegisterPhoto(student.getOldRegisterPhoto());
             dto.setApplicationNumber(student.getApplicationNumber());
+            dto.setEntranceExamName(student.getEntranceExamName());
+            dto.setEntranceExam(student.isEntranceExam());
+            dto.setEntranceMarks(student.getEntranceMarks());
+            dto.setEMarksOutOff(student.getEMarksOutOff());
             if (student.getClassRoom() != null) {
                 dto.setClasssRoomId(student.getClassRoom().getId());
             } else {

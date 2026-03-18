@@ -67,6 +67,11 @@ public class StudentDTO
     private boolean isTcGenrated;
     private String oldRegisterPhoto;
     private String applicationNumber;
+    private boolean entranceExam;
+    private String entranceExamName;
+    private Integer entranceMarks;
+    private Integer eMarksOutOff;
+    private String entranceMarkSheet;
 
     @Email
     private String createdByEmail;
