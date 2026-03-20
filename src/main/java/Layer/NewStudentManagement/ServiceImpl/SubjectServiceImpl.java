@@ -102,8 +102,6 @@ public class SubjectServiceImpl implements SubjectService
                         .orElseThrow(() -> new RuntimeException("Degree not found"));
                 subject.setDegree(degree);
                 subject.setDegreeName(degree.getDegreeName());
-
-
                 subject.setDepartmentName(dto.getDepartmentName());
             }
             else {
@@ -124,6 +122,7 @@ public class SubjectServiceImpl implements SubjectService
         response.setRole(saved.getRole());
         response.setBranchCode(saved.getBranchCode());
         response.setInstitutionType(saved.getInstitutionType());
+        response.setDepartmentName(saved.getDepartmentName());
 
         if (saved.getGraduationType() != null) {
             response.setGraduationTypeId(saved.getGraduationType().getId());
@@ -255,6 +254,7 @@ public class SubjectServiceImpl implements SubjectService
         dto.setRole(subject.getRole());
         dto.setBranchCode(subject.getBranchCode());
         dto.setInstitutionType(subject.getInstitutionType());
+        dto.setDepartmentName(subject.getDepartmentName());
 
         // Graduation Type
         if (subject.getGraduationType() != null) {
