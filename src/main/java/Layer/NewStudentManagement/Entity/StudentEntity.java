@@ -51,6 +51,7 @@ public class StudentEntity
     private String applyFor;
     private String streamName;
     private String groupName;
+    private String departmentName;
     private String semister;
     private String password;
     private String institutionType;
@@ -120,11 +121,6 @@ public class StudentEntity
     @ManyToOne
     @JoinColumn(name = "degree_name_id")
     private StudentDegreeName degreeName;
-
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    private StudentDepartment department;
-
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentPromotionRecord> promotionRecords;

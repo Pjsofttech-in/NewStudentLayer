@@ -31,6 +31,6 @@ public class StudentDegreeName
     @JoinColumn(name = "graduation_type_id")
     private StudentGraduationType graduationType;
 
-    @OneToMany(mappedBy = "degreeName", cascade = CascadeType.ALL)
-    private List<StudentDepartment> departments;
+//    @OneToMany(mappedBy = "degreeName", cascade = CascadeType.ALL)
+//    private List<StudentDepartment> departments;
 }

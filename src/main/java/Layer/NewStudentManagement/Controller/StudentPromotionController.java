@@ -33,7 +33,7 @@ public class StudentPromotionController
                 requestDTO.getNewStandardId(),
                 requestDTO.getNewMediumId(),
                 requestDTO.getNewDegreeNameId(),
-                requestDTO.getNewDepartmentId(),
+                requestDTO.getNewDepartmentName(),
                 requestDTO.getNewStreamId(),
                 requestDTO.getGroupName(),
                 requestDTO.getAcademicYear(),

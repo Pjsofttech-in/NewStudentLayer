@@ -60,9 +60,6 @@ public class ClassRoomServiceImpl implements ClassRoomService
     DegreeNameRepository degreeNameRepository;
 
     @Autowired
-    DepartmentRepository departmentRepository;
-
-    @Autowired
     private S3Service s3Service;
 
 
@@ -143,7 +140,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
             // UG / PG
             else {
-                if (dto.getStreamId() == null || dto.getDegreeNameId() == null || dto.getDepartmentId() == null) {
+                if (dto.getStreamId() == null || dto.getDegreeNameId() == null) {
                     throw new RuntimeException("Stream, DegreeName and Department are required for UG/PG ClassRoom");
                 }
 
@@ -151,12 +148,9 @@ public class ClassRoomServiceImpl implements ClassRoomService
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
                 StudentDegreeName degree = degreeNameRepository.findById(dto.getDegreeNameId())
                         .orElseThrow(() -> new RuntimeException("Degree not found"));
-                StudentDepartment department = departmentRepository.findById(dto.getDepartmentId())
-                        .orElseThrow(() -> new RuntimeException("Department not found"));
 
                 classRoom.setStream(stream);
                 classRoom.setDegreeName(degree);
-                classRoom.setDepartment(department);
             }
         }
         StudentClassRoom savedClassRoom = classRoomRepository.save(classRoom);
@@ -263,6 +257,11 @@ public class ClassRoomServiceImpl implements ClassRoomService
         {
             throw new RuntimeException("You don't have permission to Delete ClassRoom");
         }
+        boolean studentExists = studentRepository.existsByClassRoomId(id);
+
+        if (studentExists) {
+            throw new RuntimeException("Cannot delete classroom. Students are still assigned to this classroom.");
+        }
         classRoomRepository.deleteById(id);
     }
 
@@ -360,8 +359,8 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 (classroom != null && classroom.getGraduationType() != null) ? classroom.getGraduationType().getGraduationType() : null,
                 classroom != null ? classroom.getInstitutionType() : null,
                 (classroom != null && classroom.getStream() != null) ? classroom.getStream().getStream() : null,
-                (classroom != null && classroom.getDepartment() != null) ? classroom.getDepartment().getDepartmentName() : null,
                 (classroom != null && classroom.getDegreeName() != null) ? classroom.getDegreeName().getDegreeName() : null,
+                classroom != null ? classroom.getDepartmentName() :null,
                 classroom != null ? classroom.getBranchCode() : "",
                 classroom != null ? classroom.getCreatedByEmail() : "",
                 classroom != null ? classroom.getRole() : null,
@@ -438,8 +437,8 @@ public class ClassRoomServiceImpl implements ClassRoomService
                         newDto.setGraduationType(classroom.getGraduationType() != null ? classroom.getGraduationType().getGraduationType() : null);
                         newDto.setInstitutionType(classroom.getInstitutionType());
                         newDto.setStreamName(classroom.getStream() != null ? classroom.getStream().getStream() : null);
-                        newDto.setDepartmentName(classroom.getDepartment() != null ? classroom.getDepartment().getDepartmentName() : null);
                         newDto.setDegreeName(classroom.getDegreeName() != null ? classroom.getDegreeName().getDegreeName() : null);
+                        newDto.setDepartmentName(classroom.getDepartmentName());
                         newDto.setBranchCode(classroom.getBranchCode());
                         newDto.setTeacherSubjectMappings(new ArrayList<>());
                         return newDto;
@@ -495,7 +494,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 filter.getMediumId(),
                 filter.getStandardId(),
                 filter.getDegreeNameId(),
-                filter.getDepartmentId(),
+                filter.getDepartmentName(),
                 filter.getGroupName(),
                 filter.getYear()
         );

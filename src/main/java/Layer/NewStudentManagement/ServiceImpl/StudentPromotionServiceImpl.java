@@ -23,7 +23,6 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
     private final StandardRepository standardRepository;
     private final MediumRepository mediumRepository;
     private final StudentPromotionRepository promotionRecordRepository;
-    private final DepartmentRepository departmentRepository;
     private final DegreeNameRepository degreeNameRepository;
     private final StreamRepository streamRepository;
     private final GraduationTypeRepository graduationTypeRepository;
@@ -35,7 +34,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
     public StudentPromotionResponseDTO promoteStudent(
             String role, String email, Long studentId,
             Long newStandardId, Long newMediumId,
-            Long newDegreeNameId, Long newDepartmentId,
+            Long newDegreeNameId, String newDepartmentName,
             Long newStreamId, String groupName,
             String academicYear, Long newClassroomId,
             String institutionType, Long graduationTypeId )
@@ -72,7 +71,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         previous.setMedium(student.getMedium());
         previous.setMediumName(student.getMediumName());
         previous.setDegree(student.getDegreeName());
-        previous.setDepartment(student.getDepartment());
+        previous.setDepartmentName(student.getDepartmentName());
         previous.setStream(student.getStream());
         previous.setStreamName(student.getStreamName());
         previous.setGroupName(student.getGroupName());
@@ -96,7 +95,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
 
             // Reset college fields
             student.setDegreeName(null);
-            student.setDepartment(null);
+            student.setDepartmentName(null);
             student.setStream(null);
             student.setStreamName(null);
             student.setGroupName(null);
@@ -128,19 +127,16 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
                 student.setGroupName(groupName);
 
                 student.setDegreeName(null);
-                student.setDepartment(null);
+                student.setDepartmentName(null);
             } else {
                 StudentDegreeName degree = degreeNameRepository.findById(newDegreeNameId)
                         .orElseThrow(() -> new RuntimeException("DegreeName not found"));
-                StudentDepartment department = departmentRepository.findById(newDepartmentId)
-                        .orElseThrow(() -> new RuntimeException("Department not found"));
                 StudentMedium medium = mediumRepository.findById(newMediumId)
                         .orElseThrow(() -> new RuntimeException("Medium not found"));
                 StudentStream stream = streamRepository.findById(newStreamId)
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
 
                 student.setDegreeName(degree);
-                student.setDepartment(department);
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
                 student.setStream(stream);
@@ -183,7 +179,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         current.setMedium(student.getMedium());
         current.setMediumName(student.getMediumName());
         current.setDegree(student.getDegreeName());
-        current.setDepartment(student.getDepartment());
+        current.setDepartmentName(student.getDepartmentName());
         current.setStream(student.getStream());
         current.setStreamName(student.getStreamName());
         current.setGroupName(student.getGroupName());
@@ -306,9 +302,6 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
         // Newly added fields
         dto.setDegreeId(record.getDegree() != null ? record.getDegree().getId() : null);
         dto.setDegreeName(record.getDegree() != null ? record.getDegree().getDegreeName() : null);
-
-        dto.setDepartmentId(record.getDepartment() != null ? record.getDepartment().getId() : null);
-        dto.setDepartmentName(record.getDepartment() != null ? record.getDepartment().getDepartmentName() : null);
 
         dto.setStreamId(record.getStream() != null ? record.getStream().getId() : null);
         dto.setStreamName(record.getStreamName() !=null ? record.getStream().getStream() :null);

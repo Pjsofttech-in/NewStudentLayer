@@ -26,10 +26,9 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
 
     // For UG/PG
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
-            "WHERE f.student = :student AND f.student.degreeName.id = :degreeId AND f.student.department.id = :departmentId")
+            "WHERE f.student = :student AND f.student.degreeName.id = :degreeId")
     boolean existsUGPGFees(@Param("student") StudentEntity student,
-                           @Param("degreeId") Long degreeId,
-                           @Param("departmentId") Long departmentId);
+                           @Param("degreeId") Long degreeId);
 
     // For Jr. College
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
@@ -63,12 +62,11 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
 
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
             "WHERE f.student = :student AND f.medium.mid = :mediumId AND f.stream.id = :streamId " +
-            "AND f.degree.id = :degreeId AND f.department.id = :departmentId")
+            "AND f.degree.id = :degreeId")
     boolean existsByMediumStreamDegreeDepartment(@Param("student") StudentEntity student,
                                                  @Param("mediumId") Long mediumId,
                                                  @Param("streamId") Long streamId,
-                                                 @Param("degreeId") Long degreeId,
-                                                 @Param("departmentId") Long departmentId);
+                                                 @Param("degreeId") Long degreeId);
 
 
 

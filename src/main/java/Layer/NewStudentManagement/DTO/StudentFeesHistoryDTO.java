@@ -29,7 +29,7 @@ public class StudentFeesHistoryDTO {
     private Long degreeId;
     private String degreeName;
 
-    private Long departmentId;
+
     private String departmentName;
     private String feesCollectionType;
     private List<FeesCollectionDetailDTO> paymentHistory;

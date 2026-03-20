@@ -29,7 +29,6 @@ public class ClassRoomRequestDTO
     private String groupName; // for Jr. College
 
     private Long degreeNameId;
-    private Long departmentId;
 
     private Map<Long, List<Long>> teacherSubjectMap; // teacherId -> List<subjectId>
 

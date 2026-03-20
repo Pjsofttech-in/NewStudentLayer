@@ -18,7 +18,7 @@ public class StudentRequest
     private Long streamId;
     private Long graduationTypeId;
     private Long degreeNameId;
-    private Long departmentId;
+
     private StudentEntity student;
     private StudentAddress address;
     private List<StudentEducation> educationList;

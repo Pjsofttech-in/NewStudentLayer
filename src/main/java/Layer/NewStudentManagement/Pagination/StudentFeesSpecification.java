@@ -51,10 +51,10 @@ public class StudentFeesSpecification
                 predicates.add(criteriaBuilder.equal(degreeJoin.get("degreeName"), dto.getDegreeName()));
             }
 
-            if (dto.getDepartmentName() != null && !dto.getDepartmentName().isEmpty()) {
-                Join<StudentFees, StudentDepartment> deptJoin = root.join("department", JoinType.LEFT);
-                predicates.add(criteriaBuilder.equal(deptJoin.get("departmentName"), dto.getDepartmentName()));
-            }
+//            if (dto.getDepartmentName() != null && !dto.getDepartmentName().isEmpty()) {
+//                Join<StudentFees, StudentDepartment> deptJoin = root.join("department", JoinType.LEFT);
+//                predicates.add(criteriaBuilder.equal(deptJoin.get("departmentName"), dto.getDepartmentName()));
+//            }
 
             if (dto.getInstitutionType() != null && !dto.getInstitutionType().isBlank()) {
                 predicates.add(criteriaBuilder.equal(

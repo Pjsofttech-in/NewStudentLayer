@@ -43,8 +43,7 @@ public class TeacherServiceImpl implements TeacherService
     @Autowired
     DegreeNameRepository degreeRepository;
 
-    @Autowired
-    DepartmentRepository departmentRepository;
+
 
     @Autowired
     ResultRepository resultRepository;
@@ -81,7 +80,6 @@ public class TeacherServiceImpl implements TeacherService
         StudentGraduationType graduationType = null;
         StudentStream stream = null;
         StudentDegreeName degree = null;
-        StudentDepartment department = null;
 
         if ("School".equalsIgnoreCase(institutionType)) {
             // School: no further checks
@@ -105,7 +103,7 @@ public class TeacherServiceImpl implements TeacherService
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
 
             } else if ("UG".equalsIgnoreCase(gradTypeName) || "PG".equalsIgnoreCase(gradTypeName)) {
-                if (dto.getStreamId() == null || dto.getDegreeId() == null || dto.getDepartmentId() == null) {
+                if (dto.getStreamId() == null || dto.getDegreeId() == null) {
                     throw new RuntimeException("Stream, Degree, and Department are required for UG/PG");
                 }
 
@@ -115,8 +113,6 @@ public class TeacherServiceImpl implements TeacherService
                 degree = degreeRepository.findById(dto.getDegreeId())
                         .orElseThrow(() -> new RuntimeException("Degree not found"));
 
-                department = departmentRepository.findById(dto.getDepartmentId())
-                        .orElseThrow(() -> new RuntimeException("Department not found"));
             } else {
                 throw new RuntimeException("Unsupported Graduation Type for College");
             }
@@ -173,12 +169,6 @@ public class TeacherServiceImpl implements TeacherService
             teacher.setDegree(degree);
             teacher.setDegreeName(degree.getDegreeName());
         }
-
-        if (department != null) {
-            teacher.setDepartment(department);
-            teacher.setDepartmentName(department.getDepartmentName());
-        }
-
 
         if (profilePhoto != null && !profilePhoto.isEmpty()) {
             String uploadedUrl = s3Service.uploadFile(profilePhoto, branchCode);
@@ -244,11 +234,6 @@ public class TeacherServiceImpl implements TeacherService
         if (teacher.getDegreeId() != null) {
             StudentDegreeName degree = degreeRepository.findById(teacher.getDegreeId()).orElse(null);
             existingTeacher.setDegree(degree);
-        }
-
-        if (teacher.getDepartmentId() != null) {
-            StudentDepartment dept = departmentRepository.findById(teacher.getDepartmentId()).orElse(null);
-            existingTeacher.setDepartment(dept);
         }
 
         if (teacher.getSubjectIds() != null && !teacher.getSubjectIds().isEmpty()) {
@@ -480,11 +465,6 @@ public class TeacherServiceImpl implements TeacherService
         if (teacher.getDegree() != null) {
             responseDTO.setDegreeId(teacher.getDegree().getId());
             responseDTO.setDegreeName(teacher.getDegree().getDegreeName());
-        }
-
-        if (teacher.getDepartment() != null) {
-            responseDTO.setDepartmentId(teacher.getDepartment().getId());
-            responseDTO.setDepartmentName(teacher.getDepartment().getDepartmentName());
         }
 
         return responseDTO;

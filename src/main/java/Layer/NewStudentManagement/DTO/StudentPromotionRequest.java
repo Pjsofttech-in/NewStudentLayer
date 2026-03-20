@@ -15,7 +15,7 @@ public class StudentPromotionRequest
     private Long newStandardId;
     private Long newMediumId;
     private Long newDegreeNameId;
-    private Long newDepartmentId;
+    private String newDepartmentName;
     private Long newStreamId;
     private String groupName;
     private String academicYear;

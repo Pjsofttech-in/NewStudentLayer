@@ -37,8 +37,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
     @Autowired
     StreamRepository streamRepository;
 
-    @Autowired
-    DepartmentRepository departmentRepository;
+
 
     @Autowired
     DegreeNameRepository degreeNameRepository;
@@ -120,8 +119,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
 
             // UG/PG logic
             else {
-                if (standardFees.getDegree() == null || standardFees.getDegree().getId() == null ||
-                        standardFees.getDepartment() == null || standardFees.getDepartment().getId() == null) {
+                if (standardFees.getDegree() == null || standardFees.getDegree().getId() == null) {
                     throw new RuntimeException("Degree and Department must be provided for UG/PG College students.");
                 }
                 StudentStream stream = streamRepository.findById(standardFees.getStream().getId())
@@ -130,11 +128,8 @@ public class StandardFeesServiceImpl implements StandardFeesService
                 StudentDegreeName degree = degreeNameRepository.findById(standardFees.getDegree().getId())
                         .orElseThrow(() -> new RuntimeException("Invalid degree ID"));
 
-                StudentDepartment department = departmentRepository.findById(standardFees.getDepartment().getId())
-                        .orElseThrow(() -> new RuntimeException("Invalid department ID"));
-
                 boolean exists = standardFeesRepository.existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCodeAndAcademicYear(
-                        graduationType, degree, department, medium, branchCode,academicYear);
+                        graduationType, degree, medium, branchCode,academicYear);
 
                 if (exists) {
                     throw new RuntimeException("Fees already assigned for this graduation type, degree, department, and medium.");
@@ -144,8 +139,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
                 standardFees.setStreamName(stream.getStream());
                 standardFees.setDegree(degree);
                 standardFees.setDegreeName(degree.getDegreeName());
-                standardFees.setDepartment(department);
-                standardFees.setDepartmentName(department.getDepartmentName());
+                standardFees.setDepartmentName(standardFees.getDepartmentName());
             }
         }
 
@@ -311,11 +305,8 @@ public class StandardFeesServiceImpl implements StandardFeesService
                 Long degreeId = degreeIds.get(0);
 
                 String departmentName = filterDTO.getDepartmentName().trim();
-                List<Long> departmentIds = departmentRepository.findIdsByNameAndDegreeAndBranchCode(departmentName, degreeId, branchCode);
-                if (departmentIds.size() != 1) throw new RuntimeException("Invalid or duplicate department");
-                Long departmentId = departmentIds.get(0);
 
-                feesList = standardFeesRepository.findForUGPG(mediumId, streamId, degreeId, departmentId, branchCode);
+                feesList = standardFeesRepository.findForUGPG(mediumId, streamId, degreeId, departmentName, branchCode);
             }
             // JR.COLLEGE
             else {

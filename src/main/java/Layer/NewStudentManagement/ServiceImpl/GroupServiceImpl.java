@@ -1,8 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.DTO.StudentDepartmentDTO;
 import Layer.NewStudentManagement.DTO.StudentGroupDTO;
-import Layer.NewStudentManagement.Entity.StudentDepartment;
+//import Layer.NewStudentManagement.Entity.StudentDepartment;
 import Layer.NewStudentManagement.Entity.StudentGraduationType;
 import Layer.NewStudentManagement.Entity.StudentGroup;
 

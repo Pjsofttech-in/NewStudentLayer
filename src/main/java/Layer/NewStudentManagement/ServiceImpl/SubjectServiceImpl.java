@@ -34,8 +34,7 @@ public class SubjectServiceImpl implements SubjectService
     @Autowired
     private DegreeNameRepository degreeRepository;
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
+
 
     @Override
     public StudentSubjectDTO saveSubject(StudentSubjectDTO dto, String role, String email) {
@@ -61,7 +60,7 @@ public class SubjectServiceImpl implements SubjectService
             subject.setGraduationType(null);
             subject.setStream(null);
             subject.setDegree(null);
-            subject.setDepartment(null);
+            subject.setDepartmentName(null);
         }
         else if ("College".equalsIgnoreCase(institutionType)) {
             // Graduation Type must be present
@@ -86,11 +85,11 @@ public class SubjectServiceImpl implements SubjectService
                 subject.setStreamName(stream.getStream());
 
                 subject.setDegree(null);
-                subject.setDepartment(null);
+                subject.setDepartmentName(null);
             }
             else if ("UG".equalsIgnoreCase(graduationTypeName) || "PG".equalsIgnoreCase(graduationTypeName)) {
                 // All fields are required
-                if (dto.getStreamId() == null || dto.getDegreeId() == null || dto.getDepartmentId() == null) {
+                if (dto.getStreamId() == null || dto.getDegreeId() == null) {
                     throw new RuntimeException("Stream, Degree, and Department are required for UG/PG");
                 }
 
@@ -104,10 +103,8 @@ public class SubjectServiceImpl implements SubjectService
                 subject.setDegree(degree);
                 subject.setDegreeName(degree.getDegreeName());
 
-                StudentDepartment department = departmentRepository.findById(dto.getDepartmentId())
-                        .orElseThrow(() -> new RuntimeException("Department not found"));
-                subject.setDepartment(department);
-                subject.setDepartmentName(department.getDepartmentName());
+
+                subject.setDepartmentName(dto.getDepartmentName());
             }
             else {
                 throw new RuntimeException("Unsupported Graduation Type for College");
@@ -143,10 +140,6 @@ public class SubjectServiceImpl implements SubjectService
             response.setDegreeName(saved.getDegree().getDegreeName());
         }
 
-        if (saved.getDepartment() != null) {
-            response.setDepartmentId(saved.getDepartment().getId());
-            response.setDepartmentName(saved.getDepartment().getDepartmentName());
-        }
 
         return response;
     }
@@ -278,10 +271,6 @@ public class SubjectServiceImpl implements SubjectService
         if (subject.getDegree() != null) {
             dto.setDegreeId(subject.getDegree().getId());
             dto.setDegreeName(subject.getDegree().getDegreeName());
-        }
-        if (subject.getDepartment() != null) {
-            dto.setDepartmentId(subject.getDepartment().getId());
-            dto.setDepartmentName(subject.getDepartment().getDepartmentName());
         }
 
         return dto;

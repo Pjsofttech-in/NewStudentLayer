@@ -17,7 +17,7 @@ public class ClassRoomFilterRequest
     private Long mediumId;
     private Long standardId;
     private Long degreeNameId;
-    private Long departmentId;
+    private String departmentName;
     private String groupName;
     private String year;
 

@@ -47,8 +47,6 @@ public class StudentSubject
     @JoinColumn(name = "degree_id",nullable = true)
     private StudentDegreeName degree;
 
-    @ManyToOne
-    @JoinColumn(name = "department_id",nullable = true)
-    private StudentDepartment department;
+
 
 }

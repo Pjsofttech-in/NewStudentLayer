@@ -64,6 +64,9 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     Optional<StudentEntity> findByRegistrationNumberWithAllData(@Param("registrationNumber") String registrationNumber);
 
 
+    boolean existsByClassRoomId(Long classRoomId);
+
+
     @Query("SELECT s FROM StudentEntity s " +
             "WHERE s.institutionType = 'School' AND " +
             "s.standard.id = :standardId AND " +
@@ -93,14 +96,14 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "s.medium.id = :mediumId AND " +
             "s.stream.id = :streamId AND " +
             "s.degreeName.id = :degreeNameId AND " +
-            "s.department.id = :departmentId AND " +
+            "s.departmentName = :departmentName AND " +
             "s.academicYear = :academicYear AND " +
             "s.status = 'Approved' AND " +
             "s.classRoom IS NULL")
     Page<StudentEntity> findUnassignedUGPGStudents(@Param("mediumId") Long mediumId,
                                  @Param("streamId") Long streamId,
                                  @Param("degreeNameId") Long degreeNameId,
-                                 @Param("departmentId") Long departmentId,
+                                 @Param("departmentName") String departmentName,
                                  @Param("academicYear") String academicYear,
                                  Pageable pageable);
 
@@ -141,7 +144,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "AND (:graduationTypeId IS NULL OR s.graduationType.id = :graduationTypeId) " +
             "AND (:streamId IS NULL OR s.stream.id = :streamId) " +
             "AND (:degreeNameId IS NULL OR s.degreeName.id = :degreeNameId) " +
-            "AND (:departmentId IS NULL OR s.department.id = :departmentId) " +
+            "AND (:departmentName IS NULL OR s.departmentName = :departmentName) " +
             "AND (:standardId IS NULL OR s.standard.id = :standardId) " +
             "AND (:mediumId IS NULL OR s.medium.id = :mediumId) " +
             "AND (:groupName IS NULL OR s.groupName = :groupName) " +
@@ -152,7 +155,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             @Param("graduationTypeId") Long graduationTypeId,
             @Param("streamId") Long streamId,
             @Param("degreeNameId") Long degreeNameId,
-            @Param("departmentId") Long departmentId,
+            @Param("departmentName") String departmentName,
             @Param("standardId") Long standardId,
             @Param("mediumId") Long mediumId,
             @Param("groupName") String groupName,
@@ -169,14 +172,13 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     LEFT JOIN s.medium m
     LEFT JOIN s.stream st
     LEFT JOIN s.degreeName d
-    LEFT JOIN s.department dept
     WHERE s.branchCode = :branchCode
       AND (:graduationType IS NULL OR g.graduationType = :graduationType)
       AND (:standardName IS NULL OR s.standardName = :standardName)
       AND (:mediumName IS NULL OR m.mediumName = :mediumName)
       AND (:streamName IS NULL OR st.stream = :streamName)
       AND (:degreeName IS NULL OR d.degreeName = :degreeName)
-      AND (:departmentName IS NULL OR dept.departmentName = :departmentName)
+      AND (:departmentName IS NULL OR s.departmentName = :departmentName)
       AND (:institutionType IS NULL OR c.institutionType = :institutionType)
       AND (:academicYear IS NULL OR s.academicYear = :academicYear)
     GROUP BY c.id, c.division.division

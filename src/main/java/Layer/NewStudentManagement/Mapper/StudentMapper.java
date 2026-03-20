@@ -44,6 +44,7 @@ public class StudentMapper
             dto.setApplyFor(student.getApplyFor());
             dto.setStreamName(student.getStreamName());
             dto.setGroupName(student.getGroupName());
+            dto.setDepartmentName(student.getDepartmentName());
             dto.setSemister(student.getSemister());
             dto.setInstitutionType(student.getInstitutionType());
             dto.setPassword(student.getPassword());
@@ -72,10 +73,7 @@ public class StudentMapper
                 dto.setMediumId(student.getMedium().getMid());
                 dto.setMediumName(student.getMedium().getMediumName());
             }
-            if (student.getDepartment() != null) {
-                dto.setDepartmentId(student.getDepartment().getId());
-                dto.setDepartmentName(student.getDepartment().getDepartmentName());
-            }
+
             if (student.getStream() != null) {
                 dto.setStreamId(student.getStream().getId());
                 dto.setStreamName(student.getStream().getStream());

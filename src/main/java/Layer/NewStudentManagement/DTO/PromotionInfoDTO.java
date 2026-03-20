@@ -30,8 +30,6 @@ public class PromotionInfoDTO
     private String studentFullName;
     private Long degreeId;
     private String degreeName;
-
-    private Long departmentId;
     private String departmentName;
 
     private Long streamId;

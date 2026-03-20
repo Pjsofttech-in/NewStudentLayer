@@ -40,13 +40,12 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
 
     // UG/PG: graduationType + degree + department + medium + branchCode + academicYear
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
-            "WHERE f.graduationType = :graduationType AND f.degree = :degree AND f.department = :department " +
+            "WHERE f.graduationType = :graduationType AND f.degree = :degree " +
             "AND f.medium = :medium AND f.branchCode = :branchCode AND f.academicYear = :academicYear " +
             "AND f.institutionType = 'College'")
     boolean existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCodeAndAcademicYear(
             StudentGraduationType graduationType,
             StudentDegreeName degree,
-            StudentDepartment department,
             StudentMedium medium,
             String branchCode,
             String academicYear
@@ -58,7 +57,7 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
     @Query("SELECT f FROM StudentStandardFees f WHERE f.standard.id = :standardId AND f.medium.id = :mediumId AND f.stream.id = :streamId AND f.graduationType.id = :graduationTypeId AND f.groupName = :groupName AND f.institutionType = 'College' AND f.branchCode = :branchCode")
     List<StudentStandardFees> findForJrCollege(Long standardId, Long mediumId, Long streamId, Long graduationTypeId, String groupName, String branchCode);
 
-    @Query("SELECT f FROM StudentStandardFees f WHERE f.medium.id = :mediumId AND f.stream.id = :streamId AND f.degree.id = :degreeId AND f.department.id = :departmentId AND f.institutionType = 'College' AND f.branchCode = :branchCode")
-    List<StudentStandardFees> findForUGPG(Long mediumId, Long streamId, Long degreeId, Long departmentId, String branchCode);
+    @Query("SELECT f FROM StudentStandardFees f WHERE f.medium.id = :mediumId AND f.stream.id = :streamId AND f.degree.id = :degreeId AND f.departmentName = :departmentName AND f.institutionType = 'College' AND f.branchCode = :branchCode")
+    List<StudentStandardFees> findForUGPG(Long mediumId, Long streamId, Long degreeId, String departmentName,String branchCode);
 
 }

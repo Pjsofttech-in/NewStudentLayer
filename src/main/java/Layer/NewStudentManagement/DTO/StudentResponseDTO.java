@@ -53,7 +53,7 @@ public class StudentResponseDTO {
     private String graduationType;
     private Long degreeNameId;
     private String degreeName;
-    private Long departmentId;
+
     private String departmentName;
     private String institutionType;
     private boolean earthquake;

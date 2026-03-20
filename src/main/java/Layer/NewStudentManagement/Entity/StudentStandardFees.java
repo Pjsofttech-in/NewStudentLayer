@@ -72,9 +72,6 @@ public class StudentStandardFees
     @JoinColumn(name = "degree_id")
     private StudentDegreeName degree;
 
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    private StudentDepartment department;
 
 
 }

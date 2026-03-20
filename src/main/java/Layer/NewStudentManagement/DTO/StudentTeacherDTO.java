@@ -26,7 +26,6 @@ public class StudentTeacherDTO
     private String degreeName;
     private Long degreeId;
     private String departmentName;
-    private Long departmentId;
     private String profilePhoto;
     private String education;
     private String experience;

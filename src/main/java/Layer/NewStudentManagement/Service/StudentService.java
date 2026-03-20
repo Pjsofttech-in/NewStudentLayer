@@ -49,14 +49,14 @@ public interface StudentService
     Map<String, Long> getApplicationCount(String role, String email, String filter, LocalDate customStart, LocalDate customEnd,
                                           String institutionType, Long standardId, Long mediumId,
                                           Long graduationTypeId, Long streamId, String groupName,
-                                          Long degreeNameId, Long departmentId, String academicYear,
+                                          Long degreeNameId, String departmentName, String academicYear,
                                           @Nullable String branchCodeFilter);
 
     LoginResponse studentLogin(LoginRequest request);
 
     GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                        Long graduationTypeId, Long streamId, String groupName,
-                                       Long degreeNameId, Long departmentId, String academicYear,
+                                       Long degreeNameId, String departmentName, String academicYear,
                                        @Nullable String branchCodeFilter);
 
     DataForTcDTO getDataForTc(Long studentId,String role, String email);
@@ -78,4 +78,5 @@ public interface StudentService
     List<UpcomingBirthdayProjection> getUpcomingBirthdays(String role, String email) ;
 
     List<Map<String, Object>> getStaffInfo(String role, String email,String deptEmail);
+
 }

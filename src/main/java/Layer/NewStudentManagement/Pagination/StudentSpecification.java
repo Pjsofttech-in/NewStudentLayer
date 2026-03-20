@@ -87,10 +87,10 @@ public class StudentSpecification {
                 if (filter.getDegreeName() != null && !filter.getDegreeName().isEmpty()) {
                     predicates.add(cb.equal(cb.lower(degreeJoin.get("degreeName")), filter.getDegreeName().toLowerCase()));
                 }
-                Join<StudentEntity, StudentDepartment> departmentJoin = root.join("department", JoinType.LEFT);
-                if (filter.getDepartmentName() != null && !filter.getDepartmentName().isEmpty()) {
-                    predicates.add(cb.equal(cb.lower(departmentJoin.get("departmentName")), filter.getDepartmentName().toLowerCase()));
-                }
+//                Join<StudentEntity, StudentDepartment> departmentJoin = root.join("department", JoinType.LEFT);
+//                if (filter.getDepartmentName() != null && !filter.getDepartmentName().isEmpty()) {
+//                    predicates.add(cb.equal(cb.lower(departmentJoin.get("departmentName")), filter.getDepartmentName().toLowerCase()));
+//                }
 
 
                 if (filter.getCastCategory() != null) {
@@ -148,7 +148,7 @@ public class StudentSpecification {
     public static Specification<StudentEntity> withFilters(
             String institutionType, Long standardId, Long mediumId,
             Long graduationTypeId, Long streamId, String groupName,
-            Long degreeNameId, Long departmentId, LocalDate startDate, LocalDate endDate, String academicYear) {
+            Long degreeNameId, String departmentName, LocalDate startDate, LocalDate endDate, String academicYear) {
 
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -174,8 +174,8 @@ public class StudentSpecification {
             if (degreeNameId != null) {
                 predicates.add(cb.equal(root.get("degreeName").get("id"), degreeNameId));
             }
-            if (departmentId != null) {
-                predicates.add(cb.equal(root.get("department").get("id"), departmentId));
+            if (departmentName != null && !departmentName.trim().isEmpty()) {
+                predicates.add(cb.equal(cb.lower(root.get("departmentName")),  "%" + departmentName.toLowerCase() + "%"));
             }
             if (startDate != null && endDate != null) {
                 predicates.add(cb.between(root.get("enrollmentDate"), startDate, endDate));

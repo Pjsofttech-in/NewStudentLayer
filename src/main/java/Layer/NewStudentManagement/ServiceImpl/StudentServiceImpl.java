@@ -61,8 +61,7 @@ public class StudentServiceImpl implements StudentService {
     private StandardRepository standardRepository;
     @Autowired
     private GraduationTypeRepository graduationTypeRepository;
-    @Autowired
-    private DepartmentRepository departmentRepository;
+
     @Autowired
     private DegreeNameRepository degreeNameRepository;
     @Autowired
@@ -148,7 +147,7 @@ public class StudentServiceImpl implements StudentService {
             }
 
             student.setDegreeName(null);
-            student.setDepartment(null);
+            student.setDepartmentName(null);
         }
 
         else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
@@ -171,7 +170,7 @@ public class StudentServiceImpl implements StudentService {
             }
 
             student.setDegreeName(null);
-            student.setDepartment(null);
+            student.setDepartmentName(null);
         }
 
         else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
@@ -180,11 +179,6 @@ public class StudentServiceImpl implements StudentService {
                 StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
                         .orElseThrow(() -> new RuntimeException("DegreeName not found with ID: " + request.getDegreeNameId()));
                 student.setDegreeName(degree);
-            }
-            if (request.getDepartmentId() != null) {
-                StudentDepartment department = departmentRepository.findById(request.getDepartmentId())
-                        .orElseThrow(() -> new RuntimeException("Department not found with ID: " + request.getDepartmentId()));
-                student.setDepartment(department);
             }
             Long mediumId = request.getMediumId();
             if (mediumId != null) {
@@ -535,14 +529,10 @@ public class StudentServiceImpl implements StudentService {
 
                 //  Department
                 String department = filterDTO.getDepartmentName().trim();
-                List<Long> departmentIds = departmentRepository.findIdsByNameAndDegreeAndBranchCode(department, degreeNameId, branchCode);
-                if (departmentIds.size() != 1) throw new RuntimeException("Invalid or duplicate department name");
-                Long departmentId = departmentIds.get(0);
 
-                // Final UG/PG student search
+               // Final UG/PG student search
                 studentPage = studentRepository.findUnassignedUGPGStudents(
-                        mediumId, streamId, degreeNameId, departmentId,
-                        filterDTO.getAcademicYear(), pageable);
+                        mediumId, streamId, degreeNameId, department,filterDTO.getAcademicYear(), pageable);
 
             } else {
                 // Jr. College
@@ -713,10 +703,6 @@ public class StudentServiceImpl implements StudentService {
         if (student.getMedium() != null) {
             dto.setMediumId(student.getMedium().getMid());
             dto.setMediumName(student.getMedium().getMediumName());
-        }
-        if (student.getDepartment() != null) {
-            dto.setDepartmentId(student.getDepartment().getId());
-            dto.setDepartmentName(student.getDepartment().getDepartmentName());
         }
         if (student.getStream() != null) {
             dto.setStreamId(student.getStream().getId());
@@ -941,7 +927,7 @@ public class StudentServiceImpl implements StudentService {
     public Map<String, Long> getApplicationCount(String role, String email, String filter, LocalDate customStart, LocalDate customEnd,
                                                  String institutionType, Long standardId, Long mediumId,
                                                  Long graduationTypeId, Long streamId, String groupName,
-                                                 Long degreeNameId, Long departmentId, String academicYear,
+                                                 Long degreeNameId, String departmentName, String academicYear,
                                                  @Nullable String branchCodeFilter) {
 
         if (!staffService.hasPermission(role, email, "GET")) {
@@ -1014,7 +1000,7 @@ public class StudentServiceImpl implements StudentService {
         for (String branchCode : branchCodes) {
             Specification<StudentEntity> baseSpec = StudentSpecification.withFilters(
                     institutionType, standardId, mediumId, graduationTypeId,
-                    streamId, groupName, degreeNameId, departmentId,
+                    streamId, groupName, degreeNameId, departmentName,
                     startDate, endDate, academicYear);
 
             Specification<StudentEntity> branchSpec = (root, query, cb) ->
@@ -1080,7 +1066,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                               Long graduationTypeId, Long streamId, String groupName,
-                                              Long degreeNameId, Long departmentId, String academicYear,
+                                              Long degreeNameId, String departmentName, String academicYear,
                                               @Nullable String branchCodeFilter) {
 
         if (!staffService.hasPermission(role, email, "GET")) {
@@ -1112,7 +1098,7 @@ public class StudentServiceImpl implements StudentService {
             for (String branchCode : branchCodes) {
                 GenderCountResponse resp = studentRepository.getGenderCountByFilters(
                         branchCode, institutionType, graduationTypeId, streamId,
-                        degreeNameId, departmentId, standardId, mediumId, groupName, academicYear);
+                        degreeNameId, departmentName, standardId, mediumId, groupName, academicYear);
 
                 if (resp != null) {
                     aggregatedResponse.setMaleCount(safeSum(aggregatedResponse.getMaleCount(), resp.getMaleCount()));
@@ -1139,7 +1125,7 @@ public class StudentServiceImpl implements StudentService {
 
             GenderCountResponse resp = studentRepository.getGenderCountByFilters(
                     branchCodeToUse, institutionType, graduationTypeId, streamId,
-                    degreeNameId, departmentId, standardId, mediumId, groupName, academicYear);
+                    degreeNameId, departmentName,standardId, mediumId, groupName, academicYear);
 
             if (resp != null) {
                 aggregatedResponse = new GenderCountResponse(
@@ -1197,8 +1183,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setGraduationType(student.getGraduationType() != null ? student.getGraduationType().getGraduationType() : null);
         dto.setDegreeNameId(student.getDegreeName() != null ? student.getDegreeName().getId() : null);
         dto.setDegreeName(student.getDegreeName() != null ? student.getDegreeName().getDegreeName() : null);
-        dto.setDepartmentId(student.getDepartment() != null ? student.getDepartment().getId() : null);
-        dto.setDepartmentName(student.getDepartment() != null ? student.getDepartment().getDepartmentName() : null);
+        dto.setDepartmentName(student.getDepartmentName());
         dto.setAcademicYear(student.getAcademicYear());
         dto.setRegistrationNumber(student.getRegistrationNumber());
         dto.setRollNo(student.getRollNo());
@@ -1503,7 +1488,7 @@ public class StudentServiceImpl implements StudentService {
                 student.setMediumName(medium.getMediumName());
             }
             student.setDegreeName(null);
-            student.setDepartment(null);
+            student.setDepartmentName(null);
 
         } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
                 request.getGraduationTypeId() != null &&
@@ -1526,18 +1511,13 @@ public class StudentServiceImpl implements StudentService {
             }
             student.setGroupName(request.getGroupName());
             student.setDegreeName(null);
-            student.setDepartment(null);
+            student.setDepartmentName(null);
 
         } else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
             if (request.getDegreeNameId() != null) {
                 StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
                         .orElseThrow(() -> new RuntimeException("DegreeName not found"));
                 student.setDegreeName(degree);
-            }
-            if (request.getDepartmentId() != null) {
-                StudentDepartment dept = departmentRepository.findById(request.getDepartmentId())
-                        .orElseThrow(() -> new RuntimeException("Department not found"));
-                student.setDepartment(dept);
             }
             if (request.getMediumId() != null) {
                 StudentMedium medium = mediumRepository.findById(request.getMediumId())

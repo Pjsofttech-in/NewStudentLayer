@@ -31,7 +31,7 @@ public class DataForTcDTO {
     private String graduationType;
     private Long degreeNameId;
     private String degreeName;
-    private Long departmentId;
+
     private String departmentName;
     private String academicYear;
     private String registrationNumber;
@@ -67,7 +67,6 @@ public class DataForTcDTO {
         this.graduationType = graduationType;
         this.degreeNameId = degreeNameId;
         this.degreeName = degreeName;
-        this.departmentId = departmentId;
         this.departmentName = departmentName;
         this.academicYear = academicYear;
         this.registrationNumber = registrationNumber;

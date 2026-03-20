@@ -25,6 +25,8 @@ public class StudentPromotionRecord
     private Integer rollNo;
     private String institutionType;
 
+    private String departmentName;
+
     private Boolean isCurrent = true; // True for latest promotion
 
     // ============ Student Reference ============
@@ -47,10 +49,6 @@ public class StudentPromotionRecord
     private StudentDegreeName degree;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "department_id")
-    private StudentDepartment department;
-
-    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "stream_id")
     private StudentStream stream;
 
@@ -65,7 +63,6 @@ public class StudentPromotionRecord
     private String standardName;
     private String mediumName;
 //    private String degreeName;
-//    private String departmentName;
     private String streamName;
     private String groupName;
 

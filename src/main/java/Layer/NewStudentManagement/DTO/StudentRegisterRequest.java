@@ -37,7 +37,7 @@ public class StudentRegisterRequest
     private Long streamId;
     private Long graduationTypeId;
     private Long degreeNameId;
-    private Long departmentId;
+
     private String oldRegisterPhoto;
 
     private boolean entranceExam;

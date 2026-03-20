@@ -28,7 +28,7 @@ public class StudentClassRoomRequestDTO
     private Long graduationTypeId;
     private Long streamId;
     private Long degreeNameId;
-    private Long departmentId;
+
 
     private String groupName;
 

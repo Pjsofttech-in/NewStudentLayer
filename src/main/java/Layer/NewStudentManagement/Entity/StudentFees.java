@@ -91,10 +91,6 @@ public class StudentFees
     @JoinColumn(name = "degree_id", nullable = true)
     private StudentDegreeName degree;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "department_id", nullable = true)
-    private StudentDepartment department;
-
     @OneToMany(mappedBy = "studentFees", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentFeeSchedule> scheduleList = new ArrayList<>();
 

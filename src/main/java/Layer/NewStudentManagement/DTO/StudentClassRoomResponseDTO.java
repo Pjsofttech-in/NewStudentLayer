@@ -23,8 +23,8 @@ public class StudentClassRoomResponseDTO {
     private String graduationType;
     private String institutionType;
     private String streamName;
-    private String departmentName;
     private String degreeName;
+    private String departmentName;
     private String branchCode;
     private String email;
     private String role;

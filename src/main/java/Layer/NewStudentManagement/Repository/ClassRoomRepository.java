@@ -21,6 +21,7 @@ public interface ClassRoomRepository extends JpaRepository<StudentClassRoom,Long
 //    List<StudentClassRoom> findClassroomsByTeacherId(@Param("teacherId") Long teacherId);
 
 
+
     @Query("SELECT c FROM StudentClassRoom c " +
             "WHERE (:institutionType IS NULL OR c.institutionType = :institutionType) " +
             "AND (:graduationTypeId IS NULL OR c.graduationType.id = :graduationTypeId) " +
@@ -28,7 +29,7 @@ public interface ClassRoomRepository extends JpaRepository<StudentClassRoom,Long
             "AND (:mediumId IS NULL OR c.medium.id = :mediumId) " +
             "AND (:standardId IS NULL OR c.standard.id = :standardId) " +
             "AND (:degreeNameId IS NULL OR c.degreeName.id = :degreeNameId) " +
-            "AND (:departmentId IS NULL OR c.department.id = :departmentId) " +
+            "AND (:departmentName IS NULL OR LOWER(c.departmentName) = LOWER(:departmentName)) " +
             "AND (:groupName IS NULL OR LOWER(c.groupName) = LOWER(:groupName)) " +
             "AND (:year IS NULL OR c.year = :year)")
     List<StudentClassRoom> findByFilters(
@@ -38,7 +39,7 @@ public interface ClassRoomRepository extends JpaRepository<StudentClassRoom,Long
             @Param("mediumId") Long mediumId,
             @Param("standardId") Long standardId,
             @Param("degreeNameId") Long degreeNameId,
-            @Param("departmentId") Long departmentId,
+            @Param("departmentName") String departmentName,
             @Param("groupName") String groupName,
             @Param("year") String year
     );
