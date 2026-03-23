@@ -113,6 +113,7 @@ public class TeacherServiceImpl implements TeacherService
                 degree = degreeRepository.findById(dto.getDegreeId())
                         .orElseThrow(() -> new RuntimeException("Degree not found"));
 
+
             } else {
                 throw new RuntimeException("Unsupported Graduation Type for College");
             }
@@ -153,6 +154,7 @@ public class TeacherServiceImpl implements TeacherService
         teacher.setRole(role);
         teacher.setCreatedByEmail(email);
         teacher.setSubjects(subjectEntities);
+        teacher.setDepartmentName(dto.getDepartmentName());
 
         // Set graduationType and stream
         if (graduationType != null) {
@@ -219,6 +221,7 @@ public class TeacherServiceImpl implements TeacherService
         if (teacher.getReserch() != null) existingTeacher.setReserch(teacher.getReserch());
         if (teacher.getDob() != null) existingTeacher.setDob(teacher.getDob());
         if (teacher.getJoiningDate() != null) existingTeacher.setJoiningDate(teacher.getJoiningDate());
+        if (teacher.getDepartmentName() != null) existingTeacher.setDepartmentName(teacher.getDepartmentName());
 
         // 5️⃣ Update relationships if IDs provided
         if (teacher.getGraduationTypeId() != null) {
@@ -449,6 +452,7 @@ public class TeacherServiceImpl implements TeacherService
         responseDTO.setDob(teacher.getDob());
         responseDTO.setJoiningDate(teacher.getJoiningDate());
         responseDTO.setRole(teacher.getRole());
+        responseDTO.setDepartmentName(teacher.getDepartmentName());
         responseDTO.setCreatedByEmail(teacher.getCreatedByEmail());
         responseDTO.setSubjects(subjectDTOs);
 
