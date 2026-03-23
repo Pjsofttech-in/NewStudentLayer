@@ -245,9 +245,8 @@ public class StudentSpecification {
                     predicates.add(cb.equal(cb.lower(degreeJoin.get("degreeName")), filter.getDegreeName().toLowerCase()));
                 }
 
-                Join<Object, Object> departmentJoin = root.join("department", JoinType.LEFT);
                 if (filter.getDepartmentName() != null) {
-                    predicates.add(cb.equal(cb.lower(departmentJoin.get("departmentName")), filter.getDepartmentName().toLowerCase()));
+                    predicates.add(cb.equal(cb.lower(root.get("departmentName")), filter.getDepartmentName().toLowerCase()));
                 }
 
                 // Extra filters
