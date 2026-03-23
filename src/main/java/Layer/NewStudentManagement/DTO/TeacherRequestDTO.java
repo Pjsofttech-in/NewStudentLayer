@@ -19,6 +19,7 @@ public class TeacherRequestDTO
     private Long graduationTypeId;
     private Long streamId;
     private Long degreeId;
+    private String departmentName;
 
     private String education;
     private String experience;

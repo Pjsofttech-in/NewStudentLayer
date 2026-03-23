@@ -51,7 +51,7 @@ public class StudentEntity
     private String applyFor;
     private String streamName;
     private String groupName;
-    private String departmentName;
+    private String departmentName;          //for year
     private String semister;
     private String password;
     private String institutionType;

@@ -308,7 +308,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
 
         dto.setGraduationTypeId(record.getGraduationType() != null ? record.getGraduationType().getId() : null);
         dto.setGraduationTypeName(record.getGraduationType() != null ? record.getGraduationType().getGraduationType() : null);
-
+        dto.setDepartmentName(record.getDepartmentName());
         dto.setGroupName(record.getGroupName());
 
         return dto;
