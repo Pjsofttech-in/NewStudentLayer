@@ -22,6 +22,8 @@ public class ClassRoomRequestDTO
     private Long mediumId;
     private Long divisionId;
 
+    private String departmentName; // for College
+
     private Long standardId;
     private Long graduationTypeId;
 

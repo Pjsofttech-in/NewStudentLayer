@@ -148,7 +148,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
                 StudentDegreeName degree = degreeNameRepository.findById(dto.getDegreeNameId())
                         .orElseThrow(() -> new RuntimeException("Degree not found"));
-
+                classRoom.setDepartmentName(dto.getDepartmentName());
                 classRoom.setStream(stream);
                 classRoom.setDegreeName(degree);
             }
