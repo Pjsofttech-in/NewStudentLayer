@@ -75,6 +75,9 @@ public class StudentSpecification {
                 if (filter.getInstitutionType() != null) {
                     predicates.add(cb.equal(root.get("institutionType"), filter.getInstitutionType()));
                 }
+                if (filter.getDepartmentName() != null) {
+                    predicates.add(cb.equal(cb.lower(root.get("departmentName")), filter.getDepartmentName().toLowerCase()));
+                }
 
                 Join<StudentEntity, StudentGraduationType> graduationJoin = root.join("graduationType", JoinType.LEFT);
 

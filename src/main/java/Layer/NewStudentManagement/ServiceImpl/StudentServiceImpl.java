@@ -187,6 +187,9 @@ public class StudentServiceImpl implements StudentService {
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
             }
+            student.setDepartmentName(request.getDepartmentName());
+
+
             student.setGroupName(null);
             student.setStandardName(null);
             student.setStandard(null);
@@ -656,6 +659,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setEntranceMarks(student.getEntranceMarks());
         dto.setEMarksOutOff(student.getEMarksOutOff());
         dto.setEntranceMarkSheet(student.getEntranceMarkSheet());
+        dto.setDepartmentName(student.getDepartmentName());
 
         if (student.getClassRoom() != null) {
             dto.setClasssRoomId(student.getClassRoom().getId());
@@ -1434,6 +1438,7 @@ public class StudentServiceImpl implements StudentService {
         student.setInstitutionType(request.getInstitutionType());
         student.setAcademicYear(request.getAcademicYear());
         student.setDiscount(request.getDiscount());
+        student.setDepartmentName(request.getDepartmentName());
 
         student.setEntranceExam(request.isEntranceExam());
         student.setEntranceExamName(request.getEntranceExamName());
