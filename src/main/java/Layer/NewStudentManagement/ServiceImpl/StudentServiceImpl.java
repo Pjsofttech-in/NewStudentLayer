@@ -1515,6 +1515,7 @@ public class StudentServiceImpl implements StudentService {
                 student.setMediumName(medium.getMediumName());
             }
             student.setGroupName(request.getGroupName());
+            student.setSemister(request.getSemister());
             student.setDegreeName(null);
             student.setDepartmentName(null);
 
@@ -1533,6 +1534,7 @@ public class StudentServiceImpl implements StudentService {
             student.setStandard(null);
             student.setStandardName(null);
             student.setGroupName(null);
+            student.setSemister(request.getSemister());
         }
 
         StudentEntity savedStudent = studentRepository.save(student);
