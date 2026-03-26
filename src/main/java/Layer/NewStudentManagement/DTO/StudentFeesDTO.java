@@ -40,7 +40,7 @@ public class StudentFeesDTO
     private double libraryFees;
     private double sportFees;
     private Double feesAmount;      // fees total before discount
-    private double discount;
+    private Double discount;
     private double GST;
     private Double totalamount;         // fees total after discount
     private Long sfid;

@@ -51,7 +51,7 @@ public class StudentMapper
             dto.setRegistrationNumber(student.getRegistrationNumber());
             dto.setFormStatus(student.getFormStatus());
             dto.setReason(student.getReason());
-            dto.setDiscount(student.getDiscount());
+//            dto.setDiscount(student.getDiscount());
             dto.setTcGenrated(student.isTcGenrated());
             dto.setOldRegisterPhoto(student.getOldRegisterPhoto());
             dto.setApplicationNumber(student.getApplicationNumber());

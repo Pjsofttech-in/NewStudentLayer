@@ -57,7 +57,7 @@ public class StudentEntity
     private String institutionType;
     private String formStatus ;
     private String reason;
-    private Double discount;
+//    private Double discount;
     private String userRole;
     private boolean isTcGenrated = true;
     @Column(unique = true, length = 12)
