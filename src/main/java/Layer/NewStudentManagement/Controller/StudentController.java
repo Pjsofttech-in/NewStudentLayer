@@ -249,18 +249,21 @@ public class StudentController
 
 
     @PostMapping("/getAllStudentRequest")
-    public Page<StudentResponseDTO> getStudentsByBranchCode(
+    public StudentPageResponseDTO getStudentsByBranchCode(
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam(required = false) String timeFrame,
             @RequestParam(required = false) LocalDate customStart,
             @RequestParam(required = false) LocalDate customEnd,
-            @RequestBody(required = false) StudentFilterDTO filter, // ✅ send filters in body
+            @RequestBody(required = false) StudentFilterDTO filter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "25") int size
     ) {
+
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
-        return studentService.getStudentsByBranchCode(role, email, filter, timeFrame, customStart, customEnd, pageable);
+
+        return studentService.getStudentsByBranchCode(role, email, filter, timeFrame,
+                customStart, customEnd, pageable);
     }
 
 

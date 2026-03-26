@@ -66,8 +66,9 @@ public interface StudentService
             String mediumName, String streamName, String degreeName, String departmentName,
             String institutionType, String academicYear, @Nullable String branchCodeFilter);
 
-    Page<StudentResponseDTO> getStudentsByBranchCode(String role, String email, StudentFilterDTO filter, String timeFrame,
-                                                     LocalDate customStart, LocalDate customEnd, Pageable pageable);
+    StudentPageResponseDTO getStudentsByBranchCode(String role, String email, StudentFilterDTO filter, String timeFrame,
+                                                   LocalDate customStart, LocalDate customEnd, Pageable pageable);
+
     List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(String role, String email, String institutionType,
             @Nullable String branchCodeFilter, @Nullable String academicYear);
 

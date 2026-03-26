@@ -1269,15 +1269,49 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public Page<StudentResponseDTO> getStudentsByBranchCode(String role, String email, StudentFilterDTO filter, String timeFrame,
-                                                            LocalDate customStart, LocalDate customEnd, Pageable pageable) {
+    public StudentPageResponseDTO getStudentsByBranchCode(String role, String email,
+            StudentFilterDTO filter, String timeFrame, LocalDate customStart,
+            LocalDate customEnd, Pageable pageable)
+    {
+
+        // ✅ Get branch code
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        Specification<StudentEntity> spec = StudentSpecification.filter(branchCode, filter, timeFrame, customStart, customEnd);
+        // ✅ Apply same filter logic
+        Specification<StudentEntity> spec =
+                StudentSpecification.filter(branchCode, filter, timeFrame, customStart, customEnd);
 
+        // ✅ PAGINATION (UNCHANGED)
+        Page<StudentResponseDTO> studentPage =
+                studentRepository.findAll(spec, pageable)
+                        .map(this::mapToDTO);
 
-        return studentRepository.findAll(spec, pageable)
-                .map(this::mapToDTO);
+        // ✅ COUNT (NO PAGINATION EFFECT)
+        long total = studentRepository.count(spec);
+
+        long approved = studentRepository.count(
+                spec.and((root, query, cb) ->
+                        cb.equal(cb.lower(root.get("status")), "approved"))
+        );
+
+        long rejected = studentRepository.count(
+                spec.and((root, query, cb) ->
+                        cb.equal(cb.lower(root.get("status")), "rejected"))
+        );
+
+        long pending = studentRepository.count(
+                spec.and((root, query, cb) ->
+                        cb.equal(cb.lower(root.get("status")), "pending"))
+        );
+
+        // ✅ FINAL RESPONSE
+        return new StudentPageResponseDTO(
+                studentPage,
+                total,
+                approved,
+                rejected,
+                pending
+        );
     }
 
 

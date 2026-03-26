@@ -69,6 +69,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
     @Override
     @Transactional
     public StudentClassRoomResponseDTO createClassRoom(String role, String email, ClassRoomRequestDTO dto) {
+
         if (!staffService.hasPermission(role, email, "Post")) {
             throw new RuntimeException("You don't have permission to create ClassRoom");
         }
@@ -87,25 +88,96 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
         StudentMedium medium = mediumRepository.findById(dto.getMediumId())
                 .orElseThrow(() -> new RuntimeException("Medium not found"));
+
         StudentDivision division = divisionRepository.findById(dto.getDivisionId())
                 .orElseThrow(() -> new RuntimeException("Division not found"));
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        String institutionType = dto.getInstitutionType();
+
+        // ================== 🔥 DUPLICATE CHECK LOGIC ==================
+
+        Long standardId = null;
+        Long streamId = null;
+        Long degreeId = null;
+        String departmentName = null;
+
+        if ("School".equalsIgnoreCase(institutionType)) {
+
+            if (dto.getStandardId() == null)
+                throw new RuntimeException("Standard is required for School ClassRoom");
+
+            standardId = dto.getStandardId();
+        }
+
+        else if ("College".equalsIgnoreCase(institutionType)) {
+
+            if (dto.getGraduationTypeId() == null)
+                throw new RuntimeException("GraduationType is required for College ClassRoom");
+
+            StudentGraduationType graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
+                    .orElseThrow(() -> new RuntimeException("GraduationType not found"));
+
+            // Jr College
+            if ("Jr.College".equalsIgnoreCase(graduationType.getGraduationType())) {
+
+                if (dto.getStandardId() == null)
+                    throw new RuntimeException("Standard is required for Jr.College ClassRoom");
+
+                if (dto.getStreamId() == null)
+                    throw new RuntimeException("Stream is required for Jr.College ClassRoom");
+
+                standardId = dto.getStandardId();
+                streamId = dto.getStreamId();
+            }
+
+            // UG / PG
+            else {
+
+                if (dto.getStreamId() == null || dto.getDegreeNameId() == null) {
+                    throw new RuntimeException("Stream and DegreeName are required for UG/PG ClassRoom");
+                }
+
+                if (dto.getDepartmentName() == null || dto.getDepartmentName().isEmpty()) {
+                    throw new RuntimeException("DepartmentName is required for UG/PG ClassRoom");
+                }
+
+                streamId = dto.getStreamId();
+                degreeId = dto.getDegreeNameId();
+                departmentName = dto.getDepartmentName(); // ✅ included
+            }
+        }
+
+        boolean exists = classRoomRepository.existsClassRoom(
+                branchCode,
+                dto.getYear(),
+                dto.getMediumId(),
+                dto.getDivisionId(),
+                standardId,
+                streamId,
+                degreeId,
+                departmentName
+        );
+
+        if (exists) {
+            throw new RuntimeException("ClassRoom already exists for this combination");
+        }
+
+        // ================== ORIGINAL CODE CONTINUES ==================
 
         StudentClassRoom classRoom = new StudentClassRoom();
         classRoom.setYear(dto.getYear());
         classRoom.setStartTime(dto.getStartTime());
         classRoom.setEndTime(dto.getEndTime());
         classRoom.setInstitutionType(dto.getInstitutionType());
-        classRoom.setBranchCode(staffService.fetchBranchCodeByRole(role, email));
+        classRoom.setBranchCode(branchCode);
         classRoom.setCreatedByEmail(email);
         classRoom.setRole(role);
         classRoom.setMedium(medium);
         classRoom.setDivision(division);
         classRoom.setCreatedDate(LocalDate.now());
-        String institutionType = dto.getInstitutionType();
 
         if ("School".equalsIgnoreCase(institutionType)) {
-            if (dto.getStandardId() == null)
-                throw new RuntimeException("Standard is required for School ClassRoom");
 
             StudentStandard standard = standardRepository.findById(dto.getStandardId())
                     .orElseThrow(() -> new RuntimeException("Standard not found"));
@@ -113,46 +185,39 @@ public class ClassRoomServiceImpl implements ClassRoomService
         }
 
         else if ("College".equalsIgnoreCase(institutionType)) {
-            if (dto.getGraduationTypeId() == null)
-                throw new RuntimeException("GraduationType is required for College ClassRoom");
 
             StudentGraduationType graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
                     .orElseThrow(() -> new RuntimeException("GraduationType not found"));
+
             classRoom.setGraduationType(graduationType);
 
-            // Jr.College
             if ("Jr.College".equalsIgnoreCase(graduationType.getGraduationType())) {
-                if (dto.getStandardId() == null)
-                    throw new RuntimeException("Standard is required for Jr.College ClassRoom");
 
                 StudentStandard standard = standardRepository.findById(dto.getStandardId())
                         .orElseThrow(() -> new RuntimeException("Standard not found"));
                 classRoom.setStandard(standard);
 
-                if (dto.getStreamId() == null)
-                    throw new RuntimeException("Stream is required for Jr.College ClassRoom");
-
                 StudentStream stream = streamRepository.findById(dto.getStreamId())
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
                 classRoom.setStream(stream);
+
                 classRoom.setGroupName(dto.getGroupName());
             }
 
-            // UG / PG
             else {
-                if (dto.getStreamId() == null || dto.getDegreeNameId() == null) {
-                    throw new RuntimeException("Stream, DegreeName and Department are required for UG/PG ClassRoom");
-                }
 
                 StudentStream stream = streamRepository.findById(dto.getStreamId())
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
+
                 StudentDegreeName degree = degreeNameRepository.findById(dto.getDegreeNameId())
                         .orElseThrow(() -> new RuntimeException("Degree not found"));
+
                 classRoom.setDepartmentName(dto.getDepartmentName());
                 classRoom.setStream(stream);
                 classRoom.setDegreeName(degree);
             }
         }
+
         StudentClassRoom savedClassRoom = classRoomRepository.save(classRoom);
 
         if (dto.getTeacherSubjectMap() == null || dto.getTeacherSubjectMap().isEmpty()) {
@@ -160,6 +225,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
         }
 
         for (Map.Entry<Long, List<Long>> entry : dto.getTeacherSubjectMap().entrySet()) {
+
             Long teacherId = entry.getKey();
             List<StudentSubject> subjects = subjectRepository.findAllById(entry.getValue());
 
@@ -170,6 +236,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
             mapping.setClassRoom(savedClassRoom);
             mapping.setTeacher(teacher);
             mapping.setSubjects(subjects);
+
             classRoomTeacherSubjectRepository.save(mapping);
         }
 

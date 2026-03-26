@@ -55,10 +55,10 @@ public class ClassRoomController
     }
 
     @DeleteMapping("/deleteClassRoom/{id}")
-    public ResponseEntity<Void> deleteClassRoom(@PathVariable Long id,@RequestParam String role, @RequestParam String email)
+    public ResponseEntity<String> deleteClassRoom(@PathVariable Long id,@RequestParam String role, @RequestParam String email)
     {
         classRoomService.deleteClassRoomById(id,role,email);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("ClassRoom deleted successfully.");
     }
 
     @PostMapping("/assignStudentToClassRoom")

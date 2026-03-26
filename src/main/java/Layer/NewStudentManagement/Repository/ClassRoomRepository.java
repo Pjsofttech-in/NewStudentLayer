@@ -44,6 +44,27 @@ public interface ClassRoomRepository extends JpaRepository<StudentClassRoom,Long
             @Param("year") String year
     );
 
+    @Query("""
+    SELECT COUNT(c) > 0 FROM StudentClassRoom c
+    WHERE c.branchCode = :branchCode
+    AND c.year = :year
+    AND c.medium.id = :mediumId
+    AND c.division.id = :divisionId
+    AND (:standardId IS NULL OR c.standard.id = :standardId)
+    AND (:streamId IS NULL OR c.stream.id = :streamId)
+    AND (:degreeId IS NULL OR c.degreeName.id = :degreeId)
+    AND (:departmentName IS NULL OR c.departmentName = :departmentName)
+""")
+    boolean existsClassRoom(
+            @Param("branchCode") String branchCode,
+            @Param("year") String year,
+            @Param("mediumId") Long mediumId,
+            @Param("divisionId") Long divisionId,
+            @Param("standardId") Long standardId,
+            @Param("streamId") Long streamId,
+            @Param("degreeId") Long degreeId,
+            @Param("departmentName") String departmentName
+    );
 
 
 
