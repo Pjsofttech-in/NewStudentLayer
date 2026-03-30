@@ -93,12 +93,12 @@ public class TeacherController
         return ResponseEntity.ok(teachers);
     }
 
-    @GetMapping("/getTeacherByInstitutionType")
-    public ResponseEntity<Iterable<StudentTeacherDTO>> getTeacherByInstitutionType(@RequestParam String role, @RequestParam String email, @RequestParam String institutionType)
-    {
-        Iterable<StudentTeacherDTO> teachers = teacherService.getTeacherByInstitutionType(role,email,institutionType);
-        return ResponseEntity.ok(teachers);
-    }
+//    @GetMapping("/getTeacherByInstitutionType")
+//    public ResponseEntity<Iterable<StudentTeacherDTO>> getTeacherByInstitutionType(@RequestParam String role, @RequestParam String email, @RequestParam String institutionType)
+//    {
+//        Iterable<StudentTeacherDTO> teachers = teacherService.getTeacherByInstitutionType(role,email,institutionType);
+//        return ResponseEntity.ok(teachers);
+//    }
 
     @PostMapping("/teacherLogin")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {

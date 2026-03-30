@@ -19,7 +19,7 @@ public class TeacherRequestDTO
     private Long graduationTypeId;
     private Long streamId;
     private Long degreeId;
-    private String departmentName;
+    private String departmentName;          //Frontend year field
 
     private String education;
     private String experience;
