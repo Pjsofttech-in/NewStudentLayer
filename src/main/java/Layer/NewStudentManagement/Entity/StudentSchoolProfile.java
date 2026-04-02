@@ -30,6 +30,9 @@ public class StudentSchoolProfile
     private String societyName;
     private String indexNumber;
     private String board;
+    @Column(unique = true)
+    private String schoolSlug;
+    private String schoolUrl;
 
     @Email
     private String createdByEmail;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,5 +60,13 @@ public class SchoolProfileController
             @RequestParam String role,
             @RequestParam String email) {
         return schoolProfileService.getSchoolProfileByBranchCode(role, email);
+    }
+
+    @GetMapping("/school/{slug}")
+    public ResponseEntity<StudentSchoolProfile> getSchool(@PathVariable String slug) {
+
+        StudentSchoolProfile profile = schoolProfileService.getBySlug(slug);
+
+        return ResponseEntity.ok(profile);
     }
 }

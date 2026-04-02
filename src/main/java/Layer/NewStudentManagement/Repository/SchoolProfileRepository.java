@@ -17,4 +17,7 @@ public interface SchoolProfileRepository extends JpaRepository<StudentSchoolProf
     @Query("SELECT s FROM StudentSchoolProfile s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     Optional<StudentSchoolProfile> findByBranchCode(@Param("branchCode") String branchCode);
 
+
+    @Query("SELECT s FROM StudentSchoolProfile s WHERE s.schoolSlug = :schoolSlug")
+    Optional<StudentSchoolProfile> findBySchoolSlug(@Param("schoolSlug") String schoolSlug);
 }

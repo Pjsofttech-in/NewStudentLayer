@@ -13,4 +13,6 @@ public interface SchoolProfileService
     void deleteSchoolProfile(Long id, String role, String email);
     StudentSchoolProfile getSchoolProfileByBranchCode(String role, String email);
 
+    StudentSchoolProfile getBySlug(String slug);
+
 }
