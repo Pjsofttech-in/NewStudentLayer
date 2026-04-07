@@ -396,44 +396,77 @@ public class ClassRoomServiceImpl implements ClassRoomService
     }
 
     private StudentClassRoomResponseDTO mapToResponseDTO(StudentClassRoom classroom) {
+
         List<StudentClassRoomTeacherSubject> mappings = Collections.emptyList();
+
         if (classroom != null && classroom.getId() != null) {
             mappings = classRoomTeacherSubjectRepository.findByClassRoomId(classroom.getId());
         }
 
         List<TeacherWithSubjectsDTO> teacherSubjectDTOs = mappings.stream().map(mapping -> {
             TeacherWithSubjectsDTO dto = new TeacherWithSubjectsDTO();
-            dto.setTeacherId(mapping.getTeacher() != null ? mapping.getTeacher().getId() : null);
-            dto.setTeacherName(mapping.getTeacher() != null ? mapping.getTeacher().getTeacherName() : null);
-            dto.setTeacherEmail(mapping.getTeacher() != null ? mapping.getTeacher().getTeacherEmail() : null);
+
+            if (mapping.getTeacher() != null) {
+                dto.setTeacherId(mapping.getTeacher().getId());
+                dto.setTeacherName(mapping.getTeacher().getTeacherName());
+                dto.setTeacherEmail(mapping.getTeacher().getTeacherEmail());
+            }
+
             dto.setSubjects(mapping.getSubjects() != null
                     ? mapping.getSubjects().stream()
                     .map(StudentSubject::getSubject)
                     .collect(Collectors.toList())
                     : Collections.emptyList());
+
             return dto;
         }).collect(Collectors.toList());
 
-        return new StudentClassRoomResponseDTO(
-                classroom != null ? classroom.getId() : null,
-                classroom != null ? classroom.getYear() : null,
-                (classroom != null && classroom.getMedium() != null) ? classroom.getMedium().getMediumName() : null,
-                (classroom != null && classroom.getDivision() != null) ? classroom.getDivision().getDivision() : null,
-                (classroom != null && classroom.getStandard() != null) ? classroom.getStandard().getStandardName() : null,
-                classroom != null ? classroom.getStartTime() : null,
-                classroom != null ? classroom.getEndTime() : null,
-                classroom != null ? classroom.getGroupName() :null,
-                (classroom != null && classroom.getGraduationType() != null) ? classroom.getGraduationType().getGraduationType() : null,
-                classroom != null ? classroom.getInstitutionType() : null,
-                (classroom != null && classroom.getStream() != null) ? classroom.getStream().getStream() : null,
-                (classroom != null && classroom.getDegreeName() != null) ? classroom.getDegreeName().getDegreeName() : null,
-                classroom != null ? classroom.getDepartmentName() :null,
-                classroom != null ? classroom.getBranchCode() : "",
-                classroom != null ? classroom.getCreatedByEmail() : "",
-                classroom != null ? classroom.getRole() : null,
-                teacherSubjectDTOs
-        );
+        StudentClassRoomResponseDTO dto = new StudentClassRoomResponseDTO();
 
+        if (classroom != null) {
+            dto.setId(classroom.getId());
+            dto.setYear(classroom.getYear());
+
+            dto.setMedium(classroom.getMedium() != null ? classroom.getMedium().getMediumName() : null);
+            dto.setMediumId(classroom.getMedium() != null ? classroom.getMedium().getMid() : null);
+
+            dto.setDivision(classroom.getDivision() != null ? classroom.getDivision().getDivision() : null);
+            dto.setDivisionId(classroom.getDivision() != null ? classroom.getDivision().getDid() : null);
+
+            dto.setStandard(classroom.getStandard() != null ? classroom.getStandard().getStandardName() : null);
+            dto.setStandardId(classroom.getStandard() != null ? classroom.getStandard().getSid() : null);
+
+            dto.setStartTime(classroom.getStartTime());
+            dto.setEndTime(classroom.getEndTime());
+            dto.setGroupName(classroom.getGroupName());
+
+            dto.setGraduationType(classroom.getGraduationType() != null
+                    ? classroom.getGraduationType().getGraduationType() : null);
+            dto.setGraduationTypeId(classroom.getGraduationType() != null
+                    ? classroom.getGraduationType().getId() : null);
+
+            dto.setInstitutionType(classroom.getInstitutionType());
+
+            dto.setStreamName(classroom.getStream() != null
+                    ? classroom.getStream().getStream() : null);
+            dto.setStreamId(classroom.getStream() != null
+                    ? classroom.getStream().getId() : null);
+
+            dto.setDegreeName(classroom.getDegreeName() != null
+                    ? classroom.getDegreeName().getDegreeName() : null);
+            dto.setDegreeNameId(classroom.getDegreeName() != null
+                    ? classroom.getDegreeName().getId() : null);
+
+            dto.setDepartmentName(classroom.getDepartmentName());
+
+            dto.setBranchCode(classroom.getBranchCode());
+            dto.setEmail(classroom.getCreatedByEmail());
+            dto.setRole(classroom.getRole());
+        }
+
+        dto.setTeacherSubjectMappings(teacherSubjectDTOs);
+
+        return dto;
     }
 
     @Override
