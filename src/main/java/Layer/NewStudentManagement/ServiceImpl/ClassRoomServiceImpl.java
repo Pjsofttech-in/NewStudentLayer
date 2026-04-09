@@ -247,22 +247,99 @@ public class ClassRoomServiceImpl implements ClassRoomService
     public StudentClassRoomResponseDTO updateClassRoom(Long id, String role,
                                                        String email, StudentClassRoomRequestDTO request) {
 
+        // 🔐 Permission
         if (!staffService.hasPermission(role, email, "Put")) {
             throw new RuntimeException("No permission");
         }
 
+        // 📌 Fetch existing
         StudentClassRoom existing = classRoomRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ClassRoom not found"));
 
         // ===============================
-        // ✅ BASIC UPDATE
+        // 🔥 DUPLICATE CHECK (SMART WAY)
         // ===============================
+        boolean exists = classRoomRepository.existsClassRoom(
+                existing.getBranchCode(),
+                request.getYear(),
+                request.getMediumId(),
+                request.getDivisionId(),
+                request.getStandardId(),
+                request.getStreamId(),
+                request.getDegreeNameId(),
+                existing.getDepartmentName()
+        );
+
+        // ✅ Allow update if values are same (avoid self-match issue)
+        boolean isSameRecord =
+                Objects.equals(existing.getYear(), request.getYear()) &&
+                        Objects.equals(existing.getGroupName(), request.getGroupName()) &&
+                        Objects.equals(existing.getMedium() != null ? existing.getMedium().getMid() : null, request.getMediumId()) &&
+                        Objects.equals(existing.getDivision() != null ? existing.getDivision().getDid() : null, request.getDivisionId()) &&
+                        Objects.equals(existing.getStandard() != null ? existing.getStandard().getSid() : null, request.getStandardId()) &&
+                        Objects.equals(existing.getStream() != null ? existing.getStream().getId() : null, request.getStreamId()) &&
+                        Objects.equals(existing.getDegreeName() != null ? existing.getDegreeName().getId() : null, request.getDegreeNameId());
+
+        if (exists && !isSameRecord) {
+            throw new RuntimeException("ClassRoom already exists for this branch");
+        }
+
+        // ===============================
+        // ✅ UPDATE BASIC FIELDS
+        // ===============================
+        existing.setYear(request.getYear());
+        existing.setInstitutionType(request.getInstitutionType());
         existing.setStartTime(request.getStartTime());
         existing.setEndTime(request.getEndTime());
         existing.setGroupName(request.getGroupName());
 
         // ===============================
-        // 🔥 TEACHER-SUBJECT LOGIC
+        // 🔗 RELATIONS
+        // ===============================
+        if (request.getMediumId() != null) {
+            StudentMedium medium = mediumRepository.findById(request.getMediumId())
+                    .orElseThrow(() -> new RuntimeException("Medium not found"));
+            existing.setMedium(medium);
+        }
+
+        if (request.getDivisionId() != null) {
+            StudentDivision division = divisionRepository.findById(request.getDivisionId())
+                    .orElseThrow(() -> new RuntimeException("Division not found"));
+            existing.setDivision(division);
+        }
+
+        if (request.getStandardId() != null) {
+            StudentStandard standard = standardRepository.findById(request.getStandardId())
+                    .orElseThrow(() -> new RuntimeException("Standard not found"));
+            existing.setStandard(standard);
+        }
+
+        if (request.getGraduationTypeId() != null) {
+            StudentGraduationType grad = graduationTypeRepository.findById(request.getGraduationTypeId())
+                    .orElseThrow(() -> new RuntimeException("Graduation type not found"));
+            existing.setGraduationType(grad);
+        } else {
+            existing.setGraduationType(null);
+        }
+
+        if (request.getStreamId() != null) {
+            StudentStream stream = streamRepository.findById(request.getStreamId())
+                    .orElseThrow(() -> new RuntimeException("Stream not found"));
+            existing.setStream(stream);
+        } else {
+            existing.setStream(null);
+        }
+
+        if (request.getDegreeNameId() != null) {
+            StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
+                    .orElseThrow(() -> new RuntimeException("Degree not found"));
+            existing.setDegreeName(degree);
+        } else {
+            existing.setDegreeName(null);
+        }
+
+        // ===============================
+        // 🔥 TEACHER SUBJECT UPDATE
         // ===============================
         if (request.getTeacherSubjectMap() != null) {
 
@@ -270,33 +347,24 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
             for (Map.Entry<Long, List<Long>> entry : request.getTeacherSubjectMap().entrySet()) {
 
-                Long teacherId = entry.getKey();
-                List<Long> subjectIds = entry.getValue();
+                StudentTeacher teacher = teacherRepository.findById(entry.getKey())
+                        .orElseThrow(() -> new RuntimeException("Teacher not found"));
 
-                // ✅ Fetch Teacher
-                StudentTeacher teacher = teacherRepository.findById(teacherId)
-                        .orElseThrow(() -> new RuntimeException("Teacher not found: " + teacherId));
+                List<StudentSubject> subjects = subjectRepository.findAllById(entry.getValue());
 
-                // ✅ Fetch Subjects
-                List<StudentSubject> subjects = subjectRepository.findAllById(subjectIds);
-
-                // ✅ Create Mapping
                 StudentClassRoomTeacherSubject mapping = new StudentClassRoomTeacherSubject();
-
                 mapping.setTeacher(teacher);
                 mapping.setSubjects(subjects);
-                mapping.setClassRoom(existing); // 🔥 VERY IMPORTANT
+                mapping.setClassRoom(existing);
 
                 finalList.add(mapping);
             }
 
-            // ===============================
-            // 🔥 REMOVE + ADD (SYNC)
-            // ===============================
-            existing.getTeacherSubjectAssignments().clear(); // remove old
-            existing.getTeacherSubjectAssignments().addAll(finalList); // add new
+            existing.getTeacherSubjectAssignments().clear();
+            existing.getTeacherSubjectAssignments().addAll(finalList);
         }
 
+        // 💾 SAVE
         StudentClassRoom saved = classRoomRepository.save(existing);
 
         return mapToResponseDTO(saved);
