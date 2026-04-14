@@ -113,7 +113,7 @@ public class DegreeNameServiceImpl implements DegreeNameService
     public List<StudentDegreeNameDTO> getDegreeNamesByGraduationType(String role, String email, Long graduationTypeId, String token) {
 
         String branchCode;
-        if ("USER".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
 
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);

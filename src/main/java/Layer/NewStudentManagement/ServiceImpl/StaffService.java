@@ -178,7 +178,7 @@ public class StaffService
                 try {
                     System.out.println("Checking role for Student: " + email + " Action: " + action);
                     boolean exists = studentRepository.existsByEmail(email);
-                    return exists && ("POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action));
+                    return exists && ("POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action) || "PUT".equalsIgnoreCase(action));
                 } catch (Exception e) {
                     System.err.println("Error checking student permission: " + e.getMessage());
                     return false;

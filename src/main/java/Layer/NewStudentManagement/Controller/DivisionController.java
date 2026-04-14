@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 //@CrossOrigin(origins = "http://localhost:3000")
-@CrossOrigin(origins = "https://pjsofttech.in")
+//@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
 public class DivisionController
 {

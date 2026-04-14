@@ -100,7 +100,7 @@ public class GroupServiceImpl implements GroupService
     public List<StudentGroupDTO> getAllGroupByName(String role, String email, @Nullable String branchCode, String token) {
         List<StudentGroup> groups = new ArrayList<>();
 
-        if ("USER".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
 

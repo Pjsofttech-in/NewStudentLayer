@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 //@CrossOrigin(origins = "http://localhost:3000")
-@CrossOrigin(origins = "https://pjsofttech.in")
+//@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
 public class ClassRoomController
 {

@@ -25,7 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Collections;
 import java.util.List;
 //@CrossOrigin(origins = "http://localhost:3000")
-@CrossOrigin(origins = "https://pjsofttech.in")
+//@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
 public class TeacherController
 {

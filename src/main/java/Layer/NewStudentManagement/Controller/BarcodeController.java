@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 //@CrossOrigin(origins = "http://localhost:3000")
-@CrossOrigin(origins = "https://pjsofttech.in")
+//@CrossOrigin(origins = "https://pjsofttech.in")
 public class BarcodeController
 {
     @Autowired

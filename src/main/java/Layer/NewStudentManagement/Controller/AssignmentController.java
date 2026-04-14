@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 //@CrossOrigin(origins = "http://localhost:3000")
-@CrossOrigin(origins = "https://pjsofttech.in")
+//@CrossOrigin(origins = "https://pjsofttech.in")
 public class AssignmentController
 {
 

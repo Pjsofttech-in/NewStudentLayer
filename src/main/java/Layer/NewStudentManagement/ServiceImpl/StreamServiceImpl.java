@@ -86,7 +86,7 @@ public class StreamServiceImpl implements StreamService
     @Override
     public List<StreamDTO> getAllStream(String role, String email, @Nullable String branchCode, String token) {
 
-        if ("USER".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
 

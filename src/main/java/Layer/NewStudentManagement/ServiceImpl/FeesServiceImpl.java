@@ -85,6 +85,7 @@ public class FeesServiceImpl implements FeesService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         fees.setInstitutionType(fees.getInstitutionType());
+        fees.setRollNo(student.getRollNo());
         boolean isUGPG = student.getDegreeName() != null && student.getStream() != null;
         boolean isJrCollege = student.getStream() != null && student.getGroupName() != null&& !isUGPG;
 

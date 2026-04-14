@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
+
 @Service
 public class SchoolProfileServiceImpl implements SchoolProfileService
 {
@@ -90,37 +92,58 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
     }
 
     @Override
-    public StudentSchoolProfile updateSchoolProfile(Long id, StudentSchoolProfile updatedProfile,
-                                                    MultipartFile logo, String role, String email) {
+    public StudentSchoolProfile updateSchoolProfile(Long id,
+                                                    StudentSchoolProfile updatedProfile,
+                                                    MultipartFile logo,
+                                                    String role,
+                                                    String email) {
+
+        // ✅ 1. Permission check
         if (!staffService.hasPermission(role, email, "Put")) {
             throw new RuntimeException("You don't have permission to update School Profile");
         }
 
+        // ✅ 2. Get existing profile
         StudentSchoolProfile existing = schoolProfileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("School Profile not found with ID: " + id));
+                .orElseThrow(() -> new RuntimeException("School Profile not found"));
 
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        if (!existing.getBranchCode().equals(branchCode)) {
-            throw new RuntimeException("You are not allowed to update another branch's profile");
-        }
-
+        // ✅ 3. Update normal fields
         existing.setSchoolName(updatedProfile.getSchoolName());
-        existing.setUdiseNumber(updatedProfile.getUdiseNumber());
         existing.setSchoolAddress(updatedProfile.getSchoolAddress());
         existing.setContactNumber(updatedProfile.getContactNumber());
         existing.setSchoolEmail(updatedProfile.getSchoolEmail());
         existing.setPlace(updatedProfile.getPlace());
-        existing.setIndexNumber(updatedProfile.getIndexNumber());
         existing.setSocietyName(updatedProfile.getSocietyName());
+        existing.setIndexNumber(updatedProfile.getIndexNumber());
         existing.setBoard(updatedProfile.getBoard());
-        existing.setRole(role);
-        existing.setCreatedByEmail(email);
 
+        // ✅ 4. Logo update (optional)
         if (logo != null && !logo.isEmpty()) {
-            String uploadedUrl = s3Service.uploadFile(logo, branchCode);
+            String uploadedUrl = s3Service.uploadFile(logo, existing.getBranchCode());
             existing.setSchoolLogo(uploadedUrl);
         }
 
+        // ✅ 5. SLUG UPDATE LOGIC 🔥
+        if (updatedProfile.getSchoolSlug() != null && !updatedProfile.getSchoolSlug().isEmpty()) {
+
+            String newSlug = updatedProfile.getSchoolSlug()
+                    .toLowerCase()
+                    .trim()
+                    .replaceAll("[^a-z0-9-]", "")
+                    .replaceAll("-+", "-");
+
+            // ⚠️ IMPORTANT: Check if slug belongs to another record
+            Optional<StudentSchoolProfile> slugOwner =
+                    schoolProfileRepository.findBySchoolSlug(newSlug);
+
+            if (slugOwner.isPresent() && !slugOwner.get().getId().equals(existing.getId())) {
+                throw new RuntimeException("Slug already in use. Try another.");
+            }
+
+            existing.setSchoolSlug(newSlug);
+        }
+
+        // ✅ 6. Save
         return schoolProfileRepository.save(existing);
     }
 

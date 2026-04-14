@@ -88,7 +88,7 @@ public class StudentServiceImpl implements StudentService {
     public StudentResponseDTO saveStudent(String role, String email, StudentRequest request, String token) {
 
         String branchCode;
-        if ("USER".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
 
@@ -416,7 +416,7 @@ public class StudentServiceImpl implements StudentService {
             MultipartFile studentSignPhoto,String token)
     {
         String branchCode;
-        if ("USER".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
 
@@ -1412,7 +1412,7 @@ public class StudentServiceImpl implements StudentService {
         String decodedRole;
         String decodedEmail;
 
-        if ("USER".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
 
             String encodedBranchCode = claims.get("branchCode", String.class);

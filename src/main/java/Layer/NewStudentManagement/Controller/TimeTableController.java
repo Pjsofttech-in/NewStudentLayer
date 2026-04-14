@@ -13,7 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:3000")
-@CrossOrigin(origins = "https://pjsofttech.in")
+//@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
 public class TimeTableController
 {

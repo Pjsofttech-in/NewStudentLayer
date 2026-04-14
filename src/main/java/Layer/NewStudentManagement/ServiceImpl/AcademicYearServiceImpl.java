@@ -90,7 +90,7 @@ public class AcademicYearServiceImpl implements AcademicYearService
     public List<StudentAcademicYear> getAllAcademicYear(String role, String email,
                                                         @Nullable String branchCode, String token) {
 
-        if ("USER".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encodedBranch = claims.get("branchCode", String.class);
 

@@ -75,7 +75,7 @@ public class ScholarshipServiceImpl implements ScholarshipService
                                                        String token) {
 
         // USER ROLE
-        if ("USER".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
 
             Claims claims = jwtUtil.extractAllClaims(token);
             String encodedBranch = claims.get("branchCode", String.class);
