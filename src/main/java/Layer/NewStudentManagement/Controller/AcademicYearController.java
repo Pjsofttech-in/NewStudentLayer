@@ -34,24 +34,33 @@ public class AcademicYearController
     }
 
     @GetMapping("/getAllAcademicYear")
-    public ResponseEntity<Iterable<StudentAcademicYear>> getAllAcademicYear(@RequestParam String role,
-                                                                            @RequestParam(required = false) String email,
-                                                                            @RequestParam(required = false) String branchCode,
-                                                                            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
-    {
+    public ResponseEntity<?> getAllAcademicYear(
+            @RequestParam String role,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String branchCode,
+            @RequestHeader("Authorization") String authorizationHeader
+    ) {
         try {
-            String token = null;
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+
+            // ✅ Validate header
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Missing or invalid Authorization header");
             }
 
-            List<StudentAcademicYear> academicYear = academicYearService.getAllAcademicYear(role, email,branchCode, token);
+            // ✅ Extract token
+            String token = authorizationHeader.substring(7);
+
+            List<StudentAcademicYear> academicYear =
+                    academicYearService.getAllAcademicYear(role, email, branchCode, token);
+
             return ResponseEntity.ok(academicYear);
+
         } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ex.getMessage());
         }
     }
-
     @PutMapping("/updateAcademicYear/{id}")
     public ResponseEntity<StudentAcademicYear> updateAcademicYear(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentAcademicYear academicYear)
     {
