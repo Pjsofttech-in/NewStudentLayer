@@ -13,5 +13,5 @@ public interface DegreeNameService
     StudentDegreeNameDTO updateDegreeName(Long id,String role,String email,StudentDegreeName degreeName);
     void deleteDegreeNameById(Long id,String role,String email);
     List<StudentDegreeNameDTO> getAllDegreeName(String role, String email);
-    List<StudentDegreeNameDTO> getDegreeNamesByGraduationType(String role, String email, Long graduationTypeId, String token);
+    List<StudentDegreeNameDTO> getDegreeNamesByGraduationType(String role, String email, Long graduationTypeId, String branchCode);
 }

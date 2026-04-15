@@ -123,86 +123,63 @@ public class GraduationTypeServiceImpl implements GraduationTypeService
 
 
     @Override
-    public List<StudentGraduationTypeDTO> getGraduationTypesByStream(String role, String email, String streamName,
-                                                                     String branchCode, String token) {
-        String effectiveBranchCode = null;
-        List<StudentGraduationTypeDTO> result;
+    public List<StudentGraduationTypeDTO> getGraduationTypesByStream(String role, String email, String streamName, String branchCode) {
 
-        if (role == null) {
-            throw new RuntimeException("Role is required");
-        }
+        try {
 
-        String roleUpper = role.toUpperCase();
+            if ("STUDENT".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
 
-        switch (roleUpper) {
-
-            case "USER": {
-                if (token == null || token.isEmpty()) {
-                    throw new RuntimeException("Token is required for USER role");
-                }
-                Claims claims = jwtUtil.extractAllClaims(token);
-                String encoded = claims.get("branchCode", String.class);
-
-                if (encoded == null || encoded.isEmpty()) {
-                    throw new RuntimeException("Invalid token: branchCode not found");
+                // 🔥 FIX: auto-fetch branchCode
+                if (branchCode == null || branchCode.isBlank()) {
+                    branchCode = staffService.fetchBranchCodeByRole(role, email);
                 }
 
-                effectiveBranchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-                if (branchCode != null && !branchCode.isEmpty()) {
-                    effectiveBranchCode = branchCode;
+                if (branchCode == null || branchCode.isBlank()) {
+                    throw new RuntimeException("BranchCode not found");
                 }
 
-                result = graduationTypeRepository.findByStreamName(streamName, effectiveBranchCode)
-                        .stream()
+                return graduationTypeRepository.findByStreamName(streamName, branchCode).stream()
                         .map(this::mapToGraduationTypeDTO)
                         .collect(Collectors.toList());
-                return result;
             }
 
-            case "SUPERADMIN": {
-                if (branchCode != null && !branchCode.isEmpty()) {
-                    effectiveBranchCode = branchCode;
-                    result = graduationTypeRepository.findByStreamName(streamName, effectiveBranchCode)
-                            .stream()
-                            .map(this::mapToGraduationTypeDTO)
-                            .collect(Collectors.toList());
-                    return result;
+            // ✅ SUPERADMIN
+            if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+                if (!staffService.hasPermission(role, email, "GET")) {
+                    throw new RuntimeException("You don't have permission to get GraduationType by Stream");
                 }
 
-                boolean hasPerm = staffService.hasPermission(role, email, "GET");
-                if (!hasPerm) {
-                    throw new RuntimeException("You don't have permission or institute email not found for SUPERADMIN.");
+                List<String> instituteBranchCodes =
+                        staffService.getBranchCodesByInstituteEmail(email);
+
+                if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                    throw new RuntimeException("No branches found for this institute email: " + email);
                 }
 
-                List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
-                if (branchCodes == null || branchCodes.isEmpty()) {
-                    return Collections.emptyList();
-                }
-
-                result = graduationTypeRepository.findByStreamNameAndBranchCodeIn(streamName, branchCodes)
-                        .stream()
+                return graduationTypeRepository.findByStreamNameAndBranchCodeIn(streamName, instituteBranchCodes).stream()
                         .map(this::mapToGraduationTypeDTO)
                         .collect(Collectors.toList());
-                return result;
             }
 
-            default: {
-                if (!staffService.hasPermission(role, email, "Get")) {      // note: original used "Get"
-                    throw new RuntimeException("You don't have permission to get graduation types.");
-                }
-
-                effectiveBranchCode = staffService.fetchBranchCodeByRole(role, email);
-
-                if (branchCode != null && !branchCode.isEmpty()) {
-                    effectiveBranchCode = branchCode;
-                }
-
-                result = graduationTypeRepository.findByStreamName(streamName, effectiveBranchCode)
-                        .stream()
-                        .map(this::mapToGraduationTypeDTO)
-                        .collect(Collectors.toList());
-                return result;
+            // ✅ OTHER ROLES (ADMIN / STAFF)
+            if (!staffService.hasPermission(role, email, "GET")) {
+                throw new RuntimeException("You don't have permission to get GraduationType by Stream");
             }
+
+            String resolvedBranch =
+                    staffService.fetchBranchCodeByRole(role, email);
+
+            if (resolvedBranch == null || resolvedBranch.isBlank()) {
+                throw new RuntimeException("BranchCode not found for role: " + role);
+            }
+
+            return graduationTypeRepository.findByStreamName(streamName, resolvedBranch).stream()
+                    .map(this::mapToGraduationTypeDTO)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
     }
 

@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.Controller;
 import Layer.NewStudentManagement.DTO.StandardDTO;
 import Layer.NewStudentManagement.DTO.StreamDTO;
 import Layer.NewStudentManagement.Entity.StudentStandard;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.StandardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,6 +21,9 @@ public class StandardController
     @Autowired
     private StandardService standardService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/createStandard")
     public ResponseEntity<StudentStandard> createStandard(@RequestParam String role, @RequestParam String email, @RequestBody StudentStandard standard)
     {
@@ -29,20 +33,42 @@ public class StandardController
     }
 
     @GetMapping("/getAllStandard")
-    public ResponseEntity<Iterable<StandardDTO>> getAllStandard(@RequestParam String role, @RequestParam(required = false) String email,
-                                                                @RequestParam(required = false) String branchCode,
-                                                                @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
-    {
+    public ResponseEntity<?> getAllStandard(
+            @RequestParam String role,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String branchCode,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+
         try {
-            String token = null;
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            // ✅ Validate role
+            if (role == null || role.isBlank()) {
+                return ResponseEntity.badRequest().body("Role is required");
             }
 
-            Iterable<StandardDTO> standard = standardService.getAllStandard(role, email, token, branchCode);
-            return ResponseEntity.ok(standard);
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+            String tokenEmail = null;
+
+            // ✅ Extract email from token
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                tokenEmail = jwtUtil.extractEmail(token);
+            }
+
+            // ✅ Priority: param email > token email
+            String finalEmail = (email != null && !email.isBlank()) ? email : tokenEmail;
+
+            if (finalEmail == null || finalEmail.isBlank()) {
+                return ResponseEntity.badRequest().body("Email not found");
+            }
+
+            List<StandardDTO> result =
+                    standardService.getAllStandard(role, finalEmail, branchCode);
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
         }
     }
 

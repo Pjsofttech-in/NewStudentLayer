@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -88,7 +89,7 @@ public class StudentServiceImpl implements StudentService {
     public StudentResponseDTO saveStudent(String role, String email, StudentRequest request, String token) {
 
         String branchCode;
-        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
 
@@ -416,7 +417,7 @@ public class StudentServiceImpl implements StudentService {
             MultipartFile studentSignPhoto,String token)
     {
         String branchCode;
-        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
             String encoded = claims.get("branchCode", String.class);
 
@@ -1037,9 +1038,9 @@ public class StudentServiceImpl implements StudentService {
         return result;
     }
 
-
     @Override
     public LoginResponse studentLogin(LoginRequest request) {
+
         StudentEntity student = studentRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
@@ -1047,23 +1048,27 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("Invalid email or password");
         }
 
-        student.setUserRole("Student");
+        student.setUserRole("STUDENT");
 
-        String token = jwtUtil.generateToken(student.getEmail());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", student.getUserRole());
+        claims.put("branchCode", student.getBranchCode());
+
+        String token = jwtUtil.generateTokenWithClaims(
+                student.getEmail(),
+                claims,
+                Duration.ofHours(10)
+        );
 
         Map<String, Object> studentData = new HashMap<>();
         studentData.put("id", student.getId());
         studentData.put("name", student.getFullName());
         studentData.put("email", student.getEmail());
         studentData.put("role", student.getUserRole());
-        studentData.put("classRoomId",
-                student.getClassRoom() != null ? student.getClassRoom().getId() : null);
-
         studentData.put("branchCode", student.getBranchCode());
 
         return new LoginResponse(token, studentData);
     }
-
 
     @Override
     public GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
@@ -1412,7 +1417,7 @@ public class StudentServiceImpl implements StudentService {
         String decodedRole;
         String decodedEmail;
 
-        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
+        if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
 
             String encodedBranchCode = claims.get("branchCode", String.class);

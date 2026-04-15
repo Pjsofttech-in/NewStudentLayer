@@ -76,5 +76,13 @@ public class JwtUtil {
                 .getBody();
     }
 
+    public String extractBranchCode(String token) {
+        return extractAllClaims(token).get("branchCode", String.class);
+    }
+
+    public String extractRole(String token) {
+        return extractAllClaims(token).get("role", String.class);
+    }
+
 
 }

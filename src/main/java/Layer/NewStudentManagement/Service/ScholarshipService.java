@@ -12,9 +12,7 @@ public interface ScholarshipService
 
     StudentScholarship getScholarshipById(Long id, String role, String email);
 
-    List<StudentScholarship> getAllScholarships(String role, String email,
-                                                @Nullable String branchCode,
-                                                String token);
+    List<StudentScholarship> getAllScholarships(String role, String email, String branchCode);
 
     StudentScholarship updateScholarship(Long id, String role, String email, StudentScholarship scholarship);
 

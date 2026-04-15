@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.StudentGroupDTO;
 import Layer.NewStudentManagement.Entity.StudentGroup;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,9 @@ public class GroupController
     @Autowired
     private GroupService groupService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
 
     @PostMapping("/createGroup")
     public ResponseEntity<StudentGroupDTO> createGroup(@RequestParam String role, @RequestParam String email, @RequestBody StudentGroup group)
@@ -35,20 +39,43 @@ public class GroupController
     }
 
     @GetMapping("/getAllGroup")
-    public ResponseEntity<Iterable<StudentGroupDTO>> getAllGroup(@RequestParam String role, @RequestParam(required = false) String email,
-                                                                 @RequestParam(required = false) String branchCode,
-                                                                 @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
-    {try {
-        String token = null;
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7);  // Extract token after "Bearer "
-        }
+    public ResponseEntity<?> getAllGroup(
+            @RequestParam String role,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String branchCode,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
 
-        List<StudentGroupDTO> academicYear = groupService.getAllGroupByName(role, email, branchCode,token);
-        return ResponseEntity.ok(academicYear);
-    } catch (RuntimeException ex) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
-    }
+        try {
+            // ✅ Validate role
+            if (role == null || role.isBlank()) {
+                return ResponseEntity.badRequest().body("Role is required");
+            }
+
+            String tokenEmail = null;
+
+            // ✅ Extract email from token
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                tokenEmail = jwtUtil.extractEmail(token);
+            }
+
+            // ✅ Priority: param email > token email
+            String finalEmail = (email != null && !email.isBlank()) ? email : tokenEmail;
+
+            if (finalEmail == null || finalEmail.isBlank()) {
+                return ResponseEntity.badRequest().body("Email not found");
+            }
+
+            List<StudentGroupDTO> result =
+                    groupService.getAllGroup(role, finalEmail, branchCode);
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
     }
 
     @PutMapping("/updateGroup/{id}")

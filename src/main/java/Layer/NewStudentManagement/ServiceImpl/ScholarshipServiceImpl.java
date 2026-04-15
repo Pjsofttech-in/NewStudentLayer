@@ -70,74 +70,70 @@ public class ScholarshipServiceImpl implements ScholarshipService
     }
 
     @Override
-    public List<StudentScholarship> getAllScholarships(String role, String email,
-                                                       @Nullable String branchCode,
-                                                       String token) {
+    public List<StudentScholarship> getAllScholarships(String role, String email, String branchCode) {
 
-        // USER ROLE
-        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
+        try {
 
-            Claims claims = jwtUtil.extractAllClaims(token);
-            String encodedBranch = claims.get("branchCode", String.class);
+            if ("STUDENT".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
 
-            if (encodedBranch == null || encodedBranch.isEmpty()) {
-                throw new RuntimeException("Invalid token: branchCode not found");
-            }
+                // 🔥 FIX: auto-fetch branchCode
+                if (branchCode == null || branchCode.isBlank()) {
+                    branchCode = staffService.fetchBranchCodeByRole(role, email);
+                }
 
-            String decodedBranch = new String(
-                    Base64.getUrlDecoder().decode(encodedBranch),
-                    StandardCharsets.UTF_8
-            );
-
-            return scholarshipRepository.findAllByBranchCode(decodedBranch);
-        }
-
-        // SUPERADMIN ROLE
-        if ("SUPERADMIN".equalsIgnoreCase(role)) {
-
-            if (!staffService.hasPermission(role, email, "GET")) {
-                throw new RuntimeException("You don't have permission to get scholarships");
-            }
-
-            List<String> instituteBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
-
-            if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
-                throw new RuntimeException("No branches found for this institute email: " + email);
-            }
-
-            // If branchCode filter provided
-            if (branchCode != null && !branchCode.isBlank()) {
-
-                if (!instituteBranchCodes.contains(branchCode)) {
-                    throw new RuntimeException("Filtered branchCode does not belong to your institute");
+                if (branchCode == null || branchCode.isBlank()) {
+                    throw new RuntimeException("BranchCode not found");
                 }
 
                 return scholarshipRepository.findAllByBranchCode(branchCode);
             }
 
-            try {
-                return scholarshipRepository.findAllByBranchCodeIn(instituteBranchCodes);
-            }
-            catch (Exception e) {
+            // ✅ SUPERADMIN
+            if ("SUPERADMIN".equalsIgnoreCase(role)) {
 
-                List<StudentScholarship> result = new ArrayList<>();
-
-                for (String code : instituteBranchCodes) {
-                    result.addAll(scholarshipRepository.findAllByBranchCode(code));
+                if (!staffService.hasPermission(role, email, "GET")) {
+                    throw new RuntimeException("You don't have permission to get Scholarship");
                 }
 
-                return result;
+                List<String> instituteBranchCodes =
+                        staffService.getBranchCodesByInstituteEmail(email);
+
+                if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                    throw new RuntimeException("No branches found for this institute email: " + email);
+                }
+
+                try {
+                    return scholarshipRepository.findAllByBranchCodeIn(instituteBranchCodes);
+                }
+                catch (Exception e) {
+
+                    List<StudentScholarship> result = new ArrayList<>();
+
+                    for (String code : instituteBranchCodes) {
+                        result.addAll(scholarshipRepository.findAllByBranchCode(code));
+                    }
+
+                    return result;
+                }
             }
+
+            // ✅ OTHER ROLES (ADMIN / STAFF)
+            if (!staffService.hasPermission(role, email, "GET")) {
+                throw new RuntimeException("You don't have permission to get Scholarship");
+            }
+
+            String resolvedBranch =
+                    staffService.fetchBranchCodeByRole(role, email);
+
+            if (resolvedBranch == null || resolvedBranch.isBlank()) {
+                throw new RuntimeException("BranchCode not found for role: " + role);
+            }
+
+            return scholarshipRepository.findAllByBranchCode(resolvedBranch);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        // OTHER ROLES (ADMIN / STAFF)
-        if (!staffService.hasPermission(role, email, "GET")) {
-            throw new RuntimeException("You don't have permission to get scholarships");
-        }
-
-        String resolvedBranch = staffService.fetchBranchCodeByRole(role, email);
-
-        return scholarshipRepository.findAllByBranchCode(resolvedBranch);
     }
     @Override
     public StudentScholarship updateScholarship(Long id, String role, String email, StudentScholarship scholarship)

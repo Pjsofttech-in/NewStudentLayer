@@ -17,4 +17,6 @@ public interface GroupRepository extends JpaRepository<StudentGroup,Long>
     @Query("SELECT sg FROM StudentGroup sg WHERE sg.graduationType.id = :graduationTypeId")
     List<StudentGroup> findGroupsByGraduationTypeId(@Param("graduationTypeId") Long graduationTypeId);
 
+    @Query("SELECT s FROM StudentGroup s WHERE s.branchCode IN :branchCodes ORDER BY s.id DESC")
+    List<StudentGroup> findAllByBranchCodeIn(@Param("branchCodes") List<String> branchCodes);
 }

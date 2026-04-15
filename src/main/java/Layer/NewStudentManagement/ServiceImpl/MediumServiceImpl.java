@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -82,59 +83,61 @@ public class MediumServiceImpl implements MediumService
     }
 
     @Override
-    public List<MediumDTO> getAllMedium(String role, String email, String token, String branchCode)
-    {
-        String branchCodeToUse;
+    public List<MediumDTO> getAllMedium(String role, String email, String branchCode) {
 
-        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
-            Claims claims = jwtUtil.extractAllClaims(token);
-            String encoded = claims.get("branchCode", String.class);
+        if ("STUDENT".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
 
-            if (encoded == null || encoded.isEmpty()) {
-                throw new RuntimeException("Invalid token: branchCode not found");
+
+            if (branchCode == null || branchCode.isBlank()) {
+                branchCode = staffService.fetchBranchCodeByRole(role, email);
             }
 
-            branchCodeToUse = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-            return mediumRepository.findAllByBranchCode(branchCodeToUse).stream()
-                    .map(this::mapToMediumDTO)
-                    .collect(Collectors.toList());
-
-        } else if ("SUPERADMIN".equalsIgnoreCase(role)) {
-            boolean hasPerm = staffService.hasPermission(role, email, "GET");
-            if (!hasPerm) {
-                throw new RuntimeException("You don't have permission or email does not exist for SuperAdmin");
+            if (branchCode == null || branchCode.isBlank()) {
+                throw new RuntimeException("BranchCode not found for role: " + role);
             }
 
-            List<String> instituteBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
-            if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
-                return Collections.emptyList();
-            }
-
-            if (branchCode != null && !branchCode.isBlank()) {
-                String requested = branchCode.trim();
-                if (instituteBranchCodes.contains(requested)) {
-                    instituteBranchCodes = Collections.singletonList(requested);
-                } else {
-                    return Collections.emptyList();
-                }
-            }
-
-            // fetch all mediums for the branch codes list
-            return mediumRepository.findAllByBranchCodeIn(instituteBranchCodes).stream()
-                    .map(this::mapToMediumDTO)
-                    .collect(Collectors.toList());
-
-        } else {
-            if (!staffService.hasPermission(role, email, "Get")) {
-                throw new RuntimeException("You don't have permission to view Industry");
-            }
-            branchCodeToUse = staffService.fetchBranchCodeByRole(role, email);
-            return mediumRepository.findAllByBranchCode(branchCodeToUse).stream()
+            return mediumRepository.findAllByBranchCode(branchCode)
+                    .stream()
                     .map(this::mapToMediumDTO)
                     .collect(Collectors.toList());
         }
-    }
 
+        // ✅ SUPERADMIN (KEEP SAME)
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            if (!staffService.hasPermission(role, email, "GET")) {
+                throw new RuntimeException("You don't have permission to get Medium");
+            }
+
+            List<String> instituteBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                throw new RuntimeException("No branches found for this institute email: " + email);
+            }
+
+            return mediumRepository.findAllByBranchCodeIn(instituteBranchCodes)
+                    .stream()
+                    .map(this::mapToMediumDTO)
+                    .collect(Collectors.toList());
+        }
+
+        // ✅ OTHER ROLES (ADMIN / STAFF etc.)
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to get Medium");
+        }
+
+        // 🔥 SAME LOGIC AS getExams()
+        String resolvedBranch = staffService.fetchBranchCodeByRole(role, email);
+
+        if (resolvedBranch == null || resolvedBranch.isBlank()) {
+            throw new RuntimeException("BranchCode not found for role: " + role);
+        }
+
+        return mediumRepository.findAllByBranchCode(resolvedBranch)
+                .stream()
+                .map(this::mapToMediumDTO)
+                .collect(Collectors.toList());
+    }
 
     private MediumDTO mapToMediumDTO(StudentMedium medium) {
         return new MediumDTO(

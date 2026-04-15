@@ -2,8 +2,10 @@ package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.StudentDivisionDTO;
 import Layer.NewStudentManagement.Entity.StudentDivision;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.DivisionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +17,9 @@ public class DivisionController
     @Autowired
     private DivisionService divisionService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     @PostMapping("/createDivision")
     public ResponseEntity<StudentDivision> createDivision(@RequestParam String role, @RequestParam String email, @RequestBody StudentDivision division)
     {
@@ -23,11 +28,43 @@ public class DivisionController
     }
 
     @GetMapping("/getAllDivision")
-    public ResponseEntity<Iterable<StudentDivisionDTO>> getAllDivision(@RequestParam String role, @RequestParam String email,
-                                                                       @RequestParam(required = false) String branchCode)
-    {
-        Iterable<StudentDivisionDTO> divisions = divisionService.getAllDivision(role,email,branchCode);
-        return ResponseEntity.ok(divisions);
+    public ResponseEntity<?> getAllDivision(
+            @RequestParam String role,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String branchCode,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+
+        try {
+            // ✅ Validate role
+            if (role == null || role.isBlank()) {
+                return ResponseEntity.badRequest().body("Role is required");
+            }
+
+            String tokenEmail = null;
+
+            // ✅ Extract email from token
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                tokenEmail = jwtUtil.extractEmail(token);
+            }
+
+            // ✅ Priority: param email > token email
+            String finalEmail = (email != null && !email.isBlank()) ? email : tokenEmail;
+
+            if (finalEmail == null || finalEmail.isBlank()) {
+                return ResponseEntity.badRequest().body("Email not found");
+            }
+
+            Iterable<StudentDivisionDTO> result =
+                    divisionService.getAllDivision(role, finalEmail, branchCode);
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
+        }
     }
     @GetMapping("/getDivisionById/{id}")
     public ResponseEntity<StudentDivisionDTO> getDivisionById(@PathVariable Long id, @RequestParam String role, @RequestParam String email)

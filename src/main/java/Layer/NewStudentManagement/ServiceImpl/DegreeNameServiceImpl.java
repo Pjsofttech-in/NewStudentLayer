@@ -110,28 +110,69 @@ public class DegreeNameServiceImpl implements DegreeNameService
 
 
     @Override
-    public List<StudentDegreeNameDTO> getDegreeNamesByGraduationType(String role, String email, Long graduationTypeId, String token) {
+    public List<StudentDegreeNameDTO> getDegreeNamesByGraduationType(String role, String email, Long graduationTypeId, String branchCode) {
 
-        String branchCode;
-        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
+        try {
 
-            Claims claims = jwtUtil.extractAllClaims(token);
-            String encoded = claims.get("branchCode", String.class);
+            if ("STUDENT".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
 
-            if (encoded == null || encoded.isEmpty()) {
-                throw new RuntimeException("Invalid token: branchCode not found");
+                // 🔥 FIX: auto-fetch branchCode
+                String resolvedBranchCode = branchCode;
+                if (resolvedBranchCode == null || resolvedBranchCode.isBlank()) {
+                    resolvedBranchCode = staffService.fetchBranchCodeByRole(role, email);
+                }
+
+                if (resolvedBranchCode == null || resolvedBranchCode.isBlank()) {
+                    throw new RuntimeException("BranchCode not found");
+                }
+
+                String finalBranchCode = resolvedBranchCode;
+                return degreeNameRepository.findByGraduationTypeId(graduationTypeId).stream()
+                        .filter(d -> d.getBranchCode().equals(finalBranchCode))
+                        .map(this::mapToDegreeNameDTO)
+                        .collect(Collectors.toList());
             }
 
-        } else {
+            // ✅ SUPERADMIN
+            if ("SUPERADMIN".equalsIgnoreCase(role)) {
 
-            if (!staffService.hasPermission(role, email, "Get")) {
-                throw new RuntimeException("You don't have permission to get degree names.");
+                if (!staffService.hasPermission(role, email, "GET")) {
+                    throw new RuntimeException("You don't have permission to get DegreeName");
+                }
+
+                List<String> instituteBranchCodes =
+                        staffService.getBranchCodesByInstituteEmail(email);
+
+                if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                    throw new RuntimeException("No branches found for this institute email: " + email);
+                }
+
+                return degreeNameRepository.findByGraduationTypeId(graduationTypeId).stream()
+                        .filter(d -> instituteBranchCodes.contains(d.getBranchCode()))
+                        .map(this::mapToDegreeNameDTO)
+                        .collect(Collectors.toList());
             }
+
+            // ✅ OTHER ROLES (ADMIN / STAFF)
+            if (!staffService.hasPermission(role, email, "GET")) {
+                throw new RuntimeException("You don't have permission to get DegreeName");
+            }
+
+            String resolvedBranch =
+                    staffService.fetchBranchCodeByRole(role, email);
+
+            if (resolvedBranch == null || resolvedBranch.isBlank()) {
+                throw new RuntimeException("BranchCode not found for role: " + role);
+            }
+
+            return degreeNameRepository.findByGraduationTypeId(graduationTypeId).stream()
+                    .filter(d -> d.getBranchCode().equals(resolvedBranch))
+                    .map(this::mapToDegreeNameDTO)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        return degreeNameRepository.findByGraduationTypeId(graduationTypeId).stream()
-                .map(this::mapToDegreeNameDTO)
-                .collect(Collectors.toList());
     }
 
     private StudentDegreeNameDTO mapToDegreeNameDTO(StudentDegreeName entity) {

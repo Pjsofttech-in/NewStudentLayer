@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.StudentGraduationTypeDTO;
 import Layer.NewStudentManagement.Entity.StudentGraduationType;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.GraduationTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,9 @@ public class GraduationTypeController
 
     @Autowired
     GraduationTypeService graduationTypeService;
+
+    @Autowired
+    JwtUtil jwtUtil;
 
 
     @PostMapping("/createGraduationType")
@@ -56,27 +60,43 @@ public class GraduationTypeController
 
 
     @GetMapping("/graduationTypesByStreamName")
-    public ResponseEntity<List<StudentGraduationTypeDTO>> getGraduationTypesByStream(
+    public ResponseEntity<?> getGraduationTypesByStream(
             @RequestParam String role,
             @RequestParam(required = false) String email,
             @RequestParam String streamName,
-            @RequestParam(required = false) String branchCode,              // NEW optional filter
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
-    {
+            @RequestParam(required = false) String branchCode,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+
         try {
-            String token = null;
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            // ✅ Validate role
+            if (role == null || role.isBlank()) {
+                return ResponseEntity.badRequest().body("Role is required");
             }
 
-            List<StudentGraduationTypeDTO> graduationTypeDTOS =
-                    graduationTypeService.getGraduationTypesByStream(role, email, streamName, branchCode, token);
+            String tokenEmail = null;
 
-            return ResponseEntity.ok(graduationTypeDTOS);
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+            // ✅ Extract email from token
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                tokenEmail = jwtUtil.extractEmail(token);
+            }
+
+            // ✅ Priority: param email > token email
+            String finalEmail = (email != null && !email.isBlank()) ? email : tokenEmail;
+
+            if (finalEmail == null || finalEmail.isBlank()) {
+                return ResponseEntity.badRequest().body("Email not found");
+            }
+
+            List<StudentGraduationTypeDTO> result =
+                    graduationTypeService.getGraduationTypesByStream(role, finalEmail, streamName, branchCode);
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
         }
     }
-
-
 }

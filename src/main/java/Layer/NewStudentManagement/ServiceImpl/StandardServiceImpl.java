@@ -86,61 +86,64 @@ public class StandardServiceImpl implements StandardService
     }
 
     @Override
-    public List<StandardDTO> getAllStandard(String role, String email, String token, String branchCode)
-    {
-        String branchCodeToUse;
+    public List<StandardDTO> getAllStandard(String role, String email, String branchCode) {
 
-        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
-            Claims claims = jwtUtil.extractAllClaims(token);
-            String encoded = claims.get("branchCode", String.class);
+        try {
 
-            if (encoded == null || encoded.isEmpty()) {
-                throw new RuntimeException("Invalid token: branchCode not found");
-            }
+            if ("STUDENT".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
 
-            branchCodeToUse = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-
-            List<StudentStandard> standards = standardRepository.getAllStandardByBranchCode(branchCodeToUse);
-            return standards.stream()
-                    .map(this::mapToStandardDTO)
-                    .collect(Collectors.toList());
-        }
-
-        if ("SUPERADMIN".equalsIgnoreCase(role)) {
-            boolean hasPerm = staffService.hasPermission(role, email, "GET");
-            if (!hasPerm) {
-                throw new RuntimeException("You don't have permission or email does not exist for SuperAdmin");
-            }
-
-            List<String> instituteBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
-            if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
-                return Collections.emptyList();
-            }
-
-            if (branchCode != null && !branchCode.isBlank()) {
-                String requested = branchCode.trim();
-                if (instituteBranchCodes.contains(requested)) {
-                    instituteBranchCodes = Collections.singletonList(requested);
-                } else {
-                    return Collections.emptyList();
+                // 🔥 FIX: auto-fetch branchCode
+                if (branchCode == null || branchCode.isBlank()) {
+                    branchCode = staffService.fetchBranchCodeByRole(role, email);
                 }
+
+                if (branchCode == null || branchCode.isBlank()) {
+                    throw new RuntimeException("BranchCode not found");
+                }
+
+                return standardRepository.getAllStandardByBranchCode(branchCode).stream()
+                        .map(this::mapToStandardDTO)
+                        .collect(Collectors.toList());
             }
 
-            List<StudentStandard> standards = standardRepository.getAllStandardByBranchCodeIn(instituteBranchCodes);
-            return standards.stream()
+            // ✅ SUPERADMIN
+            if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+                if (!staffService.hasPermission(role, email, "GET")) {
+                    throw new RuntimeException("You don't have permission to get Standard");
+                }
+
+                List<String> instituteBranchCodes =
+                        staffService.getBranchCodesByInstituteEmail(email);
+
+                if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                    throw new RuntimeException("No branches found for this institute email: " + email);
+                }
+
+                return standardRepository.getAllStandardByBranchCodeIn(instituteBranchCodes).stream()
+                        .map(this::mapToStandardDTO)
+                        .collect(Collectors.toList());
+            }
+
+            // ✅ OTHER ROLES (ADMIN / STAFF)
+            if (!staffService.hasPermission(role, email, "GET")) {
+                throw new RuntimeException("You don't have permission to get Standard");
+            }
+
+            String resolvedBranch =
+                    staffService.fetchBranchCodeByRole(role, email);
+
+            if (resolvedBranch == null || resolvedBranch.isBlank()) {
+                throw new RuntimeException("BranchCode not found for role: " + role);
+            }
+
+            return standardRepository.getAllStandardByBranchCode(resolvedBranch).stream()
                     .map(this::mapToStandardDTO)
                     .collect(Collectors.toList());
-        }
 
-        if (!staffService.hasPermission(role, email, "Get")) {
-            throw new RuntimeException("You don't have permission to get standard");
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-        branchCodeToUse = staffService.fetchBranchCodeByRole(role, email);
-
-        List<StudentStandard> standards = standardRepository.getAllStandardByBranchCode(branchCodeToUse);
-        return standards.stream()
-                .map(this::mapToStandardDTO)
-                .collect(Collectors.toList());
     }
 
 

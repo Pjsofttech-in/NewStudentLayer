@@ -44,7 +44,7 @@ public class GroupServiceImpl implements GroupService
         StudentGraduationType graduationType = graduationTypeRepository.findById(group.getGraduationType().getId())
                 .orElseThrow(() -> new RuntimeException("Graduation type not found"));
 
-        if ("Jr.College".equalsIgnoreCase(graduationType.getGraduationType())) {
+        if ("Jr. College".equalsIgnoreCase(graduationType.getGraduationType())) {
             group.setGraduationType(graduationType);
         } else {
             group.setGraduationType(null);
@@ -97,65 +97,65 @@ public class GroupServiceImpl implements GroupService
     }
 
     @Override
-    public List<StudentGroupDTO> getAllGroupByName(String role, String email, @Nullable String branchCode, String token) {
-        List<StudentGroup> groups = new ArrayList<>();
+    public List<StudentGroupDTO> getAllGroup(String role, String email, String branchCode) {
 
-        if ("USER".equalsIgnoreCase(role) || "STUDENT".equalsIgnoreCase(role)) {
-            Claims claims = jwtUtil.extractAllClaims(token);
-            String encoded = claims.get("branchCode", String.class);
+        try {
 
-            if (encoded == null || encoded.isEmpty()) {
-                throw new RuntimeException("Invalid token: branchCode not found");
-            }
+            if ("STUDENT".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
 
-            branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-            groups = groupRepository.getAllByBranchCode(branchCode);
-
-        } else if ("SUPERADMIN".equalsIgnoreCase(role)) {
-            if (!staffService.hasPermission(role, email, "GET")) {
-                throw new RuntimeException("You don't have permission or email not found for SuperAdmin: " + email);
-            }
-
-            if (branchCode != null && !branchCode.trim().isEmpty()) {
-                groups = groupRepository.getAllByBranchCode(branchCode);
-            } else {
-                List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
-                if (branchCodes == null || branchCodes.isEmpty()) {
-                    throw new RuntimeException("No branches found for institute email: " + email);
+                // 🔥 FIX: auto-fetch branchCode
+                if (branchCode == null || branchCode.isBlank()) {
+                    branchCode = staffService.fetchBranchCodeByRole(role, email);
                 }
 
-                for (String code : branchCodes) {
-                    List<StudentGroup> branchGroups = groupRepository.getAllByBranchCode(code);
-                    if (branchGroups != null && !branchGroups.isEmpty()) {
-                        groups.addAll(branchGroups);
-                    }
+                if (branchCode == null || branchCode.isBlank()) {
+                    throw new RuntimeException("BranchCode not found");
                 }
+
+                return groupRepository.getAllByBranchCode(branchCode).stream()
+                        .map(this::mapToGroupDTO)
+                        .collect(Collectors.toList());
             }
 
-        } else {
+            // ✅ SUPERADMIN
+            if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+                if (!staffService.hasPermission(role, email, "GET")) {
+                    throw new RuntimeException("You don't have permission to get Group");
+                }
+
+                List<String> instituteBranchCodes =
+                        staffService.getBranchCodesByInstituteEmail(email);
+
+                if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                    throw new RuntimeException("No branches found for this institute email: " + email);
+                }
+
+                return groupRepository.findAllByBranchCodeIn(instituteBranchCodes).stream()
+                        .map(this::mapToGroupDTO)
+                        .collect(Collectors.toList());
+            }
+
+            // ✅ OTHER ROLES (ADMIN / STAFF)
             if (!staffService.hasPermission(role, email, "GET")) {
-                throw new RuntimeException("You don't have permission to get group");
+                throw new RuntimeException("You don't have permission to get Group");
             }
 
-            branchCode = staffService.fetchBranchCodeByRole(role, email);
-            if (branchCode == null || branchCode.trim().isEmpty()) {
-                throw new RuntimeException("Branch code not found for given role and email.");
+            String resolvedBranch =
+                    staffService.fetchBranchCodeByRole(role, email);
+
+            if (resolvedBranch == null || resolvedBranch.isBlank()) {
+                throw new RuntimeException("BranchCode not found for role: " + role);
             }
 
-            groups = groupRepository.getAllByBranchCode(branchCode);
-        }
+            return groupRepository.getAllByBranchCode(resolvedBranch).stream()
+                    .map(this::mapToGroupDTO)
+                    .collect(Collectors.toList());
 
-        if (groups == null || groups.isEmpty()) {
-            return Collections.emptyList();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        return groups.stream()
-                .filter(Objects::nonNull)
-                .map(this::mapToGroupDTO)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
-
 
     @Override
     public List<StudentGroupDTO> getGroupsByGraduationTypeId(String role, String email,Long graduationTypeId)

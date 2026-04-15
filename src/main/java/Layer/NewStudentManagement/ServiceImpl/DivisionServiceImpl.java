@@ -74,55 +74,64 @@ public class DivisionServiceImpl implements DivisionService
     }
 
     @Override
-    public List<StudentDivisionDTO> getAllDivision(String role, String email, @Nullable String branchCodeFilter)
-    {
-        if (!staffService.hasPermission(role, email, "Get")) {
-            throw new RuntimeException("You don't have permission to get division");
-        }
+    public List<StudentDivisionDTO> getAllDivision(String role, String email, String branchCode) {
 
-        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+        try {
 
-            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+            if ("STUDENT".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
 
-            if (branchCodes == null || branchCodes.isEmpty()) {
-                throw new RuntimeException("No branch codes found for this Superadmin");
-            }
-
-            if (branchCodeFilter != null && !branchCodeFilter.isBlank()) {
-
-                if (!branchCodes.contains(branchCodeFilter)) {
-                    throw new RuntimeException("Invalid branchCode for this Superadmin");
+                // 🔥 FIX: auto-fetch branchCode
+                if (branchCode == null || branchCode.isBlank()) {
+                    branchCode = staffService.fetchBranchCodeByRole(role, email);
                 }
 
-                List<StudentDivision> filteredDivisions =
-                        divisionRepository.findAllByBranchCode(branchCodeFilter);
+                if (branchCode == null || branchCode.isBlank()) {
+                    throw new RuntimeException("BranchCode not found");
+                }
 
-                return filteredDivisions.stream()
+                return divisionRepository.findAllByBranchCode(branchCode).stream()
                         .map(this::mapToDivisionDTO)
                         .collect(Collectors.toList());
             }
 
-            List<StudentDivisionDTO> finalList = new ArrayList<>();
+            // ✅ SUPERADMIN
+            if ("SUPERADMIN".equalsIgnoreCase(role)) {
 
-            for (String brCode : branchCodes) {
+                if (!staffService.hasPermission(role, email, "GET")) {
+                    throw new RuntimeException("You don't have permission to get Division");
+                }
 
-                List<StudentDivision> divisions =
-                        divisionRepository.findAllByBranchCode(brCode);
+                List<String> instituteBranchCodes =
+                        staffService.getBranchCodesByInstituteEmail(email);
 
-                divisions.stream()
+                if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                    throw new RuntimeException("No branches found for this institute email: " + email);
+                }
+
+                return divisionRepository.findAllByBranchCodeIn(instituteBranchCodes).stream()
                         .map(this::mapToDivisionDTO)
-                        .forEach(finalList::add);
+                        .collect(Collectors.toList());
             }
 
-            return finalList;
+            // ✅ OTHER ROLES (ADMIN / STAFF)
+            if (!staffService.hasPermission(role, email, "GET")) {
+                throw new RuntimeException("You don't have permission to get Division");
+            }
+
+            String resolvedBranch =
+                    staffService.fetchBranchCodeByRole(role, email);
+
+            if (resolvedBranch == null || resolvedBranch.isBlank()) {
+                throw new RuntimeException("BranchCode not found for role: " + role);
+            }
+
+            return divisionRepository.findAllByBranchCode(resolvedBranch).stream()
+                    .map(this::mapToDivisionDTO)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
-
-        List<StudentDivision> divisions = divisionRepository.findAllByBranchCode(branchCode);
-
-        return divisions.stream()
-                .map(this::mapToDivisionDTO)
-                .collect(Collectors.toList());
     }
 
     private StudentDivisionDTO mapToDivisionDTO(StudentDivision division) {

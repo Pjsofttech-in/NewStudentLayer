@@ -91,68 +91,60 @@ public class AcademicYearServiceImpl implements AcademicYearService
         academicYearRepository.deleteById(id);
     }
 
+
     @Override
-    public List<StudentAcademicYear> getAllAcademicYear(String role, String email,
-                                                        @Nullable String branchCode, String token) {
+    public List<StudentAcademicYear> getAllAcademicYear(String role, String email, String branchCode) {
 
-        if ("STUDENT".equalsIgnoreCase(role)) {
-            // For STUDENT, fetch branchCode from student entity using email
-            StudentEntity student = studentRepository.findByEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Student not found with email: " + email));
-            String studentBranchCode = student.getBranchCode();
-            if (studentBranchCode == null || studentBranchCode.isEmpty()) {
-                throw new RuntimeException("Branch code not found for student");
-            }
-            return academicYearRepository.findAllByBranchCode(studentBranchCode);
-        }
+        try {
 
-        if ("USER".equalsIgnoreCase(role)) {
-            Claims claims = jwtUtil.extractAllClaims(token);
-            String encodedBranch = claims.get("branchCode", String.class);
+            if ("STUDENT".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role) || "TEACHER".equalsIgnoreCase(role)) {
 
-            if (encodedBranch == null || encodedBranch.isEmpty()) {
-                throw new RuntimeException("Invalid token: branchCode not found");
+                // 🔥 FIX: auto-fetch branchCode
+                if (branchCode == null || branchCode.isBlank()) {
+                    branchCode = staffService.fetchBranchCodeByRole(role, email);
+                }
+
+                if (branchCode == null || branchCode.isBlank()) {
+                    throw new RuntimeException("BranchCode not found");
+                }
+
+                return academicYearRepository.findAllByBranchCode(branchCode);
             }
 
-            String decodedBranch = new String(Base64.getUrlDecoder().decode(encodedBranch), StandardCharsets.UTF_8);
-            return academicYearRepository.findAllByBranchCode(decodedBranch);
-        }
+            // ✅ SUPERADMIN
+            if ("SUPERADMIN".equalsIgnoreCase(role)) {
 
-        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+                if (!staffService.hasPermission(role, email, "GET")) {
+                    throw new RuntimeException("You don't have permission to get AcademicYear");
+                }
 
+                List<String> instituteBranchCodes =
+                        staffService.getBranchCodesByInstituteEmail(email);
+
+                if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
+                    throw new RuntimeException("No branches found for this institute email: " + email);
+                }
+
+                return academicYearRepository.findAllByBranchCodeIn(instituteBranchCodes);
+            }
+
+            // ✅ OTHER ROLES (ADMIN / STAFF)
             if (!staffService.hasPermission(role, email, "GET")) {
                 throw new RuntimeException("You don't have permission to get AcademicYear");
             }
 
-            List<String> instituteBranchCodes = staffService.getBranchCodesByInstituteEmail(email);
-            if (instituteBranchCodes == null || instituteBranchCodes.isEmpty()) {
-                throw new RuntimeException("No branches found for this institute email: " + email);
+            String resolvedBranch =
+                    staffService.fetchBranchCodeByRole(role, email);
+
+            if (resolvedBranch == null || resolvedBranch.isBlank()) {
+                throw new RuntimeException("BranchCode not found for role: " + role);
             }
 
-            if (branchCode != null && !branchCode.isBlank()) {
-                if (!instituteBranchCodes.contains(branchCode)) {
-                    throw new RuntimeException("Filtered branchCode does not belong to your institute");
-                }
-                return academicYearRepository.findAllByBranchCode(branchCode);
-            }
+            return academicYearRepository.findAllByBranchCode(resolvedBranch);
 
-            try {
-                return academicYearRepository.findAllByBranchCodeIn(instituteBranchCodes);
-            } catch (Exception e) {
-                List<StudentAcademicYear> result = new ArrayList<>();
-                for (String code : instituteBranchCodes) {
-                    result.addAll(academicYearRepository.findAllByBranchCode(code));
-                }
-                return result;
-            }
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        if (!staffService.hasPermission(role, email, "GET")) {
-            throw new RuntimeException("You don't have permission to get AcademicYear");
-        }
-
-        String resolvedBranch = staffService.fetchBranchCodeByRole(role, email);
-        return academicYearRepository.findAllByBranchCode(resolvedBranch);
     }
 
 }

@@ -15,5 +15,8 @@ public interface DivisionRepository extends JpaRepository<StudentDivision,Long>
     @Query("SELECT s FROM StudentDivision s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentDivision> findAllByBranchCode(@Param("branchCode") String branchCode);
 
+    @Query("SELECT s FROM StudentDivision s WHERE s.branchCode IN :branchCodes ORDER BY s.id DESC")
+    List<StudentDivision> findAllByBranchCodeIn(@Param("branchCodes") List<String> branchCodes);
+
     boolean existsByDivisionIgnoreCaseAndBranchCode(String division, String branchCode);
 }

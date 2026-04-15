@@ -12,5 +12,5 @@ public interface DivisionService
     StudentDivisionDTO getDivisionById(Long id, String role, String email);
     StudentDivision updateDivision(Long id,String role,String email,StudentDivision division);
     void deleteDivisionById(Long id,String role,String email);
-    List<StudentDivisionDTO> getAllDivision(String role, String email, @Nullable String branchCodeFilter);
+    List<StudentDivisionDTO> getAllDivision(String role, String email, String branchCode);
 }

@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.Entity.StudentScholarship;
+import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.ScholarshipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,9 @@ public class ScholarshipController
 
     @Autowired
     ScholarshipService scholarshipService;
+
+    @Autowired
+    JwtUtil jwtUtil;
 
     @PostMapping("/createScholarship")
     public StudentScholarship createScholarship(
@@ -37,22 +41,42 @@ public class ScholarshipController
     }
 
     @GetMapping("/getAllScholarships")
-    public ResponseEntity<List<StudentScholarship>> getAll(
+    public ResponseEntity<?> getAllScholarships(
             @RequestParam String role,
-            @RequestParam String email,
+            @RequestParam(required = false) String email,
             @RequestParam(required = false) String branchCode,
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
-    {
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+
         try {
-            String token = null;
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                token = authorizationHeader.substring(7);  // Extract token after "Bearer "
+            // ✅ Validate role
+            if (role == null || role.isBlank()) {
+                return ResponseEntity.badRequest().body("Role is required");
             }
 
-            List<StudentScholarship> scholarships = scholarshipService.getAllScholarships(role, email,branchCode, token);
-            return ResponseEntity.ok(scholarships);
-        } catch (RuntimeException ex) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+            String tokenEmail = null;
+
+            // ✅ Extract email from token
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                tokenEmail = jwtUtil.extractEmail(token);
+            }
+
+            // ✅ Priority: param email > token email
+            String finalEmail = (email != null && !email.isBlank()) ? email : tokenEmail;
+
+            if (finalEmail == null || finalEmail.isBlank()) {
+                return ResponseEntity.badRequest().body("Email not found");
+            }
+
+            List<StudentScholarship> result =
+                    scholarshipService.getAllScholarships(role, finalEmail, branchCode);
+
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(e.getMessage());
         }
     }
 
@@ -76,4 +100,3 @@ public class ScholarshipController
     }
 
 }
-
