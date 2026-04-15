@@ -9,7 +9,7 @@ import Layer.NewStudentManagement.Repository.StreamRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Service.StreamService;
 import io.jsonwebtoken.Claims;
-import jakarta.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

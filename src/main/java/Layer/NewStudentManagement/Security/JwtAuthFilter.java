@@ -42,7 +42,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String role = jwtUtil.extractRole(token);          // ✅ extract role
             String branchCode = jwtUtil.extractBranchCode(token); // ✅ extract branchCode
 
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (email != null && role != null && branchCode != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 UserDetails userDetails = User.withUsername(email)
                         .password("")

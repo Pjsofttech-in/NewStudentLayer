@@ -6,7 +6,7 @@ import Layer.NewStudentManagement.Entity.StudentDocument;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
-import jakarta.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;

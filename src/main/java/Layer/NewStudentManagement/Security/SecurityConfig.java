@@ -49,7 +49,7 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/stafflogin","/teacherLogin","/verifyOtpToTeacher","/sendOtpToTeacher","/resetTeacherPassword",
-                                "/studentLogin","/getSchoolProfileByBranchCode","/school/{slug}").permitAll()
+                                "/studentLogin","/getSchoolProfileByBranchCode","/school/{slug}","/error","/getStudentCountByCastCategory").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

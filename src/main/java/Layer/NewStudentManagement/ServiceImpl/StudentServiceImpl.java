@@ -13,7 +13,7 @@ import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
 import io.jsonwebtoken.Claims;
-import jakarta.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -260,7 +260,9 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentDTO getStudentById(Long id, String role, String email) {
-        checkPermission(role, email, "Get");
+        if (role != null && email != null) {
+            checkPermission(role, email, "Get");
+        }
         StudentEntity student = studentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + id));
 
@@ -605,7 +607,7 @@ public class StudentServiceImpl implements StudentService {
         if (incoming.getEnrollmentDate() != null) existing.setEnrollmentDate(incoming.getEnrollmentDate());
         if (incoming.getApprovalDate() != null) existing.setApprovalDate(incoming.getApprovalDate());
         if (incoming.getStatus() != null) existing.setStatus(incoming.getStatus());
-        if (incoming.getApplyFor() != null) existing.setApplyFor(incoming.getApplyFor());
+        if (incoming.getApplyFor() != null) existing.setApplyFor(incoming.getFormStatus());
         if (incoming.getFormStatus() != null) existing.setFormStatus(incoming.getFormStatus());
         if (incoming.getStreamName() != null) existing.setStreamName(incoming.getStreamName());
         if (incoming.getGroupName() != null) existing.setGroupName(incoming.getGroupName());

@@ -2,7 +2,7 @@ package Layer.NewStudentManagement.Service;
 
 import Layer.NewStudentManagement.DTO.StreamDTO;
 import Layer.NewStudentManagement.Entity.StudentStream;
-import jakarta.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
