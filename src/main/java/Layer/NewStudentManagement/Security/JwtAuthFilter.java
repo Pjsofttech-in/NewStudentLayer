@@ -38,15 +38,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = authHeader.substring(7);
 
         try {
+            // Validate token first
+            if (!jwtUtil.validateToken(token)) {
+                System.out.println("❌ Invalid Token: Token validation failed");
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             String email = jwtUtil.extractEmail(token);
-            String role = jwtUtil.extractRole(token);          // ✅ extract role
-            String branchCode = jwtUtil.extractBranchCode(token); // ✅ extract branchCode
+            String role = jwtUtil.extractRole(token);
+            String branchCode = jwtUtil.extractBranchCode(token);
 
-            if (email != null && role != null && branchCode != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
+            // Email is required, but role and branchCode can be null
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                
+                // Default role if not present in token
+                String roleToUse = role != null ? role : "USER";
+                
                 UserDetails userDetails = User.withUsername(email)
                         .password("")
-                        .roles(role) // ✅ dynamic role (IMPORTANT)
+                        .roles(roleToUse)
                         .build();
 
                 UsernamePasswordAuthenticationToken authToken =
@@ -56,18 +67,22 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                 userDetails.getAuthorities()
                         );
 
-                // ✅ STORE EXTRA DATA HERE
-                authToken.setDetails(Map.of(
-                        "email", email,
-                        "role", role,
-                        "branchCode", branchCode
-                ));
+                // Store extra data in details
+                Map<String, Object> details = new java.util.HashMap<>();
+                details.put("email", email);
+                details.put("role", roleToUse);
+                if (branchCode != null) {
+                    details.put("branchCode", branchCode);
+                }
+                authToken.setDetails(details);
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
 
         } catch (Exception e) {
             System.out.println("❌ Invalid Token: " + e.getMessage());
+            // Clear authentication on error
+            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);
