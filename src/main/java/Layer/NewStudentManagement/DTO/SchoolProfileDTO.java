@@ -1,8 +1,5 @@
-package Layer.NewStudentManagement.Entity;
+package Layer.NewStudentManagement.DTO;
 
-
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,16 +9,12 @@ import java.util.List;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
-public class StudentSchoolProfile
+@AllArgsConstructor
+public class SchoolProfileDTO
 {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String schoolName;
-    private Long udiseNumber;
     private String schoolLogo;
     private String schoolAddress;
     private Long contactNumber;
@@ -30,7 +23,6 @@ public class StudentSchoolProfile
     private String societyName;
     private String indexNumber;
     private String board;
-    @Column(unique = true)
     private String schoolSlug;
     private String schoolUrl;
     private String whatsappLink;
@@ -38,13 +30,5 @@ public class StudentSchoolProfile
     private String instagramLink;
     private String twitterLink;
 
-
-    @Email
-    private String createdByEmail;
-    private String branchCode;
-    private String role;
-
-
-    @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StudentProfileImage> images;
+    private List<String> images;
 }

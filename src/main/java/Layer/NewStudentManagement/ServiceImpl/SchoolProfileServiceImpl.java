@@ -1,7 +1,10 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.SchoolProfileDTO;
+import Layer.NewStudentManagement.Entity.StudentProfileImage;
 import Layer.NewStudentManagement.Entity.StudentSchoolProfile;
 
+import Layer.NewStudentManagement.Repository.ProfileImageRepository;
 import Layer.NewStudentManagement.Repository.SchoolProfileRepository;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.SchoolProfileService;
@@ -9,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -25,55 +30,41 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
     @Autowired
     S3Service s3Service;
 
-    @Override
-    public StudentSchoolProfile createSchoolProfile(StudentSchoolProfile profile,
-                                                    MultipartFile logo,
-                                                    String role,
-                                                    String email) {
+    @Autowired
+    private ProfileImageRepository profileImageRepository;
 
-        // ✅ 1. Permission check
+    @Override
+    public SchoolProfileDTO createSchoolProfile(StudentSchoolProfile profile,
+                                                MultipartFile logo,
+                                                List<MultipartFile> images,
+                                                String role,
+                                                String email) {
+
         if (!staffService.hasPermission(role, email, "Post")) {
-            throw new RuntimeException("You don't have permission to create School Profile");
+            throw new RuntimeException("No permission");
         }
 
-        // ✅ 2. Fetch branchCode
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         profile.setBranchCode(branchCode);
 
-        // ✅ 3. One profile per branch
         if (schoolProfileRepository.existsByBranchCode(branchCode)) {
-            throw new RuntimeException("School already exists for this branch");
+            throw new RuntimeException("School already exists");
         }
 
-        // ✅ 4. Upload logo (if present)
+        // Logo upload
         if (logo != null && !logo.isEmpty()) {
-            String uploadedUrl = s3Service.uploadFile(logo, branchCode);
-            profile.setSchoolLogo(uploadedUrl);
+            profile.setSchoolLogo(s3Service.uploadFile(logo, branchCode));
         }
 
-        // ✅ 5. SLUG LOGIC 🔥 (User input OR auto-generate)
-        String slug;
+        // SLUG
+        String slug = (profile.getSchoolSlug() != null && !profile.getSchoolSlug().isEmpty())
+                ? profile.getSchoolSlug()
+                : profile.getSchoolName();
 
-        if (profile.getSchoolSlug() != null && !profile.getSchoolSlug().isEmpty()) {
+        slug = slug.toLowerCase().trim()
+                .replaceAll("[^a-z0-9 ]", "")
+                .replaceAll("\\s+", "-");
 
-            // ✔ Clean user input slug
-            slug = profile.getSchoolSlug()
-                    .toLowerCase()
-                    .trim()
-                    .replaceAll("[^a-z0-9-]", "")   // allow only a-z, 0-9, -
-                    .replaceAll("-+", "-");         // remove duplicate hyphens
-
-        } else {
-
-            // ✔ Generate from school name
-            slug = profile.getSchoolName()
-                    .toLowerCase()
-                    .trim()
-                    .replaceAll("[^a-z0-9 ]", "")   // remove special chars
-                    .replaceAll("\\s+", "-");       // space → hyphen
-        }
-
-        // ✅ 6. Ensure UNIQUE slug
         String baseSlug = slug;
         int count = 1;
 
@@ -82,32 +73,51 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
         }
 
         profile.setSchoolSlug(slug);
-
-        // ✅ 7. Set metadata
         profile.setCreatedByEmail(email);
         profile.setRole(role);
 
-        // ✅ 8. Save
-        return schoolProfileRepository.save(profile);
-    }
+        // ✅ SAVE PROFILE ONCE
+        StudentSchoolProfile savedProfile = schoolProfileRepository.save(profile);
 
-    @Override
-    public StudentSchoolProfile updateSchoolProfile(Long id,
-                                                    StudentSchoolProfile updatedProfile,
-                                                    MultipartFile logo,
-                                                    String role,
-                                                    String email) {
+        // ✅ SAVE IMAGES
+        if (images != null && !images.isEmpty()) {
+            List<StudentProfileImage> imageList = new ArrayList<>();
 
-        // ✅ 1. Permission check
-        if (!staffService.hasPermission(role, email, "Put")) {
-            throw new RuntimeException("You don't have permission to update School Profile");
+            for (MultipartFile file : images) {
+                if (!file.isEmpty()) {
+                    String url = s3Service.uploadFile(file, branchCode);
+
+                    StudentProfileImage img = new StudentProfileImage();
+                    img.setImageUrl(url);
+                    img.setProfile(savedProfile);
+
+                    imageList.add(img);
+                }
+            }
+
+            profileImageRepository.saveAll(imageList);
+            savedProfile.setImages(imageList);
         }
 
-        // ✅ 2. Get existing profile
-        StudentSchoolProfile existing = schoolProfileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("School Profile not found"));
+        return mapToDTO(savedProfile);
+    }
 
-        // ✅ 3. Update normal fields
+    // ✅ UPDATE
+    @Override
+    public SchoolProfileDTO updateSchoolProfile(Long id,
+                                                StudentSchoolProfile updatedProfile,
+                                                MultipartFile logo,
+                                                List<MultipartFile> images,
+                                                String role,
+                                                String email) {
+
+        if (!staffService.hasPermission(role, email, "Put")) {
+            throw new RuntimeException("No permission");
+        }
+
+        StudentSchoolProfile existing = schoolProfileRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Profile not found"));
+
         existing.setSchoolName(updatedProfile.getSchoolName());
         existing.setSchoolAddress(updatedProfile.getSchoolAddress());
         existing.setContactNumber(updatedProfile.getContactNumber());
@@ -117,66 +127,99 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
         existing.setIndexNumber(updatedProfile.getIndexNumber());
         existing.setBoard(updatedProfile.getBoard());
 
-        // ✅ 4. Logo update (optional)
         if (logo != null && !logo.isEmpty()) {
-            String uploadedUrl = s3Service.uploadFile(logo, existing.getBranchCode());
-            existing.setSchoolLogo(uploadedUrl);
+            existing.setSchoolLogo(s3Service.uploadFile(logo, existing.getBranchCode()));
         }
 
-        // ✅ 5. SLUG UPDATE LOGIC 🔥
-        if (updatedProfile.getSchoolSlug() != null && !updatedProfile.getSchoolSlug().isEmpty()) {
+        // ✅ ADD NEW IMAGES
+        if (images != null && !images.isEmpty()) {
+            List<StudentProfileImage> imageList = new ArrayList<>();
 
-            String newSlug = updatedProfile.getSchoolSlug()
-                    .toLowerCase()
-                    .trim()
-                    .replaceAll("[^a-z0-9-]", "")
-                    .replaceAll("-+", "-");
+            for (MultipartFile file : images) {
+                if (!file.isEmpty()) {
+                    String url = s3Service.uploadFile(file, existing.getBranchCode());
 
-            // ⚠️ IMPORTANT: Check if slug belongs to another record
-            Optional<StudentSchoolProfile> slugOwner =
-                    schoolProfileRepository.findBySchoolSlug(newSlug);
+                    StudentProfileImage img = new StudentProfileImage();
+                    img.setImageUrl(url);
+                    img.setProfile(existing);
 
-            if (slugOwner.isPresent() && !slugOwner.get().getId().equals(existing.getId())) {
-                throw new RuntimeException("Slug already in use. Try another.");
+                    imageList.add(img);
+                }
             }
 
-            existing.setSchoolSlug(newSlug);
+            profileImageRepository.saveAll(imageList);
         }
 
-        // ✅ 6. Save
-        return schoolProfileRepository.save(existing);
+        StudentSchoolProfile saved = schoolProfileRepository.save(existing);
+        return mapToDTO(saved);
     }
 
+    // ✅ DELETE PROFILE
     @Override
     public void deleteSchoolProfile(Long id, String role, String email) {
         if (!staffService.hasPermission(role, email, "Delete")) {
-            throw new RuntimeException("You don't have permission to delete School Profile");
+            throw new RuntimeException("No permission");
         }
 
         StudentSchoolProfile profile = schoolProfileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("School Profile not found with ID: " + id));
-
-        String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        if (!profile.getBranchCode().equals(branchCode)) {
-            throw new RuntimeException("You are not allowed to delete another branch's profile");
-        }
+                .orElseThrow(() -> new RuntimeException("Not found"));
 
         schoolProfileRepository.delete(profile);
     }
 
+    // ✅ GET BY BRANCH
     @Override
-    public StudentSchoolProfile getSchoolProfileByBranchCode(String role, String email) {
+    public SchoolProfileDTO getSchoolProfileByBranchCode(String role, String email) {
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        return schoolProfileRepository.findByBranchCode(branchCode)
-                .orElseThrow(() -> new RuntimeException("No School Profile found for branch: " + branchCode));
+
+        StudentSchoolProfile profile = schoolProfileRepository.findByBranchCode(branchCode)
+                .orElseThrow(() -> new RuntimeException("Not found"));
+
+        return mapToDTO(profile);
     }
 
-
+    // ✅ GET BY SLUG
     @Override
-    public StudentSchoolProfile getBySlug(String slug) {
-        return schoolProfileRepository.findBySchoolSlug(slug.toLowerCase())
-                .orElseThrow(() -> new RuntimeException("School not found"));
+    public SchoolProfileDTO getBySlug(String slug) {
+        StudentSchoolProfile profile = schoolProfileRepository
+                .findBySchoolSlug(slug.toLowerCase())
+                .orElseThrow(() -> new RuntimeException("Not found"));
+
+        return mapToDTO(profile);
     }
 
+    // ✅ DELETE IMAGE
+    @Override
+    public void deleteImage(Long imageId) {
+        profileImageRepository.deleteById(imageId);
+    }
 
+    // ✅ DTO MAPPER
+    private SchoolProfileDTO mapToDTO(StudentSchoolProfile profile) {
+
+        SchoolProfileDTO dto = new SchoolProfileDTO();
+
+        dto.setId(profile.getId());
+        dto.setSchoolName(profile.getSchoolName());
+        dto.setSchoolLogo(profile.getSchoolLogo());
+        dto.setSchoolAddress(profile.getSchoolAddress());
+        dto.setContactNumber(profile.getContactNumber());
+        dto.setSchoolEmail(profile.getSchoolEmail());
+        dto.setPlace(profile.getPlace());
+        dto.setSocietyName(profile.getSocietyName());
+        dto.setIndexNumber(profile.getIndexNumber());
+        dto.setBoard(profile.getBoard());
+        dto.setSchoolSlug(profile.getSchoolSlug());
+
+        if (profile.getImages() != null) {
+            List<String> imageUrls = profile.getImages()
+                    .stream()
+                    .map(StudentProfileImage::getImageUrl)
+                    .toList();
+
+            dto.setImages(imageUrls);
+        }
+
+        return dto;
+    }
 }
