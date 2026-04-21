@@ -49,6 +49,9 @@ public class StudentFeesDTO
 //    private String paymentStatus;     // Pending, Ongoing, Completed
 //    private String feesPaymentType;
 //    private double lateFeeCharges;
+    private Double extraFees1;
+    private Double extraFees2;
+    private Double extraFees3;
     private String feesStatus;
     private String feesCollectionType;
     private String institutionType;

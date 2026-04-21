@@ -582,6 +582,9 @@ public class FeesServiceImpl implements FeesService
         dto.setDiscount(fees.getDiscount());
         dto.setGST(fees.getGST());
         dto.setTotalamount(fees.getTotalamount());
+        dto.setExtraFees1(fees.getExtraFees1());
+        dto.setExtraFees2(fees.getExtraFees2());
+        dto.setExtraFees3(fees.getExtraFees3());
 //        dto.setLateFeeCharges(fees.getLateFeeCharges());
         dto.setSfid(fees.getSfid());
         dto.setPaidAmount(fees.getPaidAmount());

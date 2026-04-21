@@ -27,6 +27,9 @@ public class ClassRoomServiceImpl implements ClassRoomService
     MediumRepository mediumRepository;
 
     @Autowired
+    FeesRepository feesRepository;
+
+    @Autowired
     DivisionRepository divisionRepository;
 
     @Autowired
@@ -434,22 +437,28 @@ public class ClassRoomServiceImpl implements ClassRoomService
         Map<Long, String> studentPhotoUrls = new HashMap<>();
 
         for (StudentEntity student : students) {
+
             StudentDocument document = documentRepository.findByStudent(student.getId());
 
             if (document == null || document.getStudentPhoto() == null || document.getStudentPhoto().isBlank()) {
                 throw new RuntimeException("Student photo is required for assignment. Missing for student ID: " + student.getId());
             }
 
-            // Assign classroom and mandatory roll number
+            // Assign classroom and roll number
             student.setClassRoom(classroom);
             student.setRollNo(newRollNo);
+
+            // ✅ NEW LOGIC: update rollNo in fees table if exists
+            if (feesRepository.existsByStudentId(student.getId())) {
+                feesRepository.updateRollNoByStudentId(student.getId(), newRollNo);
+            }
 
             try {
                 String newPhotoUrl = s3Service.copyStudentPhotoToAttendanceFaces(
                         document.getStudentPhoto(),
                         branchCode,
                         classroomId.toString(),
-                        String.valueOf(newRollNo) // rollNo is mandatory
+                        String.valueOf(newRollNo)
                 );
                 studentPhotoUrls.put(student.getId(), newPhotoUrl);
             } catch (Exception e) {
