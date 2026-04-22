@@ -202,6 +202,7 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
         dto.setId(profile.getId());
         dto.setSchoolName(profile.getSchoolName());
         dto.setSchoolLogo(profile.getSchoolLogo());
+        dto.setUdiseNumber(profile.getUdiseNumber());
         dto.setSchoolAddress(profile.getSchoolAddress());
         dto.setContactNumber(profile.getContactNumber());
         dto.setSchoolEmail(profile.getSchoolEmail());

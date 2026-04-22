@@ -16,6 +16,7 @@ public class SchoolProfileDTO
     private Long id;
     private String schoolName;
     private String schoolLogo;
+    private Long udiseNumber;
     private String schoolAddress;
     private Long contactNumber;
     private String schoolEmail;
