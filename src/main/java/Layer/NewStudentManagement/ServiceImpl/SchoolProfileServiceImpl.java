@@ -123,6 +123,7 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
         existing.setContactNumber(updatedProfile.getContactNumber());
         existing.setSchoolEmail(updatedProfile.getSchoolEmail());
         existing.setPlace(updatedProfile.getPlace());
+        existing.setUdiseNumber(updatedProfile.getUdiseNumber());
         existing.setSocietyName(updatedProfile.getSocietyName());
         existing.setIndexNumber(updatedProfile.getIndexNumber());
         existing.setBoard(updatedProfile.getBoard());
