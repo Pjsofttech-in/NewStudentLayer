@@ -5,6 +5,8 @@ import Layer.NewStudentManagement.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -216,5 +218,35 @@ public class DashBoardController
                 feesService.getClassWiseRevenue(role, email)
         );
     }
+
+
+    @GetMapping("/getDailyCollection")
+    public ResponseEntity<?> getDailyFees(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+
+        return ResponseEntity.ok(
+                feesCollectService.getDailyCollectedFees(role, email, date)
+        );
+    }
+
+    @GetMapping("/getFeesByCollectedByWithFilter")
+    public ResponseEntity<?> getFees(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam String filter,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+            @RequestParam(required = false)
+            @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate) {
+
+        return ResponseEntity.ok(
+                feesCollectService.getCollectedFeesByFilter(role, email, filter, fromDate, toDate)
+        );
+    }
+
+
 
 }

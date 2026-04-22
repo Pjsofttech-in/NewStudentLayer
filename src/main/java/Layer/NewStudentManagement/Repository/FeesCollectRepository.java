@@ -135,5 +135,17 @@ ORDER BY cr.id
     );
 
 
+    @Query("SELECT COALESCE(SUM(s.amount), 0) FROM StudentFeesCollect s " +
+            "WHERE s.paymentDate = :date AND s.branchCode = :branchCode")
+    Double getTotalFeesByDateAndBranch(@Param("date") LocalDate date,
+                                       @Param("branchCode") String branchCode);
+
+
+    @Query("SELECT s FROM StudentFeesCollect s " +
+            "WHERE s.branchCode = :branchCode " +
+            "AND s.paymentDate BETWEEN :startDate AND :endDate")
+    List<StudentFeesCollect> findByBranchAndDateRange(String branchCode, LocalDate startDate, LocalDate endDate);
+
+
 
 }

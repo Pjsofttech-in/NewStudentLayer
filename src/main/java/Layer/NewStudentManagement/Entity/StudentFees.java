@@ -55,9 +55,9 @@ public class StudentFees
     private Double feesAmount;      // fees total before discount
     private Double totalamount;         // fees total after discount
 //    private double lateFeeCharges;
-    private Double extraFees1;
-    private Double extraFees2;
-    private Double extraFees3;
+    private Double otherFees1;
+    private Double otherFees2;
+    private Double otherFees3;
     private Long sfid;
     private double paidAmount;         // total paid by student
     private double pendingAmount;     // remaining amount

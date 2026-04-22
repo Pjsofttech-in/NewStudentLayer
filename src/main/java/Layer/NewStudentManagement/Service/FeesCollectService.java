@@ -25,4 +25,8 @@ public interface FeesCollectService
     Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(
             String role, String email, FeesFilterDTO filterDTO, String timeFrame, LocalDate startDate, LocalDate endDate, int page, int size);
 
+    Map<String, Object> getDailyCollectedFees(String role, String email, LocalDate date);
+    Map<String, Object> getCollectedFeesByFilter(String role, String email, String filter,
+                                                 LocalDate fromDate, LocalDate toDate);
+
 }

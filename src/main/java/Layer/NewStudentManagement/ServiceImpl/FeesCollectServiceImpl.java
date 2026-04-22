@@ -25,8 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class FeesCollectServiceImpl implements FeesCollectService
-{
+public class FeesCollectServiceImpl implements FeesCollectService {
 
     @Autowired
     FeesCollectRepository feesCollectRepository;
@@ -129,10 +128,8 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
 
     @Override
-    public FeesCollectDTO updateFeeCollectionStatus(Long id, String role, String email, String newStatus)
-    {
-        if(!staffService.hasPermission(role,email,"Put"))
-        {
+    public FeesCollectDTO updateFeeCollectionStatus(Long id, String role, String email, String newStatus) {
+        if (!staffService.hasPermission(role, email, "Put")) {
             throw new RuntimeException("You don't have permission to Update Fees Status");
         }
         StudentFeesCollect collect = feesCollectRepository.findById(id)
@@ -141,8 +138,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
         if (!collect.getStatus().equalsIgnoreCase(newStatus)) {
             collect.setStatus(newStatus);
             StudentFees fees = collect.getStudentFees();
-            if(collect.getPaymentDate()==null || collect.getFeesPaymentType().isEmpty())
-            {
+            if (collect.getPaymentDate() == null || collect.getFeesPaymentType().isEmpty()) {
                 collect.setPaymentDate(LocalDate.now());
                 LocalDate startDate = LocalDate.of(collect.getPaymentDate().getYear(), collect.getPaymentDate().getMonthValue(), 1);
                 LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
@@ -171,10 +167,8 @@ public class FeesCollectServiceImpl implements FeesCollectService
     }
 
     @Override
-    public List<FeesCollectDTO> getAllCollectDataByStudentFeesID(Long fid,String role,String email)
-    {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
+    public List<FeesCollectDTO> getAllCollectDataByStudentFeesID(Long fid, String role, String email) {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Fees Status");
         }
 
@@ -187,10 +181,8 @@ public class FeesCollectServiceImpl implements FeesCollectService
     }
 
     @Override
-    public List<FeesCollectDTO> getCollectedFeesByStudentId(String role, String email, Long studentId)
-    {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
+    public List<FeesCollectDTO> getCollectedFeesByStudentId(String role, String email, Long studentId) {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Fees by StudentId");
         }
         List<StudentFeesCollect> studentFeesCollects = feesCollectRepository.findCollectedFeesByStudentId(studentId);
@@ -212,14 +204,12 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
 
     @Override
-    public FeesCollectDTO getCollectedFeesById(String role, String email, Long id)
-    {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
+    public FeesCollectDTO getCollectedFeesById(String role, String email, Long id) {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees by Fees Id");
         }
 
-        StudentFeesCollect collectedFees = feesCollectRepository.findById(id).orElseThrow(()->
+        StudentFeesCollect collectedFees = feesCollectRepository.findById(id).orElseThrow(() ->
                 new RuntimeException("FeesCollected Not Found for this Id"));
 
         return mapToDTO(collectedFees);
@@ -227,8 +217,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
     }
 
     @Override
-    public List<Map<String, Object>> getReportByYear(String role, String email, @Nullable String branchCodeFilter)
-    {
+    public List<Map<String, Object>> getReportByYear(String role, String email, @Nullable String branchCodeFilter) {
         if (!staffService.hasPermission(role, email, "GET")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees by Year");
         }
@@ -370,6 +359,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
         return response;
     }
+
     private List<Map<String, Object>> convertMonthlyResults(List<Object[]> results) {
         List<Map<String, Object>> response = new ArrayList<>();
 
@@ -391,14 +381,12 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
 
     @Override
-    public List<Map<String, Object>> getReportByStandard(String role,String email)
-    {
-        if(!staffService.hasPermission(role,email,"Get"))
-    {
-        throw new RuntimeException("You don't have permission to Get Collected Fees by Standard");
-    }
+    public List<Map<String, Object>> getReportByStandard(String role, String email) {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Collected Fees by Standard");
+        }
 
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         List<Object[]> results = feesCollectRepository.getPaidFeesReportByStandard(branchCode);
         List<Map<String, Object>> response = new ArrayList<>();
@@ -503,6 +491,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
         return revenueMap;
     }
+
     private Map<String, Double> convertBankRevenue(List<Object[]> results) {
         Map<String, Double> revenueMap = new LinkedHashMap<>();
 
@@ -524,8 +513,7 @@ public class FeesCollectServiceImpl implements FeesCollectService
             LocalDate startDate,
             LocalDate endDate,
             int page,
-            int size)
-    {
+            int size) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees History");
         }
@@ -657,6 +645,119 @@ public class FeesCollectServiceImpl implements FeesCollectService
     }
 
 
+    @Override
+    public Map<String, Object> getDailyCollectedFees(String role, String email, LocalDate date) {
+
+        if (date == null) {
+            date = LocalDate.now();
+        }
+
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Collected Fees History");
+        }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        Double totalCollected = feesCollectRepository
+                .getTotalFeesByDateAndBranch(date, branchCode);
+
+        if (totalCollected == null) {
+            totalCollected = 0.0;
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("date", date);
+        response.put("totalCollectedFees", totalCollected);
+
+        return response;
+    }
+
+    @Override
+    public Map<String, Object> getCollectedFeesByFilter(String role, String email, String filter,
+                                                        LocalDate fromDate, LocalDate toDate) {
+
+        // ✅ 1. Permission Check
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("No permission");
+        }
+
+            // ✅ 2. BranchCode
+            String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+            // ✅ 3. Date Range Logic
+            LocalDate startDate;
+            LocalDate endDate = LocalDate.now();
+
+            switch (filter.toLowerCase()) {
+
+                case "today":
+                    startDate = LocalDate.now();
+                    break;
+
+                case "7days":
+                    startDate = LocalDate.now().minusDays(7);
+                    break;
+
+                case "30days":
+                    startDate = LocalDate.now().minusDays(30);
+                    break;
+
+                case "last365days":
+                    startDate = LocalDate.now().minusDays(365);
+                    break;
+
+                case "custom":
+                    if (fromDate == null || toDate == null) {
+                        throw new RuntimeException("Custom filter requires fromDate and toDate");
+                    }
+                    startDate = fromDate;
+                    endDate = toDate;
+                    break;
+
+                default:
+                    throw new RuntimeException("Invalid filter");
+            }
+
+            // ✅ 4. Fetch Data
+            List<StudentFeesCollect> data =
+                    feesCollectRepository.findByBranchAndDateRange(branchCode, startDate, endDate);
+
+            // ✅ 5. Role-based Filtering
+            List<StudentFeesCollect> filteredData = new ArrayList<>();
+
+            for (StudentFeesCollect fee : data) {
+
+                if ("BRANCH".equalsIgnoreCase(role)) {
+                    filteredData.add(fee); // all
+
+                } else if ("DEPARTMENT".equalsIgnoreCase(role)) {
+                    // 👉 if you add department field, filter here
+                    filteredData.add(fee);
+
+                } else if ("STAFF".equalsIgnoreCase(role)) {
+                    if (fee.getCreatedByEmail().equalsIgnoreCase(email)) {
+                        filteredData.add(fee);
+                    }
+                }
+            }
+
+            // ✅ 6. Total Calculation
+            double total = filteredData.stream()
+                    .mapToDouble(StudentFeesCollect::getAmount)
+                    .sum();
+
+            // ✅ 7. Response
+            Map<String, Object> response = new HashMap<>();
+            response.put("filter", filter);
+            response.put("totalCollected", total);
+            response.put("totalRecords", filteredData.size());
+            response.put("data", filteredData);
+
+            return response;
+        }
+
+
+
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {
         FeesCollectDTO dto = new FeesCollectDTO();
         dto.setId(feesCollect.getId());
@@ -703,8 +804,6 @@ public class FeesCollectServiceImpl implements FeesCollectService
 
         return dto;
     }
-
-
 
 
 }

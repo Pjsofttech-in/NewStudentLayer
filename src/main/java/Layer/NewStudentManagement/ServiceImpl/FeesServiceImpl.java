@@ -582,9 +582,9 @@ public class FeesServiceImpl implements FeesService
         dto.setDiscount(fees.getDiscount());
         dto.setGST(fees.getGST());
         dto.setTotalamount(fees.getTotalamount());
-        dto.setExtraFees1(fees.getExtraFees1());
-        dto.setExtraFees2(fees.getExtraFees2());
-        dto.setExtraFees3(fees.getExtraFees3());
+        dto.setOtherFees1(fees.getOtherFees1());
+        dto.setOtherFees2(fees.getOtherFees2());
+        dto.setOtherFees3(fees.getOtherFees3());
 //        dto.setLateFeeCharges(fees.getLateFeeCharges());
         dto.setSfid(fees.getSfid());
         dto.setPaidAmount(fees.getPaidAmount());
@@ -614,6 +614,10 @@ public class FeesServiceImpl implements FeesService
 
         return dto;
     }
+
+
+
+
 
 
 }

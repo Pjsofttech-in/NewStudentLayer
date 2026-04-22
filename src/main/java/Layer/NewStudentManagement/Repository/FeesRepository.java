@@ -84,7 +84,7 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
     FeesRevenueProjection getFeesRevenueByStudentId(@Param("studentId") Long studentId);
 
     @Modifying
-    @Transactional   // ✅ REQUIRED
+    @Transactional
     @Query("UPDATE StudentFees f SET f.rollNo = :rollNo WHERE f.student.id = :studentId")
     int updateRollNoByStudentId(@Param("studentId") Long studentId,
                                 @Param("rollNo") Integer rollNo);
