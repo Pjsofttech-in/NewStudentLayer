@@ -550,8 +550,13 @@ public class AttendanceServiceImpl implements AttendanceService {
         }
 
         LocalDate classStartDate = student.getClassRoom().getCreatedDate();
-        if (classStartDate != null && fromDate.isBefore(classStartDate)) {
-            fromDate = classStartDate;
+
+        if (classStartDate != null) {
+            fromDate = fromDate.isBefore(classStartDate) ? classStartDate : fromDate;
+
+            if (toDate.isBefore(classStartDate)) {
+                toDate = classStartDate;
+            }
         }
 
         List<StudentAttendance> attendances = attendanceRepository.findAttendanceByStudentAndDateRange(
