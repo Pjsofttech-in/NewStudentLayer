@@ -2,7 +2,6 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
-
 import Layer.NewStudentManagement.Mapper.StudentMapper;
 import Layer.NewStudentManagement.Pagination.StudentSpecification;
 import Layer.NewStudentManagement.Repository.*;
@@ -13,8 +12,9 @@ import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
 import io.jsonwebtoken.Claims;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +34,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
+    private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @Autowired
     private StudentRepository studentRepository;
     @Autowired
@@ -55,14 +58,11 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     private DocumentRepository documentRepository;
     @Autowired
-    PasswordEncoder passwordEncoder;
-    @Autowired
     private MediumRepository mediumRepository;
     @Autowired
     private StandardRepository standardRepository;
     @Autowired
     private GraduationTypeRepository graduationTypeRepository;
-
     @Autowired
     private DegreeNameRepository degreeNameRepository;
     @Autowired
@@ -75,8 +75,6 @@ public class StudentServiceImpl implements StudentService {
     private FeesRepository feesRepository;
     @Autowired
     private ClassRoomTeacherSubjectRepository classRoomTeacherSubjectRepository;
-
-    private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
 
     private void checkPermission(String role, String email, String action) {
         if (!staffService.hasPermission(role, email, action)) {
@@ -98,8 +96,7 @@ public class StudentServiceImpl implements StudentService {
             }
 
             branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-        }
-        else {
+        } else {
             checkPermission(role, email, "Post");
             branchCode = staffService.fetchBranchCodeByRole(role, email);
         }
@@ -149,9 +146,7 @@ public class StudentServiceImpl implements StudentService {
 
             student.setDegreeName(null);
             student.setDepartmentName(null);
-        }
-
-        else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
+        } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
                 "Jr.College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
 
             Long standardId = request.getStandardId();
@@ -172,9 +167,7 @@ public class StudentServiceImpl implements StudentService {
 
             student.setDegreeName(null);
             student.setDepartmentName(null);
-        }
-
-        else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
+        } else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
 
             if (request.getDegreeNameId() != null) {
                 StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
@@ -358,7 +351,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Page<StudentResponseDTO> getAllStudent(
-            String role, String email,String staffEmail, StudentFilterDTO filter,
+            String role, String email, String staffEmail, StudentFilterDTO filter,
             String timeFrame, LocalDate customStart, LocalDate customEnd,
             Pageable pageable) {
 
@@ -381,7 +374,7 @@ public class StudentServiceImpl implements StudentService {
 
             for (String branchCode : branchCodes) {
                 Specification<StudentEntity> spec =
-                        StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd,staffEmail);
+                        StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd, staffEmail);
 
                 List<StudentEntity> students = studentRepository.findAll(spec);
                 allStudents.addAll(students);
@@ -402,12 +395,11 @@ public class StudentServiceImpl implements StudentService {
         }
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         Specification<StudentEntity> spec =
-                StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd,staffEmail);
+                StudentSpecification.build(filter, branchCode, timeFrame, customStart, customEnd, staffEmail);
 
         return studentRepository.findAll(spec, pageable)
                 .map(this::mapToDTO);
     }
-
 
 
     public StudentDocumentDTO uploadStudentDocuments(
@@ -416,8 +408,7 @@ public class StudentServiceImpl implements StudentService {
             MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto,
             MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
             MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate,
-            MultipartFile studentSignPhoto,String token)
-    {
+            MultipartFile studentSignPhoto, String token) {
         String branchCode;
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
@@ -428,8 +419,7 @@ public class StudentServiceImpl implements StudentService {
             }
 
             branchCode = new String(Base64.getUrlDecoder().decode(encoded), StandardCharsets.UTF_8);
-        }
-        else {
+        } else {
             checkPermission(role, email, "Post");
             branchCode = staffService.fetchBranchCodeByRole(role, email);
         }
@@ -493,7 +483,7 @@ public class StudentServiceImpl implements StudentService {
 
         //  Medium
         String medium = filterDTO.getMedium().trim();
-        List<Long> mediumIds = mediumRepository.findIdsByName(medium,branchCode);
+        List<Long> mediumIds = mediumRepository.findIdsByName(medium, branchCode);
         if (mediumIds.size() != 1) throw new RuntimeException("Invalid or duplicate medium");
         Long mediumId = mediumIds.get(0);
 
@@ -503,7 +493,7 @@ public class StudentServiceImpl implements StudentService {
             }
 
             String standard = filterDTO.getStandard().trim();
-            List<Long> standardIds = standardRepository.findIdsByName(standard,branchCode);
+            List<Long> standardIds = standardRepository.findIdsByName(standard, branchCode);
             if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
             Long standardId = standardIds.get(0);
 
@@ -536,9 +526,9 @@ public class StudentServiceImpl implements StudentService {
                 //  Department
                 String department = filterDTO.getDepartmentName().trim();
 
-               // Final UG/PG student search
+                // Final UG/PG student search
                 studentPage = studentRepository.findUnassignedUGPGStudents(
-                        mediumId, streamId, degreeNameId, department,filterDTO.getAcademicYear(), pageable);
+                        mediumId, streamId, degreeNameId, department, filterDTO.getAcademicYear(), pageable);
 
             } else {
                 // Jr. College
@@ -547,7 +537,7 @@ public class StudentServiceImpl implements StudentService {
                 }
 
                 String standard = filterDTO.getStandard().trim();
-                List<Long> standardIds = standardRepository.findIdsByName(standard,branchCode);
+                List<Long> standardIds = standardRepository.findIdsByName(standard, branchCode);
                 if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
                 Long standardId = standardIds.get(0);
 
@@ -579,7 +569,6 @@ public class StudentServiceImpl implements StudentService {
 
         return studentMapper.toStudentDTO(student); // or manually map to StudentDTO
     }
-
 
 
     private void updateStudentFields(StudentEntity existing, StudentEntity incoming) {
@@ -845,28 +834,23 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email,Long classRoomId)
-    {
-        checkPermission(role,email,"Get");
+    public List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email, Long classRoomId) {
+        checkPermission(role, email, "Get");
         List<StudentEntity> students = studentRepository.findByClassRoomId(classRoomId);
         return students.stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
     @Override
-    public void updateStatus(String role, String email, Long studentId, String status,String reason)
-    {
-        checkPermission(role,email,"Put");
+    public void updateStatus(String role, String email, Long studentId, String status, String reason) {
+        checkPermission(role, email, "Put");
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
         student.setStatus(status);
-        if ("Approved".equalsIgnoreCase(status))
-        {
+        if ("Approved".equalsIgnoreCase(status)) {
             student.setApprovalDate(LocalDate.now());
             student.setApplicationNumber(generateApplicationNumber());
-        }
-        else
-        {
+        } else {
             student.setReason(reason);
         }
 
@@ -917,10 +901,10 @@ public class StudentServiceImpl implements StudentService {
 
         educationRepo.deleteById(educationId);
     }
+
     @Override
-    public void updateFormStatus(String role, String email, Long studentId)
-    {
-        checkPermission(role,email,"Put");
+    public void updateFormStatus(String role, String email, Long studentId) {
+        checkPermission(role, email, "Put");
         StudentEntity student = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
@@ -1134,7 +1118,7 @@ public class StudentServiceImpl implements StudentService {
 
             GenderCountResponse resp = studentRepository.getGenderCountByFilters(
                     branchCodeToUse, institutionType, graduationTypeId, streamId,
-                    degreeNameId, departmentName,standardId, mediumId, groupName, academicYear);
+                    degreeNameId, departmentName, standardId, mediumId, groupName, academicYear);
 
             if (resp != null) {
                 aggregatedResponse = new GenderCountResponse(
@@ -1205,6 +1189,12 @@ public class StudentServiceImpl implements StudentService {
         return dto;
     }
 
+    public List<ClassRoomStudentCountProjection> getStudentCountByStandard(String role, String email, String academicYear, String mediumName) {
+        checkPermission(role, email, "Get");
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        return studentRepository.getRawStudentCountByStandard(branchCode, academicYear, mediumName);
+    }
 
     @Override
     public List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
@@ -1234,19 +1224,50 @@ public class StudentServiceImpl implements StudentService {
 
             // Collect data for each branchCode and merge results
             for (String branchCode : branchCodes) {
-                List<ClassRoomStudentCountProjection> tempList =
-                        studentRepository.getStudentCountByClassRoomWithFilters(
-                                branchCode,
-                                graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
-                                standardName != null && !standardName.trim().isEmpty() ? standardName : null,
-                                mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
-                                streamName != null && !streamName.trim().isEmpty() ? streamName : null,
-                                degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
-                                departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
-                                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
-                                academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
-                        );
-
+                List<ClassRoomStudentCountProjection> tempList = new ArrayList<>();
+                if (StringUtils.isNotBlank(departmentName) && StringUtils.isNotBlank(degreeName) && StringUtils.isNotBlank(graduationType)) {
+                    tempList = studentRepository.getStudentCountByClassRoomWithFilters(
+                            branchCode,
+                            graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
+                            standardName != null && !standardName.trim().isEmpty() ? standardName : null,
+                            mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
+                            streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                            degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                            departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
+                            institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                            academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
+                    );
+                } else if (StringUtils.isBlank(departmentName)) {
+                    tempList = studentRepository.getStudentCountByClassRoomWithFiltersWithoutDepartment(
+                            branchCode,
+                            graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
+                            standardName != null && !standardName.trim().isEmpty() ? standardName : null,
+                            mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
+                            streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                            degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                            institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                            academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
+                    );
+                } else if (StringUtils.isBlank(degreeName)) {
+                    tempList = studentRepository.getStudentCountByClassRoomWithFiltersWithoutDepartmentDegree(
+                            branchCode,
+                            graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
+                            standardName != null && !standardName.trim().isEmpty() ? standardName : null,
+                            mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
+                            streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                            institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                            academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
+                    );
+                } else if (StringUtils.isBlank(graduationType)) {
+                    tempList = studentRepository.getStudentCountByClassRoomWithFiltersWithoutDepartmentDegreeGraduationType(
+                            branchCode,
+                            standardName != null && !standardName.trim().isEmpty() ? standardName : null,
+                            mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
+                            streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                            institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                            academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
+                    );
+                }
                 resultList.addAll(tempList);
             }
 
@@ -1259,25 +1280,37 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("Branch code not found for the given role and email");
         }
 
-        return studentRepository.getStudentCountByClassRoomWithFilters(
-                branchCode,
-                graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
-                standardName != null && !standardName.trim().isEmpty() ? standardName : null,
-                mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
-                streamName != null && !streamName.trim().isEmpty() ? streamName : null,
-                degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
-                departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
-                institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
-                academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
-        );
+        if (StringUtils.isNotBlank(departmentName)) {
+            return studentRepository.getStudentCountByClassRoomWithFilters(
+                    branchCode,
+                    graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
+                    standardName != null && !standardName.trim().isEmpty() ? standardName : null,
+                    mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
+                    streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                    degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                    departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
+                    institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                    academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
+            );
+        } else {
+            return studentRepository.getStudentCountByClassRoomWithFiltersWithoutDepartment(
+                    branchCode,
+                    graduationType != null && !graduationType.trim().isEmpty() ? graduationType : null,
+                    standardName != null && !standardName.trim().isEmpty() ? standardName : null,
+                    mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
+                    streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                    degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                    institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
+                    academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
+            );
+        }
     }
 
 
     @Override
     public StudentPageResponseDTO getStudentsByBranchCode(String role, String email,
-            StudentFilterDTO filter, String timeFrame, LocalDate customStart,
-            LocalDate customEnd, Pageable pageable)
-    {
+                                                          StudentFilterDTO filter, String timeFrame, LocalDate customStart,
+                                                          LocalDate customEnd, Pageable pageable) {
 
         // ✅ Get branch code
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
@@ -1318,7 +1351,6 @@ public class StudentServiceImpl implements StudentService {
                 pending
         );
     }
-
 
 
     @Override
@@ -1371,9 +1403,9 @@ public class StudentServiceImpl implements StudentService {
                 academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
         );
     }
+
     @Override
-    public List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email, @Nullable String academicYear)
-    {
+    public List<StudentCountByGenderDTO> getStudentCountByGenderAndAllStandards(String role, String email, @Nullable String academicYear) {
         checkPermission(role, email, "Get");
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
@@ -1581,28 +1613,26 @@ public class StudentServiceImpl implements StudentService {
 
 
     @Override
-    public  List<UpcomingBirthdayProjection> getUpcomingBirthdays(String role, String email)
-    {
-        checkPermission(role,email,"GET");
+    public List<UpcomingBirthdayProjection> getUpcomingBirthdays(String role, String email) {
+        checkPermission(role, email, "GET");
 
-            if (email == null || email.isBlank()) {
-                throw new IllegalArgumentException("Teacher email cannot be empty");
-            }
-
-            return studentRepository.getUpcomingBirthdays(email);
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Teacher email cannot be empty");
         }
 
+        return studentRepository.getUpcomingBirthdays(email);
+    }
+
     @Override
-    public List<Map<String, Object>> getStaffInfo(String role, String email,String deptEmail) {
+    public List<Map<String, Object>> getStaffInfo(String role, String email, String deptEmail) {
 
         checkPermission(role, email, "GET");
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        if(deptEmail != null  && !deptEmail.isEmpty())
-        {
-            branchCode =null;
-            return staffService.getStaffNamesAndEmails(branchCode,deptEmail);
+        if (deptEmail != null && !deptEmail.isEmpty()) {
+            branchCode = null;
+            return staffService.getStaffNamesAndEmails(branchCode, deptEmail);
         }
-        return staffService.getStaffNamesAndEmails(branchCode,deptEmail);
+        return staffService.getStaffNamesAndEmails(branchCode, deptEmail);
 
     }
 }

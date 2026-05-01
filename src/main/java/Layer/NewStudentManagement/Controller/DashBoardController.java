@@ -2,21 +2,22 @@ package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Service.*;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+
 //@CrossOrigin(origins = "http://localhost:3000")
 //@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
-public class DashBoardController
-{
+public class DashBoardController {
     @Autowired
     StudentService studentService;
 
@@ -53,8 +54,8 @@ public class DashBoardController
             @RequestParam(required = false) String academicYear,
             @RequestParam(required = false) String branchCode) {
 
-        Map<String, Long> result = studentService.getApplicationCount(role, email, filter, startDate, endDate,institutionType,standardId,mediumId,
-                graduationTypeId, streamId, groupName,degreeNameId, departmentName, academicYear, branchCode);
+        Map<String, Long> result = studentService.getApplicationCount(role, email, filter, startDate, endDate, institutionType, standardId, mediumId,
+                graduationTypeId, streamId, groupName, degreeNameId, departmentName, academicYear, branchCode);
         return ResponseEntity.ok(result);
     }
 
@@ -74,8 +75,8 @@ public class DashBoardController
             @RequestParam(required = false) String academicYear,
             @RequestParam(required = false) String branchCode) {
 
-        return studentService.getGenderCount(role,email, institutionType,standardId,mediumId,
-                graduationTypeId, streamId, groupName,degreeNameId, departmentName, academicYear,branchCode);
+        return studentService.getGenderCount(role, email, institutionType, standardId, mediumId,
+                graduationTypeId, streamId, groupName, degreeNameId, departmentName, academicYear, branchCode);
     }
 
 
@@ -93,11 +94,14 @@ public class DashBoardController
             @RequestParam(required = false) String academicYear,
             @RequestParam(required = false) String branchCode) {
 
-        return studentService.getStudentCountByClassRoom(
-                role, email, graduationType, standardName, mediumName, streamName,
-                degreeName, departmentName, institutionType, academicYear, branchCode);
+        if (StringUtils.isNotBlank(institutionType) && "School".equalsIgnoreCase(institutionType)) {
+            return studentService.getStudentCountByStandard(role, email, academicYear, mediumName);
+        } else {
+            return studentService.getStudentCountByClassRoom(
+                    role, email, graduationType, standardName, mediumName, streamName,
+                    degreeName, departmentName, institutionType, academicYear, branchCode);
+        }
     }
-
 
 
     @GetMapping("/getAttendaceCountByStudentId")
@@ -114,13 +118,13 @@ public class DashBoardController
 
     @GetMapping("/getCollectedFeesByYear")
     public List<Map<String, Object>> getReportByYear(@RequestParam String role, @RequestParam String email, @RequestParam(required = false) String branchCode) {
-        return feesCollectService.getReportByYear(role, email,branchCode);
+        return feesCollectService.getReportByYear(role, email, branchCode);
     }
 
     @GetMapping("/getCollectedFeesByMonth")
     public List<Map<String, Object>> getReportByMonth(@RequestParam String role, @RequestParam String email,
-                                                      @RequestParam int year,@RequestParam(required = false) String branchCode) {
-        return feesCollectService.getReportByMonth(role,email,year,branchCode);
+                                                      @RequestParam int year, @RequestParam(required = false) String branchCode) {
+        return feesCollectService.getReportByMonth(role, email, year, branchCode);
     }
 
     @GetMapping("/getCollectedFeesByStandard")
@@ -136,7 +140,7 @@ public class DashBoardController
             @RequestParam(required = false) Integer year,
             @RequestParam String institutionType) {
 
-        return feesCollectService.getCollectedFeesByPaymentMode(role, email, branchCode, institutionType,year);
+        return feesCollectService.getCollectedFeesByPaymentMode(role, email, branchCode, institutionType, year);
     }
 
     @GetMapping("/getStudentCountByCastCategory")
@@ -147,7 +151,7 @@ public class DashBoardController
             @RequestParam(required = false) String branchCode,
             @RequestParam(required = false) String academicYear) {
 
-        return studentService.getStudentCountByCastCategory(role, email, institutionType, branchCode,academicYear);
+        return studentService.getStudentCountByCastCategory(role, email, institutionType, branchCode, academicYear);
     }
 
     @GetMapping("/getCountByGenderAllStandards")
@@ -155,7 +159,7 @@ public class DashBoardController
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam(required = false) String academicYear) {
-        return studentService.getStudentCountByGenderAndAllStandards(role, email,academicYear);
+        return studentService.getStudentCountByGenderAndAllStandards(role, email, academicYear);
     }
 
     @GetMapping("/getFeesRevenueByBank")
@@ -164,14 +168,14 @@ public class DashBoardController
             @RequestParam String email,
             @RequestParam(required = false) String branchCode) {
 
-        Map<String, Double> response = feesCollectService.getFeesRevenueByBank(role, email,branchCode);
+        Map<String, Double> response = feesCollectService.getFeesRevenueByBank(role, email, branchCode);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/revenueByStudent")
     public FeesRevenueProjection getFeesRevenueByStudent(@RequestParam String role,
-                                                          @RequestParam String email,
-                                                          @RequestParam Long studentId) {
+                                                         @RequestParam String email,
+                                                         @RequestParam Long studentId) {
         return feesService.getFeesRevenueByStudentId(role, email, studentId);
     }
 
@@ -185,9 +189,9 @@ public class DashBoardController
 
     @GetMapping("/getFeesRevenewByMonth")
     public Map<String, Object> getMonthlyFees(@RequestParam String role,
-                                              @RequestParam String email,@RequestParam String month,
+                                              @RequestParam String email, @RequestParam String month,
                                               @RequestParam(required = false) String branchCode) {
-        return feesService.getMonthlyFeesStatus(role, email, month,branchCode);
+        return feesService.getMonthlyFeesStatus(role, email, month, branchCode);
     }
 
     @GetMapping("/getPassFailCount")
@@ -197,12 +201,11 @@ public class DashBoardController
             @RequestParam Long examId,
             @RequestParam Long classroomId
     ) {
-        return teacherService.getPassFailCount(role,email,examId, classroomId);
+        return teacherService.getPassFailCount(role, email, examId, classroomId);
     }
 
     @GetMapping("/getUpcommingBirthday")
-    public ResponseEntity<?> getUpcomingBirthdays(@RequestParam String role, @RequestParam String email)
-    {
+    public ResponseEntity<?> getUpcomingBirthdays(@RequestParam String role, @RequestParam String email) {
         List<UpcomingBirthdayProjection> list =
                 studentService.getUpcomingBirthdays(role, email);
 
@@ -246,7 +249,6 @@ public class DashBoardController
                 feesCollectService.getCollectedFeesByFilter(role, email, filter, fromDate, toDate)
         );
     }
-
 
 
 }

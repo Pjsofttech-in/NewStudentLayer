@@ -3,7 +3,12 @@ package Layer.NewStudentManagement.DTO;
 
 public interface ClassRoomStudentCountProjection
 {
-    Long getClassRoomId();
+    String getMediumName();
+    String getStream();
+    String getDegree();
+    String getAcademicYear();
     Long getStudentCount();
     String getDivision();
+    String getDepartmentName();
+    String getStandardName();
 }

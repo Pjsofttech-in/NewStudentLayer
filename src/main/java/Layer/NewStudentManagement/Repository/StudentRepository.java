@@ -1,6 +1,8 @@
 package Layer.NewStudentManagement.Repository;
 
-import Layer.NewStudentManagement.DTO.*;
+import Layer.NewStudentManagement.DTO.ClassRoomStudentCountProjection;
+import Layer.NewStudentManagement.DTO.GenderCountResponse;
+import Layer.NewStudentManagement.DTO.UpcomingBirthdayProjection;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,17 +10,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Repository
-public interface StudentRepository extends JpaRepository<StudentEntity,Long>, JpaSpecificationExecutor<StudentEntity>
-{
+public interface StudentRepository extends JpaRepository<StudentEntity, Long>, JpaSpecificationExecutor<StudentEntity> {
 
     @Query("SELECT s FROM StudentEntity s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentEntity> findAllByBranchCode(@Param("branchCode") String branchCode);
@@ -101,12 +100,11 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "s.status = 'Approved' AND " +
             "s.classRoom IS NULL")
     Page<StudentEntity> findUnassignedUGPGStudents(@Param("mediumId") Long mediumId,
-                                 @Param("streamId") Long streamId,
-                                 @Param("degreeNameId") Long degreeNameId,
-                                 @Param("departmentName") String departmentName,
-                                 @Param("academicYear") String academicYear,
-                                 Pageable pageable);
-
+                                                   @Param("streamId") Long streamId,
+                                                   @Param("degreeNameId") Long degreeNameId,
+                                                   @Param("departmentName") String departmentName,
+                                                   @Param("academicYear") String academicYear,
+                                                   Pageable pageable);
 
 
     @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.status = :status AND s.enrollmentDate BETWEEN :startDate AND :endDate")
@@ -119,6 +117,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
                                @Param("endDate") LocalDate endDate);
 
     boolean existsByRegistrationNumber(String registrationNumber);
+
     boolean existsByApplicationNumber(String applicationNumber);
 
     @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.classRoom.id = :classroomId")
@@ -148,7 +147,8 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             "AND (:standardId IS NULL OR s.standard.id = :standardId) " +
             "AND (:mediumId IS NULL OR s.medium.id = :mediumId) " +
             "AND (:groupName IS NULL OR s.groupName = :groupName) " +
-            "AND (:academicYear IS NULL OR s.academicYear = :academicYear)") // academicYear filter added
+            "AND (:academicYear IS NULL OR s.academicYear = :academicYear)")
+        // academicYear filter added
     GenderCountResponse getGenderCountByFilters(
             @Param("branchCode") String branchCode,
             @Param("institutionType") String institutionType,
@@ -163,26 +163,30 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
     );
 
     @Query("""
-    SELECT c.id AS classRoomId,
-           c.division.division AS division,
-           COUNT(s.id) AS studentCount
-    FROM StudentEntity s
-    JOIN s.classRoom c
-    LEFT JOIN s.graduationType g
-    LEFT JOIN s.medium m
-    LEFT JOIN s.stream st
-    LEFT JOIN s.degreeName d
-    WHERE s.branchCode = :branchCode
-      AND (:graduationType IS NULL OR g.graduationType = :graduationType)
-      AND (:standardName IS NULL OR s.standardName = :standardName)
-      AND (:mediumName IS NULL OR m.mediumName = :mediumName)
-      AND (:streamName IS NULL OR st.stream = :streamName)
-      AND (:degreeName IS NULL OR d.degreeName = :degreeName)
-      AND (:departmentName IS NULL OR s.departmentName = :departmentName)
-      AND (:institutionType IS NULL OR c.institutionType = :institutionType)
-      AND (:academicYear IS NULL OR s.academicYear = :academicYear)
-    GROUP BY c.id, c.division.division
-""")
+                SELECT c.division.division AS division,
+                       m.mediumName AS mediumName,
+                       st.stream AS stream,
+                       d.degreeName AS degree,
+                       s.academicYear AS academicYear,
+                       s.departmentName AS departmentName,
+                       COUNT(s.id) AS studentCount
+                FROM StudentEntity s
+                JOIN s.classRoom c
+                LEFT JOIN s.graduationType g
+                LEFT JOIN s.medium m
+                LEFT JOIN s.stream st
+                LEFT JOIN s.degreeName d
+                WHERE s.branchCode = :branchCode
+                  AND (:graduationType IS NULL OR g.graduationType = :graduationType)
+                  AND (:standardName IS NULL OR s.standardName = :standardName)
+                  AND (:mediumName IS NULL OR m.mediumName = :mediumName)
+                  AND (:streamName IS NULL OR st.stream = :streamName)
+                  AND (:degreeName IS NULL OR d.degreeName = :degreeName)
+                  AND (:departmentName IS NULL OR s.departmentName = :departmentName)
+                  AND (:institutionType IS NULL OR c.institutionType = :institutionType)
+                  AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+                GROUP BY m.mediumName, st.stream, d.degreeName, s.academicYear, c.division.division, s.departmentName
+            """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFilters(
             @Param("branchCode") String branchCode,
             @Param("graduationType") String graduationType,
@@ -195,50 +199,152 @@ public interface StudentRepository extends JpaRepository<StudentEntity,Long>, Jp
             @Param("academicYear") String academicYear
     );
 
+    @Query("""
+                SELECT c.division.division AS division,
+                       m.mediumName AS mediumName,
+                       st.stream AS stream,
+                       d.degreeName AS degree,
+                       s.academicYear AS academicYear,
+                       COUNT(s.id) AS studentCount
+                FROM StudentEntity s
+                JOIN s.classRoom c
+                LEFT JOIN s.graduationType g
+                LEFT JOIN s.medium m
+                LEFT JOIN s.stream st
+                LEFT JOIN s.degreeName d
+                WHERE s.branchCode = :branchCode
+                  AND (:graduationType IS NULL OR g.graduationType = :graduationType)
+                  AND (:standardName IS NULL OR s.standardName = :standardName)
+                  AND (:mediumName IS NULL OR m.mediumName = :mediumName)
+                  AND (:streamName IS NULL OR st.stream = :streamName)
+                  AND (:degreeName IS NULL OR d.degreeName = :degreeName)
+                  AND (:institutionType IS NULL OR c.institutionType = :institutionType)
+                  AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+                GROUP BY m.mediumName, st.stream, d.degreeName, s.academicYear, c.division.division
+            """)
+    List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartment(
+            @Param("branchCode") String branchCode,
+            @Param("graduationType") String graduationType,
+            @Param("standardName") String standardName,
+            @Param("mediumName") String mediumName,
+            @Param("streamName") String streamName,
+            @Param("degreeName") String degreeName,
+            @Param("institutionType") String institutionType,
+            @Param("academicYear") String academicYear
+    );
+
+    @Query("""
+                SELECT c.division.division AS division,
+                       m.mediumName AS mediumName,
+                       st.stream AS stream,
+                       s.academicYear AS academicYear,
+                       COUNT(s.id) AS studentCount
+                FROM StudentEntity s
+                JOIN s.classRoom c
+                LEFT JOIN s.graduationType g
+                LEFT JOIN s.medium m
+                LEFT JOIN s.stream st
+                WHERE s.branchCode = :branchCode
+                  AND (:graduationType IS NULL OR g.graduationType = :graduationType)
+                  AND (:standardName IS NULL OR s.standardName = :standardName)
+                  AND (:mediumName IS NULL OR m.mediumName = :mediumName)
+                  AND (:streamName IS NULL OR st.stream = :streamName)
+                  AND (:institutionType IS NULL OR c.institutionType = :institutionType)
+                  AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+                GROUP BY m.mediumName, st.stream, s.academicYear, c.division.division
+            """)
+    List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartmentDegree(
+            @Param("branchCode") String branchCode,
+            @Param("graduationType") String graduationType,
+            @Param("standardName") String standardName,
+            @Param("mediumName") String mediumName,
+            @Param("streamName") String streamName,
+            @Param("institutionType") String institutionType,
+            @Param("academicYear") String academicYear
+    );
+
+    @Query("""
+                SELECT c.division.division AS division,
+                       m.mediumName AS mediumName,
+                       st.stream AS stream,
+                       s.academicYear AS academicYear,
+                       COUNT(s.id) AS studentCount
+                FROM StudentEntity s
+                JOIN s.classRoom c
+                LEFT JOIN s.medium m
+                LEFT JOIN s.stream st
+                WHERE s.branchCode = :branchCode
+                  AND (:standardName IS NULL OR s.standardName = :standardName)
+                  AND (:mediumName IS NULL OR m.mediumName = :mediumName)
+                  AND (:streamName IS NULL OR st.stream = :streamName)
+                  AND (:institutionType IS NULL OR c.institutionType = :institutionType)
+                  AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+                GROUP BY m.mediumName, st.stream, s.academicYear, c.division.division
+            """)
+    List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartmentDegreeGraduationType(
+            @Param("branchCode") String branchCode,
+            @Param("standardName") String standardName,
+            @Param("mediumName") String mediumName,
+            @Param("streamName") String streamName,
+            @Param("institutionType") String institutionType,
+            @Param("academicYear") String academicYear
+    );
+
     @Query("SELECT s FROM StudentEntity s WHERE s.id = :studentId")
     Optional<StudentEntity> findByStudentId(@Param("studentId") Long studentId);
+
+    @Query("SELECT s.standard.standardName AS standardName, COUNT(s) AS studentCount " +
+            "FROM StudentEntity s " +
+            "LEFT JOIN s.medium m " +
+            "WHERE s.branchCode = :branchCode " +
+            "AND (:academicYear IS NULL OR s.academicYear = :academicYear) " +
+            "AND (:mediumName IS NULL OR m.mediumName = :mediumName) " +
+            "GROUP BY s.standard.standardName")
+    List<ClassRoomStudentCountProjection> getRawStudentCountByStandard(@Param("branchCode") String branchCode,
+                                                                       @Param("academicYear") String academicYear,
+                                                                       @Param("mediumName") String mediumName);
 
     @Query("SELECT s.standard.standardName, s.gender, COUNT(s) " +
             "FROM StudentEntity s " +
             "WHERE s.branchCode = :branchCode " +
-            "AND (:academicYear IS NULL OR s.academicYear = :academicYear)"+
+            "AND (:academicYear IS NULL OR s.academicYear = :academicYear)" +
             "GROUP BY s.standard.standardName, s.gender")
     List<Object[]> getRawStudentCountByGenderAndStandard(@Param("branchCode") String branchCode,
                                                          @Param("academicYear") String academicYear);
 
     @Query(value = """
-    SELECT DISTINCT
-        s.id AS id,
-        s.full_name AS fullName,
-        s.gender AS gender,
-        CAST(s.date_of_birth AS CHAR) AS dateOfBirth,
-        s.roll_no AS rollNo,
-        s.stream_name AS streamName,
-        s.medium_name AS mediumName,
-        s.group_name AS groupName,
-        s.semister AS semister,
-        s.institution_type AS institutionType,
-        s.classroom_id AS classId,
-        d.division AS division,
-        st.standard_name AS standard,
-        gt.graduation_type AS graduationType      -- CORRECT COLUMN NAME
-    FROM student_entity s
-    JOIN student_class_room c ON c.id = s.classroom_id
-    JOIN student_division d ON d.did = c.division_id
-    JOIN student_class_room_teacher_subject ts ON ts.classroom_id = c.id
-    JOIN student_teacher t ON t.id = ts.teacher_id
-
-    LEFT JOIN student_standard st 
-        ON st.sid = s.standard_id     -- verify your standard table uses sid
-
-    LEFT JOIN student_graduation_type gt 
-        ON gt.id = s.graduation_type_id
-
-    WHERE t.teacher_email = :teacherEmail
-      AND DATE_FORMAT(s.date_of_birth, '%m-%d')
-          BETWEEN DATE_FORMAT(CURDATE(), '%m-%d')
-              AND DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 30 DAY), '%m-%d')
-""", nativeQuery = true)
+                SELECT DISTINCT
+                    s.id AS id,
+                    s.full_name AS fullName,
+                    s.gender AS gender,
+                    CAST(s.date_of_birth AS CHAR) AS dateOfBirth,
+                    s.roll_no AS rollNo,
+                    s.stream_name AS streamName,
+                    s.medium_name AS mediumName,
+                    s.group_name AS groupName,
+                    s.semister AS semister,
+                    s.institution_type AS institutionType,
+                    s.classroom_id AS classId,
+                    d.division AS division,
+                    st.standard_name AS standard,
+                    gt.graduation_type AS graduationType      -- CORRECT COLUMN NAME
+                FROM student_entity s
+                JOIN student_class_room c ON c.id = s.classroom_id
+                JOIN student_division d ON d.did = c.division_id
+                JOIN student_class_room_teacher_subject ts ON ts.classroom_id = c.id
+                JOIN student_teacher t ON t.id = ts.teacher_id
+            
+                LEFT JOIN student_standard st 
+                    ON st.sid = s.standard_id     -- verify your standard table uses sid
+            
+                LEFT JOIN student_graduation_type gt 
+                    ON gt.id = s.graduation_type_id
+            
+                WHERE t.teacher_email = :teacherEmail
+                  AND DATE_FORMAT(s.date_of_birth, '%m-%d')
+                      BETWEEN DATE_FORMAT(CURDATE(), '%m-%d')
+                          AND DATE_FORMAT(DATE_ADD(CURDATE(), INTERVAL 30 DAY), '%m-%d')
+            """, nativeQuery = true)
     List<UpcomingBirthdayProjection> getUpcomingBirthdays(@Param("teacherEmail") String teacherEmail);
 
 
