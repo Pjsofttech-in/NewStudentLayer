@@ -2,7 +2,6 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
-
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ClassRoomService;
 import Layer.NewStudentManagement.Service.S3Service;
@@ -10,16 +9,13 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class ClassRoomServiceImpl implements ClassRoomService
-{
+public class ClassRoomServiceImpl implements ClassRoomService {
     @Autowired
     ClassRoomRepository classRoomRepository;
 
@@ -111,9 +107,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 throw new RuntimeException("Standard is required for School ClassRoom");
 
             standardId = dto.getStandardId();
-        }
-
-        else if ("College".equalsIgnoreCase(institutionType)) {
+        } else if ("College".equalsIgnoreCase(institutionType)) {
 
             if (dto.getGraduationTypeId() == null)
                 throw new RuntimeException("GraduationType is required for College ClassRoom");
@@ -185,9 +179,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
             StudentStandard standard = standardRepository.findById(dto.getStandardId())
                     .orElseThrow(() -> new RuntimeException("Standard not found"));
             classRoom.setStandard(standard);
-        }
-
-        else if ("College".equalsIgnoreCase(institutionType)) {
+        } else if ("College".equalsIgnoreCase(institutionType)) {
 
             StudentGraduationType graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
                     .orElseThrow(() -> new RuntimeException("GraduationType not found"));
@@ -205,9 +197,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
                 classRoom.setStream(stream);
 
                 classRoom.setGroupName(dto.getGroupName());
-            }
-
-            else {
+            } else {
 
                 StudentStream stream = streamRepository.findById(dto.getStreamId())
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
@@ -374,25 +364,21 @@ public class ClassRoomServiceImpl implements ClassRoomService
     }
 
     @Override
-    public StudentClassRoomResponseDTO getClassRoomById(Long id, String role, String email)
-    {
-        if (!staffService.hasPermission(role,email,"Get"))
-        {
+    public StudentClassRoomResponseDTO getClassRoomById(Long id, String role, String email) {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get ClassRoom");
         }
 
         StudentClassRoom classRooms = classRoomRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("ClassRoom not found"));
+                .orElseThrow(() -> new RuntimeException("ClassRoom not found"));
 
         return mapToResponseDTO(classRooms);
 
     }
 
     @Override
-    public void deleteClassRoomById(Long id, String role, String email)
-    {
-        if (!staffService.hasPermission(role,email,"Delete"))
-        {
+    public void deleteClassRoomById(Long id, String role, String email) {
+        if (!staffService.hasPermission(role, email, "Delete")) {
             throw new RuntimeException("You don't have permission to Delete ClassRoom");
         }
         boolean studentExists = studentRepository.existsByClassRoomId(id);
@@ -404,14 +390,12 @@ public class ClassRoomServiceImpl implements ClassRoomService
     }
 
     @Override
-    public List<StudentClassRoomResponseDTO> getAllClassRoom(String role, String email)
-    {
-        if(!staffService.hasPermission(role,email,"Get"))
-        {
+    public List<StudentClassRoomResponseDTO> getAllClassRoom(String role, String email) {
+        if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Fetch ClassRoom");
         }
 
-        String branchCode = staffService.fetchBranchCodeByRole(role,email);
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
         List<StudentClassRoom> classRooms = classRoomRepository.getAllByBranchCode(branchCode);
         return classRooms.stream()
                 .map(this::mapToResponseDTO)
@@ -587,8 +571,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
 
 
     @Override
-    public List<StudentClassRoomResponseDTO> getClassroomDTOsByTeacherId(Long teacherId,String role, String email)
-    {
+    public List<StudentClassRoomResponseDTO> getClassroomDTOsByTeacherId(Long teacherId, String role, String email) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Assign Student To ClassRoom");
         }
@@ -643,8 +626,7 @@ public class ClassRoomServiceImpl implements ClassRoomService
     }
 
     @Override
-    public List<TeacherWithSubjectsDTO> getTeachersWithSubjectsByClassroom(String role, String email,Long classroomId)
-    {
+    public List<TeacherWithSubjectsDTO> getTeachersWithSubjectsByClassroom(String role, String email, Long classroomId) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Teacher and Subject by ClassRoom");
         }
@@ -659,6 +641,14 @@ public class ClassRoomServiceImpl implements ClassRoomService
             dto.setSubjects(a.getSubjects().stream().map(s -> s.getSubject()).toList());
             return dto;
         }).toList();
+    }
+
+    @Override
+    public List<SubjectByClassroomProjection> getAllSubjectsByClassroom(String role, String email, Long classroomId) {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Subject by ClassRoom");
+        }
+        return classRoomTeacherSubjectRepository.getAllSubjectsAssignedToClassroom(classroomId);
     }
 
 

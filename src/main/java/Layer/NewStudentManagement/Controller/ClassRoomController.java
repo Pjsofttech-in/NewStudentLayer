@@ -1,8 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.*;
-import Layer.NewStudentManagement.Entity.StudentClassRoom;
-import Layer.NewStudentManagement.Entity.StudentClassRoomTeacherSubject;
 import Layer.NewStudentManagement.Service.ClassRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -105,5 +103,12 @@ public class ClassRoomController
                                                                 @RequestParam String email,
                                                                 @RequestParam Long classroomId) {
         return classRoomService.getTeachersWithSubjectsByClassroom(role, email, classroomId);
+    }
+
+    @GetMapping("/getAllSubjectsByClassRoom")
+    public List<SubjectByClassroomProjection> getAllSubjectsByClassRoom(@RequestParam String role,
+                                                                        @RequestParam String email,
+                                                                        @RequestParam Long classroomId) {
+        return classRoomService.getAllSubjectsByClassroom(role, email, classroomId);
     }
 }

@@ -1,8 +1,6 @@
 package Layer.NewStudentManagement.Service;
 
 import Layer.NewStudentManagement.DTO.*;
-import Layer.NewStudentManagement.Entity.StudentClassRoom;
-import Layer.NewStudentManagement.Entity.StudentClassRoomTeacherSubject;
 
 import java.util.List;
 import java.util.Map;
@@ -21,4 +19,5 @@ public interface ClassRoomService
     List<StudentClassRoomResponseDTO> getClassRoomsByFilter(ClassRoomFilterRequest filter);
     void removeStudentsFromClassroom(String role, String email, Long classroomId, List<Long> studentIds);
     List<TeacherWithSubjectsDTO> getTeachersWithSubjectsByClassroom(String role, String email, Long classroomId);
+    List<SubjectByClassroomProjection> getAllSubjectsByClassroom(String role, String email, Long classroomId);
 }
