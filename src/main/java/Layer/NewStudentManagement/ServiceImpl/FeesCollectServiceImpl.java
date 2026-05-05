@@ -651,6 +651,19 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             dto.setPaymentHistory(collectionHistory);
             dto.setCreatedByEmail(sf.getCreatedByEmail());
 
+            if (StringUtils.isNotBlank(sf.getCreatedByEmail())) {
+                try {
+                    CreatedByResponseDTO creator =
+                            staffService.getCreatorByEmail(sf.getCreatedByEmail()).block();
+
+                    if (creator != null) {
+                        dto.setCreatedByName(creator.getName());
+                    }
+                } catch (Exception ex) {
+                    dto.setCreatedByName(null);
+                }
+            }
+
             result.add(dto);
         }
 

@@ -602,6 +602,20 @@ public class FeesServiceImpl implements FeesService
         dto.setCreatedByEmail(fees.getCreatedByEmail());
         dto.setRole(fees.getRole());
         dto.setBranchCode(fees.getBranchCode());
+        dto.setCreatedByEmail(fees.getCreatedByEmail());
+
+        if (StringUtils.isNotBlank(fees.getCreatedByEmail())) {
+            try {
+                CreatedByResponseDTO creator =
+                        staffService.getCreatorByEmail(fees.getCreatedByEmail()).block();
+
+                if (creator != null) {
+                    dto.setCreatedByName(creator.getName());
+                }
+            } catch (Exception ex) {
+                dto.setCreatedByName(null);
+            }
+        }
 
         if (fees.getScheduleList() != null && !fees.getScheduleList().isEmpty()) {
             List<FeeScheduleDTO> scheduleList = fees.getScheduleList().stream()

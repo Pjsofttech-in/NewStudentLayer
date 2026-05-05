@@ -63,6 +63,7 @@ public class StudentFeesDTO
     //    private String feesType;
     @Email
     private String createdByEmail;
+    private String createdByName;
     private String role;
     private String branchCode;
 
