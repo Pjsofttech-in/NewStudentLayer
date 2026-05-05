@@ -23,7 +23,8 @@ public interface FeesCollectService
     List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email,@Nullable String branchCode, String institutionType, Integer year);
     Map<String, Double> getFeesRevenueByBank(String role,String email,@Nullable String branchCodeFilter);
     Page<StudentFeesHistoryDTO> getAllCollectedFeesByBranch(
-            String role, String email, FeesFilterDTO filterDTO, String timeFrame, LocalDate startDate, LocalDate endDate, int page, int size);
+            String role, String email, FeesFilterDTO filterDTO, String timeFrame, LocalDate startDate, LocalDate endDate, int page, int size,
+            String sort);
 
     Map<String, Object> getDailyCollectedFees(String role, String email, LocalDate date);
     Map<String, Object> getCollectedFeesByFilter(String role, String email, String filter,

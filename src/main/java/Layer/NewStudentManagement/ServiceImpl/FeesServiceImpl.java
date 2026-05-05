@@ -283,8 +283,10 @@ public class FeesServiceImpl implements FeesService
 
 
     @Override
-    public Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("fid").descending());
+    public Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size, String sort) {
+        String[] arr = sort.split(",");
+        Sort.Direction dir = "DESC".equalsIgnoreCase(arr[1]) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, arr[0]));
 
         if (StringUtils.isNotBlank(filterDTO.getCreatedByName())) {
             CreatedByResponseDTO response = staffService.getCreatorByName(filterDTO.getCreatedByName()).block();

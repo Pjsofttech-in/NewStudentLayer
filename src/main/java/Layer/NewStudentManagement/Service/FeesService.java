@@ -18,7 +18,7 @@ public interface FeesService
     StudentFeesDTO getFeesById(Long id,String role, String email);
 //    List<StudentFeesDTO> getAllFees(String role, String email);
     List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email);
-    Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size);
+    Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size, String sort);
     FeesRevenueProjection getFeesRevenueByBranch(String role, String email, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters);
     FeesRevenueProjection getFeesRevenueByStudentId(String role, String email,Long studentId);
     Map<String, Object> getMonthlyFeesStatus(String role, String email, String month, @Nullable String branchCodeFilter);

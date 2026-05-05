@@ -33,4 +33,6 @@ public class StudentFeesHistoryDTO {
     private String departmentName;
     private String feesCollectionType;
     private List<FeesCollectionDetailDTO> paymentHistory;
+
+    private String createdByEmail;
 }

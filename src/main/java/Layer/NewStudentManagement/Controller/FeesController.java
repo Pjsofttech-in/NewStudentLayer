@@ -64,11 +64,12 @@ public class FeesController
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "fid,DESC") String sort
     ) {
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        Page<StudentFeesDTO> feesPage = feesService.getAllFeesWithFilter(filterDTO, branchCode, page, size);
+        Page<StudentFeesDTO> feesPage = feesService.getAllFeesWithFilter(filterDTO, branchCode, page, size, sort);
 
         return ResponseEntity.ok(feesPage);
     }

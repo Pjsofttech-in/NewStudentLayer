@@ -72,13 +72,14 @@ public class FeesCollectController
             @RequestParam String email,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "fid,DESC") String sort,
             @RequestParam(required = false, defaultValue = "all") String timeFrame,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestBody(required = false) FeesFilterDTO filterDTO)
     {
         Page<StudentFeesHistoryDTO> response = feesCollectService.getAllCollectedFeesByBranch(
-                role, email, filterDTO, timeFrame, startDate, endDate, page, size);
+                role, email, filterDTO, timeFrame, startDate, endDate, page, size, sort);
         return ResponseEntity.ok(response);
     }
 

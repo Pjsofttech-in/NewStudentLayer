@@ -13,10 +13,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -513,13 +510,15 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             LocalDate startDate,
             LocalDate endDate,
             int page,
-            int size) {
+            int size,
+            String sort) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees History");
         }
-
+        String[] arr = sort.split(",");
+        Sort.Direction dir = "DESC".equalsIgnoreCase(arr[1]) ? Sort.Direction.DESC : Sort.Direction.ASC;
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, arr[0]));
 
         LocalDate today = LocalDate.now();
         LocalDate fromDate = null;
@@ -650,6 +649,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             dto.setPendingAmount(sf.getPendingAmount());
             dto.setFeesCollectionType(sf.getFeesCollectionType());
             dto.setPaymentHistory(collectionHistory);
+            dto.setCreatedByEmail(sf.getCreatedByEmail());
 
             result.add(dto);
         }
