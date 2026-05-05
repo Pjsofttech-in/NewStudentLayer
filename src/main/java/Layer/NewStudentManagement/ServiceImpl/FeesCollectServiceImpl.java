@@ -4,23 +4,23 @@ import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
-
 import Layer.NewStudentManagement.Repository.FeesCollectRepository;
 import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Service.FeesCollectService;
+import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
-import java.text.DateFormatSymbols;
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -562,6 +562,10 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             predicates.add(cb.equal(root.get("branchCode"), branchCode));
 
             if (filterDTO != null) {
+
+                if (filterDTO.getStudentName() != null && !filterDTO.getStudentName().isEmpty())
+                    predicates.add(cb.like(root.get("studentName"), filterDTO.getStudentName()));
+
                 if (filterDTO.getStandardName() != null && !filterDTO.getStandardName().isEmpty())
                     predicates.add(cb.equal(root.get("standardName"), filterDTO.getStandardName()));
 
@@ -588,6 +592,15 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
                 if (filterDTO.getFeesStatus() != null && !filterDTO.getFeesStatus().isEmpty())
                     predicates.add(cb.equal(root.get("feesStatus"), filterDTO.getFeesStatus()));
+
+                if (StringUtils.isNotBlank(filterDTO.getCreatedByEmail()))
+                    predicates.add(cb.equal(root.get("createdByEmail"), filterDTO.getCreatedByEmail()));
+
+                if (StringUtils.isNotBlank(filterDTO.getCreatedByName())) {
+                    CreatedByResponseDTO response = staffService.getCreatorByName(filterDTO.getCreatedByName()).block();
+                    String creatorEmail = Objects.isNull(response) ? "null" : response.getName();
+                    predicates.add(cb.equal(root.get("createdByEmail"), creatorEmail));
+                }
             }
 
             if (finalFromDate != null && finalToDate != null) {
@@ -681,81 +694,80 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             throw new RuntimeException("No permission");
         }
 
-            // ✅ 2. BranchCode
-            String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        // ✅ 2. BranchCode
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-            // ✅ 3. Date Range Logic
-            LocalDate startDate;
-            LocalDate endDate = LocalDate.now();
+        // ✅ 3. Date Range Logic
+        LocalDate startDate;
+        LocalDate endDate = LocalDate.now();
 
-            switch (filter.toLowerCase()) {
+        switch (filter.toLowerCase()) {
 
-                case "today":
-                    startDate = LocalDate.now();
-                    break;
+            case "today":
+                startDate = LocalDate.now();
+                break;
 
-                case "7days":
-                    startDate = LocalDate.now().minusDays(7);
-                    break;
+            case "7days":
+                startDate = LocalDate.now().minusDays(7);
+                break;
 
-                case "30days":
-                    startDate = LocalDate.now().minusDays(30);
-                    break;
+            case "30days":
+                startDate = LocalDate.now().minusDays(30);
+                break;
 
-                case "last365days":
-                    startDate = LocalDate.now().minusDays(365);
-                    break;
+            case "last365days":
+                startDate = LocalDate.now().minusDays(365);
+                break;
 
-                case "custom":
-                    if (fromDate == null || toDate == null) {
-                        throw new RuntimeException("Custom filter requires fromDate and toDate");
-                    }
-                    startDate = fromDate;
-                    endDate = toDate;
-                    break;
-
-                default:
-                    throw new RuntimeException("Invalid filter");
-            }
-
-            // ✅ 4. Fetch Data
-            List<StudentFeesCollect> data =
-                    feesCollectRepository.findByBranchAndDateRange(branchCode, startDate, endDate);
-
-            // ✅ 5. Role-based Filtering
-            List<StudentFeesCollect> filteredData = new ArrayList<>();
-
-            for (StudentFeesCollect fee : data) {
-
-                if ("BRANCH".equalsIgnoreCase(role)) {
-                    filteredData.add(fee); // all
-
-                } else if ("DEPARTMENT".equalsIgnoreCase(role)) {
-                    // 👉 if you add department field, filter here
-                    filteredData.add(fee);
-
-                } else if ("STAFF".equalsIgnoreCase(role)) {
-                    if (fee.getCreatedByEmail().equalsIgnoreCase(email)) {
-                        filteredData.add(fee);
-                    }
+            case "custom":
+                if (fromDate == null || toDate == null) {
+                    throw new RuntimeException("Custom filter requires fromDate and toDate");
                 }
-            }
+                startDate = fromDate;
+                endDate = toDate;
+                break;
 
-            // ✅ 6. Total Calculation
-            double total = filteredData.stream()
-                    .mapToDouble(StudentFeesCollect::getAmount)
-                    .sum();
-
-            // ✅ 7. Response
-            Map<String, Object> response = new HashMap<>();
-            response.put("filter", filter);
-            response.put("totalCollected", total);
-            response.put("totalRecords", filteredData.size());
-            response.put("data", filteredData);
-
-            return response;
+            default:
+                throw new RuntimeException("Invalid filter");
         }
 
+        // ✅ 4. Fetch Data
+        List<StudentFeesCollect> data =
+                feesCollectRepository.findByBranchAndDateRange(branchCode, startDate, endDate);
+
+        // ✅ 5. Role-based Filtering
+        List<StudentFeesCollect> filteredData = new ArrayList<>();
+
+        for (StudentFeesCollect fee : data) {
+
+            if ("BRANCH".equalsIgnoreCase(role)) {
+                filteredData.add(fee); // all
+
+            } else if ("DEPARTMENT".equalsIgnoreCase(role)) {
+                // 👉 if you add department field, filter here
+                filteredData.add(fee);
+
+            } else if ("STAFF".equalsIgnoreCase(role)) {
+                if (fee.getCreatedByEmail().equalsIgnoreCase(email)) {
+                    filteredData.add(fee);
+                }
+            }
+        }
+
+        // ✅ 6. Total Calculation
+        double total = filteredData.stream()
+                .mapToDouble(StudentFeesCollect::getAmount)
+                .sum();
+
+        // ✅ 7. Response
+        Map<String, Object> response = new HashMap<>();
+        response.put("filter", filter);
+        response.put("totalCollected", total);
+        response.put("totalRecords", filteredData.size());
+        response.put("data", filteredData);
+
+        return response;
+    }
 
 
     private FeesCollectDTO mapToDTO(StudentFeesCollect feesCollect) {

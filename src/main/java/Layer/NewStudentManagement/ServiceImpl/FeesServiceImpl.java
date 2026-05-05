@@ -6,6 +6,7 @@ import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Pagination.StudentFeesSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.FeesService;
+import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
@@ -13,6 +14,7 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,10 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -286,6 +285,12 @@ public class FeesServiceImpl implements FeesService
     @Override
     public Page<StudentFeesDTO> getAllFeesWithFilter(FeesFilterDTO filterDTO, String branchCode, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("fid").descending());
+
+        if (StringUtils.isNotBlank(filterDTO.getCreatedByName())) {
+            CreatedByResponseDTO response = staffService.getCreatorByName(filterDTO.getCreatedByName()).block();
+            String creatorEmail = Objects.isNull(response) ? "null" : response.getName();
+            filterDTO.setCreatedByEmail(creatorEmail);
+        }
         Page<StudentFees> fees = feesRepository.findAll(
                 StudentFeesSpecification.filterByDTOAndBranchCode(filterDTO, branchCode),
                 pageable

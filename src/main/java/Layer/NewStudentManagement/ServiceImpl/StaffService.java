@@ -344,11 +344,18 @@ public class StaffService
                 .bodyToMono(CreatedByResponseDTO.class);
     }
 
-    public Mono<String> getCreatedByName(String email) {
-        return getCreatorByEmail(email)
-                .map(CreatedByResponseDTO::getName)
-                .defaultIfEmpty("Unknown");
+    public Mono<CreatedByResponseDTO> getCreatorByName(String name) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/getCreatorByName")
+                        .queryParam("name", name)
+                        .build())
+                .retrieve()
+                .onStatus(
+                        status -> status.value() == 404,
+                        response -> Mono.empty()
+                )
+                .bodyToMono(CreatedByResponseDTO.class);
     }
-
 
 }

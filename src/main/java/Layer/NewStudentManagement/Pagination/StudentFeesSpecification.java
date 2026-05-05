@@ -1,11 +1,14 @@
 package Layer.NewStudentManagement.Pagination;
 
+import Layer.NewStudentManagement.DTO.CreatedByResponseDTO;
 import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueFilterDTO;
 import Layer.NewStudentManagement.Entity.*;
+import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -16,6 +19,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class StudentFeesSpecification
 {
@@ -56,6 +60,13 @@ public class StudentFeesSpecification
 //                predicates.add(criteriaBuilder.equal(deptJoin.get("departmentName"), dto.getDepartmentName()));
 //            }
 
+            if (dto.getStudentName() != null && !dto.getStudentName().isBlank()) {
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.lower(root.get("studentName")),
+                        dto.getStudentName().toLowerCase()
+                ));
+            }
+
             if (dto.getInstitutionType() != null && !dto.getInstitutionType().isBlank()) {
                 predicates.add(criteriaBuilder.equal(
                         criteriaBuilder.lower(root.get("institutionType")),
@@ -76,6 +87,14 @@ public class StudentFeesSpecification
                         dto.getFeesStatus().toLowerCase()
                 ));
             }
+
+            if (StringUtils.isNotBlank(dto.getCreatedByEmail())){
+                predicates.add(criteriaBuilder.equal(
+                        criteriaBuilder.lower(root.get("createdByEmail")),
+                        dto.getCreatedByEmail()
+                ));
+            }
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
