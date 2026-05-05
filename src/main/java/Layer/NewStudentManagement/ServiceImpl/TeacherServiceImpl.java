@@ -155,6 +155,7 @@ public class TeacherServiceImpl implements TeacherService
         teacher.setCreatedByEmail(email);
         teacher.setSubjects(subjectEntities);
         teacher.setDepartmentName(dto.getDepartmentName());
+        teacher.setGender(dto.getGender());
 
         // Set graduationType and stream
         if (graduationType != null) {

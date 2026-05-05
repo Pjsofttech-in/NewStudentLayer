@@ -658,6 +658,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
                     if (creator != null) {
                         dto.setCreatedByName(creator.getName());
+                        dto.setRole(creator.getType());
                     }
                 } catch (Exception ex) {
                     dto.setCreatedByName(null);

@@ -36,4 +36,5 @@ public class StudentFeesHistoryDTO {
 
     private String createdByEmail;
     private String createdByName;
+    private String role;
 }

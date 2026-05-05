@@ -77,9 +77,12 @@ public class StudentController
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customEnd,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "25") int size,
+            @RequestParam(defaultValue = "id,DESC") String sort,
             @RequestBody(required = false) StudentFilterDTO filterDTO
     ) {
-        Pageable pageable = PageRequest.of(page, size);
+        String[] arr = sort.split(",");
+        Sort.Direction dir = "DESC".equalsIgnoreCase(arr[1])? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, arr[0]));
 
         Page<StudentResponseDTO> studentPage =
                 studentService.getAllStudent(
@@ -257,10 +260,12 @@ public class StudentController
             @RequestParam(required = false) LocalDate customEnd,
             @RequestBody(required = false) StudentFilterDTO filter,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "25") int size
+            @RequestParam(defaultValue = "25") int size,
+            @RequestParam(defaultValue = "id,DESC") String sort
     ) {
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        String[] arr = sort.split(",");
+        Sort.Direction dir = "DESC".equalsIgnoreCase(arr[1])? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, arr[0]));
 
         return studentService.getStudentsByBranchCode(role, email, filter, timeFrame,
                 customStart, customEnd, pageable);
