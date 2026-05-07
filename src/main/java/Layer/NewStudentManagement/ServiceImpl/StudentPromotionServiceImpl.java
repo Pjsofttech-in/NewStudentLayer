@@ -7,6 +7,7 @@ import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ClassRoomService;
 import Layer.NewStudentManagement.Service.StudentPromotionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentPromotionServiceImpl implements StudentPromotionService
@@ -37,176 +39,180 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             Long newDegreeNameId, String newDepartmentName,
             Long newStreamId, String groupName,
             String academicYear, Long newClassroomId,
-            String institutionType, Long graduationTypeId )
-    {
-        if (!staffService.hasPermission(role, email, "Post")) {
-            throw new RuntimeException("You don't have permission to Promote Student");
-        }
-
-        StudentEntity student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
-
-        if (!"Approved".equalsIgnoreCase(student.getStatus())) {
-            throw new RuntimeException("Student cannot be promoted. Status must be 'Approved'.");
-        }
-
-        // Step 1: Save current record as previous promotion
-        StudentPromotionRecord previous = new StudentPromotionRecord();
-        previous.setStudent(student);
-        previous.setAcademicYear(student.getAcademicYear());
-        previous.setPromotionDate(LocalDate.now());
-        previous.setIsCurrent(false); // Mark as old
-        previous.setRollNo(student.getRollNo());
-        previous.setInstitutionType(student.getInstitutionType());
-
-        if (student.getClassRoom() != null) {
-            previous.setClassroomId(student.getClassRoom().getId());
-            if (student.getClassRoom().getDivision() != null) {
-                previous.setDivision(student.getClassRoom().getDivision().getDivision());
-            }
-        }
-
-        previous.setStandard(student.getStandard());
-        previous.setStandardName(student.getStandardName());
-        previous.setMedium(student.getMedium());
-        previous.setMediumName(student.getMediumName());
-        previous.setDegree(student.getDegreeName());
-        previous.setDepartmentName(student.getDepartmentName());
-        previous.setStream(student.getStream());
-        previous.setStreamName(student.getStreamName());
-        previous.setGroupName(student.getGroupName());
-        previous.setGraduationType(student.getGraduationType());
-
-        promotionRecordRepository.save(previous); // Save previous record
-
-        // Step 2: Apply promotion
-        student.setInstitutionType(institutionType);
-
-        if ("School".equalsIgnoreCase(institutionType)) {
-            StudentStandard standard = standardRepository.findById(newStandardId)
-                    .orElseThrow(() -> new RuntimeException("Standard not found"));
-            StudentMedium medium = mediumRepository.findById(newMediumId)
-                    .orElseThrow(() -> new RuntimeException("Medium not found"));
-
-            student.setStandard(standard);
-            student.setStandardName(standard.getStandardName());
-            student.setMedium(medium);
-            student.setMediumName(medium.getMediumName());
-
-            // Reset college fields
-            student.setDegreeName(null);
-            student.setDepartmentName(null);
-            student.setStream(null);
-            student.setStreamName(null);
-            student.setGroupName(null);
-            student.setGraduationType(null);
-        }
-        else if ("College".equalsIgnoreCase(institutionType)) {
-            if (graduationTypeId != null) {
-                StudentGraduationType graduationType = graduationTypeRepository.findById(graduationTypeId)
-                        .orElseThrow(() -> new RuntimeException("GraduationType not found"));
-                student.setGraduationType(graduationType);
+            String institutionType, Long graduationTypeId ) {
+        try {
+            if (!staffService.hasPermission(role, email, "Post")) {
+                throw new RuntimeException("You don't have permission to Promote Student");
             }
 
-            if (student.getGraduationType() != null &&
-                    "Jr.College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
+            StudentEntity student = studentRepository.findById(studentId)
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
 
+            if (!"Approved".equalsIgnoreCase(student.getStatus())) {
+                throw new RuntimeException("Student cannot be promoted. Status must be 'Approved'.");
+            }
+
+            // Step 1: Save current record as previous promotion
+            Optional<StudentPromotionRecord> previousOpt = promotionRecordRepository.findCurrentByStudentIdStandardId(studentId, student.getStandard().getSid());
+            StudentPromotionRecord previous = previousOpt.orElse(new StudentPromotionRecord());
+            previous.setStudent(student);
+            previous.setAcademicYear(student.getAcademicYear());
+            previous.setPromotionDate(LocalDate.now());
+            previous.setIsCurrent(false); // Mark as old
+            previous.setRollNo(student.getRollNo());
+            previous.setInstitutionType(student.getInstitutionType());
+
+            if (student.getClassRoom() != null) {
+                previous.setClassroomId(student.getClassRoom().getId());
+                if (student.getClassRoom().getDivision() != null) {
+                    previous.setDivision(student.getClassRoom().getDivision().getDivision());
+                }
+            }
+
+            previous.setStandard(student.getStandard());
+            previous.setStandardName(student.getStandardName());
+            previous.setMedium(student.getMedium());
+            previous.setMediumName(student.getMediumName());
+            previous.setDegree(student.getDegreeName());
+            previous.setDepartmentName(student.getDepartmentName());
+            previous.setStream(student.getStream());
+            previous.setStreamName(student.getStreamName());
+            previous.setGroupName(student.getGroupName());
+            previous.setGraduationType(student.getGraduationType());
+
+            promotionRecordRepository.save(previous); // Save previous record
+
+            // Step 2: Apply promotion
+            student.setInstitutionType(institutionType);
+
+            if ("School".equalsIgnoreCase(institutionType)) {
                 StudentStandard standard = standardRepository.findById(newStandardId)
                         .orElseThrow(() -> new RuntimeException("Standard not found"));
                 StudentMedium medium = mediumRepository.findById(newMediumId)
                         .orElseThrow(() -> new RuntimeException("Medium not found"));
-                StudentStream stream = streamRepository.findById(newStreamId)
-                        .orElseThrow(() -> new RuntimeException("Stream not found"));
 
                 student.setStandard(standard);
                 student.setStandardName(standard.getStandardName());
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
-                student.setStream(stream);
-                student.setStreamName(stream.getStream());
-                student.setGroupName(groupName);
 
+                // Reset college fields
                 student.setDegreeName(null);
                 student.setDepartmentName(null);
-            } else {
-                StudentDegreeName degree = degreeNameRepository.findById(newDegreeNameId)
-                        .orElseThrow(() -> new RuntimeException("DegreeName not found"));
-                StudentMedium medium = mediumRepository.findById(newMediumId)
-                        .orElseThrow(() -> new RuntimeException("Medium not found"));
-                StudentStream stream = streamRepository.findById(newStreamId)
-                        .orElseThrow(() -> new RuntimeException("Stream not found"));
-
-                student.setDegreeName(degree);
-                student.setMedium(medium);
-                student.setMediumName(medium.getMediumName());
-                student.setStream(stream);
-                student.setStreamName(stream.getStream());
-
-                student.setStandard(null);
-                student.setStandardName(null);
+                student.setStream(null);
+                student.setStreamName(null);
                 student.setGroupName(null);
+                student.setGraduationType(null);
+            } else if ("College".equalsIgnoreCase(institutionType)) {
+                if (graduationTypeId != null) {
+                    StudentGraduationType graduationType = graduationTypeRepository.findById(graduationTypeId)
+                            .orElseThrow(() -> new RuntimeException("GraduationType not found"));
+                    student.setGraduationType(graduationType);
+                }
+
+                if (student.getGraduationType() != null &&
+                        "Jr.College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
+
+                    StudentStandard standard = standardRepository.findById(newStandardId)
+                            .orElseThrow(() -> new RuntimeException("Standard not found"));
+                    StudentMedium medium = mediumRepository.findById(newMediumId)
+                            .orElseThrow(() -> new RuntimeException("Medium not found"));
+                    StudentStream stream = streamRepository.findById(newStreamId)
+                            .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+                    student.setStandard(standard);
+                    student.setStandardName(standard.getStandardName());
+                    student.setMedium(medium);
+                    student.setMediumName(medium.getMediumName());
+                    student.setStream(stream);
+                    student.setStreamName(stream.getStream());
+                    student.setGroupName(groupName);
+
+                    student.setDegreeName(null);
+                    student.setDepartmentName(null);
+                } else {
+                    StudentDegreeName degree = degreeNameRepository.findById(newDegreeNameId)
+                            .orElseThrow(() -> new RuntimeException("DegreeName not found"));
+                    StudentMedium medium = mediumRepository.findById(newMediumId)
+                            .orElseThrow(() -> new RuntimeException("Medium not found"));
+                    StudentStream stream = streamRepository.findById(newStreamId)
+                            .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+                    student.setDegreeName(degree);
+                    student.setMedium(medium);
+                    student.setMediumName(medium.getMediumName());
+                    student.setStream(stream);
+                    student.setStreamName(stream.getStream());
+
+                    student.setStandard(null);
+                    student.setStandardName(null);
+                    student.setGroupName(null);
+                }
             }
-        }
 
-        // Step 3: Update academic year, classroom, and roll number
-        student.setAcademicYear(academicYear);
-        student.setClassRoom(null);
-        student.setRollNo(null);
+            // Step 3: Update academic year, classroom, and roll number
+            student.setAcademicYear(academicYear);
+            student.setClassRoom(null);
+            student.setRollNo(null);
 
-        studentRepository.save(student);
+            studentRepository.save(student);
 
-        // Step 4: Assign to classroom
-        classRoomService.assignStudentsToClassroom(role, email, newClassroomId, List.of(student.getId()));
+            // Step 4: Assign to classroom
+            classRoomService.assignStudentsToClassroom(role, email, newClassroomId, List.of(student.getId()));
 
-        // Step 5: Save new promotion record (after update)
-        StudentPromotionRecord current = new StudentPromotionRecord();
-        current.setStudent(student);
-        current.setAcademicYear(student.getAcademicYear());
-        current.setPromotionDate(LocalDate.now());
-        current.setIsCurrent(true); // Mark this one as latest
-        current.setRollNo(student.getRollNo());
-        current.setInstitutionType(student.getInstitutionType());
+            // Step 5: Save new promotion record (after update)
+            StudentPromotionRecord current = new StudentPromotionRecord();
+            current.setStudent(student);
+            current.setAcademicYear(student.getAcademicYear());
+            current.setPromotionDate(LocalDate.now());
+            current.setIsCurrent(true); // Mark this one as latest
+            current.setRollNo(student.getRollNo());
+            current.setInstitutionType(student.getInstitutionType());
 
-        if (student.getClassRoom() != null) {
-            current.setClassroomId(student.getClassRoom().getId());
-            if (student.getClassRoom().getDivision() != null) {
-                current.setDivision(student.getClassRoom().getDivision().getDivision());
+            if (student.getClassRoom() != null) {
+                current.setClassroomId(student.getClassRoom().getId());
+                if (student.getClassRoom().getDivision() != null) {
+                    current.setDivision(student.getClassRoom().getDivision().getDivision());
+                }
             }
+
+            current.setStandard(student.getStandard());
+            current.setStandardName(student.getStandardName());
+            current.setMedium(student.getMedium());
+            current.setMediumName(student.getMediumName());
+            current.setDegree(student.getDegreeName());
+            current.setDepartmentName(student.getDepartmentName());
+            current.setStream(student.getStream());
+            current.setStreamName(student.getStreamName());
+            current.setGroupName(student.getGroupName());
+            current.setGraduationType(student.getGraduationType());
+
+            promotionRecordRepository.save(current);
+
+            // Step 6: Prepare response
+            List<StudentPromotionRecord> allPromotions = promotionRecordRepository.findAllByStudentIdOrderByPromotionDate(studentId);
+
+            StudentPromotionResponseDTO response = new StudentPromotionResponseDTO();
+            response.setStudentId(student.getId());
+            response.setFullName(student.getFullName());
+            response.setBranchCode(student.getBranchCode());
+
+            PromotionInfoDTO currentDTO = mapToPromotionInfoDTO(allPromotions.get(0));
+            currentDTO.setIsCurrent(true);
+            response.setCurrentPromotion(currentDTO);
+
+            List<PromotionInfoDTO> history = allPromotions.stream()
+                    .skip(1)
+                    .map(this::mapToPromotionInfoDTO)
+                    .peek(p -> p.setIsCurrent(false))
+                    .collect(Collectors.toList());
+
+            response.setPromotionHistory(history);
+            return response;
+        } catch (Exception e) {
+            log.error("exception in promoteStudent() in StudentPromotionServiceImpl", e);
+            throw e;
         }
-
-        current.setStandard(student.getStandard());
-        current.setStandardName(student.getStandardName());
-        current.setMedium(student.getMedium());
-        current.setMediumName(student.getMediumName());
-        current.setDegree(student.getDegreeName());
-        current.setDepartmentName(student.getDepartmentName());
-        current.setStream(student.getStream());
-        current.setStreamName(student.getStreamName());
-        current.setGroupName(student.getGroupName());
-        current.setGraduationType(student.getGraduationType());
-
-        promotionRecordRepository.save(current);
-
-        // Step 6: Prepare response
-        List<StudentPromotionRecord> allPromotions = promotionRecordRepository.findAllByStudentIdOrderByPromotionDate(studentId);
-
-        StudentPromotionResponseDTO response = new StudentPromotionResponseDTO();
-        response.setStudentId(student.getId());
-        response.setFullName(student.getFullName());
-        response.setBranchCode(student.getBranchCode());
-
-        PromotionInfoDTO currentDTO = mapToPromotionInfoDTO(allPromotions.get(0));
-        currentDTO.setIsCurrent(true);
-        response.setCurrentPromotion(currentDTO);
-
-        List<PromotionInfoDTO> history = allPromotions.stream()
-                .skip(1)
-                .map(this::mapToPromotionInfoDTO)
-                .peek(p -> p.setIsCurrent(false))
-                .collect(Collectors.toList());
-
-        response.setPromotionHistory(history);
-        return response;
     }
 
     @Override

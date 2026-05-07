@@ -11,13 +11,19 @@ import Layer.NewStudentManagement.Service.FeesCollectService;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -600,6 +606,30 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                     String creatorEmail = Objects.isNull(response) ? "null" : response.getName();
                     predicates.add(cb.equal(root.get("createdByEmail"), creatorEmail));
                 }
+
+                if (StringUtils.isNotBlank(filterDTO.getDueDate()) && isStrictlyValidDate(filterDTO.getDueDate())) {
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+                    LocalDate parsedDate = LocalDate.parse(filterDTO.getDueDate(), formatter);
+
+                    Subquery<Long> subquery = null;
+                    subquery = query.subquery(Long.class);
+                    Root<StudentFeeSchedule> childRoot = subquery.from(StudentFeeSchedule.class);
+
+                    // 2. Define the link between Parent and Child
+                    // Assuming your ChildEntity has a field named 'mainObject' that links back to the parent
+                    Predicate parentLink = cb.equal(childRoot.get("studentFees"), root);
+
+                    // 3. Define your nested filters
+                    Predicate isUnpaid = cb.equal(childRoot.get("isPaid"), false);
+                    Predicate hasDate = cb.isNotNull(childRoot.get("dueDate"));
+                    Predicate isBefore = cb.lessThanOrEqualTo(childRoot.get("dueDate"), parsedDate);
+
+                    // 4. Configure the subquery to select IDs where conditions match
+                    subquery.select(childRoot.get("id"))
+                            .where(parentLink, isUnpaid, hasDate, isBefore);
+                    predicates.add(cb.exists(subquery));
+                }
             }
 
             if (finalFromDate != null && finalToDate != null) {
@@ -663,6 +693,14 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                 } catch (Exception ex) {
                     dto.setCreatedByName(null);
                 }
+            }
+
+            if(!CollectionUtils.isEmpty(sf.getScheduleList())) {
+                LocalDate earliestDueDate = sf.getScheduleList().stream().filter(s -> !s.isPaid())
+                        .min(Comparator.comparing(StudentFeeSchedule::getDueDate,
+                                Comparator.nullsLast(Comparator.naturalOrder()))).orElse(new StudentFeeSchedule()).getDueDate();
+
+                dto.setDueDate(earliestDueDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
             }
 
             result.add(dto);
@@ -831,5 +869,15 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         return dto;
     }
 
-
+    public static boolean isStrictlyValidDate(String dateStr) {
+        try {
+            LocalDate.parse(dateStr,
+                    DateTimeFormatter.ofPattern("uuuu-MM-dd")
+                            .withResolverStyle(ResolverStyle.STRICT)
+            );
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
 }

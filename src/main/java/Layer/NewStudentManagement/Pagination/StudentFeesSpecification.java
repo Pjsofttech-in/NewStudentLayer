@@ -5,9 +5,7 @@ import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueFilterDTO;
 import Layer.NewStudentManagement.Entity.*;
 import io.micrometer.common.util.StringUtils;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.JoinType;
-import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.*;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -16,6 +14,7 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -88,11 +87,35 @@ public class StudentFeesSpecification
                 ));
             }
 
-            if (StringUtils.isNotBlank(dto.getCreatedByEmail())){
+            if (StringUtils.isNotBlank(dto.getCreatedByEmail())) {
                 predicates.add(criteriaBuilder.equal(
                         criteriaBuilder.lower(root.get("createdByEmail")),
                         dto.getCreatedByEmail()
                 ));
+            }
+
+            if (StringUtils.isNotBlank(dto.getDueDate()) && isStrictlyValidDate(dto.getDueDate())) {
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+                LocalDate parsedDate = LocalDate.parse(dto.getDueDate(), formatter);
+
+                Subquery<Long> subquery = null;
+                subquery = query.subquery(Long.class);
+                Root<StudentFeeSchedule> childRoot = subquery.from(StudentFeeSchedule.class);
+
+                // 2. Define the link between Parent and Child
+                // Assuming your ChildEntity has a field named 'mainObject' that links back to the parent
+                Predicate parentLink = criteriaBuilder.equal(childRoot.get("studentFees"), root);
+
+                // 3. Define your nested filters
+                Predicate isUnpaid = criteriaBuilder.equal(childRoot.get("isPaid"), false);
+                Predicate hasDate = criteriaBuilder.isNotNull(childRoot.get("dueDate"));
+                Predicate isBefore = criteriaBuilder.lessThanOrEqualTo(childRoot.get("dueDate"), parsedDate);
+
+                // 4. Configure the subquery to select IDs where conditions match
+                subquery.select(childRoot.get("id"))
+                        .where(parentLink, isUnpaid, hasDate, isBefore);
+                predicates.add(criteriaBuilder.exists(subquery));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
@@ -180,4 +203,15 @@ public class StudentFeesSpecification
         };
     }
 
+    public static boolean isStrictlyValidDate(String dateStr) {
+        try {
+            LocalDate.parse(dateStr,
+                    DateTimeFormatter.ofPattern("uuuu-MM-dd")
+                            .withResolverStyle(ResolverStyle.STRICT)
+            );
+            return true;
+        } catch (DateTimeParseException e) {
+            return false;
+        }
+    }
 }

@@ -66,5 +66,5 @@ public class StudentFeesDTO
     private String createdByName;
     private String role;
     private String branchCode;
-
+    private String dueDate;
 }

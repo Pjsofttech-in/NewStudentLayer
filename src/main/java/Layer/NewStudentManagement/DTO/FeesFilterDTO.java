@@ -27,4 +27,5 @@ public class FeesFilterDTO {
     @Email
     private String createdByEmail;
     private String createdByName;
+    private String dueDate;
 }

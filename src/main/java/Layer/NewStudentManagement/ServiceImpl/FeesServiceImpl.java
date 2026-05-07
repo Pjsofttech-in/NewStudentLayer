@@ -22,9 +22,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -633,12 +638,13 @@ public class FeesServiceImpl implements FeesService
             dto.setScheduleList(scheduleList);
         }
 
+        if(!CollectionUtils.isEmpty(dto.getScheduleList())) {
+            LocalDate earliestDueDate = dto.getScheduleList().stream().filter(feeScheduleDTO -> !feeScheduleDTO.isPaid())
+                    .min(Comparator.comparing(FeeScheduleDTO::getDueDate,
+                            Comparator.nullsLast(Comparator.naturalOrder()))).orElse(new FeeScheduleDTO()).getDueDate();
+
+            dto.setDueDate(earliestDueDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        }
         return dto;
     }
-
-
-
-
-
-
 }
