@@ -2,14 +2,11 @@ package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.TimeTableRequestDTO;
 import Layer.NewStudentManagement.DTO.TimeTableResponceDTO;
-import Layer.NewStudentManagement.Entity.StudentTimetable;
 import Layer.NewStudentManagement.Service.TimeTableService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 
 //@CrossOrigin(origins = "http://localhost:3000")
@@ -43,14 +40,13 @@ public class TimeTableController
         return timeTableService.getAllTimeTable(role, email);
     }
 
-//    @PutMapping("/updateTimeTable/{id}")
-//    public TimeTableResponceDTO updateTimeTable(
-//            @RequestParam String role,
-//            @RequestParam String email,
-//            @PathVariable Long id,
-//            @RequestBody StudentTimetable timetable) {
-//        return timeTableService.updateTimeTable(role, email, id, timetable);
-//    }
+    @PutMapping("/updateTimeTable")
+    public TimeTableResponceDTO updateTimeTable(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestBody TimeTableRequestDTO timetable) {
+        return timeTableService.updateTimeTable(role, email, timetable);
+    }
 
     @DeleteMapping("/deleteTimeTable/{id}")
     public String deleteTimeTable(

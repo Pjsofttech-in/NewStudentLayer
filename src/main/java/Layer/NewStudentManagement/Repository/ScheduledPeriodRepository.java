@@ -60,4 +60,12 @@ public interface ScheduledPeriodRepository extends JpaRepository<StudentSchedule
             @Param("teacherId") Long teacherId,
             @Param("slotId") Long slotId
     );
+
+    @Query("SELECT s FROM StudentScheduledPeriod s " +
+            "WHERE s.timetable.id = :timetableId " +
+            "AND s.periodSlot.id = :periodId ")
+    Optional<StudentScheduledPeriod> findScheduleByPeriod(
+            @Param("timetableId") Long timetableId,
+            @Param("periodId") Long periodId
+    );
 }

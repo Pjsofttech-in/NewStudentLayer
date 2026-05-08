@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class TimeTableRequestDTO
 {
+    private Long timeTableId;
     private String dayOfWeek;
     private Long classRoomId;
     private List<ScheduledPeriodRequestDTO> scheduledPeriods;

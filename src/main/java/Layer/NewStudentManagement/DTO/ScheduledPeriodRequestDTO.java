@@ -9,8 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScheduledPeriodRequestDTO
-{
+public class ScheduledPeriodRequestDTO {
+    private Long id;
     private Long periodSlotId;
     private Long teacherId;
     private Long subjectId;

@@ -1,7 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.ScheduledPeriodResponseDTO;
-import Layer.NewStudentManagement.DTO.StudentPeriodResponseDTO;
 import Layer.NewStudentManagement.DTO.TimeTableRequestDTO;
 import Layer.NewStudentManagement.DTO.TimeTableResponceDTO;
 import Layer.NewStudentManagement.Entity.*;
@@ -17,7 +16,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -265,5 +264,39 @@ public class TimeTableServiceImpl implements TimeTableService
         return dto;
     }
 
+    public TimeTableResponceDTO updateTimeTable(String role, String email, TimeTableRequestDTO dto) {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to View Timetable");
+        }
 
+        StudentTimetable timeTable = timeTableRepository.findById(dto.getTimeTableId())
+                .orElseThrow(() -> new ResourceNotFoundException("Timetable not found"));
+
+        dto.getScheduledPeriods().forEach(sp -> {
+            StudentPeriod periodSlot = periodRepository.findById(sp.getPeriodSlotId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Period slot not found"));
+
+            StudentTeacher teacher = teacherRepository.findById(sp.getTeacherId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Teacher not found"));
+
+            StudentSubject subject = subjectRepository.findById(sp.getSubjectId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Subject not found"));
+
+//            StudentScheduledPeriod scheduled = scheduledPeriodRepository.findScheduleByPeriod
+//                            (dto.getTimeTableId(), sp.getPeriodSlotId())
+//                    .orElseThrow(() -> new ResourceNotFoundException("Schedule Period not found"));
+
+            StudentScheduledPeriod scheduled = timeTable.getScheduledPeriods().stream().filter(s -> Objects.nonNull(s.getId())
+            && s.getId().equals(sp.getId())).findFirst().orElseThrow(() -> new ResourceNotFoundException("Schedule Period not found"));
+
+            scheduled.setTeacher(teacher);
+            scheduled.setSubject(subject);
+        });
+
+//        timeTable.getScheduledPeriods().clear();
+//        timeTable.setScheduledPeriods(scheduledPeriods);
+
+        StudentTimetable savedTimetable = timeTableRepository.save(timeTable);
+        return convertToDTO(savedTimetable);
+    }
 }
