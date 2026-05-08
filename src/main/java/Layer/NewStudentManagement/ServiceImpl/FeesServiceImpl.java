@@ -2,10 +2,10 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
-
 import Layer.NewStudentManagement.Pagination.StudentFeesSpecification;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.FeesService;
+import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -14,7 +14,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,17 +24,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.format.DateTimeParseException;
-import java.time.format.ResolverStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class FeesServiceImpl implements FeesService
-{
+public class FeesServiceImpl implements FeesService {
     @Autowired
     private FeesRepository feesRepository;
 
@@ -53,7 +46,6 @@ public class FeesServiceImpl implements FeesService
 
     @Autowired
     private MediumRepository mediumRepository;
-
 
 
     @Autowired
@@ -91,7 +83,7 @@ public class FeesServiceImpl implements FeesService
         fees.setInstitutionType(fees.getInstitutionType());
         fees.setRollNo(student.getRollNo());
         boolean isUGPG = student.getDegreeName() != null && student.getStream() != null;
-        boolean isJrCollege = student.getStream() != null && student.getGroupName() != null&& !isUGPG;
+        boolean isJrCollege = student.getStream() != null && student.getGroupName() != null && !isUGPG;
 
         // === Fetch and set Degree & Department if UG/PG ===
         if (isUGPG) {
@@ -155,7 +147,7 @@ public class FeesServiceImpl implements FeesService
         }
 
         // Jr College check
-        if (isJrCollege && feesRepository.existsJrCollegeFees(student,fees.getStandard().getStandardName(), fees.getStream().getStream())) {
+        if (isJrCollege && feesRepository.existsJrCollegeFees(student, fees.getStandard().getStandardName(), fees.getStream().getStream())) {
             throw new RuntimeException("Fees already assigned for this student and stream.");
         }
 
@@ -223,11 +215,9 @@ public class FeesServiceImpl implements FeesService
     }
 
 
-
     @Override
-    public StudentFeesDTO updateFees(Long id, StudentFees updatedFees,String role, String email)
-    {
-        checkPermission(role,email,"Put");
+    public StudentFeesDTO updateFees(Long id, StudentFees updatedFees, String role, String email) {
+        checkPermission(role, email, "Put");
         StudentFees existing = feesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Standard Fees not found"));
 
@@ -236,7 +226,8 @@ public class FeesServiceImpl implements FeesService
 //        if (updatedFees.getFeesType() != null) existing.setFeesType(updatedFees.getFeesType());
         if (updatedFees.getApprovalDate() != null) existing.setApprovalDate(updatedFees.getApprovalDate());
         if (updatedFees.getFeesStatus() != null) existing.setFeesStatus(updatedFees.getFeesStatus());
-        if (updatedFees.getFeesCollectionType() != null) existing.setFeesCollectionType(updatedFees.getFeesCollectionType());
+        if (updatedFees.getFeesCollectionType() != null)
+            existing.setFeesCollectionType(updatedFees.getFeesCollectionType());
         if (updatedFees.getTuitionFee() != 0) existing.setTuitionFee(updatedFees.getTuitionFee());
         if (updatedFees.getAdmissionFee() != 0) existing.setAdmissionFee(updatedFees.getAdmissionFee());
         if (updatedFees.getPracticalFee() != 0) existing.setPracticalFee(updatedFees.getPracticalFee());
@@ -248,12 +239,16 @@ public class FeesServiceImpl implements FeesService
         if (updatedFees.getBuildingFundFee() != 0) existing.setBuildingFundFee(updatedFees.getBuildingFundFee());
         if (updatedFees.getLibraryFees() != 0) existing.setLibraryFees(updatedFees.getLibraryFees());
         if (updatedFees.getSportFees() != 0) existing.setSportFees(updatedFees.getSportFees());
-        if (updatedFees.getFeesAmount() != null && updatedFees.getFeesAmount() != 0) existing.setFeesAmount(updatedFees.getFeesAmount());
-        if (updatedFees.getTotalamount() != null && updatedFees.getTotalamount() != 0) existing.setTotalamount(updatedFees.getTotalamount());
+        if (updatedFees.getFeesAmount() != null && updatedFees.getFeesAmount() != 0)
+            existing.setFeesAmount(updatedFees.getFeesAmount());
+        if (updatedFees.getTotalamount() != null && updatedFees.getTotalamount() != 0)
+            existing.setTotalamount(updatedFees.getTotalamount());
 //        if (updatedFees.getLateFeeCharges() != 0) existing.setLateFeeCharges(updatedFees.getLateFeeCharges());
         if (updatedFees.getSfid() != null) existing.setSfid(updatedFees.getSfid());
         if (updatedFees.getCreatedByEmail() != null) existing.setCreatedByEmail(updatedFees.getCreatedByEmail());
-        if (updatedFees.getRole() != null) {existing.setRole(updatedFees.getRole());}
+        if (updatedFees.getRole() != null) {
+            existing.setRole(updatedFees.getRole());
+        }
         if (updatedFees.getBranchCode() != null) existing.setBranchCode(updatedFees.getBranchCode());
 
         StudentFees fees = feesRepository.save(existing);
@@ -262,26 +257,23 @@ public class FeesServiceImpl implements FeesService
     }
 
     @Override
-    public void deleteFees(Long id,String role, String email)
-    {
-        checkPermission(role,email,"Delete");
+    public void deleteFees(Long id, String role, String email) {
+        checkPermission(role, email, "Delete");
         feesRepository.deleteById(id);
 
     }
 
     @Override
-    public StudentFeesDTO getFeesById(Long id,String role, String email)
-    {
-        checkPermission(role,email,"Get");
+    public StudentFeesDTO getFeesById(Long id, String role, String email) {
+        checkPermission(role, email, "Get");
         StudentFees fees = feesRepository.findById(id).orElseThrow(() -> new RuntimeException("Fees Id Not Found"));
         return mapToDTOFees(fees);
 
     }
 
     @Override
-    public List<StudentFeesDTO> getAllFeesForStudent(Long studentId,String role, String email)
-    {
-        checkPermission(role,email,"Get");
+    public List<StudentFeesDTO> getAllFeesForStudent(Long studentId, String role, String email) {
+        checkPermission(role, email, "Get");
         List<StudentFees> feesList = feesRepository.findFeesByStudentId(studentId);
         return feesList.stream().map(this::mapToDTOFees).toList();
     }
@@ -338,13 +330,19 @@ public class FeesServiceImpl implements FeesService
 
             return new FeesRevenueProjection() {
                 @Override
-                public Double getTotalFees() { return finalFees; }
+                public Double getTotalFees() {
+                    return finalFees;
+                }
 
                 @Override
-                public Double getTotalPaid() { return finalPaid; }
+                public Double getTotalPaid() {
+                    return finalPaid;
+                }
 
                 @Override
-                public Double getTotalPending() { return finalPending; }
+                public Double getTotalPending() {
+                    return finalPending;
+                }
             };
         }
 
@@ -354,6 +352,7 @@ public class FeesServiceImpl implements FeesService
 
         return calculateRevenue(branchCode, timeFrame, startDate, endDate, filters);
     }
+
     private FeesRevenueProjection calculateRevenue(String branchCode, String timeFrame, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters) {
 
         LocalDate calculatedStartDate = null;
@@ -369,8 +368,14 @@ public class FeesServiceImpl implements FeesService
                     case "7days" -> calculatedStartDate = calculatedEndDate.minusDays(6);
                     case "30days" -> calculatedStartDate = calculatedEndDate.minusDays(29);
                     case "365days" -> calculatedStartDate = calculatedEndDate.minusDays(364);
-                    case "all" -> { calculatedStartDate = null; calculatedEndDate = null; }
-                    default -> { calculatedStartDate = null; calculatedEndDate = null; }
+                    case "all" -> {
+                        calculatedStartDate = null;
+                        calculatedEndDate = null;
+                    }
+                    default -> {
+                        calculatedStartDate = null;
+                        calculatedEndDate = null;
+                    }
                 }
             }
         } else {
@@ -420,18 +425,15 @@ public class FeesServiceImpl implements FeesService
     }
 
 
-
     @Override
-    public FeesRevenueProjection getFeesRevenueByStudentId(String role, String email, Long studentId)
-    {
+    public FeesRevenueProjection getFeesRevenueByStudentId(String role, String email, Long studentId) {
         checkPermission(role, email, "Get");
         return feesRepository.getFeesRevenueByStudentId(studentId);
     }
 
     @Override
     public Map<String, Object> getMonthlyFeesStatus(String role, String email, String month,
-                                                    @Nullable String branchCodeFilter)
-    {
+                                                    @Nullable String branchCodeFilter) {
         checkPermission(role, email, "Get");
 
         if ("SUPERADMIN".equalsIgnoreCase(role)) {
@@ -530,37 +532,35 @@ public class FeesServiceImpl implements FeesService
         return response;
     }
 
-        @Override
-        public List<ClassFeesRevenueDTO> getClassWiseRevenue(String role, String email) {
+    @Override
+    public List<ClassFeesRevenueDTO> getClassWiseRevenue(String role, String email) {
 
-            String branchCode =
-                    staffService.fetchBranchCodeByRole(role, email);
+        String branchCode =
+                staffService.fetchBranchCodeByRole(role, email);
 
-            if (branchCode == null || branchCode.isBlank()) {
-                throw new IllegalStateException("Branch code not found");
-            }
-
-            List<Object[]> rows =
-                    feesCollectRepository.findClassWiseRevenueByPaymentMode(branchCode);
-
-            return rows.stream().map(row -> {
-                ClassFeesRevenueDTO dto = new ClassFeesRevenueDTO();
-                dto.setClassId(row[0] != null ? ((Number) row[0]).longValue() : null);
-                dto.setDivision((String) row[1]);
-                dto.setStandardName((String) row[2]);
-                dto.setDegreeName((String) row[3]);
-                dto.setDepartmentName((String) row[4]);
-                dto.setPaymentMode((String) row[5]);
-                dto.setTotalFeesRevenue(
-                        row[6] != null ? ((Number) row[6]).doubleValue() : 0.0
-                );
-                dto.setStatus("Completed");
-
-                return dto;
-            }).toList();
+        if (branchCode == null || branchCode.isBlank()) {
+            throw new IllegalStateException("Branch code not found");
         }
 
+        List<Object[]> rows =
+                feesCollectRepository.findClassWiseRevenueByPaymentMode(branchCode);
 
+        return rows.stream().map(row -> {
+            ClassFeesRevenueDTO dto = new ClassFeesRevenueDTO();
+            dto.setClassId(row[0] != null ? ((Number) row[0]).longValue() : null);
+            dto.setDivision((String) row[1]);
+            dto.setStandardName((String) row[2]);
+            dto.setDegreeName((String) row[3]);
+            dto.setDepartmentName((String) row[4]);
+            dto.setPaymentMode((String) row[5]);
+            dto.setTotalFeesRevenue(
+                    row[6] != null ? ((Number) row[6]).doubleValue() : 0.0
+            );
+            dto.setStatus("Completed");
+
+            return dto;
+        }).toList();
+    }
 
 
     public StudentFeesDTO mapToDTOFees(StudentFees fees) {
@@ -638,12 +638,12 @@ public class FeesServiceImpl implements FeesService
             dto.setScheduleList(scheduleList);
         }
 
-        if(!CollectionUtils.isEmpty(dto.getScheduleList())) {
+        if (!CollectionUtils.isEmpty(dto.getScheduleList())) {
             LocalDate earliestDueDate = dto.getScheduleList().stream().filter(feeScheduleDTO -> !feeScheduleDTO.isPaid())
                     .min(Comparator.comparing(FeeScheduleDTO::getDueDate,
                             Comparator.nullsLast(Comparator.naturalOrder()))).orElse(new FeeScheduleDTO()).getDueDate();
 
-            dto.setDueDate(earliestDueDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            dto.setDueDate(HelperUtil.getDateWithFormat(earliestDueDate));
         }
         return dto;
     }

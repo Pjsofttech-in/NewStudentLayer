@@ -4,6 +4,7 @@ import Layer.NewStudentManagement.DTO.CreatedByResponseDTO;
 import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueFilterDTO;
 import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.criteria.*;
 import org.apache.logging.log4j.util.Strings;
@@ -94,10 +95,8 @@ public class StudentFeesSpecification
                 ));
             }
 
-            if (StringUtils.isNotBlank(dto.getDueDate()) && isStrictlyValidDate(dto.getDueDate())) {
-
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
-                LocalDate parsedDate = LocalDate.parse(dto.getDueDate(), formatter);
+            if (StringUtils.isNotBlank(dto.getDueDate()) && HelperUtil.isStrictlyValidDate(dto.getDueDate())) {
+                LocalDate parsedDate = HelperUtil.parseDateWithFormat(dto.getDueDate());
 
                 Subquery<Long> subquery = null;
                 subquery = query.subquery(Long.class);
@@ -201,17 +200,5 @@ public class StudentFeesSpecification
 
             return predicate;
         };
-    }
-
-    public static boolean isStrictlyValidDate(String dateStr) {
-        try {
-            LocalDate.parse(dateStr,
-                    DateTimeFormatter.ofPattern("uuuu-MM-dd")
-                            .withResolverStyle(ResolverStyle.STRICT)
-            );
-            return true;
-        } catch (DateTimeParseException e) {
-            return false;
-        }
     }
 }

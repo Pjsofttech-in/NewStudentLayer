@@ -8,6 +8,7 @@ import Layer.NewStudentManagement.Repository.FeesCollectRepository;
 import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Service.FeesCollectService;
+import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
@@ -607,10 +608,8 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                     predicates.add(cb.equal(root.get("createdByEmail"), creatorEmail));
                 }
 
-                if (StringUtils.isNotBlank(filterDTO.getDueDate()) && isStrictlyValidDate(filterDTO.getDueDate())) {
-
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuu-MM-dd");
-                    LocalDate parsedDate = LocalDate.parse(filterDTO.getDueDate(), formatter);
+                if (StringUtils.isNotBlank(filterDTO.getDueDate()) && HelperUtil.isStrictlyValidDate(filterDTO.getDueDate())) {
+                    LocalDate parsedDate = HelperUtil.parseDateWithFormat(filterDTO.getDueDate());
 
                     Subquery<Long> subquery = null;
                     subquery = query.subquery(Long.class);
@@ -700,7 +699,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                         .min(Comparator.comparing(StudentFeeSchedule::getDueDate,
                                 Comparator.nullsLast(Comparator.naturalOrder()))).orElse(new StudentFeeSchedule()).getDueDate();
 
-                dto.setDueDate(earliestDueDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                dto.setDueDate(HelperUtil.getDateWithFormat(earliestDueDate));
             }
 
             result.add(dto);
@@ -867,17 +866,5 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         }
 
         return dto;
-    }
-
-    public static boolean isStrictlyValidDate(String dateStr) {
-        try {
-            LocalDate.parse(dateStr,
-                    DateTimeFormatter.ofPattern("uuuu-MM-dd")
-                            .withResolverStyle(ResolverStyle.STRICT)
-            );
-            return true;
-        } catch (DateTimeParseException e) {
-            return false;
-        }
     }
 }
