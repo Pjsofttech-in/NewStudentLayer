@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.Repository;
 
 import Layer.NewStudentManagement.DTO.FeesByPaymentModeDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
+import Layer.NewStudentManagement.DTO.FeesScheduleChartProjection;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -56,6 +57,18 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
             "ORDER BY MONTH(c.paymentDate) ASC")
     List<Object[]> getPaidFeesReportByMonth(@Param("year") int year,
                                             @Param("branchCode") String branchCode);
+
+    @Query("SELECT DAY(c.paymentDate) as dayOfMonth, SUM(c.amount) as amount " +
+            "FROM StudentFeesCollect c " +
+            "WHERE c.paymentDate IS NOT NULL " +
+            "AND LOWER(c.status) IN ('paid','complete','completed') " +
+            "AND c.branchCode = :branchCode " +
+            "AND YEAR(c.paymentDate) = :year AND MONTHNAME(c.paymentDate) = :monthName " +
+            "GROUP BY DAY(c.paymentDate) " +
+            "ORDER BY DAY(c.paymentDate) ")
+    List<FeesScheduleChartProjection> getPaidFeesReportByDayInMonth(@Param("year") int year,
+                                                                    @Param("monthName") String monthName,
+                                                                    @Param("branchCode") String branchCode);
 
     @Query("SELECT f.standardName, YEAR(c.paymentDate) as year, SUM(c.amount) as totalPaid " +
             "FROM StudentFeesCollect c " +

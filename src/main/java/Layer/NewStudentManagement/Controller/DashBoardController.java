@@ -6,7 +6,6 @@ import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -170,6 +169,29 @@ public class DashBoardController {
             @RequestParam(required = false) String branchCode) {
 
         Map<String, Double> response = feesCollectService.getFeesRevenueByBank(role, email, branchCode);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getFeesRevenueByMonth")
+    public ResponseEntity<Map<String, List<FeesScheduleChartDTO>>> getFeesRevenueByMonth(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam int academicYear,
+            @RequestParam(required = false) String branchCode) {
+
+        Map<String, List<FeesScheduleChartDTO>> response = feesService.getMonthlyReport(role, email, academicYear, branchCode);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/getFeesRevenueByDayInMonth")
+    public ResponseEntity<Map<String, List<FeesScheduleChartProjection>>> getFeesRevenueByDayInMonth(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam int academicYear,
+            @RequestParam String monthName,
+            @RequestParam(required = false) String branchCode) {
+
+        Map<String, List<FeesScheduleChartProjection>> response = feesCollectService.getReportByDayInMonth(role, email, academicYear, monthName, branchCode);
         return ResponseEntity.ok(response);
     }
 

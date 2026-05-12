@@ -4,7 +4,6 @@ import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,5 +22,5 @@ public interface FeesService
     FeesRevenueProjection getFeesRevenueByStudentId(String role, String email,Long studentId);
     Map<String, Object> getMonthlyFeesStatus(String role, String email, String month, @Nullable String branchCodeFilter);
     List<ClassFeesRevenueDTO> getClassWiseRevenue(String role, String email);
-
+    Map<String, List<FeesScheduleChartDTO>> getMonthlyReport(String role, String email, int academicYear, String branchCode);
 }

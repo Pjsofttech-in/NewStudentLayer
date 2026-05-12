@@ -29,5 +29,7 @@ public interface FeesCollectService
     Map<String, Object> getDailyCollectedFees(String role, String email, LocalDate date);
     Map<String, Object> getCollectedFeesByFilter(String role, String email, String filter,
                                                  LocalDate fromDate, LocalDate toDate);
+    Map<String, List<FeesScheduleChartProjection>> getReportByDayInMonth(String role, String email, int year, String monthName,
+                                                                                String branchCodeFilter);
 
 }

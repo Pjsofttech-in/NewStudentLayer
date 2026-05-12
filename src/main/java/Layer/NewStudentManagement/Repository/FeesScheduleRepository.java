@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Repository;
 
+import Layer.NewStudentManagement.DTO.FeesScheduleChartProjection;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,5 +28,19 @@ public interface FeesScheduleRepository extends JpaRepository<StudentFeeSchedule
             "WHERE LOWER(s.month) = LOWER(:month) AND s.studentFees.branchCode = :branchCode")
     List<StudentFeeSchedule> findByMonthAndBranchCode(@Param("month") String month,
                                                       @Param("branchCode") String branchCode);
+
+
+    @Query(value = """
+            SELECT s.month AS monthName, sum(s.collect_amount) AS amount 
+            FROM layerstudent.student_fee_schedule s
+            JOIN layerstudent.student_fees sf ON s.student_fees_id = sf.fid
+            where due_date IS NOT NULL AND YEAR(s.due_date) = :academicYear 
+            AND s.is_paid =:isPaid AND sf.branch_code = :branchCode
+            group by s.month
+            ORDER BY s.month
+            """, nativeQuery = true)
+    List<FeesScheduleChartProjection> findByAcademicYearAndBranchCode(@Param("academicYear") int year,
+                                                                      @Param("isPaid") int isPaid,
+                                                                      @Param("branchCode") String branchCode);
 
 }

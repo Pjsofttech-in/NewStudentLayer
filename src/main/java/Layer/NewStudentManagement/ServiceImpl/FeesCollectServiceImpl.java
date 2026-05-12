@@ -364,6 +364,46 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         return response;
     }
 
+    @Override
+    public Map<String, List<FeesScheduleChartProjection>> getReportByDayInMonth(String role, String email, int year, String monthName,
+                                                      @Nullable String branchCodeFilter) {
+
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to Get Collected Fees by Month");
+        }
+
+        Map<String, List<FeesScheduleChartProjection>> map = new HashMap<>();
+
+        if ("SUPERADMIN".equalsIgnoreCase(role)) {
+
+            List<String> branchCodes = staffService.getBranchCodesByInstituteEmail(email);
+
+            if (branchCodes == null || branchCodes.isEmpty()) {
+                throw new RuntimeException("No branch codes found for this Superadmin");
+            }
+
+            if (branchCodeFilter != null && !branchCodeFilter.isEmpty()) {
+
+                if (!branchCodes.contains(branchCodeFilter)) {
+                    throw new RuntimeException("Invalid branchCode for this Superadmin");
+                }
+
+                List<FeesScheduleChartProjection> list = feesCollectRepository.getPaidFeesReportByDayInMonth(year, monthName, branchCodeFilter);
+                map.put(branchCodeFilter, list);
+            }
+
+            for (String brCode : branchCodes) {
+                List<FeesScheduleChartProjection> results = feesCollectRepository.getPaidFeesReportByDayInMonth(year, monthName, branchCodeFilter);
+                map.put(brCode, results);
+            }
+        }
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        List<FeesScheduleChartProjection> results = feesCollectRepository.getPaidFeesReportByDayInMonth(year, monthName, branchCode);
+        map.put(branchCode, results);
+        return map;
+    }
+
     private List<Map<String, Object>> convertMonthlyResults(List<Object[]> results) {
         List<Map<String, Object>> response = new ArrayList<>();
 
@@ -383,8 +423,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         return response;
     }
 
-
-    @Override
+        @Override
     public List<Map<String, Object>> getReportByStandard(String role, String email) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees by Standard");
