@@ -43,4 +43,16 @@ public interface FeesScheduleRepository extends JpaRepository<StudentFeeSchedule
                                                                       @Param("isPaid") int isPaid,
                                                                       @Param("branchCode") String branchCode);
 
+    @Query(value = """
+            SELECT YEAR(s.due_date) AS year, s.is_paid AS isPaid, sum(s.collect_amount) AS amount
+            FROM layerstudent.student_fee_schedule s
+            JOIN layerstudent.student_fees sf ON s.student_fees_id = sf.fid
+            where due_date IS NOT NULL AND YEAR(s.due_date) >= :fromAcademicYear
+            AND YEAR(s.due_date) <= :toAcademicYear AND sf.branch_code = :branchCode
+            group by year, s.is_paid
+            ORDER BY year
+            """, nativeQuery = true)
+    List<FeesScheduleChartProjection> findByRangeOfAcademicYearsAndBranchCode(@Param("fromAcademicYear") int fromAcademicYear,
+                                                                              @Param("toAcademicYear") int toAcademicYear,
+                                                                              @Param("branchCode") String branchCode);
 }
