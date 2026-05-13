@@ -18,7 +18,7 @@ public interface FeesCollectService
     FeesCollectDTO getCollectedFeesById(String role, String email, Long id);
     List<Map<String, Object>> getReportByYear(String role, String email, @Nullable String branchCodeFilter);
     List<Map<String, Object>> getReportByMonth(String role, String email,int year,@Nullable String branchCodeFilter);
-    List<Map<String, Object>> getReportByStandard(String role, String email);
+    List<Map<String, Object>> getReportByStandard(String role, String email, int academicYear);
 
     List<FeesByPaymentModeDTO> getCollectedFeesByPaymentMode(String role, String email,@Nullable String branchCode, String institutionType, Integer year);
     Map<String, Double> getFeesRevenueByBank(String role,String email,@Nullable String branchCodeFilter);

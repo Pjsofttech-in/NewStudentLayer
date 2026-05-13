@@ -128,8 +128,8 @@ public class DashBoardController {
     }
 
     @GetMapping("/getCollectedFeesByStandard")
-    public List<Map<String, Object>> getReportByStandard(@RequestParam String role, @RequestParam String email) {
-        return feesCollectService.getReportByStandard(role, email);
+    public List<Map<String, Object>> getReportByStandard(@RequestParam String role, @RequestParam String email, @RequestParam int academicYear) {
+        return feesCollectService.getReportByStandard(role, email, academicYear);
     }
 
     @GetMapping("/getFeesByPaymentMode")

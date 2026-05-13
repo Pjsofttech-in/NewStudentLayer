@@ -423,25 +423,23 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         return response;
     }
 
-        @Override
-    public List<Map<String, Object>> getReportByStandard(String role, String email) {
+    @Override
+    public List<Map<String, Object>> getReportByStandard(String role, String email, int academicYear) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees by Standard");
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
-        List<Object[]> results = feesCollectRepository.getPaidFeesReportByStandard(branchCode);
+        List<Object[]> results = feesCollectRepository.getPaidFeesReportByStandard(branchCode, academicYear);
         List<Map<String, Object>> response = new ArrayList<>();
 
         for (Object[] row : results) {
             String standardName = row[0] != null ? (String) row[0] : "N/A"; // handle null
-            Integer year = (Integer) row[1];
-            Double totalPaid = (Double) row[2];
+            Double totalPaid = (Double) row[1];
 
             Map<String, Object> map = new HashMap<>();
             map.put("standardName", standardName);
-            map.put("academicYear", year + "-" + (year + 1));
             map.put("totalPaid", totalPaid);
             response.add(map);
         }
