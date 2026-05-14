@@ -11,20 +11,13 @@ import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
-import org.apache.logging.log4j.util.Strings;
+import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.format.ResolverStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -636,13 +629,17 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                 if (filterDTO.getFeesStatus() != null && !filterDTO.getFeesStatus().isEmpty())
                     predicates.add(cb.equal(root.get("feesStatus"), filterDTO.getFeesStatus()));
 
-                if (StringUtils.isNotBlank(filterDTO.getCreatedByEmail()))
-                    predicates.add(cb.equal(root.get("createdByEmail"), filterDTO.getCreatedByEmail()));
+                if (StringUtils.isNotBlank(filterDTO.getCreatedByEmail())) {
+//                    predicates.add(cb.equal(root.get("createdByEmail"), filterDTO.getCreatedByEmail()));
+                    HelperUtil.addFeesCollectedByEmailFilterForStudentFees(root, query, cb, filterDTO.getCreatedByEmail(), predicates);
+                }
+
 
                 if (StringUtils.isNotBlank(filterDTO.getCreatedByName())) {
                     CreatedByResponseDTO response = staffService.getCreatorByName(filterDTO.getCreatedByName()).block();
                     String creatorEmail = Objects.isNull(response) ? "null" : response.getName();
-                    predicates.add(cb.equal(root.get("createdByEmail"), creatorEmail));
+//                    predicates.add(cb.equal(root.get("createdByEmail"), creatorEmail));
+                    HelperUtil.addFeesCollectedByEmailFilterForStudentFees(root, query, cb, creatorEmail, predicates);
                 }
 
                 if (StringUtils.isNotBlank(filterDTO.getDueDate()) && HelperUtil.isStrictlyValidDate(filterDTO.getDueDate())) {
@@ -744,7 +741,6 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
         return new PageImpl<>(result, pageable, studentFeesPage.getTotalElements());
     }
-
 
     @Override
     public Map<String, Object> getDailyCollectedFees(String role, String email, LocalDate date) {

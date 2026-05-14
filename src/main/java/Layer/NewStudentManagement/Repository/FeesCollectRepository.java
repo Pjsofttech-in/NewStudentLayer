@@ -89,7 +89,7 @@ public interface FeesCollectRepository extends JpaRepository<StudentFeesCollect,
     )
     FROM StudentFeesCollect s
     WHERE (:branchCode IS NULL OR s.branchCode = :branchCode)
-      AND s.status = 'Completed'
+      AND LOWER(s.status) IN ('paid','complete','completed')
       AND s.studentFees.institutionType = :institutionType
       AND (:year IS NULL OR YEAR(s.paymentDate) = :year)
     GROUP BY s.paymentMode

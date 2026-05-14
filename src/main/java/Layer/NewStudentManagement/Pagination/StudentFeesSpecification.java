@@ -89,10 +89,11 @@ public class StudentFeesSpecification
             }
 
             if (StringUtils.isNotBlank(dto.getCreatedByEmail())) {
-                predicates.add(criteriaBuilder.equal(
-                        criteriaBuilder.lower(root.get("createdByEmail")),
-                        dto.getCreatedByEmail()
-                ));
+//                predicates.add(criteriaBuilder.equal(
+//                        criteriaBuilder.lower(root.get("createdByEmail")),
+//                        dto.getCreatedByEmail()
+//                ));
+                HelperUtil.addFeesCollectedByEmailFilterForStudentFees(root, query, criteriaBuilder, dto.getCreatedByEmail(), predicates);
             }
 
             if (StringUtils.isNotBlank(dto.getDueDate()) && HelperUtil.isStrictlyValidDate(dto.getDueDate())) {
