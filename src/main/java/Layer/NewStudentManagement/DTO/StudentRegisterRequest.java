@@ -46,6 +46,7 @@ public class StudentRegisterRequest
     private Integer entranceMarks;
     private Integer eMarksOutOff;
     private String entranceMarkSheet;
+    private String permanentEducationNumber;
 
     private String createdByEmail;
     private String role;

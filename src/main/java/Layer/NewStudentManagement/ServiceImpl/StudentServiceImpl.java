@@ -1523,6 +1523,7 @@ public class StudentServiceImpl implements StudentService {
         student.setEnrollmentDate(LocalDate.now());
         student.setRegistrationNumber(generateRegistrationNumber());
         student.setFormStatus(request.getFormStatus());
+        student.setPermanentEducationNumber(request.getPermanentEducationNumber());
 
         // GraduationType, Stream, Standard, Medium, Degree, Department setup (unchanged)
         if (request.getGraduationTypeId() != null) {

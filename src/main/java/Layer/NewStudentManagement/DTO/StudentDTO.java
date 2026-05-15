@@ -72,6 +72,7 @@ public class StudentDTO
     private Integer entranceMarks;
     private Integer eMarksOutOff;
     private String entranceMarkSheet;
+    private String permanentEducationNumber;
 
     @Email
     private String createdByEmail;

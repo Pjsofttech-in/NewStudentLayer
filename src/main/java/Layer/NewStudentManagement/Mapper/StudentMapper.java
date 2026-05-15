@@ -92,6 +92,7 @@ public class StudentMapper
             dto.setBranchCode(student.getBranchCode());
 
             dto.setAddress(toStudentAddressDTO(student.getAddress()));
+            dto.setPermanentEducationNumber(student.getPermanentEducationNumber());
 
             dto.setEducationList(
                     student.getEducationList() != null
