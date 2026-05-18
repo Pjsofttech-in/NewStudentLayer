@@ -70,18 +70,18 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             }
         }
 
-        if ("Completed".equalsIgnoreCase(collect.getStatus())) {
-            List<StudentFeesCollect> alreadyCollected = feesCollectRepository
-                    .findCompletedPaymentInMonth(fees.getFid(),
-                            LocalDate.now().withDayOfMonth(1),
-                            LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
+//        if ("Completed".equalsIgnoreCase(collect.getStatus())) {
+//            List<StudentFeesCollect> alreadyCollected = feesCollectRepository
+//                    .findCompletedPaymentInMonth(fees.getFid(),
+//                            LocalDate.now().withDayOfMonth(1),
+//                            LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()));
 
-            for (StudentFeesCollect e : alreadyCollected) {
-                if (e.getMonth().equalsIgnoreCase(collect.getMonth())) {
-                    throw new RuntimeException("Fees already collected for this month/installment.");
-                }
-            }
-        }
+//            for (StudentFeesCollect e : alreadyCollected) {
+//                if (e.getMonth().equalsIgnoreCase(collect.getMonth())) {
+//                    throw new RuntimeException("Fees already collected for this month/installment.");
+//                }
+//            }
+//        }
 
         Long maxId = feesCollectRepository.findMaxId();
         String invoice = String.format("%06d", (maxId != null ? maxId + 1 : 1));

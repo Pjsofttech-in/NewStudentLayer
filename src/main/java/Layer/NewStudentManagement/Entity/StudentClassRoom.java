@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -68,6 +69,9 @@ public class StudentClassRoom
 
     @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentClassRoomTeacherSubject> teacherSubjectAssignments;
+
+    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentTimetable> studentTimetables = new ArrayList<>();
 
 
 }
