@@ -431,10 +431,10 @@ public class FeesServiceImpl implements FeesService {
         return feesRepository.getFeesRevenueByStudentId(studentId);
     }
 
-    public Map<String, List<FeesScheduleChartDTO>> getMonthlyReport(String role, String email, int academicYear, String branchCodeFilter) {
+    public Map<String, List<FeesScheduleChartByMonthDTO>> getMonthlyReport(String role, String email, int academicYear, String branchCodeFilter) {
         checkPermission(role, email, "Get");
 
-        Map<String, List<FeesScheduleChartDTO>> map = new HashMap<>();
+        Map<String, List<FeesScheduleChartByMonthDTO>> map = new HashMap<>();
 
         if ("SUPERADMIN".equalsIgnoreCase(role)) {
 
@@ -449,27 +449,27 @@ public class FeesServiceImpl implements FeesService {
                     throw new RuntimeException("Invalid branchCode for this Superadmin");
                 }
 
-                List<FeesScheduleChartDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, branchCodeFilter);
+                List<FeesScheduleChartByMonthDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, branchCodeFilter);
                 map.put(branchCodeFilter, listOfFeesScheduleByMonth);
             }
 
             for (String brCode : branchCodes) {
-                List<FeesScheduleChartDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, branchCodeFilter);
+                List<FeesScheduleChartByMonthDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, branchCodeFilter);
                 map.put(brCode, listOfFeesScheduleByMonth);
             }
             return map;
         }
 
         String brCode = staffService.fetchBranchCodeByRole(role, email);
-        List<FeesScheduleChartDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, brCode);
+        List<FeesScheduleChartByMonthDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, brCode);
         map.put(brCode, listOfFeesScheduleByMonth);
         return map;
     }
 
-    public Map<String, List<FeesScheduleChartDTO>> getYearlyReport(String role, String email, int fromAcademicYear, int toAcademicYear, String branchCodeFilter) {
+    public Map<String, List<FeesScheduleChartByYearDTO>> getYearlyReport(String role, String email, int fromAcademicYear, int toAcademicYear, String branchCodeFilter) {
         checkPermission(role, email, "Get");
 
-        Map<String, List<FeesScheduleChartDTO>> map = new HashMap<>();
+        Map<String, List<FeesScheduleChartByYearDTO>> map = new HashMap<>();
 
         if ("SUPERADMIN".equalsIgnoreCase(role)) {
 
@@ -484,32 +484,32 @@ public class FeesServiceImpl implements FeesService {
                     throw new RuntimeException("Invalid branchCode for this Superadmin");
                 }
 
-                List<FeesScheduleChartDTO> listOfFeesScheduleByYear = getListOfFeesScheduleByYear(fromAcademicYear, toAcademicYear, branchCodeFilter);
+                List<FeesScheduleChartByYearDTO> listOfFeesScheduleByYear = getListOfFeesScheduleByYear(fromAcademicYear, toAcademicYear, branchCodeFilter);
                 map.put(branchCodeFilter, listOfFeesScheduleByYear);
             }
 
             for (String brCode : branchCodes) {
-                List<FeesScheduleChartDTO> listOfFeesScheduleByYear = getListOfFeesScheduleByYear(fromAcademicYear, toAcademicYear, branchCodeFilter);
+                List<FeesScheduleChartByYearDTO> listOfFeesScheduleByYear = getListOfFeesScheduleByYear(fromAcademicYear, toAcademicYear, branchCodeFilter);
                 map.put(brCode, listOfFeesScheduleByYear);
             }
             return map;
         }
 
         String brCode = staffService.fetchBranchCodeByRole(role, email);
-        List<FeesScheduleChartDTO> listOfFeesScheduleByYear = getListOfFeesScheduleByYear(fromAcademicYear, toAcademicYear, branchCodeFilter);
+        List<FeesScheduleChartByYearDTO> listOfFeesScheduleByYear = getListOfFeesScheduleByYear(fromAcademicYear, toAcademicYear, brCode);
         map.put(brCode, listOfFeesScheduleByYear);
         return map;
     }
 
-    private List<FeesScheduleChartDTO> getListOfFeesScheduleByYear(int fromAcademicYear, int toAcademicYear, String branchCode) {
+    private List<FeesScheduleChartByYearDTO> getListOfFeesScheduleByYear(int fromAcademicYear, int toAcademicYear, String branchCode) {
         List<FeesScheduleChartProjection> lisOfYears = feesScheduleRepository.findByRangeOfAcademicYearsAndBranchCode(fromAcademicYear, toAcademicYear,
                  branchCode);
 
         // Map to hold our combined results
-        Map<String, FeesScheduleChartDTO> map = new HashMap<>();
+        Map<String, FeesScheduleChartByYearDTO> map = new HashMap<>();
         for (FeesScheduleChartProjection p : lisOfYears) {
             // Find existing DTO for this month, or create a new one if it doesn't exist
-            FeesScheduleChartDTO dto = map.computeIfAbsent(p.getYear(), FeesScheduleChartDTO::new);
+            FeesScheduleChartByYearDTO dto = map.computeIfAbsent(p.getYear(), FeesScheduleChartByYearDTO::new);
 
             // Check if paid, and add to the respective bucket
             if (Boolean.TRUE.equals(p.getIsPaid())) {
@@ -518,35 +518,38 @@ public class FeesServiceImpl implements FeesService {
                 dto.setPendingAmount(p.getAmount());
             }
         }
-
-        return new ArrayList<>(map.values()).stream().sorted((o1, o2) -> o1.getMonthName().compareTo(o2.getMonthName())).collect(Collectors.toList());
+        Collection<FeesScheduleChartByYearDTO> values = map.values();
+        values.forEach(FeesScheduleChartByYearDTO::calculateTotalAmount);
+        return new ArrayList<>(values).stream().sorted((o1, o2) -> o1.getYear().compareTo(o2.getYear())).collect(Collectors.toList());
     }
 
-    private List<FeesScheduleChartDTO> getListOfFeesScheduleByMonth(int academicYear, String branchCode) {
+    private List<FeesScheduleChartByMonthDTO> getListOfFeesScheduleByMonth(int academicYear, String branchCode) {
         List<FeesScheduleChartProjection> paidList = feesScheduleRepository.findByAcademicYearAndBranchCode(academicYear, 1, branchCode);
         List<FeesScheduleChartProjection> unpaidList = feesScheduleRepository.findByAcademicYearAndBranchCode(academicYear, 0, branchCode);
 
         // Map to hold our combined results
-        Map<String, FeesScheduleChartDTO> summaryMap = new HashMap<>();
+        Map<String, FeesScheduleChartByMonthDTO> summaryMap = new HashMap<>();
 
         // 1. Process Paid List
         for (FeesScheduleChartProjection p : paidList) {
-            FeesScheduleChartDTO dto = summaryMap.computeIfAbsent(p.getMonthName(), FeesScheduleChartDTO::new);
+            FeesScheduleChartByMonthDTO dto = summaryMap.computeIfAbsent(p.getMonthName(), FeesScheduleChartByMonthDTO::new);
             dto.setPaidAmount(p.getAmount());
         }
 
         // 2. Process Unpaid List
         for (FeesScheduleChartProjection u : unpaidList) {
-            FeesScheduleChartDTO dto = summaryMap.computeIfAbsent(u.getMonthName(), FeesScheduleChartDTO::new);
+            FeesScheduleChartByMonthDTO dto = summaryMap.computeIfAbsent(u.getMonthName(), FeesScheduleChartByMonthDTO::new);
             dto.setPendingAmount(u.getAmount());
         }
+        Collection<FeesScheduleChartByMonthDTO> values = summaryMap.values();
+        values.forEach(FeesScheduleChartByMonthDTO::calculateTotalAmount);
         return new ArrayList<>(summaryMap.values()).stream().sorted((o1, o2) -> o1.getMonthName().compareTo(o2.getMonthName())).collect(Collectors.toList());
     }
 
-    public Map<String, List<FeesScheduleChartDTO>> getFeesCollectionByPaymentMode(String role, String email, int academicYear, String branchCodeFilter) {
+    public Map<String, List<FeesScheduleChartByMonthDTO>> getFeesCollectionByPaymentMode(String role, String email, int academicYear, String branchCodeFilter) {
         checkPermission(role, email, "Get");
 
-        Map<String, List<FeesScheduleChartDTO>> map = new HashMap<>();
+        Map<String, List<FeesScheduleChartByMonthDTO>> map = new HashMap<>();
 
         if ("SUPERADMIN".equalsIgnoreCase(role)) {
 
@@ -561,19 +564,19 @@ public class FeesServiceImpl implements FeesService {
                     throw new RuntimeException("Invalid branchCode for this Superadmin");
                 }
 
-                List<FeesScheduleChartDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, branchCodeFilter);
+                List<FeesScheduleChartByMonthDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, branchCodeFilter);
                 map.put(branchCodeFilter, listOfFeesScheduleByMonth);
             }
 
             for (String brCode : branchCodes) {
-                List<FeesScheduleChartDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, branchCodeFilter);
+                List<FeesScheduleChartByMonthDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, branchCodeFilter);
                 map.put(brCode, listOfFeesScheduleByMonth);
             }
             return map;
         }
 
         String brCode = staffService.fetchBranchCodeByRole(role, email);
-        List<FeesScheduleChartDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, brCode);
+        List<FeesScheduleChartByMonthDTO> listOfFeesScheduleByMonth = getListOfFeesScheduleByMonth(academicYear, brCode);
         map.put(brCode, listOfFeesScheduleByMonth);
         return map;
     }

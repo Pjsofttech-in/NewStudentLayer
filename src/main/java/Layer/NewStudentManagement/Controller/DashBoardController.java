@@ -173,25 +173,25 @@ public class DashBoardController {
     }
 
     @GetMapping("/getFeesRevenueByYear")
-    public ResponseEntity<Map<String, List<FeesScheduleChartDTO>>> getFeesRevenueByYear(
+    public ResponseEntity<Map<String, List<FeesScheduleChartByYearDTO>>> getFeesRevenueByYear(
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam int fromAcademicYear,
             @RequestParam int toAcademicYear,
             @RequestParam(required = false) String branchCode) {
 
-        Map<String, List<FeesScheduleChartDTO>> response = feesService.getYearlyReport(role, email, fromAcademicYear, toAcademicYear, branchCode);
+        Map<String, List<FeesScheduleChartByYearDTO>> response = feesService.getYearlyReport(role, email, fromAcademicYear, toAcademicYear, branchCode);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/getFeesRevenueByMonth")
-    public ResponseEntity<Map<String, List<FeesScheduleChartDTO>>> getFeesRevenueByMonth(
+    public ResponseEntity<Map<String, List<FeesScheduleChartByMonthDTO>>> getFeesRevenueByMonth(
             @RequestParam String role,
             @RequestParam String email,
             @RequestParam int academicYear,
             @RequestParam(required = false) String branchCode) {
 
-        Map<String, List<FeesScheduleChartDTO>> response = feesService.getMonthlyReport(role, email, academicYear, branchCode);
+        Map<String, List<FeesScheduleChartByMonthDTO>> response = feesService.getMonthlyReport(role, email, academicYear, branchCode);
         return ResponseEntity.ok(response);
     }
 
