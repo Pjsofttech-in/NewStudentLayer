@@ -32,4 +32,6 @@ public interface FeesCollectService
     Map<String, List<FeesScheduleChartProjection>> getReportByDayInMonth(String role, String email, int year, String monthName,
                                                                                 String branchCodeFilter);
 
+    StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, Long studentFeesScheduleId);
+
 }

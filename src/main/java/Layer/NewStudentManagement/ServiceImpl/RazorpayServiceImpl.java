@@ -1,5 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.Entity.StudentFeesCollect;
+import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Service.RazorpayService;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
@@ -15,17 +17,19 @@ public class RazorpayServiceImpl implements RazorpayService {
     private final RazorpayClient razorpayClient;
     private final String keySecret;
     private final StaffService staffService;
+    private final FeesCollectService feesCollectService;
 
     public RazorpayServiceImpl(
             RazorpayClient razorpayClient,
-            @Value("${razorpay.key.secret}") String keySecret, StaffService staffService) {
+            @Value("${razorpay.key.secret}") String keySecret, StaffService staffService, FeesCollectService feesCollectService) {
         this.razorpayClient = razorpayClient;
         this.keySecret = keySecret;
         this.staffService = staffService;
+        this.feesCollectService = feesCollectService;
     }
 
     // 1. Create a transaction order
-    public String createOrder(String role, String email, BigDecimal amountInRupees, String receiptNumber) throws Exception {
+    public String createOrder(String role, String email, BigDecimal amountInRupees, Long studentFeeScheduleId) throws Exception {
         if (!staffService.hasPermission(role, email, "POST")) {
             throw new RuntimeException("You don't have permission to create order");
         }
@@ -35,7 +39,9 @@ public class RazorpayServiceImpl implements RazorpayService {
         JSONObject orderRequest = new JSONObject();
         orderRequest.put("amount", amountInPaise.intValue());
         orderRequest.put("currency", "INR");
-        orderRequest.put("receipt", receiptNumber);
+        orderRequest.put("receipt", "receiptNumber");//Pls fix this b4 commiting
+
+        StudentFeesCollect feeCollectionB4PaymentGateway = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, studentFeeScheduleId);
 
         // Call Razorpay API
         Order order = razorpayClient.orders.create(orderRequest);

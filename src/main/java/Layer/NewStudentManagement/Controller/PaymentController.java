@@ -22,9 +22,9 @@ public class PaymentController {
     public ResponseEntity<?> startPaymentFlow(@RequestParam String role,
                                               @RequestParam String email,
                                               @RequestParam BigDecimal amount,
-                                              @RequestParam String receiptId) {
+                                              @RequestParam Long studentFeeScheduleId) {
         try {
-            String razorpayOrderId = razorpayService.createOrder(role, email, amount, receiptId);
+            String razorpayOrderId = razorpayService.createOrder(role, email, amount, studentFeeScheduleId);
             return ResponseEntity.ok(Map.of("orderId", razorpayOrderId));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed to initialize payment tracking infrastructure.");

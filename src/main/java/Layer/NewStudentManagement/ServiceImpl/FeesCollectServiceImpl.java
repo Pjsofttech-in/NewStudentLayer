@@ -900,4 +900,43 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
         return dto;
     }
+
+    public StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, Long studentFeesScheduleId) {
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        Optional<StudentFeeSchedule> feeScheduleOptional = feesScheduleRepository.findById(studentFeesScheduleId);
+        if (feeScheduleOptional.isPresent()) {
+            StudentFeeSchedule studentFeeSchedule = feeScheduleOptional.get();
+            StudentFees studentFees = studentFeeSchedule.getStudentFees();
+
+            StudentFeesCollect sfc = new StudentFeesCollect();
+            sfc.setAdmissionFee(studentFees.getAdmissionFee());
+            sfc.setExamFees(studentFees.getExamFees());
+            sfc.setUniformFee(studentFees.getUniformFee());
+            sfc.setTransportBusFee(studentFees.getTransportBusFee());
+            sfc.setTuitionFee(studentFees.getTuitionFee());
+            sfc.setBuildingFundFee(studentFees.getBuildingFundFee());
+            sfc.setComputerClassFee(studentFees.getComputerClassFee());
+            sfc.setSportFees(studentFees.getSportFees());
+            sfc.setLibraryFees(studentFees.getLibraryFees());
+            sfc.setHostelFee(studentFees.getHostelFee());
+            sfc.setPracticalFee(studentFees.getPracticalFee());
+
+            sfc.setStudentFeeSchedule(studentFeeSchedule);
+            sfc.setStudentFees(studentFees);
+
+            sfc.setAmount(studentFeeSchedule.getCollectAmount());
+            sfc.setMonth(studentFeeSchedule.getMonth());
+            sfc.setPaymentDate(LocalDate.now());
+            sfc.setFeesPaymentType(studentFees.getFeesCollectionType());
+            sfc.setFeesType(studentFeeSchedule.getFeesType());
+            sfc.setDuedate(studentFeeSchedule.getDueDate());
+
+            sfc.setCreatedByEmail(email);
+            sfc.setRole(role);
+            sfc.setBranchCode(branchCode);
+
+            return feesCollectRepository.save(sfc);
+        }
+        return null;
+    }
 }
