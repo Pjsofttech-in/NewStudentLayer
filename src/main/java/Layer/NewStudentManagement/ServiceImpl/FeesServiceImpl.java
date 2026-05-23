@@ -794,7 +794,24 @@ public class FeesServiceImpl implements FeesService {
                             Comparator.nullsLast(Comparator.naturalOrder()))).orElse(new FeeScheduleDTO()).getDueDate();
 
             dto.setDueDate(HelperUtil.getDateWithFormat(earliestDueDate));
+
+            //Find all payment collected for particular student and its current fee object
+            String lastCollectionDate = getLastCollectionDate(fees);
+            dto.setLastPaymentCollectionDate(lastCollectionDate);
         }
         return dto;
+    }
+
+    public String getLastCollectionDate(StudentFees fees) {
+        List<StudentFeesCollect> allStudentFeesCollected = feesCollectRepository.findAllStudentFeesCollected(fees.getFid());
+        if (!CollectionUtils.isEmpty(allStudentFeesCollected)) {
+            Optional<StudentFeesCollect> first = allStudentFeesCollected.stream().min
+                    ((o1, o2) -> o1.getId().compareTo(o2.getId()));
+
+            if (first.isPresent()) {
+                return HelperUtil.getDateWithFormat(first.get().getPaymentDate());
+            }
+        }
+        return "";
     }
 }

@@ -8,6 +8,7 @@ import Layer.NewStudentManagement.Repository.FeesCollectRepository;
 import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Service.FeesCollectService;
+import Layer.NewStudentManagement.Service.FeesService;
 import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
@@ -32,6 +33,9 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
     @Autowired
     StaffService staffService;
+
+    @Autowired
+    FeesService feesService;
 
     @Autowired
     FeesScheduleRepository feesScheduleRepository;
@@ -734,6 +738,9 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                                 Comparator.nullsLast(Comparator.naturalOrder()))).orElse(new StudentFeeSchedule()).getDueDate();
 
                 dto.setDueDate(HelperUtil.getDateWithFormat(earliestDueDate));
+
+                String lastCollectionDate = feesService.getLastCollectionDate(sf);
+                dto.setLastCollectionDate(lastCollectionDate);
             }
 
             result.add(dto);
@@ -901,7 +908,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         return dto;
     }
 
-    public StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, Long studentFeesScheduleId) {
+    public StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, String receiptId, Long studentFeesScheduleId) {
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         Optional<StudentFeeSchedule> feeScheduleOptional = feesScheduleRepository.findById(studentFeesScheduleId);
         if (feeScheduleOptional.isPresent()) {
@@ -924,6 +931,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             sfc.setStudentFeeSchedule(studentFeeSchedule);
             sfc.setStudentFees(studentFees);
 
+            sfc.setTransactionId(receiptId);
             sfc.setAmount(studentFeeSchedule.getCollectAmount());
             sfc.setMonth(studentFeeSchedule.getMonth());
             sfc.setPaymentDate(LocalDate.now());

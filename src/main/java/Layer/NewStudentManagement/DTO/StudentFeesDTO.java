@@ -15,8 +15,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentFeesDTO
-{
+public class StudentFeesDTO {
     private Long fid;
     private String studentName;
     private Integer rollNo;
@@ -46,7 +45,7 @@ public class StudentFeesDTO
     private Long sfid;
     private double paidAmount;         // total paid by student
     private double pendingAmount;     // remaining amount
-//    private String paymentStatus;     // Pending, Ongoing, Completed
+    //    private String paymentStatus;     // Pending, Ongoing, Completed
 //    private String feesPaymentType;
 //    private double lateFeeCharges;
     private Double otherFees1;
@@ -67,4 +66,5 @@ public class StudentFeesDTO
     private String role;
     private String branchCode;
     private String dueDate;
+    private String lastPaymentCollectionDate;
 }

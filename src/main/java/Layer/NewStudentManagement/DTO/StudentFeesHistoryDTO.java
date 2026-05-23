@@ -38,4 +38,5 @@ public class StudentFeesHistoryDTO {
     private String createdByName;
     private String role;
     private String dueDate;
+    private String lastCollectionDate;
 }

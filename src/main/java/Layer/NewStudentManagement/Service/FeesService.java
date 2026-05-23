@@ -24,4 +24,5 @@ public interface FeesService
     List<ClassFeesRevenueDTO> getClassWiseRevenue(String role, String email);
     Map<String, List<FeesScheduleChartByMonthDTO>> getMonthlyReport(String role, String email, int academicYear, String branchCode);
     Map<String, List<FeesScheduleChartByYearDTO>> getYearlyReport(String role, String email, int fromAcademicYear, int toAcademicYear, String branchCodeFilter);
+    String getLastCollectionDate(StudentFees fees);
 }
