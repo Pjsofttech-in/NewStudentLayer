@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Service.RazorpayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,9 @@ public class PaymentController {
 
     @Autowired
     private RazorpayService razorpayService;
+
+    @Autowired
+    private PaymentTransactionsService paymentTransactionsService;
 
     // Call this before opening the modal box
     @PostMapping("/createPaymentOrderId")
@@ -41,7 +45,7 @@ public class PaymentController {
         String signature = payload.get("razorpay_signature");
 
         boolean isAuthentic = razorpayService.verifyPaymentSignature(role, email, orderId, paymentId, signature);
-
+        paymentTransactionsService.updateOrder(role, email, isAuthentic, paymentId, orderId);
         if (isAuthentic) {
             // Business Logic: 
             // 1. Mark transaction record status = PAID in your SQL table.

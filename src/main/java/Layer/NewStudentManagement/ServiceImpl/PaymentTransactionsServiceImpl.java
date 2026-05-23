@@ -4,27 +4,73 @@ import Layer.NewStudentManagement.Entity.PaymentTransactions;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Repository.PaymentTransactionsRepository;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
+import com.razorpay.Payment;
+import com.razorpay.RazorpayClient;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class PaymentTransactionsServiceImpl implements PaymentTransactionsService {
 
     private final PaymentTransactionsRepository paymentTransactionsRepository;
+    private final RazorpayClient razorpayClient;
 
-    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository) {
+    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, RazorpayClient razorpayClient) {
         this.paymentTransactionsRepository = paymentTransactionsRepository;
+        this.razorpayClient = razorpayClient;
     }
 
     @Override
-    public String createOrder(String role, String email, BigDecimal amountInRupees, String receiptNumber, StudentFeesCollect feesCollect) throws Exception {
+    public void createOrder(String role, String email, BigDecimal amountInRupees, String receiptNumber, String orderId, StudentFeesCollect feesCollect) throws Exception {
         PaymentTransactions paymentTransactions = new PaymentTransactions();
         paymentTransactions.setCreatedBy(email);
-        paymentTransactions.setAmount(amountInRupees);
         paymentTransactions.setCreatedByRole(role);
-//        paymentTransactions.set
 
-        return "";
+        paymentTransactions.setCreatedAt(LocalDateTime.now());
+        paymentTransactions.setAmount(amountInRupees);
+        paymentTransactions.setStatus(PaymentTransactions.TransactionStatus.CREATED);
+        paymentTransactions.setFeesCollect(feesCollect);
+        paymentTransactions.setReceiptNo(receiptNumber);
+        paymentTransactions.setRazorpayOrderId(orderId);
+
+        paymentTransactionsRepository.save(paymentTransactions);
     }
+
+    public void updateOrder(String role, String email, boolean isAuthentic, String razorPaymentId, String orderId) {
+        Optional<PaymentTransactions> byRazorpayOrderId = paymentTransactionsRepository.findByRazorpayOrderId(orderId);
+
+        if (byRazorpayOrderId.isPresent()) {
+            PaymentTransactions paymentTransactions = byRazorpayOrderId.get();
+            paymentTransactions.setRazorpayPaymentId(razorPaymentId);
+            paymentTransactions.setUpdatedBy(email);
+            paymentTransactions.setUpdatedAt(LocalDateTime.now());
+            paymentTransactions.setUpdatedByRole(role);
+
+            StudentFeesCollect feesCollect = paymentTransactions.getFeesCollect();
+
+            String modeOfPayment = "UNKNOWN";
+            try {
+                Payment paymentDetails = razorpayClient.payments.fetch(razorPaymentId);
+                modeOfPayment = paymentDetails.get("method").toString().toUpperCase();
+                feesCollect.setPaymentMode(modeOfPayment);
+                feesCollect.setStatus(isAuthentic ? "COMPLETED" : "FAILED");
+                //Need to set this  fields once integration is complete
+//                feesCollect.setIfscCode("");
+//                feesCollect.setInvoice("");
+//                feesCollect.setBankName("");
+//                feesCollect.setBankBranchName("");
+//                feesCollect.setAccountHolderName("");
+            } catch (Exception e) {
+                // Log warning but don't crash the transaction if metadata fetch fails
+                System.err.println("Failed to fetch transaction metadata from Razorpay: " + e.getMessage());
+            }
+            // This ensures a malicious user cannot fake successful checkout payloads
+
+            paymentTransactionsRepository.save(paymentTransactions);
+        }
+    }
+
 }

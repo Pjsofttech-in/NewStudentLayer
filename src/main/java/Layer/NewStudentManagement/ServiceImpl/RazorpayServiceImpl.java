@@ -2,8 +2,11 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Service.FeesCollectService;
+import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Service.RazorpayService;
+import Layer.NewStudentManagement.Util.ReceiptUtils;
 import com.razorpay.Order;
+import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import com.razorpay.Utils;
 import org.json.JSONObject;
@@ -18,14 +21,16 @@ public class RazorpayServiceImpl implements RazorpayService {
     private final String keySecret;
     private final StaffService staffService;
     private final FeesCollectService feesCollectService;
+    private final PaymentTransactionsService paymentTransactionsService;
 
     public RazorpayServiceImpl(
             RazorpayClient razorpayClient,
-            @Value("${razorpay.key.secret}") String keySecret, StaffService staffService, FeesCollectService feesCollectService) {
+            @Value("${razorpay.key.secret}") String keySecret, StaffService staffService, FeesCollectService feesCollectService, PaymentTransactionsService paymentTransactionsService) {
         this.razorpayClient = razorpayClient;
         this.keySecret = keySecret;
         this.staffService = staffService;
         this.feesCollectService = feesCollectService;
+        this.paymentTransactionsService = paymentTransactionsService;
     }
 
     // 1. Create a transaction order
@@ -35,16 +40,18 @@ public class RazorpayServiceImpl implements RazorpayService {
         }
         // Convert Rupees to Paise
         BigDecimal amountInPaise = amountInRupees.multiply(BigDecimal.valueOf(100));
-
+        String receiptId = ReceiptUtils.generateTimestampReceiptId();
         JSONObject orderRequest = new JSONObject();
         orderRequest.put("amount", amountInPaise.intValue());
         orderRequest.put("currency", "INR");
-        orderRequest.put("receipt", "receiptNumber");//Pls fix this b4 commiting
+        orderRequest.put("receipt", receiptId);//Pls fix this b4 commiting
 
-        StudentFeesCollect feeCollectionB4PaymentGateway = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, studentFeeScheduleId);
+        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId);
 
         // Call Razorpay API
         Order order = razorpayClient.orders.create(orderRequest);
+
+        paymentTransactionsService.createOrder(role, email, amountInRupees, receiptId, order.get("id").toString(), feesCollect);
 
         // Returns the order ID (e.g., order_NXb87tYv8p2Xy)
         return order.get("id").toString();
@@ -61,7 +68,6 @@ public class RazorpayServiceImpl implements RazorpayService {
             options.append("razorpay_payment_id", paymentId);
             options.append("razorpay_signature", signature);
 
-            // This ensures a malicious user cannot fake successful checkout payloads
             return Utils.verifyPaymentSignature(options, keySecret);
         } catch (Exception e) {
             return false;

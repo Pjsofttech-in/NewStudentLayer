@@ -6,5 +6,7 @@ import java.math.BigDecimal;
 
 public interface PaymentTransactionsService {
     // 1. Create a transaction order
-    public String createOrder(String role, String email, BigDecimal amountInRupees, String receiptNumber, StudentFeesCollect feesCollect) throws Exception;
+    public void createOrder(String role, String email, BigDecimal amountInRupees, String receiptNumber, String orderId, StudentFeesCollect feesCollect) throws Exception;
+
+    public void updateOrder(String role, String email, boolean isAuthentic, String razorPaymentId, String orderId);
 }
