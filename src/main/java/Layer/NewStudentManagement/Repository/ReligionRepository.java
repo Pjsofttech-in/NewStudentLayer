@@ -26,6 +26,7 @@ public interface ReligionRepository extends JpaRepository<StudentReligion,Long>
     WHERE s.branchCode = :branchCode
       AND (:institutionType IS NULL OR s.institutionType = :institutionType)
       AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+      AND s.status = 'APPROVED'
     GROUP BY r.castCategory
 """)
     List<StudentCountByCastCategoryDTO> getStudentCountByCastCategory(

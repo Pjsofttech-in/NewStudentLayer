@@ -185,6 +185,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:departmentName IS NULL OR s.departmentName = :departmentName)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+                  AND s.status = 'APPROVED'
                 GROUP BY m.mediumName, st.stream, d.degreeName, s.academicYear, c.division.division, s.departmentName
             """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFilters(
@@ -220,6 +221,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:degreeName IS NULL OR d.degreeName = :degreeName)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+                  AND s.status = 'APPROVED'
                 GROUP BY m.mediumName, st.stream, d.degreeName, s.academicYear, c.division.division
             """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartment(
@@ -251,6 +253,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:streamName IS NULL OR st.stream = :streamName)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+                  AND s.status = 'APPROVED'
                 GROUP BY m.mediumName, st.stream, s.academicYear, c.division.division
             """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartmentDegree(
@@ -279,6 +282,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:streamName IS NULL OR st.stream = :streamName)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
+                  AND s.status = 'APPROVED'
                 GROUP BY m.mediumName, st.stream, s.academicYear, c.division.division
             """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartmentDegreeGraduationType(
@@ -299,6 +303,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             "WHERE s.branchCode = :branchCode " +
             "AND (:academicYear IS NULL OR s.academicYear = :academicYear) " +
             "AND (:mediumName IS NULL OR m.mediumName = :mediumName) " +
+            "AND s.status = 'APPROVED' " +
             "GROUP BY s.standard.standardName")
     List<ClassRoomStudentCountProjection> getRawStudentCountByStandard(@Param("branchCode") String branchCode,
                                                                        @Param("academicYear") String academicYear,
@@ -308,6 +313,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             "FROM StudentEntity s " +
             "WHERE s.branchCode = :branchCode " +
             "AND (:academicYear IS NULL OR s.academicYear = :academicYear)" +
+            "AND s.status = 'APPROVED' " +
             "GROUP BY s.standard.standardName, s.gender")
     List<Object[]> getRawStudentCountByGenderAndStandard(@Param("branchCode") String branchCode,
                                                          @Param("academicYear") String academicYear);
