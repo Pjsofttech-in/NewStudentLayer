@@ -13,12 +13,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,8 +35,13 @@ public class ResultServiceImpl implements ResultService
     private StudentRepository studentRepository;
 
     @Autowired
+    private TeacherRepository teacherRepository;
+
+    @Autowired
     private ExamRepository examRepository;
 
+    @Autowired
+    private SubjectRepository subjectRepository;
 
     @Autowired
     SubjectMarksRepository subjectMarksRepository;
@@ -355,6 +358,32 @@ public class ResultServiceImpl implements ResultService
         StudentExamSubject examSubject = examSubjectRepository
                 .findByExamIdAndSubjectId(examId, subjectId)
                 .orElseThrow(() -> new RuntimeException("Exam or subject not found"));
+
+        StudentTeacher teacher = teacherRepository.findByTeacherEmail(email).orElseThrow(() ->
+                new RuntimeException("Teacher not found with email: " + email));
+
+        StudentSubjectMarks subjectMarks = subjectMarksRepository.findById(subjectId).orElseThrow(() -> new RuntimeException("Subject marks not found"));
+        StudentClassRoom classRoom = examSubject.getExam().getClassRoom();
+
+        // Finding subject using following details from StudentSubject table
+        Long degreeId = classRoom.getDegreeName().getId();
+        Long graduationId = classRoom.getGraduationType().getId();
+        Long streamId = classRoom.getStream().getId();
+
+        StudentSubject subject = subjectRepository.findSubjectByNameDegreeGraduationStream(subjectMarks.getSubjectName(),
+                degreeId, graduationId, streamId).orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        if (!CollectionUtils.isEmpty(teacher.getSubjects())) {
+            if (teacher.getSubjects().stream().noneMatch(studentSubject -> subject.getId().equals(studentSubject.getId()))) {
+                throw new RuntimeException("Subject is not assigned to this teacher");
+            }
+        } else {
+            throw new RuntimeException("Subject cannot be empty");
+        }
+
+        if (obtainedMarks > examSubject.getSubject().getMaxMarks()) {
+            throw new RuntimeException("Obtained Marks cannot be greater than Maximum Marks");
+        }
 
         // Fetch or create result
         StudentResult result = resultRepository.findByStudentIdAndExamId(studentId, examId)
