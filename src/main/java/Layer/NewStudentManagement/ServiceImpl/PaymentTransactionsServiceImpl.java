@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static Layer.NewStudentManagement.Entity.PaymentTransactions.TransactionStatus.*;
+
 @Service
 public class PaymentTransactionsServiceImpl implements PaymentTransactionsService {
 
@@ -31,7 +33,7 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
 
         paymentTransactions.setCreatedAt(LocalDateTime.now());
         paymentTransactions.setAmount(amountInRupees);
-        paymentTransactions.setStatus(PaymentTransactions.TransactionStatus.CREATED);
+        paymentTransactions.setStatus(CREATED);
         paymentTransactions.setFeesCollect(feesCollect);
         paymentTransactions.setReceiptNo(receiptNumber);
         paymentTransactions.setRazorpayOrderId(orderId);
@@ -46,21 +48,34 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
             PaymentTransactions paymentTransactions = byRazorpayOrderId.get();
             paymentTransactions.setRazorpayPaymentId(razorPaymentId);
             paymentTransactions.setUpdatedBy(email);
-            paymentTransactions.setUpdatedAt(LocalDateTime.now());
+//            paymentTransactions.setUpdatedAt(LocalDateTime.now());
             paymentTransactions.setUpdatedByRole(role);
 
             StudentFeesCollect feesCollect = paymentTransactions.getFeesCollect();
+            Long feesCollectId =  feesCollect.getId();
+            feesCollect.setId(feesCollectId);
 
-            String modeOfPayment = "UNKNOWN";
+            String modeOfPayment = "UNKNOWN", bankName = "", errorReason = "";
             try {
                 Payment paymentDetails = razorpayClient.payments.fetch(razorPaymentId);
                 modeOfPayment = paymentDetails.get("method").toString().toUpperCase();
+                errorReason = paymentDetails.get("error_reason").toString();
+                if (paymentDetails.has("bank") && paymentDetails.get("bank") != null) {
+                    bankName = paymentDetails.get("bank").toString();
+                }
                 feesCollect.setPaymentMode(modeOfPayment);
-                feesCollect.setStatus(isAuthentic ? "COMPLETED" : "FAILED");
+                feesCollect.setBankName(bankName);
+                if (isAuthentic) {
+                    paymentTransactions.setStatus(SUCCESS);
+                    feesCollect.setStatus("COMPLETED");
+                } else {
+                    paymentTransactions.setStatus(FAILED);
+                    feesCollect.setStatus("FAILED");
+                    paymentTransactions.setErrorReason(errorReason);
+                }
                 //Need to set this  fields once integration is complete
 //                feesCollect.setIfscCode("");
 //                feesCollect.setInvoice("");
-//                feesCollect.setBankName("");
 //                feesCollect.setBankBranchName("");
 //                feesCollect.setAccountHolderName("");
             } catch (Exception e) {

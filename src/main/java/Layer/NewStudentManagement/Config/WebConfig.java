@@ -14,7 +14,7 @@ public class WebConfig
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://pjsofttech.in","http://localhost:5173") // Or specific origins
+                        .allowedOrigins("https://pjsofttech.in","http://localhost:5173","http://192.168.1.54:5010","http://localhost:5010") // Or specific origins
                         .allowedMethods("GET", "POST", "PUT", "DELETE")
                         .allowedHeaders("*")
                         .allowCredentials(true)

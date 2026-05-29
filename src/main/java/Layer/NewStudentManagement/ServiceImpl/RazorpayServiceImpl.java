@@ -64,9 +64,9 @@ public class RazorpayServiceImpl implements RazorpayService {
                 throw new RuntimeException("You don't have permission to create order");
             }
             JSONObject options = new JSONObject();
-            options.append("razorpay_order_id", orderId);
-            options.append("razorpay_payment_id", paymentId);
-            options.append("razorpay_signature", signature);
+            options.put("razorpay_order_id", orderId);
+            options.put("razorpay_payment_id", paymentId);
+            options.put("razorpay_signature", signature);
 
             return Utils.verifyPaymentSignature(options, keySecret);
         } catch (Exception e) {

@@ -23,7 +23,7 @@ public class PaymentTransactions {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "fees_collect_id", nullable = false)
     private StudentFeesCollect feesCollect;
 
@@ -46,11 +46,9 @@ public class PaymentTransactions {
     @Column(name = "error_reason")
     private String errorReason;
 
-    @CreationTimestamp
     @Column(name = "created_by", updatable = false)
     private String createdBy;
 
-    @CreationTimestamp
     @Column(name = "created_by_role", updatable = false)
     private String createdByRole;
 
@@ -58,11 +56,9 @@ public class PaymentTransactions {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @CreationTimestamp
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @CreationTimestamp
     @Column(name = "updated_by_role")
     private String updatedByRole;
 
@@ -73,22 +69,4 @@ public class PaymentTransactions {
     public enum TransactionStatus {
         CREATED, SUCCESS, FAILED
     }
-
-//    // --- GETTERS AND SETTERS ---
-//    public Long getId() { return id; }
-//    public void setId(Long id) { this.id = id; }
-//    public StudentFees getFee() { return fee; }
-//    public void setFee(StudentFees fee) { this.fee = fee; }
-//    public String getRazorpayOrderId() { return razorpayOrderId; }
-//    public void setRazorpayOrderId(String razorpayOrderId) { this.razorpayOrderId = razorpayOrderId; }
-//    public String getRazorpayPaymentId() { return razorpayPaymentId; }
-//    public void setRazorpayPaymentId(String razorpayPaymentId) { this.razorpayPaymentId = razorpayPaymentId; }
-//    public BigDecimal getAmount() { return amount; }
-//    public void setAmount(BigDecimal amount) { this.amount = amount; }
-//    public TransactionStatus getStatus() { return status; }
-//    public void setStatus(TransactionStatus status) { this.status = status; }
-//    public String getErrorReason() { return errorReason; }
-//    public void setErrorReason(String errorReason) { this.errorReason = errorReason; }
-//    public LocalDateTime getCreatedAt() { return createdAt; }
-//    public LocalDateTime getUpdatedAt() { return updatedAt; }
 }

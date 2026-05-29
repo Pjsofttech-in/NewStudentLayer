@@ -1,15 +1,16 @@
 package Layer.NewStudentManagement.Controller;
 
+import Layer.NewStudentManagement.DTO.RazorPayOrderCreationDTO;
+import Layer.NewStudentManagement.DTO.RazorPayVerifyPaymentDTO;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Service.RazorpayService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.util.Map;
 
 @RestController
@@ -23,12 +24,10 @@ public class PaymentController {
 
     // Call this before opening the modal box
     @PostMapping("/createPaymentOrderId")
-    public ResponseEntity<?> startPaymentFlow(@RequestParam String role,
-                                              @RequestParam String email,
-                                              @RequestParam BigDecimal amount,
-                                              @RequestParam Long studentFeeScheduleId) {
+    public ResponseEntity<?> startPaymentFlow(@Valid @RequestBody RazorPayOrderCreationDTO requestDTO) {
         try {
-            String razorpayOrderId = razorpayService.createOrder(role, email, amount, studentFeeScheduleId);
+            String razorpayOrderId = razorpayService.createOrder(requestDTO.getRole(), requestDTO.getEmail(),
+                    requestDTO.getAmount(), requestDTO.getStudentFeeScheduleId());
             return ResponseEntity.ok(Map.of("orderId", razorpayOrderId));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed to initialize payment tracking infrastructure.");
@@ -37,12 +36,12 @@ public class PaymentController {
 
     // Call this when the modal returns success verification maps
     @PostMapping("/verifyPaymentReceiptDetails")
-    public ResponseEntity<?> verifyTransactionReceipt(@RequestParam String role,
-                                                      @RequestParam String email,
-                                                      @RequestBody Map<String, String> payload) {
-        String orderId = payload.get("razorpay_order_id");
-        String paymentId = payload.get("razorpay_payment_id");
-        String signature = payload.get("razorpay_signature");
+    public ResponseEntity<?> verifyTransactionReceipt(@Valid @RequestBody RazorPayVerifyPaymentDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        String role = requestDTO.getRole();
+        String orderId = requestDTO.getRazorpay_order_id();
+        String paymentId = requestDTO.getRazorpay_payment_id();
+        String signature = requestDTO.getRazorpay_signature();
 
         boolean isAuthentic = razorpayService.verifyPaymentSignature(role, email, orderId, paymentId, signature);
         paymentTransactionsService.updateOrder(role, email, isAuthentic, paymentId, orderId);
