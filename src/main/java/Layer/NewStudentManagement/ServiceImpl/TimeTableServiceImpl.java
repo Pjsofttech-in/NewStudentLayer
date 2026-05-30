@@ -4,7 +4,6 @@ import Layer.NewStudentManagement.DTO.ScheduledPeriodResponseDTO;
 import Layer.NewStudentManagement.DTO.TimeTableRequestDTO;
 import Layer.NewStudentManagement.DTO.TimeTableResponceDTO;
 import Layer.NewStudentManagement.Entity.*;
-
 import Layer.NewStudentManagement.Exception.ResourceNotFoundException;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.TimeTableService;
@@ -21,8 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
-public class TimeTableServiceImpl implements TimeTableService
-{
+public class TimeTableServiceImpl implements TimeTableService {
 
     @Autowired
     TimeTableRepository timeTableRepository;
@@ -73,6 +71,18 @@ public class TimeTableServiceImpl implements TimeTableService
 
             StudentSubject subject = subjectRepository.findById(sp.getSubjectId())
                     .orElseThrow(() -> new ResourceNotFoundException("Subject not found"));
+
+            if (timetable.getScheduledPeriods().stream().anyMatch(p ->
+                    periodSlot.getStartTime().equals(p.getPeriodSlot().getStartTime())
+                            || periodSlot.getEndTime().equals(p.getPeriodSlot().getStartTime()))) {
+                throw new RuntimeException("Two periods cannot have same Start or End time");
+            }
+
+            if (teacher.getSubjects().stream().noneMatch(s ->
+                    subject.getId().equals(s.getId()))) {
+                throw new RuntimeException(String.format("Teacher with name %s is not assigned to the %s subject",
+                        teacher.getTeacherName(), subject.getSubject()));
+            }
 
             StudentScheduledPeriod scheduled = new StudentScheduledPeriod();
             scheduled.setTimetable(timetable);
@@ -159,7 +169,6 @@ public class TimeTableServiceImpl implements TimeTableService
     }
 
 
-
     @Override
     public String markPeriodOff(String role, String email, Long timetableId,
                                 Long subjectId, Long teacherId, Long slotId) {
@@ -169,7 +178,7 @@ public class TimeTableServiceImpl implements TimeTableService
             throw new RuntimeException("You don't have permission to modify timetable");
         }
 
-        LocalDate date =LocalDate.now();
+        LocalDate date = LocalDate.now();
 
         // 1️⃣ Check if this date already has an override
         var existing = scheduledPeriodRepository
@@ -287,7 +296,7 @@ public class TimeTableServiceImpl implements TimeTableService
 //                    .orElseThrow(() -> new ResourceNotFoundException("Schedule Period not found"));
 
             StudentScheduledPeriod scheduled = timeTable.getScheduledPeriods().stream().filter(s -> Objects.nonNull(s.getId())
-            && s.getId().equals(sp.getId())).findFirst().orElseThrow(() -> new ResourceNotFoundException("Schedule Period not found"));
+                    && s.getId().equals(sp.getId())).findFirst().orElseThrow(() -> new ResourceNotFoundException("Schedule Period not found"));
 
             scheduled.setTeacher(teacher);
             scheduled.setSubject(subject);
