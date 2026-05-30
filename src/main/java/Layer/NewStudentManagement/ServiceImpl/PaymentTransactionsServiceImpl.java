@@ -1,6 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.Entity.PaymentTransactions;
+import Layer.NewStudentManagement.Entity.StudentPaymentTransactions;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Repository.PaymentTransactionsRepository;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static Layer.NewStudentManagement.Entity.PaymentTransactions.TransactionStatus.*;
+import static Layer.NewStudentManagement.Entity.StudentPaymentTransactions.TransactionStatus.*;
 
 @Service
 public class PaymentTransactionsServiceImpl implements PaymentTransactionsService {
@@ -27,7 +27,7 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
 
     @Override
     public void createOrder(String role, String email, BigDecimal amountInRupees, String receiptNumber, String orderId, StudentFeesCollect feesCollect) throws Exception {
-        PaymentTransactions paymentTransactions = new PaymentTransactions();
+        StudentPaymentTransactions paymentTransactions = new StudentPaymentTransactions();
         paymentTransactions.setCreatedBy(email);
         paymentTransactions.setCreatedByRole(role);
 
@@ -42,10 +42,10 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
     }
 
     public void updateOrder(String role, String email, boolean isAuthentic, String razorPaymentId, String orderId) {
-        Optional<PaymentTransactions> byRazorpayOrderId = paymentTransactionsRepository.findByRazorpayOrderId(orderId);
+        Optional<StudentPaymentTransactions> byRazorpayOrderId = paymentTransactionsRepository.findByRazorpayOrderId(orderId);
 
         if (byRazorpayOrderId.isPresent()) {
-            PaymentTransactions paymentTransactions = byRazorpayOrderId.get();
+            StudentPaymentTransactions paymentTransactions = byRazorpayOrderId.get();
             paymentTransactions.setRazorpayPaymentId(razorPaymentId);
             paymentTransactions.setUpdatedBy(email);
 //            paymentTransactions.setUpdatedAt(LocalDateTime.now());
