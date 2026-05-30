@@ -28,13 +28,17 @@ public interface StudentService {
 
     StudentDocumentDTO uploadStudentDocuments(Long studentId, String role, String email, MultipartFile studentPhoto, MultipartFile aadharcardPhoto, MultipartFile pancardPhoto,
                                               MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto, MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
-                                              MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate, MultipartFile studentSignPhoto, String token);
+                                              MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate, MultipartFile studentSignPhoto,
+                                              MultipartFile marksheet10thCert, MultipartFile marksheet12thCert, MultipartFile graduationMarksheetCert,
+                                              MultipartFile nonCreamyLayerCert, MultipartFile incomeCertificateCert, String token);
 
     StudentDocumentDTO updateStudentDocuments(Long studentId, String role, String email,
                                               MultipartFile studentPhoto, MultipartFile aadharcardPhoto, MultipartFile pancardPhoto,
                                               MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto,
                                               MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
-                                              MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate, MultipartFile studentSignPhoto);
+                                              MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate, MultipartFile studentSignPhoto,
+                                              MultipartFile marksheet10thCert, MultipartFile marksheet12thCert, MultipartFile graduationMarksheetCert,
+                                              MultipartFile nonCreamyLayerCert, MultipartFile incomeCertificateCert);
 
     Page<StudentResponseDTO> filterStudentsForClassroom(String role, String email, StudentClassRoomFilterDTO filterDTO, Pageable pageable);
 

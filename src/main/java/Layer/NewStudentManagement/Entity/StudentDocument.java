@@ -11,8 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-public class StudentDocument
-{
+public class StudentDocument {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,6 +25,15 @@ public class StudentDocument
     private String birthCertificatePhoto;
     private String disabilityCertificate;
     private String studentSignPhoto;
+
+    // --- New Document Upload S3 URL Columns ---
+    private String marksheet10thCert;
+    private String marksheet12thCert;
+    private String graduationMarksheetCert;
+    private String nonCreamyLayerCert;
+    private String incomeCertificateCert;
+
+    // --- Generate Getters and Setters for these 6 fields ---
 
     @OneToOne
     @JoinColumn(name = "student_id", nullable = false)

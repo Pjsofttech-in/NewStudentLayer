@@ -408,7 +408,8 @@ public class StudentServiceImpl implements StudentService {
             MultipartFile casteValidationPhoto, MultipartFile casteCertificatePhoto,
             MultipartFile leavingCertificatePhoto, MultipartFile domicilePhoto,
             MultipartFile birthCertificatePhoto, MultipartFile disabilityCertificate,
-            MultipartFile studentSignPhoto, String token) {
+            MultipartFile studentSignPhoto, MultipartFile marksheet10thCert, MultipartFile marksheet12thCert,
+            MultipartFile graduationMarksheetCert, MultipartFile nonCreamyLayerCert, MultipartFile incomeCertificateCert, String token) {
         String branchCode;
         if ("USER".equalsIgnoreCase(role)) {
             Claims claims = jwtUtil.extractAllClaims(token);
@@ -449,6 +450,16 @@ public class StudentServiceImpl implements StudentService {
             doc.setDisabilityCertificate(s3Service.uploadFile(disabilityCertificate, branchCode));
         if (studentSignPhoto != null)
             doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode));
+        if (marksheet10thCert != null)
+            doc.setMarksheet10thCert(s3Service.uploadFile(marksheet10thCert, branchCode));
+        if (marksheet12thCert != null)
+            doc.setMarksheet12thCert(s3Service.uploadFile(marksheet12thCert, branchCode));
+        if (graduationMarksheetCert != null)
+            doc.setGraduationMarksheetCert(s3Service.uploadFile(graduationMarksheetCert, branchCode));
+        if (nonCreamyLayerCert != null)
+            doc.setNonCreamyLayerCert(s3Service.uploadFile(nonCreamyLayerCert, branchCode));
+        if (incomeCertificateCert != null)
+            doc.setIncomeCertificateCert(s3Service.uploadFile(incomeCertificateCert, branchCode));
 
         doc.setStudent(student);
 
@@ -466,6 +477,13 @@ public class StudentServiceImpl implements StudentService {
         dto.setBirthCertificatePhoto(saved.getBirthCertificatePhoto());
         dto.setDisabilityCertificate(saved.getDisabilityCertificate());
         dto.setStudentSignPhoto(saved.getStudentSignPhoto());
+
+        dto.setMarksheet10thCert(saved.getMarksheet10thCert());
+        dto.setMarksheet12thCert(saved.getMarksheet12thCert());
+        dto.setGraduationMarksheetCert(saved.getGraduationMarksheetCert());
+        dto.setNonCreamyLayerCert(saved.getNonCreamyLayerCert());
+        dto.setIncomeCertificateCert(saved.getIncomeCertificateCert());
+
         dto.setStudentId(saved.getStudent().getId());
 
         return dto;
@@ -735,7 +753,12 @@ public class StudentServiceImpl implements StudentService {
                                                      MultipartFile domicilePhoto,
                                                      MultipartFile birthCertificatePhoto,
                                                      MultipartFile disabilityCertificate,
-                                                     MultipartFile studentSignPhoto) {
+                                                     MultipartFile studentSignPhoto,
+                                                     MultipartFile marksheet10thCert,
+                                                     MultipartFile marksheet12thCert,
+                                                     MultipartFile graduationMarksheetCert,
+                                                     MultipartFile nonCreamyLayerCert,
+                                                     MultipartFile incomeCertificateCert) {
         checkPermission(role, email, "Put");
 
         StudentEntity student = studentRepository.findById(studentId)
@@ -813,6 +836,31 @@ public class StudentServiceImpl implements StudentService {
             doc.setStudentSignPhoto(s3Service.uploadFile(studentSignPhoto, branchCode));
         }
 
+        if (marksheet10thCert != null && !marksheet10thCert.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getMarksheet10thCert());
+            doc.setMarksheet10thCert(s3Service.uploadFile(marksheet10thCert, branchCode));
+        }
+
+        if (marksheet12thCert != null && !marksheet12thCert.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getMarksheet12thCert());
+            doc.setMarksheet12thCert(s3Service.uploadFile(marksheet12thCert, branchCode));
+        }
+
+        if (graduationMarksheetCert != null && !graduationMarksheetCert.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getGraduationMarksheetCert());
+            doc.setGraduationMarksheetCert(s3Service.uploadFile(graduationMarksheetCert, branchCode));
+        }
+
+        if (nonCreamyLayerCert != null && !nonCreamyLayerCert.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getNonCreamyLayerCert());
+            doc.setNonCreamyLayerCert(s3Service.uploadFile(nonCreamyLayerCert, branchCode));
+        }
+
+        if (incomeCertificateCert != null && !incomeCertificateCert.isEmpty()) {
+            s3Service.deleteFileFromUrl(doc.getIncomeCertificateCert());
+            doc.setIncomeCertificateCert(s3Service.uploadFile(incomeCertificateCert, branchCode));
+        }
+
         StudentDocument saved = documentRepository.save(doc);
 
         StudentDocumentDTO dto = new StudentDocumentDTO();
@@ -828,6 +876,12 @@ public class StudentServiceImpl implements StudentService {
         dto.setBirthCertificatePhoto(saved.getBirthCertificatePhoto());
         dto.setDisabilityCertificate(saved.getDisabilityCertificate());
         dto.setStudentSignPhoto(saved.getStudentSignPhoto());
+
+        dto.setMarksheet10thCert(saved.getMarksheet10thCert());
+        dto.setMarksheet12thCert(saved.getMarksheet12thCert());
+        dto.setGraduationMarksheetCert(saved.getGraduationMarksheetCert());
+        dto.setNonCreamyLayerCert(saved.getNonCreamyLayerCert());
+        dto.setIncomeCertificateCert(saved.getIncomeCertificateCert());
 
         return dto;
     }

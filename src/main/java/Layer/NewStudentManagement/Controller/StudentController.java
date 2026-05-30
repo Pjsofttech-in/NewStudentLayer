@@ -135,6 +135,11 @@ public class StudentController
             @RequestParam(required = false) MultipartFile birthCertificatePhoto,
             @RequestParam(required = false) MultipartFile disabilityCertificate,
             @RequestParam(required = false) MultipartFile studentSignPhoto,
+            @RequestParam(required = false) MultipartFile marksheet10thCert,
+            @RequestParam(required = false) MultipartFile marksheet12thCert,
+            @RequestParam(required = false) MultipartFile graduationMarksheetCert,
+            @RequestParam(required = false) MultipartFile nonCreamyLayerCert,
+            @RequestParam(required = false) MultipartFile incomeCertificateCert,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
     {
         String token = null;
@@ -144,7 +149,8 @@ public class StudentController
 
         StudentDocumentDTO academicYear = studentService.uploadStudentDocuments(studentId, role, email,
                     studentPhoto, aadharcardPhoto, pancardPhoto, casteValidationPhoto, casteCertificatePhoto,
-                    leavingCertificatePhoto, domicilePhoto, birthCertificatePhoto, disabilityCertificate, studentSignPhoto,token);
+                    leavingCertificatePhoto, domicilePhoto, birthCertificatePhoto, disabilityCertificate, studentSignPhoto,
+                marksheet10thCert, marksheet12thCert, graduationMarksheetCert, nonCreamyLayerCert, incomeCertificateCert, token);
             return ResponseEntity.ok(academicYear);
 
     }
@@ -163,15 +169,20 @@ public class StudentController
             @RequestParam(required = false) MultipartFile domicilePhoto,
             @RequestParam(required = false) MultipartFile birthCertificatePhoto,
             @RequestParam(required = false) MultipartFile disabilityCertificate,
-            @RequestParam(required = false) MultipartFile studentSignPhoto
-    ) {
+            @RequestParam(required = false) MultipartFile studentSignPhoto,
+            @RequestParam(required = false) MultipartFile marksheet10thCert,
+            @RequestParam(required = false) MultipartFile marksheet12thCert,
+            @RequestParam(required = false) MultipartFile graduationMarksheetCert,
+            @RequestParam(required = false) MultipartFile nonCreamyLayerCert,
+            @RequestParam(required = false) MultipartFile incomeCertificateCert) {
         StudentDocumentDTO updated = studentService.updateStudentDocuments(
                 studentId, role, email,
                 studentPhoto, aadharcardPhoto, pancardPhoto,
                 casteValidationPhoto, casteCertificatePhoto,
                 leavingCertificatePhoto, domicilePhoto,
                 birthCertificatePhoto, disabilityCertificate,
-                studentSignPhoto
+                studentSignPhoto, marksheet10thCert, marksheet12thCert, graduationMarksheetCert,
+                nonCreamyLayerCert, incomeCertificateCert
         );
         return ResponseEntity.ok(updated);
     }

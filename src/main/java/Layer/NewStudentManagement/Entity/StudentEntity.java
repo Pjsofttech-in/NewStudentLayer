@@ -74,11 +74,17 @@ public class StudentEntity
     private String entranceMarkSheet;
     private String permanentEducationNumber;
 
+    @Column(name = "father_email_id", length = 100)
+    private String fatherEmailId;
+
     @Email
     private String createdByEmail;
 
     private String role;
     private String branchCode;
+
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
+    private StudentCollegeDetails collegeDetails;
 
     @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
     private StudentAddress address;

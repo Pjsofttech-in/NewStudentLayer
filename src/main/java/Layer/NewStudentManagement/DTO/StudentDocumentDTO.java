@@ -22,6 +22,14 @@ public class StudentDocumentDTO
     private String birthCertificatePhoto;
     private String disabilityCertificate;
     private String studentSignPhoto;
+
+    // --- New Document Upload S3 URL Columns ---
+    private String marksheet10thCert;
+    private String marksheet12thCert;
+    private String graduationMarksheetCert;
+    private String nonCreamyLayerCert;
+    private String incomeCertificateCert;
+
     private Long studentId;
 
 
