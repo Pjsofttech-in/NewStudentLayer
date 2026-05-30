@@ -97,5 +97,9 @@ public class StudentFees
     @OneToMany(mappedBy = "studentFees", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentFeeSchedule> scheduleList = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.EAGER) // Eager is safe for lightweight lookup tables
+    @JoinColumn(name = "fee_component_id")
+    private StudentFeeComponentsMaster feeComponent;
+
 
 }
