@@ -30,7 +30,10 @@ public class PeriodServiceImpl implements PeriodService
         period.setRole(role);
         period.setCreatedByEmail(email);
         period.setBranchCode(branchCode);
-
+        boolean duplicatePeriodTime = periodRepository.existsByStartTimeAndEndTime(period.getStartTime(), period.getEndTime());
+        if (duplicatePeriodTime) {
+            throw new RuntimeException("Period already exists with same start and end time");
+        }
         StudentPeriod savedPeriod = periodRepository.save(period);
 
         return convertToDTO(savedPeriod);
