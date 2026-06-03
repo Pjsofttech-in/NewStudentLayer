@@ -1,36 +1,35 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Service.RazorpayService;
 import Layer.NewStudentManagement.Util.ReceiptUtils;
 import com.razorpay.Order;
-import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import com.razorpay.Utils;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Objects;
 
 @Service
 public class RazorpayServiceImpl implements RazorpayService {
-    private final RazorpayClient razorpayClient;
-    private final String keySecret;
     private final StaffService staffService;
     private final FeesCollectService feesCollectService;
     private final PaymentTransactionsService paymentTransactionsService;
+    private final ClientAdminPaymentGatewayService clientAdminPaymentGatewayService;
 
-    public RazorpayServiceImpl(
-            RazorpayClient razorpayClient,
-            @Value("${razorpay.key.secret}") String keySecret, StaffService staffService, FeesCollectService feesCollectService, PaymentTransactionsService paymentTransactionsService) {
-        this.razorpayClient = razorpayClient;
-        this.keySecret = keySecret;
+    public RazorpayServiceImpl(StaffService staffService, FeesCollectService feesCollectService,
+            PaymentTransactionsService paymentTransactionsService, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService) {
         this.staffService = staffService;
         this.feesCollectService = feesCollectService;
         this.paymentTransactionsService = paymentTransactionsService;
+        this.clientAdminPaymentGatewayService = clientAdminPaymentGatewayService;
     }
 
     // 1. Create a transaction order
@@ -46,8 +45,14 @@ public class RazorpayServiceImpl implements RazorpayService {
         orderRequest.put("currency", "INR");
         orderRequest.put("receipt", receiptId);//Pls fix this b4 commiting
 
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
+        RazorpayClient razorpayClient = new RazorpayClient("","");
+        if (Objects.nonNull(paymentGatewayDetails)) {
+            razorpayClient = new RazorpayClient(paymentGatewayDetails.getKeyId(),
+                    paymentGatewayDetails.getSecretKey());
+        }
         StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId);
-
         // Call Razorpay API
         Order order = razorpayClient.orders.create(orderRequest);
 
@@ -67,10 +72,24 @@ public class RazorpayServiceImpl implements RazorpayService {
             options.put("razorpay_order_id", orderId);
             options.put("razorpay_payment_id", paymentId);
             options.put("razorpay_signature", signature);
-
+            String branchCode = staffService.fetchBranchCodeByRole(role, email);
+            PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
+            String keySecret = "";
+            if (Objects.nonNull(paymentGatewayDetails)) {
+                keySecret = paymentGatewayDetails.getSecretKey();
+            }
             return Utils.verifyPaymentSignature(options, keySecret);
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public PaymentGatewayAccountResponceDTO getPaymentGatewayDetails(String branchCode) {
+        List<PaymentGatewayAccountResponceDTO> paymentGatewayDetails = clientAdminPaymentGatewayService
+                .getPaymentGatewayDetails(branchCode).block();
+        if (!CollectionUtils.isEmpty(paymentGatewayDetails)) {
+            return paymentGatewayDetails.getFirst();
+        }
+        return null;
     }
 }

@@ -1,15 +1,19 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.Entity.StudentPaymentTransactions;
+import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
+import Layer.NewStudentManagement.Entity.StudentPaymentTransactions;
 import Layer.NewStudentManagement.Repository.PaymentTransactionsRepository;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static Layer.NewStudentManagement.Entity.StudentPaymentTransactions.TransactionStatus.*;
@@ -18,11 +22,13 @@ import static Layer.NewStudentManagement.Entity.StudentPaymentTransactions.Trans
 public class PaymentTransactionsServiceImpl implements PaymentTransactionsService {
 
     private final PaymentTransactionsRepository paymentTransactionsRepository;
-    private final RazorpayClient razorpayClient;
+    private final ClientAdminPaymentGatewayService clientAdminPaymentGatewayService;
+    private final StaffService staffService;
 
-    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, RazorpayClient razorpayClient) {
+    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService, StaffService staffService) {
         this.paymentTransactionsRepository = paymentTransactionsRepository;
-        this.razorpayClient = razorpayClient;
+        this.clientAdminPaymentGatewayService = clientAdminPaymentGatewayService;
+        this.staffService = staffService;
     }
 
     @Override
@@ -52,11 +58,18 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
             paymentTransactions.setUpdatedByRole(role);
 
             StudentFeesCollect feesCollect = paymentTransactions.getFeesCollect();
-            Long feesCollectId =  feesCollect.getId();
+            Long feesCollectId = feesCollect.getId();
             feesCollect.setId(feesCollectId);
 
             String modeOfPayment = "UNKNOWN", bankName = "", errorReason = "";
             try {
+                String branchCode = staffService.fetchBranchCodeByRole(role, email);
+                PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
+                RazorpayClient razorpayClient = new RazorpayClient("", "");
+                if (Objects.nonNull(paymentGatewayDetails)) {
+                    razorpayClient = new RazorpayClient(paymentGatewayDetails.getKeyId(),
+                            paymentGatewayDetails.getSecretKey());
+                }
                 Payment paymentDetails = razorpayClient.payments.fetch(razorPaymentId);
                 modeOfPayment = paymentDetails.get("method").toString().toUpperCase();
                 errorReason = paymentDetails.get("error_reason").toString();
@@ -88,4 +101,12 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
         }
     }
 
+    public PaymentGatewayAccountResponceDTO getPaymentGatewayDetails(String branchCode) {
+        List<PaymentGatewayAccountResponceDTO> paymentGatewayDetails = clientAdminPaymentGatewayService
+                .getPaymentGatewayDetails(branchCode).block();
+        if (!CollectionUtils.isEmpty(paymentGatewayDetails)) {
+            return paymentGatewayDetails.getFirst();
+        }
+        return null;
+    }
 }
