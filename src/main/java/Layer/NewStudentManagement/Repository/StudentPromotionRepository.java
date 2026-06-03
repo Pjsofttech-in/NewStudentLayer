@@ -16,7 +16,7 @@ public interface StudentPromotionRepository extends JpaRepository<StudentPromoti
     @Query("SELECT r FROM StudentPromotionRecord r WHERE r.student.id = :studentId AND r.isCurrent = true")
     Optional<StudentPromotionRecord> findCurrentByStudentId(@Param("studentId") Long studentId);
 
-    @Query("SELECT r FROM StudentPromotionRecord r WHERE r.student.id = :studentId ORDER BY r.promotionDate DESC")
+    @Query("SELECT r FROM StudentPromotionRecord r WHERE r.student.id = :studentId ORDER BY r.promotionDate, r.id DESC")
     List<StudentPromotionRecord> findAllByStudentIdOrderByPromotionDate(@Param("studentId") Long studentId);
 
     @Query("""

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -12,6 +14,7 @@ import lombok.Setter;
 public class StudentPromotionRequest
 {
     private Long studentId;
+    private List<Long> bulkStudentIds;
     private Long newStandardId;
     private Long newMediumId;
     private Long newDegreeNameId;

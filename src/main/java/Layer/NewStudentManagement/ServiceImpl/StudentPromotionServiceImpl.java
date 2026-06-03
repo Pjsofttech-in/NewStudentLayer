@@ -1,14 +1,21 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.PromotionInfoDTO;
+import Layer.NewStudentManagement.DTO.StudentBulkPromotionResponseDTO;
 import Layer.NewStudentManagement.DTO.StudentPromotionResponseDTO;
 import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ClassRoomService;
 import Layer.NewStudentManagement.Service.StudentPromotionService;
+import jakarta.transaction.TransactionScoped;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+import org.springframework.transaction.support.TransactionTemplate;
+import software.amazon.awssdk.utils.CollectionUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -30,6 +37,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
     private final GraduationTypeRepository graduationTypeRepository;
     private final ClassRoomService classRoomService;
     private final StaffService staffService;
+    private final PlatformTransactionManager transactionManager;
 
 
     @Override
@@ -70,7 +78,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             }
 
             previous.setStandard(student.getStandard());
-            previous.setStandardName(student.getStandardName());
+            previous.setStandardName(student.getStandard().getStandardName());
             previous.setMedium(student.getMedium());
             previous.setMediumName(student.getMediumName());
             previous.setDegree(student.getDegreeName());
@@ -213,6 +221,53 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             log.error("exception in promoteStudent() in StudentPromotionServiceImpl", e);
             throw e;
         }
+    }
+
+    public StudentBulkPromotionResponseDTO promoteStudentList(
+            String role, String email, List<Long> studentIdList,
+            Long newStandardId, Long newMediumId,
+            Long newDegreeNameId, String newDepartmentName,
+            Long newStreamId, String groupName,
+            String academicYear, Long newClassroomId,
+            String institutionType, Long graduationTypeId) {
+        StudentBulkPromotionResponseDTO response = new StudentBulkPromotionResponseDTO();
+        response.setStatus("Failed");
+        try {
+            if (CollectionUtils.isNullOrEmpty(studentIdList)) {
+                throw new RuntimeException("Input Student Id List cannot be empty");
+            } else {
+                List<Long> failedStudentIds = new ArrayList<>();
+                List<StudentPromotionResponseDTO> successfulStudentList = new ArrayList<>();
+                TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+                transactionTemplate.setPropagationBehavior(TransactionTemplate.PROPAGATION_REQUIRES_NEW);
+                studentIdList.forEach(studentId -> {
+                    transactionTemplate.executeWithoutResult(status -> {
+                        // Database operations live here
+                        try {
+                            StudentPromotionResponseDTO studentPromotionResponseDTO = promoteStudent(role, email, studentId, newStandardId, newMediumId, newDegreeNameId, newDepartmentName, newStreamId, groupName,
+                                    academicYear, newClassroomId, institutionType, graduationTypeId);
+                            successfulStudentList.add(studentPromotionResponseDTO);
+                        } catch (Exception e) {
+                            failedStudentIds.add(studentId);
+                            status.setRollbackOnly();
+                        }
+                    });
+                });
+                response.setFailedStudentIds(failedStudentIds);
+                response.setSuccessfulStudentList(successfulStudentList);
+                if (CollectionUtils.isNullOrEmpty(failedStudentIds) && !CollectionUtils.isNullOrEmpty(successfulStudentList)) {
+                    response.setStatus("Success");
+                } else if (CollectionUtils.isNullOrEmpty(successfulStudentList)) {
+                    response.setStatus("Failure");
+                } else {
+                    response.setStatus("PartialSuccess");
+                }
+            }
+        } catch (Exception e) {
+            log.error("exception in promoteStudent() in StudentPromotionServiceImpl", e);
+            throw e;
+        }
+        return response;
     }
 
     @Override
