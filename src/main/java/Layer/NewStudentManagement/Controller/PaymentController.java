@@ -2,25 +2,34 @@ package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.RazorPayOrderCreationDTO;
 import Layer.NewStudentManagement.DTO.RazorPayVerifyPaymentDTO;
+import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Service.RazorpayService;
+import Layer.NewStudentManagement.ServiceImpl.ClientAdminPaymentGatewayService;
+import Layer.NewStudentManagement.ServiceImpl.StaffService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.utils.CollectionUtils;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
 public class PaymentController {
 
     @Autowired
+    private ClientAdminPaymentGatewayService clientAdminPaymentGatewayService;
+
+    @Autowired
     private RazorpayService razorpayService;
 
     @Autowired
     private PaymentTransactionsService paymentTransactionsService;
+
+    @Autowired
+    private StaffService staffService;
 
     // Call this before opening the modal box
     @PostMapping("/createPaymentOrderId")
@@ -52,6 +61,24 @@ public class PaymentController {
             return ResponseEntity.ok(Map.of("status", "SUCCESS", "message", "Transaction processing complete."));
         } else {
             return ResponseEntity.badRequest().body("Cryptographic verification failures. Transaction discarded.");
+        }
+    }
+
+    @GetMapping("/getPaymentGatewayDetailsByBrahchCode")
+    public ResponseEntity<String> getGateway(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestParam String branchCode) {
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to fetch Payment Gateway Details");
+        }
+        List<PaymentGatewayAccountResponceDTO> account = clientAdminPaymentGatewayService.
+                getPaymentGatewayDetails(branchCode).block();
+        if (CollectionUtils.isNullOrEmpty(account)) {
+            return ResponseEntity.ok().body(null);
+        } else {
+            PaymentGatewayAccountResponceDTO first = account.getFirst();
+            return ResponseEntity.ok(first.getKeyId());
         }
     }
 }
