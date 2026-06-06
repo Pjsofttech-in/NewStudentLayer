@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Service.RazorpayService;
+import Layer.NewStudentManagement.Util.CryptoUtil;
 import Layer.NewStudentManagement.Util.ReceiptUtils;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
@@ -19,13 +20,15 @@ import java.util.Objects;
 
 @Service
 public class RazorpayServiceImpl implements RazorpayService {
+    private final CryptoUtil cryptoUtil;
     private final StaffService staffService;
     private final FeesCollectService feesCollectService;
     private final PaymentTransactionsService paymentTransactionsService;
     private final ClientAdminPaymentGatewayService clientAdminPaymentGatewayService;
 
-    public RazorpayServiceImpl(StaffService staffService, FeesCollectService feesCollectService,
-            PaymentTransactionsService paymentTransactionsService, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService) {
+    public RazorpayServiceImpl(CryptoUtil cryptoUtil, StaffService staffService, FeesCollectService feesCollectService,
+                               PaymentTransactionsService paymentTransactionsService, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService) {
+        this.cryptoUtil = cryptoUtil;
         this.staffService = staffService;
         this.feesCollectService = feesCollectService;
         this.paymentTransactionsService = paymentTransactionsService;
@@ -47,10 +50,10 @@ public class RazorpayServiceImpl implements RazorpayService {
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
-        RazorpayClient razorpayClient = new RazorpayClient("","");
+        RazorpayClient razorpayClient = new RazorpayClient("", "");
         if (Objects.nonNull(paymentGatewayDetails)) {
             razorpayClient = new RazorpayClient(paymentGatewayDetails.getKeyId(),
-                    paymentGatewayDetails.getSecretKey());
+                    cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey()));
         }
         StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId);
         // Call Razorpay API
@@ -76,7 +79,7 @@ public class RazorpayServiceImpl implements RazorpayService {
             PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
             String keySecret = "";
             if (Objects.nonNull(paymentGatewayDetails)) {
-                keySecret = paymentGatewayDetails.getSecretKey();
+                keySecret = cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey());
             }
             return Utils.verifyPaymentSignature(options, keySecret);
         } catch (Exception e) {
