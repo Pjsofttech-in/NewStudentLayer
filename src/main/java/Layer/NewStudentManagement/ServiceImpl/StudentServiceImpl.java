@@ -270,7 +270,22 @@ public class StudentServiceImpl implements StudentService {
         StudentEntity existing = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
+        StudentCollegeDetails scd = request.getStudent().getCollegeDetails();
+        request.getStudent().setCollegeDetails(null);
         BeanCopyUtils.copyNonNullProperties(request.getStudent(), existing);
+
+        if (scd!=null) {
+            StudentCollegeDetails collegeDetails = existing.getCollegeDetails();
+            if(collegeDetails==null) {
+                collegeDetails = new StudentCollegeDetails();
+                collegeDetails.setStudent(existing);
+            }
+            collegeDetails.setAbcId(scd.getAbcId());
+            collegeDetails.setDteNumber(scd.getDteNumber());
+            collegeDetails.setEnrollmentNumber(scd.getEnrollmentNumber());
+            collegeDetails.setGeneralRegistrationNumber(scd.getGeneralRegistrationNumber());
+            existing.setCollegeDetails(collegeDetails);
+        }
 
         updateStudentFields(existing, request.getStudent());
 
@@ -620,6 +635,10 @@ public class StudentServiceImpl implements StudentService {
         if (incoming.getGroupName() != null) existing.setGroupName(incoming.getGroupName());
         if (incoming.getSemister() != null) existing.setSemister(incoming.getSemister());
         if (incoming.getInstitutionType() != null) existing.setInstitutionType(incoming.getInstitutionType());
+//        if (incoming.getCollegeDetails() != null && existing.getCollegeDetails() !=null) {
+//            StudentCollegeDetails collegeDetails = existing.getCollegeDetails();
+////            collegeDetails.setStudent(existing);
+//        }
     }
 
 
