@@ -127,7 +127,7 @@ public class StudentMapper {
 
     public static StudentCollegeDetailsDTO toStudentCollegeDetailsDTO(StudentCollegeDetails obj) {
         StudentCollegeDetailsDTO dto = new StudentCollegeDetailsDTO();
-        if (obj == null) {
+        if (obj != null) {
             dto.setAbcId(obj.getAbcId());
             dto.setDteNumber(obj.getDteNumber());
             dto.setGeneralRegistrationNumber(obj.getGeneralRegistrationNumber());
