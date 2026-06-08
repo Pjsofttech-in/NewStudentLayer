@@ -1,7 +1,5 @@
 package Layer.NewStudentManagement.DTO;
 
-import Layer.NewStudentManagement.Entity.StudentDocument;
-
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Pattern;
@@ -15,8 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class StudentDTO
-{
+public class StudentDTO {
     private Long id;
     private String title;
     private String fullName;
@@ -56,13 +53,14 @@ public class StudentDTO
     private String graduationType;
     private Long degreeNameId;
     private String degreeName;
+    private String fatherEmailId;
 
     private String departmentName;
     private String password;
     private String registrationNumber;
     private String formStatus;
     private String reason;
-//    private Double discount;
+    //    private Double discount;
     private Long classsRoomId;
     private boolean isTcGenrated;
     private String oldRegisterPhoto;
@@ -73,6 +71,11 @@ public class StudentDTO
     private Integer eMarksOutOff;
     private String entranceMarkSheet;
     private String permanentEducationNumber;
+    private String abcId;
+    private String enrollmentNumber;
+    private String dteNumber;
+    private String generalRegistrationNumber;
+
 
     @Email
     private String createdByEmail;
@@ -85,5 +88,7 @@ public class StudentDTO
     private StudentReligionDTO religion;
     private StudentSportsDTO sports;
     private StudentDocumentDTO documents;
+
+    private StudentCollegeDetailsDTO collegeDetailsDTO;
 
 }
