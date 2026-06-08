@@ -669,6 +669,9 @@ public class StudentServiceImpl implements StudentService {
         dto.setEntranceMarkSheet(student.getEntranceMarkSheet());
         dto.setDepartmentName(student.getDepartmentName());
 
+        dto.setCollegeDetailsDTO(StudentMapper.toStudentCollegeDetailsDTO(student.getCollegeDetails()));
+        dto.setDocumentDTO(StudentMapper.toStudentDocumentDTO(student.getDocuments()));
+
         if (student.getClassRoom() != null) {
             dto.setClasssRoomId(student.getClassRoom().getId());
         } else {
@@ -741,6 +744,7 @@ public class StudentServiceImpl implements StudentService {
 
         return dto;
     }
+
 
     @Override
     public StudentDocumentDTO updateStudentDocuments(Long studentId, String role, String email,

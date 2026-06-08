@@ -73,6 +73,8 @@ public class StudentResponseDTO {
     private String createdByName;
     private String oldRegisterPhoto;
 
+    private String fatherEmailId;
+
     private boolean entranceExam;
     private String entranceExamName;
     private Integer entranceMarks;
@@ -83,4 +85,7 @@ public class StudentResponseDTO {
     private String createdByEmail;
     private String role;
     private String branchCode;
+
+    private StudentCollegeDetailsDTO collegeDetailsDTO;
+    private StudentDocumentDTO documentDTO;
 }

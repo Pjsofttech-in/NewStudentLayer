@@ -125,7 +125,7 @@ public class StudentMapper {
         return dto;
     }
 
-    public StudentCollegeDetailsDTO toStudentCollegeDetailsDTO(StudentCollegeDetails obj) {
+    public static StudentCollegeDetailsDTO toStudentCollegeDetailsDTO(StudentCollegeDetails obj) {
         StudentCollegeDetailsDTO dto = new StudentCollegeDetailsDTO();
         if (obj == null) {
             dto.setAbcId(obj.getAbcId());
@@ -260,7 +260,7 @@ public class StudentMapper {
         return dto;
     }
 
-    public StudentDocumentDTO toStudentDocumentDTO(StudentDocument document) {
+    public static StudentDocumentDTO toStudentDocumentDTO(StudentDocument document) {
         if (document == null) return null;
 
         StudentDocumentDTO dto = new StudentDocumentDTO();
@@ -279,6 +279,7 @@ public class StudentMapper {
 
         dto.setMarksheet10thCert(document.getMarksheet10thCert());
         dto.setMarksheet12thCert(document.getMarksheet12thCert());
+        dto.setGraduationMarksheetCert(document.getGraduationMarksheetCert());
         dto.setNonCreamyLayerCert(document.getNonCreamyLayerCert());
         dto.setIncomeCertificateCert(document.getIncomeCertificateCert());
 
