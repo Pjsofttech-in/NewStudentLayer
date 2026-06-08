@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.CreatedByResponseDTO;
+import Layer.NewStudentManagement.DTO.FeeReminderDTO;
 import Layer.NewStudentManagement.DTO.InstituteClientWrapperResponse;
 import Layer.NewStudentManagement.DTO.InstituteLoginResponse;
 import Layer.NewStudentManagement.Entity.StudentEntity;
@@ -26,8 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class StaffService
-{
+public class StaffService {
     private final WebClient webClient;
 
 
@@ -69,7 +69,8 @@ public class StaffService
                         .build())
                 .header(HttpHeaders.AUTHORIZATION, token)  // pass it as-is
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Boolean>>() {})
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Boolean>>() {
+                })
                 .block();
     }
 
@@ -85,7 +86,8 @@ public class StaffService
                         .build())
                 .header(HttpHeaders.AUTHORIZATION, token)  // Pass token directly
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
                 .block();
 
     }
@@ -102,7 +104,8 @@ public class StaffService
                         .build())
                 .header(HttpHeaders.AUTHORIZATION, token)  // Pass token directly
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {})
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
                 .block();
 
     }
@@ -127,7 +130,8 @@ public class StaffService
                         .queryParam("instituteEmail", instituteEmail)
                         .build())
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
+                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
+                })
                 .block();
 
         return branchMap != null
@@ -142,7 +146,8 @@ public class StaffService
                         .queryParam("instituteEmail", instituteEmail)
                         .build())
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
+                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
+                })
                 .block();
     }
 
@@ -356,6 +361,19 @@ public class StaffService
                         response -> Mono.empty()
                 )
                 .bodyToMono(CreatedByResponseDTO.class);
+    }
+
+    public Mono<String> sendFeeReminderViaWati(FeeReminderDTO request, String token) {
+        return webClient.post()
+                .uri("/watiTemplate/sendStudentFeeReminderMessage")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(error -> Mono.error(new RuntimeException("Login Failed: " + error)))
+                )
+                .bodyToMono(String.class);
     }
 
 }

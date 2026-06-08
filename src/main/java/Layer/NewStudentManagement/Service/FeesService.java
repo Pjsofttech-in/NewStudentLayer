@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.Service;
 
 import Layer.NewStudentManagement.DTO.*;
+import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
@@ -25,4 +26,5 @@ public interface FeesService
     Map<String, List<FeesScheduleChartByMonthDTO>> getMonthlyReport(String role, String email, int academicYear, String branchCode);
     Map<String, List<FeesScheduleChartByYearDTO>> getYearlyReport(String role, String email, int fromAcademicYear, int toAcademicYear, String branchCodeFilter);
     String getLastCollectionDate(StudentFees fees);
+    List<StudentFeeSchedule> getFeesDueInDays(Integer days);
 }

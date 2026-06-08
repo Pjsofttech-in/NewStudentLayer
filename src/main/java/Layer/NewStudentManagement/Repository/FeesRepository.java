@@ -1,8 +1,8 @@
 package Layer.NewStudentManagement.Repository;
 
-import Layer.NewStudentManagement.DTO.ClassFeesRevenueDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueProjection;
 import Layer.NewStudentManagement.Entity.StudentEntity;
+import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentStandard;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,8 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpecificationExecutor<StudentFees>
-{
+public interface FeesRepository extends JpaRepository<StudentFees, Long>, JpaSpecificationExecutor<StudentFees> {
 
     boolean existsByStudentAndStandard(StudentEntity student, StudentStandard standard);
 
@@ -46,14 +45,14 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
                                       @Param("mediumId") Long mediumId);
 
     @Query("""
-        SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END
-        FROM StudentFees f
-        WHERE f.student = :student
-          AND f.standard.sid = :standardId
-          AND f.medium.mid = :mediumId
-          AND f.stream.id = :streamId
-          AND f.group.id = :groupId
-    """)
+                SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END
+                FROM StudentFees f
+                WHERE f.student = :student
+                  AND f.standard.sid = :standardId
+                  AND f.medium.mid = :mediumId
+                  AND f.stream.id = :streamId
+                  AND f.group.id = :groupId
+            """)
     boolean existsFees(
             @Param("student") StudentEntity student,
             @Param("standardId") Long standardId,
@@ -69,7 +68,6 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
                                                  @Param("mediumId") Long mediumId,
                                                  @Param("streamId") Long streamId,
                                                  @Param("degreeId") Long degreeId);
-
 
 
     @Query("SELECT f FROM StudentFees f WHERE f.student.id = :studentId")
@@ -91,4 +89,11 @@ public interface FeesRepository extends JpaRepository<StudentFees,Long>, JpaSpec
 
     boolean existsByStudentId(Long studentId);
 
+    @Query("""
+            SELECT s FROM StudentFeeSchedule s LEFT JOIN FETCH s.studentFees
+            LEFT JOIN FETCH s.studentFees.student
+            WHERE s.isPaid = false AND s.dueDate BETWEEN :low AND :high
+            ORDER BY s.id DESC
+            """)
+    List<StudentFeeSchedule> getAllScheduledFeesDueInBetween(@Param("low") LocalDate low, @Param("high") LocalDate high);
 }

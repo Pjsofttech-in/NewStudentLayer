@@ -4,6 +4,8 @@ import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Pagination.StudentFeesSpecification;
 import Layer.NewStudentManagement.Repository.*;
+import Layer.NewStudentManagement.Security.LoginRequest;
+import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.FeesService;
 import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
@@ -503,7 +505,7 @@ public class FeesServiceImpl implements FeesService {
 
     private List<FeesScheduleChartByYearDTO> getListOfFeesScheduleByYear(int fromAcademicYear, int toAcademicYear, String branchCode) {
         List<FeesScheduleChartProjection> lisOfYears = feesScheduleRepository.findByRangeOfAcademicYearsAndBranchCode(fromAcademicYear, toAcademicYear,
-                 branchCode);
+                branchCode);
 
         // Map to hold our combined results
         Map<String, FeesScheduleChartByYearDTO> map = new HashMap<>();
@@ -813,5 +815,36 @@ public class FeesServiceImpl implements FeesService {
             }
         }
         return "";
+    }
+
+    public List<StudentFeeSchedule> getFeesDueInDays(Integer days) {
+        LocalDate startOfToday = LocalDate.now();
+        LocalDate endOfNextWeek = LocalDate.now().plusWeeks(1);
+        LoginRequest loginReq = new LoginRequest();
+        loginReq.setEmail("neha@gmail.com");
+        loginReq.setPassword("12345678");
+        LoginResponse loginResponse = staffService.loginStaff(loginReq).block();
+        List<StudentFeeSchedule> allScheduledFeesDueInBetween = feesRepository.getAllScheduledFeesDueInBetween(startOfToday, endOfNextWeek);
+        if (!CollectionUtils.isEmpty(allScheduledFeesDueInBetween)) {
+            allScheduledFeesDueInBetween.forEach(studentFeeSchedule -> {
+                String stringMono = staffService.sendFeeReminderViaWati(mapToFeesReminder(studentFeeSchedule), loginResponse.getToken())
+                        .block();
+                System.out.println(stringMono);
+            });
+        }
+
+        return allScheduledFeesDueInBetween;
+    }
+
+    public FeeReminderDTO mapToFeesReminder(StudentFeeSchedule obj) {
+        FeeReminderDTO dto = new FeeReminderDTO();
+        dto.setDueDateStr(HelperUtil.getDateWithFormat(obj.getDueDate()));
+        if (obj.getStudentFees() != null && obj.getStudentFees().getStudent() != null
+                && StringUtils.isNotBlank(obj.getStudentFees().getStudent().getContact())) {
+            dto.setStudentPhoneNo(obj.getStudentFees().getStudent().getContact());
+        }
+        dto.setCollectAmount(obj.getCollectAmount());
+        dto.setStudentName(obj.getStudentFees().getStudentName());
+        return dto;
     }
 }
