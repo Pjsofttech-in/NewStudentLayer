@@ -40,6 +40,8 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     private StudentRepository studentRepository;
     @Autowired
+    private StudentCollegeDetailsRepository collegeDetailsRepository;
+    @Autowired
     private AddressRepository addressRepo;
     @Autowired
     private EducationRepository educationRepo;
@@ -270,22 +272,7 @@ public class StudentServiceImpl implements StudentService {
         StudentEntity existing = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
-        StudentCollegeDetails scd = request.getStudent().getCollegeDetails();
-        request.getStudent().setCollegeDetails(null);
         BeanCopyUtils.copyNonNullProperties(request.getStudent(), existing);
-
-        if (scd!=null) {
-            StudentCollegeDetails collegeDetails = existing.getCollegeDetails();
-            if(collegeDetails==null) {
-                collegeDetails = new StudentCollegeDetails();
-                collegeDetails.setStudent(existing);
-            }
-            collegeDetails.setAbcId(scd.getAbcId());
-            collegeDetails.setDteNumber(scd.getDteNumber());
-            collegeDetails.setEnrollmentNumber(scd.getEnrollmentNumber());
-            collegeDetails.setGeneralRegistrationNumber(scd.getGeneralRegistrationNumber());
-            existing.setCollegeDetails(collegeDetails);
-        }
 
         updateStudentFields(existing, request.getStudent());
 
@@ -304,6 +291,14 @@ public class StudentServiceImpl implements StudentService {
                 }
             }
         }
+
+        Optional.ofNullable(request.getCollegeDetails()).ifPresent(collegeDetails -> {
+            StudentCollegeDetails existingObj = collegeDetailsRepository.findByStudentId(existing.getId())
+                    .orElse(new StudentCollegeDetails());
+            BeanCopyUtils.copyNonNullProperties(collegeDetails, existingObj);
+            existingObj.setStudent(savedStudent);
+            collegeDetailsRepository.save(existingObj);
+        });
 
         Optional.ofNullable(request.getAddress()).ifPresent(updatedAddr -> {
             StudentAddress existingAddress = addressRepo.findByStudentId(studentId)

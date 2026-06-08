@@ -21,6 +21,7 @@ public class StudentRequest
     private String departmentName;
 
     private StudentEntity student;
+    private StudentCollegeDetails collegeDetails;
     private StudentAddress address;
     private List<StudentEducation> educationList;
     private StudentAdditionalInfo additionalInfo;
