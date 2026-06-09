@@ -77,7 +77,6 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
                     bankName = paymentDetails.get("bank").toString();
                 }
                 feesCollect.setPaymentMode(modeOfPayment);
-                feesCollect.setBankName(bankName);
                 if (isAuthentic) {
                     paymentTransactions.setStatus(SUCCESS);
                     feesCollect.setStatus("COMPLETED");
@@ -86,17 +85,11 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
                     feesCollect.setStatus("FAILED");
                     paymentTransactions.setErrorReason(errorReason);
                 }
-                //Need to set this  fields once integration is complete
-//                feesCollect.setIfscCode("");
-//                feesCollect.setInvoice("");
-//                feesCollect.setBankBranchName("");
-//                feesCollect.setAccountHolderName("");
             } catch (Exception e) {
                 // Log warning but don't crash the transaction if metadata fetch fails
                 System.err.println("Failed to fetch transaction metadata from Razorpay: " + e.getMessage());
             }
             // This ensures a malicious user cannot fake successful checkout payloads
-
             paymentTransactionsRepository.save(paymentTransactions);
         }
     }

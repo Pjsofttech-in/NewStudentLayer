@@ -1,6 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.*;
+import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
 import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFees;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
@@ -908,7 +909,8 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         return dto;
     }
 
-    public StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, String receiptId, Long studentFeesScheduleId) {
+    public StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, String receiptId, Long studentFeesScheduleId,
+                                                                  PaymentGatewayAccountResponceDTO paymentGatewayDTO) {
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         Optional<StudentFeeSchedule> feeScheduleOptional = feesScheduleRepository.findById(studentFeesScheduleId);
         if (feeScheduleOptional.isPresent()) {
@@ -930,6 +932,14 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
             sfc.setStudentFeeSchedule(studentFeeSchedule);
             sfc.setStudentFees(studentFees);
+
+            sfc.setInvoice("");
+            if(paymentGatewayDTO!=null) {
+                sfc.setIfscCode(paymentGatewayDTO.getIfscCode());
+                sfc.setBankBranchName(paymentGatewayDTO.getBankBranchName());
+                sfc.setBankName(paymentGatewayDTO.getBankName());
+                sfc.setAccountHolderName(paymentGatewayDTO.getAccountHolderName());
+            }
 
             sfc.setTransactionId(receiptId);
             sfc.setAmount(studentFeeSchedule.getCollectAmount());

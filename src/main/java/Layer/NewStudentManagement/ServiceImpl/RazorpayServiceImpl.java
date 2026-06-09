@@ -55,7 +55,7 @@ public class RazorpayServiceImpl implements RazorpayService {
             razorpayClient = new RazorpayClient(paymentGatewayDetails.getKeyId(),
                     cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey()));
         }
-        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId);
+        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId, paymentGatewayDetails);
         // Call Razorpay API
         Order order = razorpayClient.orders.create(orderRequest);
 
