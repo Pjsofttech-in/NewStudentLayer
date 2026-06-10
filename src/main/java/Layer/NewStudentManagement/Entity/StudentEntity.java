@@ -129,6 +129,10 @@ public class StudentEntity
     @JoinColumn(name = "degree_name_id")
     private StudentDegreeName degreeName;
 
+    @ManyToOne
+    @JoinColumn(name = "course_type_id")
+    private StudentCourseType courseType;
+
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentPromotionRecord> promotionRecords;
 

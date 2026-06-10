@@ -19,6 +19,7 @@ public class StudentFilterDTO
     private String mediumName;
     private String status;
     private String streamName;
+    private String courseType;
     private String groupName;
     private String semister;
     private Boolean earthquake;

@@ -14,6 +14,7 @@ public class StudentRequest
 {
 
     private Long standardId;
+    private Long courseTypeId;
     private Long mediumId;
     private Long streamId;
     private Long graduationTypeId;

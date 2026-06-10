@@ -51,6 +51,8 @@ public class StudentDTO {
     private Long streamId;
     private Long graduationTypeId;
     private String graduationType;
+    private Long courseTypeId;
+    private String courseType;
     private Long degreeNameId;
     private String degreeName;
     private String fatherEmailId;

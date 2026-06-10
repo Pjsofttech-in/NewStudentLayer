@@ -243,6 +243,11 @@ public class StudentSpecification {
                     predicates.add(cb.equal(cb.lower(graduationJoin.get("graduationType")), filter.getGraduationType().toLowerCase()));
                 }
 
+                Join<Object, Object> courseTypeJoin = root.join("courseType", JoinType.LEFT);
+                if (filter.getCourseType() != null) {
+                    predicates.add(cb.equal(cb.lower(courseTypeJoin.get("courseType")), filter.getCourseType().toLowerCase()));
+                }
+
                 Join<Object, Object> degreeJoin = root.join("degreeName", JoinType.LEFT);
                 if (filter.getDegreeName() != null) {
                     predicates.add(cb.equal(cb.lower(degreeJoin.get("degreeName")), filter.getDegreeName().toLowerCase()));

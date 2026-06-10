@@ -84,6 +84,10 @@ public class StudentMapper {
             dto.setGraduationTypeId(student.getGraduationType().getId());
             dto.setGraduationType(student.getGraduationType().getGraduationType());
         }
+        if (student.getCourseType() != null) {
+            dto.setCourseTypeId(student.getCourseType().getId());
+            dto.setCourseType(student.getCourseType().getCourseType());
+        }
 
         dto.setCreatedByEmail(student.getCreatedByEmail());
         dto.setRole(student.getRole());

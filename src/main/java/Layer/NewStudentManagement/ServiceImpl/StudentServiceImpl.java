@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -76,6 +77,8 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     private FeesRepository feesRepository;
     @Autowired
+    private CourseTypeRepository courseTypeRepository;
+    @Autowired
     private ClassRoomTeacherSubjectRepository classRoomTeacherSubjectRepository;
 
     private void checkPermission(String role, String email, String action) {
@@ -119,6 +122,12 @@ public class StudentServiceImpl implements StudentService {
             StudentGraduationType gradType = graduationTypeRepository.findById(request.getGraduationTypeId())
                     .orElseThrow(() -> new RuntimeException("GraduationType not found with ID: " + request.getGraduationTypeId()));
             student.setGraduationType(gradType);
+        }
+
+        if (request.getCourseTypeId() != null) {
+            StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                    .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getGraduationTypeId()));
+            student.setCourseType(courseType);
         }
 
         if (request.getStreamId() != null) {
@@ -175,6 +184,26 @@ public class StudentServiceImpl implements StudentService {
                 StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
                         .orElseThrow(() -> new RuntimeException("DegreeName not found with ID: " + request.getDegreeNameId()));
                 student.setDegreeName(degree);
+            }
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+            student.setDepartmentName(request.getDepartmentName());
+
+
+            student.setGroupName(null);
+            student.setStandardName(null);
+            student.setStandard(null);
+        } else if ("Diploma".equalsIgnoreCase(student.getInstitutionType())) {
+
+            if (request.getCourseTypeId() != null) {
+                StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                        .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getCourseTypeId()));
+                student.setCourseType(courseType);
             }
             Long mediumId = request.getMediumId();
             if (mediumId != null) {
@@ -737,6 +766,10 @@ public class StudentServiceImpl implements StudentService {
             dto.setStreamId(student.getStream().getId());
             dto.setStreamName(student.getStream().getStream());
         }
+        if (student.getCourseType() != null) {
+            dto.setCourseType(student.getCourseType().getCourseType());
+            dto.setCourseTypeId(student.getCourseType().getId());
+        }
         if (student.getDegreeName() != null) {
             dto.setDegreeNameId(student.getDegreeName().getId());
             dto.setDegreeName(student.getDegreeName().getDegreeName());
@@ -1271,7 +1304,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
             String role, String email, String graduationType, String standardName,
-            String mediumName, String streamName, String degreeName, String departmentName,
+            String mediumName, String streamName, String courseType, String degreeName, String departmentName,
             String institutionType, String academicYear, @Nullable String branchCodeFilter) {
 
         checkPermission(role, email, "Get");
@@ -1304,6 +1337,7 @@ public class StudentServiceImpl implements StudentService {
                             standardName != null && !standardName.trim().isEmpty() ? standardName : null,
                             mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
                             streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                            courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                             degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
                             departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
                             institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
@@ -1316,6 +1350,7 @@ public class StudentServiceImpl implements StudentService {
                             standardName != null && !standardName.trim().isEmpty() ? standardName : null,
                             mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
                             streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                            courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                             degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
                             institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                             academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
@@ -1327,6 +1362,7 @@ public class StudentServiceImpl implements StudentService {
                             standardName != null && !standardName.trim().isEmpty() ? standardName : null,
                             mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
                             streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                            courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                             institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                             academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
                     );
@@ -1336,6 +1372,7 @@ public class StudentServiceImpl implements StudentService {
                             standardName != null && !standardName.trim().isEmpty() ? standardName : null,
                             mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
                             streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                            courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                             institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                             academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
                     );
@@ -1360,6 +1397,7 @@ public class StudentServiceImpl implements StudentService {
                     mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
                     streamName != null && !streamName.trim().isEmpty() ? streamName : null,
                     degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                    courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                     departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
                     institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                     academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
@@ -1371,6 +1409,7 @@ public class StudentServiceImpl implements StudentService {
                     standardName != null && !standardName.trim().isEmpty() ? standardName : null,
                     mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
                     streamName != null && !streamName.trim().isEmpty() ? streamName : null,
+                    courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                     degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
                     institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                     academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null

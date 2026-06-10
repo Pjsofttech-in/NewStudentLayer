@@ -89,6 +89,7 @@ public class DashBoardController {
             @RequestParam(required = false) String mediumName,
             @RequestParam(required = false) String streamName,
             @RequestParam(required = false) String degreeName,
+            @RequestParam(required = false) String courseType,
             @RequestParam(required = false) String departmentName,
             @RequestParam(required = false) String institutionType,
             @RequestParam(required = false) String academicYear,
@@ -98,7 +99,7 @@ public class DashBoardController {
             return studentService.getStudentCountByStandard(role, email, academicYear, mediumName);
         } else {
             return studentService.getStudentCountByClassRoom(
-                    role, email, graduationType, standardName, mediumName, streamName,
+                    role, email, graduationType, standardName, mediumName, streamName, courseType,
                     degreeName, departmentName, institutionType, academicYear, branchCode);
         }
     }
