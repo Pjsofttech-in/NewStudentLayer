@@ -166,6 +166,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 SELECT c.division.division AS division,
                        m.mediumName AS mediumName,
                        st.stream AS stream,
+                       ct.courseType AS courseType,
                        d.degreeName AS degree,
                        s.academicYear AS academicYear,
                        s.departmentName AS departmentName,
@@ -176,17 +177,19 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 LEFT JOIN s.medium m
                 LEFT JOIN s.stream st
                 LEFT JOIN s.degreeName d
+                LEFT JOIN s.courseType ct
                 WHERE s.branchCode = :branchCode
                   AND (:graduationType IS NULL OR g.graduationType = :graduationType)
                   AND (:standardName IS NULL OR s.standardName = :standardName)
                   AND (:mediumName IS NULL OR m.mediumName = :mediumName)
                   AND (:streamName IS NULL OR st.stream = :streamName)
                   AND (:degreeName IS NULL OR d.degreeName = :degreeName)
+                  AND (:courseType IS NULL OR ct.courseType = :courseType)
                   AND (:departmentName IS NULL OR s.departmentName = :departmentName)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
                   AND s.status = 'APPROVED'
-                GROUP BY m.mediumName, st.stream, d.degreeName, s.academicYear, c.division.division, s.departmentName
+                GROUP BY m.mediumName, st.stream, d.degreeName, s.academicYear, c.division.division, s.departmentName, s.courseType
             """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFilters(
             @Param("branchCode") String branchCode,
@@ -205,6 +208,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 SELECT c.division.division AS division,
                        m.mediumName AS mediumName,
                        st.stream AS stream,
+                       ct.courseType AS courseType,
                        d.degreeName AS degree,
                        s.academicYear AS academicYear,
                        COUNT(s.id) AS studentCount
@@ -225,7 +229,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
                   AND s.status = 'APPROVED'
-                GROUP BY m.mediumName, st.stream, d.degreeName, s.academicYear, c.division.division
+                GROUP BY m.mediumName, st.stream, d.degreeName, s.academicYear, c.division.division, s.courseType
             """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartment(
             @Param("branchCode") String branchCode,
@@ -243,6 +247,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 SELECT c.division.division AS division,
                        m.mediumName AS mediumName,
                        st.stream AS stream,
+                       ct.courseType AS courseType,
                        s.academicYear AS academicYear,
                        COUNT(s.id) AS studentCount
                 FROM StudentEntity s
@@ -260,7 +265,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
                   AND s.status = 'APPROVED'
-                GROUP BY m.mediumName, st.stream, s.academicYear, c.division.division
+                GROUP BY m.mediumName, st.stream, s.academicYear, c.division.division, s.courseType
             """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartmentDegree(
             @Param("branchCode") String branchCode,
@@ -277,10 +282,12 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 SELECT c.division.division AS division,
                        m.mediumName AS mediumName,
                        st.stream AS stream,
+                       ct.courseType AS courseType,
                        s.academicYear AS academicYear,
                        COUNT(s.id) AS studentCount
                 FROM StudentEntity s
                 JOIN s.classRoom c
+                LEFT JOIN s.courseType ct
                 LEFT JOIN s.medium m
                 LEFT JOIN s.stream st
                 WHERE s.branchCode = :branchCode
@@ -291,7 +298,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
                   AND s.status = 'APPROVED'
-                GROUP BY m.mediumName, st.stream, s.academicYear, c.division.division
+                GROUP BY m.mediumName, st.stream, s.academicYear, c.division.division, s.courseType
             """)
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoomWithFiltersWithoutDepartmentDegreeGraduationType(
             @Param("branchCode") String branchCode,
