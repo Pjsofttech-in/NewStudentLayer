@@ -64,6 +64,10 @@ public class StudentClassRoom
     @JoinColumn(name = "degree_name_id", nullable = true)
     private StudentDegreeName degreeName;
 
+    @ManyToOne
+    @JoinColumn(name = "course_type_id", nullable = true)
+    private StudentCourseType courseType;
+
     @OneToMany(mappedBy = "classRoom", cascade = CascadeType.ALL)
     private List<StudentEntity> students;
 

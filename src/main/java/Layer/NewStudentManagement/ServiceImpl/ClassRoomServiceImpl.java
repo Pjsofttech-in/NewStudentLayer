@@ -497,6 +497,9 @@ public class ClassRoomServiceImpl implements ClassRoomService {
             dto.setStandard(classroom.getStandard() != null ? classroom.getStandard().getStandardName() : null);
             dto.setStandardId(classroom.getStandard() != null ? classroom.getStandard().getSid() : null);
 
+            dto.setCourseTypeId(classroom.getCourseType() != null ? classroom.getCourseType().getId() : null);
+            dto.setCourseTypeName(classroom.getCourseType() != null ? classroom.getCourseType().getCourseType() : null);
+
             dto.setStartTime(classroom.getStartTime());
             dto.setEndTime(classroom.getEndTime());
             dto.setGroupName(classroom.getGroupName());
