@@ -1643,6 +1643,12 @@ public class StudentServiceImpl implements StudentService {
             student.setGraduationType(gradType);
         }
 
+        if (request.getCourseTypeId() != null) {
+            StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                    .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getGraduationTypeId()));
+            student.setCourseType(courseType);
+        }
+
         if (request.getStreamId() != null) {
             StudentStream stream = streamRepository.findById(request.getStreamId())
                     .orElseThrow(() -> new RuntimeException("Stream not found with ID: " + request.getStreamId()));
@@ -1717,6 +1723,26 @@ public class StudentServiceImpl implements StudentService {
             student.setStandardName(null);
             student.setGroupName(null);
             student.setSemister(request.getSemister());
+        } else if ("Diploma".equalsIgnoreCase(student.getInstitutionType())) {
+
+            if (request.getCourseTypeId() != null) {
+                StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                        .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getCourseTypeId()));
+                student.setCourseType(courseType);
+            }
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+            student.setDepartmentName(request.getDepartmentName());
+
+
+            student.setGroupName(null);
+            student.setStandardName(null);
+            student.setStandard(null);
         }
 
         StudentEntity savedStudent = studentRepository.save(student);

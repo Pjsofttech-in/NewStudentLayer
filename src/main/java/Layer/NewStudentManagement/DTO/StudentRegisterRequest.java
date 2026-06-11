@@ -35,6 +35,7 @@ public class StudentRegisterRequest
     private Long standardId;
     private Long mediumId;
     private Long streamId;
+    private Long courseTypeId;
     private Long graduationTypeId;
     private Long degreeNameId;
     private String departmentName;

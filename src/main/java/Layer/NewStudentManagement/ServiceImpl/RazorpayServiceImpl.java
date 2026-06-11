@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
+import Layer.NewStudentManagement.DTO.RazorpayVerifyRequest;
 import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Service.FeesCollectService;
@@ -16,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 @Service
@@ -25,6 +27,8 @@ public class RazorpayServiceImpl implements RazorpayService {
     private final FeesCollectService feesCollectService;
     private final PaymentTransactionsService paymentTransactionsService;
     private final ClientAdminPaymentGatewayService clientAdminPaymentGatewayService;
+    private static final String SYSTEM = "Student Management Software";
+
 
     public RazorpayServiceImpl(CryptoUtil cryptoUtil, StaffService staffService, FeesCollectService feesCollectService,
                                PaymentTransactionsService paymentTransactionsService, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService) {
@@ -57,7 +61,9 @@ public class RazorpayServiceImpl implements RazorpayService {
         }
         StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId, paymentGatewayDetails);
         // Call Razorpay API
-        Order order = razorpayClient.orders.create(orderRequest);
+//        Order order = razorpayClient.orders.create(orderRequest);
+
+        Map<String, Object> order = staffService.createOrder(branchCode, SYSTEM, amountInRupees.longValue());
 
         paymentTransactionsService.createOrder(role, email, amountInRupees, receiptId, order.get("id").toString(), feesCollect);
 
@@ -71,17 +77,29 @@ public class RazorpayServiceImpl implements RazorpayService {
             if (!staffService.hasPermission(role, email, "POST")) {
                 throw new RuntimeException("You don't have permission to create order");
             }
-            JSONObject options = new JSONObject();
-            options.put("razorpay_order_id", orderId);
-            options.put("razorpay_payment_id", paymentId);
-            options.put("razorpay_signature", signature);
+
             String branchCode = staffService.fetchBranchCodeByRole(role, email);
-            PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
-            String keySecret = "";
-            if (Objects.nonNull(paymentGatewayDetails)) {
-                keySecret = cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey());
-            }
-            return Utils.verifyPaymentSignature(options, keySecret);
+
+            RazorpayVerifyRequest request = new RazorpayVerifyRequest();
+            request.setRazorpayOrderId(orderId);
+            request.setRazorpayPaymentId(paymentId);
+            request.setRazorpaySignature(signature);
+            request.setBranchCode(branchCode);
+            request.setSystemName(SYSTEM);
+
+            return Boolean.TRUE.equals(staffService.verifyPayment(request).block());
+
+//            JSONObject options = new JSONObject();
+//            options.put("razorpay_order_id", orderId);
+//            options.put("razorpay_payment_id", paymentId);
+//            options.put("razorpay_signature", signature);
+
+//            PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
+//            String keySecret = "";
+//            if (Objects.nonNull(paymentGatewayDetails)) {
+//                keySecret = cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey());
+//            }
+//            return Utils.verifyPaymentSignature(options, keySecret);
         } catch (Exception e) {
             return false;
         }

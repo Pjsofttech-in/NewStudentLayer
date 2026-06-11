@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.DTO.CreatedByResponseDTO;
-import Layer.NewStudentManagement.DTO.FeeReminderDTO;
-import Layer.NewStudentManagement.DTO.InstituteClientWrapperResponse;
-import Layer.NewStudentManagement.DTO.InstituteLoginResponse;
+import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Repository.StudentRepository;
@@ -15,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -149,6 +147,54 @@ public class StaffService {
                 .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {
                 })
                 .block();
+    }
+
+    public Map<String, Object> createOrder(String branchCode,
+                                           String systemName,
+                                           Long amount) {
+
+        HttpServletRequest request =
+                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        return webClient.post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/createOrder")
+                        .queryParam("branchCode", branchCode)
+                        .queryParam("systemName", systemName)
+                        .queryParam("amount", amount)
+                        .build())
+                .header("Authorization", token)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .block();
+    }
+
+    public Mono<Boolean> verifyPayment(RazorpayVerifyRequest request) {
+
+        HttpServletRequest httpRequest =
+                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+        String token = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+
+        return webClient.post()
+                .uri("/verifyPayment")
+                .header(HttpHeaders.AUTHORIZATION, token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        response -> response.bodyToMono(String.class)
+                                .flatMap(err -> {
+                                    System.out.println("Client verifyPayment failed: " + err);
+                                    return Mono.error(new RuntimeException(err));
+                                })
+
+                )
+                .bodyToMono(Boolean.class);
     }
 
     public boolean hasPermission(String role, String email, String action) {
