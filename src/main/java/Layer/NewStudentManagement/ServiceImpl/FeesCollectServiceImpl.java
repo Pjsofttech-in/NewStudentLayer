@@ -13,7 +13,9 @@ import Layer.NewStudentManagement.Service.FeesService;
 import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -364,7 +366,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
     @Override
     public Map<String, List<FeesScheduleChartProjection>> getReportByDayInMonth(String role, String email, int year, String monthName,
-                                                      @Nullable String branchCodeFilter) {
+                                                                                @Nullable String branchCodeFilter) {
 
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to Get Collected Fees by Month");
@@ -605,7 +607,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             if (filterDTO != null) {
 
                 if (filterDTO.getStudentName() != null && !filterDTO.getStudentName().isEmpty())
-                    predicates.add(cb.like(root.get("studentName"), filterDTO.getStudentName()));
+                    predicates.add(cb.like(root.get("studentName"), "%" + filterDTO.getStudentName() + "%"));
 
                 if (filterDTO.getStandardName() != null && !filterDTO.getStandardName().isEmpty())
                     predicates.add(cb.equal(root.get("standardName"), filterDTO.getStandardName()));
@@ -668,6 +670,38 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                             .where(parentLink, isUnpaid, hasDate, isBefore);
                     predicates.add(cb.exists(subquery));
                 }
+
+                String bankAccountName = filterDTO.getBankAccountName();
+                String paymentMode = filterDTO.getPaymentMode();
+                if (StringUtils.isNotBlank(bankAccountName) || StringUtils.isNotBlank(paymentMode)) {
+                    Subquery<Long> subquery = null;
+                    subquery = query.subquery(Long.class);
+                    Root<StudentFeesCollect> childRoot = subquery.from(StudentFeesCollect.class);
+
+                    // 2. Define the link between Parent and Child
+                    // Assuming your ChildEntity has a field named 'mainObject' that links back to the parent
+                    Predicate parentLink = cb.equal(childRoot.get("studentFees"), root);
+//                    Predicate studentLink = cb.equal(childRoot.get("studentFees").get("student"), root);
+
+                    // 3. Define your nested filters
+                    Predicate bankAccountNamePred = cb.like(childRoot.get("accountHolderName"), "%"+filterDTO.getBankAccountName()+"%");
+                    Predicate paymentModePred = cb.like(childRoot.get("paymentMode"), "%"+filterDTO.getPaymentMode()+"%");
+
+                    // 4. Configure the subquery to select IDs where conditions match
+                    List<Predicate> predArr = new ArrayList<>();
+                    predArr.add(parentLink);
+//                    predArr.add(studentLink);
+
+                    if (StringUtils.isNotBlank(bankAccountName)) {
+                        predArr.add(bankAccountNamePred);
+                    }
+                    if (StringUtils.isNotBlank(paymentMode)) {
+                        predArr.add(paymentModePred);
+                    }
+                    subquery.select(childRoot.get("id"))
+                            .where(predArr.toArray(Predicate[]::new));
+                    predicates.add(cb.exists(subquery));
+                }
             }
 
             if (finalFromDate != null && finalToDate != null) {
@@ -692,6 +726,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                         return true;
                     })
                     .map(c -> new FeesCollectionDetailDTO(
+                            c.getAccountHolderName(),
                             c.getAmount(),
                             c.getPaymentDate(),
                             c.getPaymentMode(),
@@ -733,7 +768,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                 }
             }
 
-            if(!CollectionUtils.isEmpty(sf.getScheduleList())) {
+            if (!CollectionUtils.isEmpty(sf.getScheduleList())) {
                 LocalDate earliestDueDate = sf.getScheduleList().stream().filter(s -> !s.isPaid())
                         .min(Comparator.comparing(StudentFeeSchedule::getDueDate,
                                 Comparator.nullsLast(Comparator.naturalOrder()))).orElse(new StudentFeeSchedule()).getDueDate();
@@ -934,7 +969,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             sfc.setStudentFees(studentFees);
 
             sfc.setInvoice("");
-            if(paymentGatewayDTO!=null) {
+            if (paymentGatewayDTO != null) {
                 sfc.setIfscCode(paymentGatewayDTO.getIfscCode());
                 sfc.setBankBranchName(paymentGatewayDTO.getBankBranchName());
                 sfc.setBankName(paymentGatewayDTO.getBankName());

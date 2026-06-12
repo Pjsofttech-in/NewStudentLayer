@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class FeesCollectionDetailDTO
 {
+    private String accountHolderName;
     private Double amount;
     private LocalDate paymentDate;
     private String paymentMode;

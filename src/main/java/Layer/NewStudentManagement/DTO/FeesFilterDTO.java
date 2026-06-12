@@ -28,4 +28,7 @@ public class FeesFilterDTO {
     private String createdByEmail;
     private String createdByName;
     private String dueDate;
+
+    private String bankAccountName;
+    private String paymentMode;
 }

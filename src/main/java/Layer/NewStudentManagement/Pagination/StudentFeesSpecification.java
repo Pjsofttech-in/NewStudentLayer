@@ -61,9 +61,13 @@ public class StudentFeesSpecification
 //            }
 
             if (dto.getStudentName() != null && !dto.getStudentName().isBlank()) {
-                predicates.add(criteriaBuilder.equal(
-                        criteriaBuilder.lower(root.get("studentName")),
-                        dto.getStudentName().toLowerCase()
+//                predicates.add(criteriaBuilder.equal(
+//                        criteriaBuilder.lower(root.get("studentName")),
+//                        dto.getStudentName().toLowerCase()
+//                ));
+                predicates.add(criteriaBuilder.like(
+                        root.get("studentName"),
+                        "%"+dto.getStudentName()+"%"
                 ));
             }
 
