@@ -22,7 +22,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.repository.query.Param;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -179,7 +178,7 @@ public class StudentServiceImpl implements StudentService {
             student.setDegreeName(null);
             student.setDepartmentName(null);
         } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
-            "Diploma".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
+                "Diploma".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
 
             if (request.getCourseTypeId() != null) {
                 StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
@@ -197,7 +196,7 @@ public class StudentServiceImpl implements StudentService {
 
             String departmentName = request.getDepartmentName();
             if (StringUtils.isBlank(departmentName)) {
-               throw new RuntimeException("Department can not be null");
+                throw new RuntimeException("Department can not be null");
             }
             student.setDepartmentName(request.getDepartmentName());
 
@@ -1714,7 +1713,43 @@ public class StudentServiceImpl implements StudentService {
             student.setDegreeName(null);
             student.setDepartmentName(null);
 
-        } else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
+        } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
+                request.getGraduationTypeId() != null &&
+                "Diploma".equalsIgnoreCase(
+                        graduationTypeRepository.findById(request.getGraduationTypeId())
+                                .orElseThrow(() -> new RuntimeException("GraduationType not found"))
+                                .getGraduationType())) {
+
+            if (request.getCourseTypeId() != null) {
+                StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                        .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getCourseTypeId()));
+                student.setCourseType(courseType);
+            }
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+
+            String departmentName = request.getDepartmentName();
+            if (StringUtils.isBlank(departmentName)) {
+                throw new RuntimeException("Department can not be null");
+            }
+
+            String semesterName = request.getSemister();
+            if (StringUtils.isBlank(semesterName)) {
+                throw new RuntimeException("Semester can not be null");
+            }
+            student.setDepartmentName(request.getDepartmentName());
+            student.setSemister(request.getSemister());
+
+
+            student.setGroupName(null);
+            student.setStandardName(null);
+            student.setStandard(null);
+        } else {
             if (request.getDegreeNameId() != null) {
                 StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
                         .orElseThrow(() -> new RuntimeException("DegreeName not found"));
@@ -1730,26 +1765,6 @@ public class StudentServiceImpl implements StudentService {
             student.setStandardName(null);
             student.setGroupName(null);
             student.setSemister(request.getSemister());
-        } else if ("Diploma".equalsIgnoreCase(student.getInstitutionType())) {
-
-            if (request.getCourseTypeId() != null) {
-                StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
-                        .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getCourseTypeId()));
-                student.setCourseType(courseType);
-            }
-            Long mediumId = request.getMediumId();
-            if (mediumId != null) {
-                StudentMedium medium = mediumRepository.findById(mediumId)
-                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
-                student.setMedium(medium);
-                student.setMediumName(medium.getMediumName());
-            }
-            student.setDepartmentName(request.getDepartmentName());
-
-
-            student.setGroupName(null);
-            student.setStandardName(null);
-            student.setStandard(null);
         }
 
         StudentEntity savedStudent = studentRepository.save(student);
