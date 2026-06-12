@@ -119,9 +119,13 @@ public class TeacherServiceImpl implements TeacherService
 
 
             } else if ("Diploma".equalsIgnoreCase(gradTypeName)) {
-                if (dto.getCourseTypeId() == null || StringUtils.isBlank(dto.getDepartmentName())) {
-                    throw new RuntimeException("Course Type, Department Name are required for Diploma");
+                if (dto.getStreamId() == null ||
+                        dto.getCourseTypeId() == null || StringUtils.isBlank(dto.getDepartmentName())) {
+                    throw new RuntimeException("Stream, Course Type, Department Name are required for Diploma");
                 }
+
+                stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
 
                 courseType = courseTypeRepository.findById(dto.getCourseTypeId())
                         .orElseThrow(() -> new RuntimeException("Course Type not found"));

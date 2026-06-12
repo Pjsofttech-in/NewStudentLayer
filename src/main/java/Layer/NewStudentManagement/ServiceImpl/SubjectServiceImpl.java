@@ -109,9 +109,14 @@ public class SubjectServiceImpl implements SubjectService
                 subject.setDepartmentName(dto.getDepartmentName());
             } else if ("Diploma".equalsIgnoreCase(graduationTypeName)) {
                 // All fields are required
-                if (StringUtils.isBlank(dto.getDepartmentName())) {
-                    throw new RuntimeException("Department Name are required for Diploma");
+                if (dto.getStreamId() == null || StringUtils.isBlank(dto.getDepartmentName())) {
+                    throw new RuntimeException("Stream, Department are required for Diploma");
                 }
+
+                StudentStream stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+                subject.setStream(stream);
+                subject.setStreamName(stream.getStream());
 
                 subject.setDepartmentName(dto.getDepartmentName());
             }

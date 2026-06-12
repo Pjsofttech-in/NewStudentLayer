@@ -135,12 +135,16 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 streamId = dto.getStreamId();
             } else if ("Diploma".equalsIgnoreCase(graduationType.getGraduationType())) {
 
+                if (dto.getStreamId() == null)
+                    throw new RuntimeException("Stream is required for Diploma ClassRoom");
+
                 if (dto.getDepartmentName() == null)
                     throw new RuntimeException("Department is required for Diploma ClassRoom");
 
                 if (dto.getCourseTypeId() == null)
                     throw new RuntimeException("Course Type is required for Diploma ClassRoom");
 
+                streamId = dto.getStreamId();
                 courseTypeId = dto.getCourseTypeId();
                 departmentName = dto.getDepartmentName();
             }
