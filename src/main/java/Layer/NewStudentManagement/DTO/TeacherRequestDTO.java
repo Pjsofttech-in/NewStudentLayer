@@ -17,6 +17,7 @@ public class TeacherRequestDTO
     private String teacherEmail;
     private String institutionType;
     private Long graduationTypeId;
+    private Long courseTypeId;
     private Long streamId;
     private Long degreeId;
     private String departmentName;          //Frontend year field

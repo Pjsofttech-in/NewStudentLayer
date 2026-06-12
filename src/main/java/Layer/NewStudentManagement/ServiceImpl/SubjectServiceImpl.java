@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.Entity.*;
 
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.SubjectService;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,9 @@ public class SubjectServiceImpl implements SubjectService
 
     @Autowired
     private StreamRepository streamRepository;
+
+    @Autowired
+    private CourseTypeRepository courseTypeRepository;
 
     @Autowired
     private GraduationTypeRepository graduationTypeRepository;
@@ -102,6 +106,13 @@ public class SubjectServiceImpl implements SubjectService
                         .orElseThrow(() -> new RuntimeException("Degree not found"));
                 subject.setDegree(degree);
                 subject.setDegreeName(degree.getDegreeName());
+                subject.setDepartmentName(dto.getDepartmentName());
+            } else if ("Diploma".equalsIgnoreCase(graduationTypeName)) {
+                // All fields are required
+                if (StringUtils.isBlank(dto.getDepartmentName())) {
+                    throw new RuntimeException("Department Name are required for Diploma");
+                }
+
                 subject.setDepartmentName(dto.getDepartmentName());
             }
             else {

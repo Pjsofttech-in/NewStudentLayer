@@ -12,6 +12,7 @@ import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.TeacherService;
+import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,8 @@ public class TeacherServiceImpl implements TeacherService
     private StaffService staffService;
     @Autowired
     private TeacherRepository teacherRepository;
+    @Autowired
+    private CourseTypeRepository courseTypeRepository;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -80,6 +83,7 @@ public class TeacherServiceImpl implements TeacherService
         StudentGraduationType graduationType = null;
         StudentStream stream = null;
         StudentDegreeName degree = null;
+        StudentCourseType courseType = null;
 
         if ("School".equalsIgnoreCase(institutionType)) {
             // School: no further checks
@@ -113,6 +117,14 @@ public class TeacherServiceImpl implements TeacherService
                 degree = degreeRepository.findById(dto.getDegreeId())
                         .orElseThrow(() -> new RuntimeException("Degree not found"));
 
+
+            } else if ("Diploma".equalsIgnoreCase(gradTypeName)) {
+                if (dto.getCourseTypeId() == null || StringUtils.isBlank(dto.getDepartmentName())) {
+                    throw new RuntimeException("Course Type, Department Name are required for Diploma");
+                }
+
+                courseType = courseTypeRepository.findById(dto.getCourseTypeId())
+                        .orElseThrow(() -> new RuntimeException("Course Type not found"));
 
             } else {
                 throw new RuntimeException("Unsupported Graduation Type for College");
@@ -161,6 +173,10 @@ public class TeacherServiceImpl implements TeacherService
         if (graduationType != null) {
             teacher.setGraduationType(graduationType);
             teacher.setGraduationTypeName(graduationType.getGraduationType());
+        }
+
+        if (courseType != null) {
+            teacher.setCourseType(courseType);
         }
 
         if (stream != null) {

@@ -68,12 +68,14 @@ public class StudentTeacher
     private StudentGraduationType graduationType;
 
     @ManyToOne
+    @JoinColumn(name = "course_type_id", nullable = true)
+    private StudentCourseType courseType;
+
+    @ManyToOne
     @JoinColumn(name = "stream_id", nullable = true)
     private StudentStream stream;
 
     @ManyToOne
     @JoinColumn(name = "degree_id", nullable = true)
     private StudentDegreeName degree;
-
-
 }
