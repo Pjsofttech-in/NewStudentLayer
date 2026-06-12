@@ -366,9 +366,20 @@ public class ResultServiceImpl implements ResultService
         StudentClassRoom classRoom = examSubject.getExam().getClassRoom();
 
         // Finding subject using following details from StudentSubject table
-        Long degreeId = classRoom.getDegreeName().getId();
-        Long graduationId = classRoom.getGraduationType().getId();
-        Long streamId = classRoom.getStream().getId();
+        Long degreeId = null;
+        Long graduationId = null;
+        Long streamId = null;
+        if(classRoom != null) {
+            if(classRoom.getDegreeName()!=null) {
+                degreeId = classRoom.getDegreeName().getId();
+            }
+            if(classRoom.getGraduationType()!=null) {
+                graduationId = classRoom.getDegreeName().getId();
+            }
+            if(classRoom.getStream()!=null) {
+                streamId = classRoom.getStream().getId();
+            }
+        }
 
         StudentSubject subject = subjectRepository.findSubjectByNameDegreeGraduationStream(subjectMarks.getSubjectName(),
                 degreeId, graduationId, streamId).orElseThrow(() -> new RuntimeException("Subject not found"));
