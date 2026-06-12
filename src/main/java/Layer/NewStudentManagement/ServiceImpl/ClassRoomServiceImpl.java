@@ -20,6 +20,9 @@ public class ClassRoomServiceImpl implements ClassRoomService {
     ClassRoomRepository classRoomRepository;
 
     @Autowired
+    CourseTypeRepository courseTypeRepository;
+
+    @Autowired
     MediumRepository mediumRepository;
 
     @Autowired
@@ -91,6 +94,9 @@ public class ClassRoomServiceImpl implements ClassRoomService {
         StudentDivision division = divisionRepository.findById(dto.getDivisionId())
                 .orElseThrow(() -> new RuntimeException("Division not found"));
 
+        StudentCourseType courseType = courseTypeRepository.findById(dto.getCourseTypeId())
+                .orElseThrow(() -> new RuntimeException("Course Type not found"));
+
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         String institutionType = dto.getInstitutionType();
 
@@ -99,6 +105,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
         Long standardId = null;
         Long streamId = null;
         Long degreeId = null;
+        Long courseTypeId = null;
         String departmentName = null;
 
         if ("School".equalsIgnoreCase(institutionType)) {
@@ -126,8 +133,17 @@ public class ClassRoomServiceImpl implements ClassRoomService {
 
                 standardId = dto.getStandardId();
                 streamId = dto.getStreamId();
-            }
+            } else if ("Diploma".equalsIgnoreCase(graduationType.getGraduationType())) {
 
+                if (dto.getDepartmentName() == null)
+                    throw new RuntimeException("Department is required for Diploma ClassRoom");
+
+                if (dto.getCourseTypeId() == null)
+                    throw new RuntimeException("Course Type is required for Diploma ClassRoom");
+
+                courseTypeId = dto.getCourseTypeId();
+                departmentName = dto.getDepartmentName();
+            }
             // UG / PG
             else {
 
@@ -145,6 +161,9 @@ public class ClassRoomServiceImpl implements ClassRoomService {
             }
         }
 
+        // UG / PG
+
+
         boolean exists = classRoomRepository.existsClassRoom(
                 branchCode,
                 dto.getYear(),
@@ -153,6 +172,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 standardId,
                 streamId,
                 degreeId,
+                courseTypeId,
                 departmentName
         );
 
@@ -260,6 +280,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 request.getStandardId(),
                 request.getStreamId(),
                 request.getDegreeNameId(),
+                request.getCourseTypeId(),
                 existing.getDepartmentName()
         );
 
@@ -271,6 +292,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                         Objects.equals(existing.getDivision() != null ? existing.getDivision().getDid() : null, request.getDivisionId()) &&
                         Objects.equals(existing.getStandard() != null ? existing.getStandard().getSid() : null, request.getStandardId()) &&
                         Objects.equals(existing.getStream() != null ? existing.getStream().getId() : null, request.getStreamId()) &&
+                        Objects.equals(existing.getCourseType() != null ? existing.getCourseType().getId() : null, request.getCourseTypeId()) &&
                         Objects.equals(existing.getDegreeName() != null ? existing.getDegreeName().getId() : null, request.getDegreeNameId());
 
         if (exists && !isSameRecord) {
@@ -313,6 +335,14 @@ public class ClassRoomServiceImpl implements ClassRoomService {
             existing.setGraduationType(grad);
         } else {
             existing.setGraduationType(null);
+        }
+
+        if (request.getCourseTypeId() != null) {
+            StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                    .orElseThrow(() -> new RuntimeException("Course type not found"));
+            existing.setCourseType(courseType);
+        } else {
+            existing.setCourseType(null);
         }
 
         if (request.getStreamId() != null) {
@@ -598,6 +628,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                         newDto.setEndTime(classroom.getEndTime());
                         newDto.setGroupName(classroom.getGroupName());
                         newDto.setGraduationType(classroom.getGraduationType() != null ? classroom.getGraduationType().getGraduationType() : null);
+                        newDto.setCourseTypeName(classroom.getCourseType() != null ? classroom.getCourseType().getCourseType() : null);
                         newDto.setInstitutionType(classroom.getInstitutionType());
                         newDto.setStreamName(classroom.getStream() != null ? classroom.getStream().getStream() : null);
                         newDto.setDegreeName(classroom.getDegreeName() != null ? classroom.getDegreeName().getDegreeName() : null);

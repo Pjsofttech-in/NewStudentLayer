@@ -178,13 +178,15 @@ public class StudentServiceImpl implements StudentService {
 
             student.setDegreeName(null);
             student.setDepartmentName(null);
-        } else if ("College".equalsIgnoreCase(student.getInstitutionType())) {
+        } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
+            "Diploma".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
 
-            if (request.getDegreeNameId() != null) {
-                StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
-                        .orElseThrow(() -> new RuntimeException("DegreeName not found with ID: " + request.getDegreeNameId()));
-                student.setDegreeName(degree);
+            if (request.getCourseTypeId() != null) {
+                StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                        .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getCourseTypeId()));
+                student.setCourseType(courseType);
             }
+
             Long mediumId = request.getMediumId();
             if (mediumId != null) {
                 StudentMedium medium = mediumRepository.findById(mediumId)
@@ -192,18 +194,23 @@ public class StudentServiceImpl implements StudentService {
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
             }
+
+            String departmentName = request.getDepartmentName();
+            if (StringUtils.isBlank(departmentName)) {
+               throw new RuntimeException("Department can not be null");
+            }
             student.setDepartmentName(request.getDepartmentName());
 
 
             student.setGroupName(null);
             student.setStandardName(null);
             student.setStandard(null);
-        } else if ("Diploma".equalsIgnoreCase(student.getInstitutionType())) {
+        } else {
 
-            if (request.getCourseTypeId() != null) {
-                StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
-                        .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getCourseTypeId()));
-                student.setCourseType(courseType);
+            if (request.getDegreeNameId() != null) {
+                StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
+                        .orElseThrow(() -> new RuntimeException("DegreeName not found with ID: " + request.getDegreeNameId()));
+                student.setDegreeName(degree);
             }
             Long mediumId = request.getMediumId();
             if (mediumId != null) {
