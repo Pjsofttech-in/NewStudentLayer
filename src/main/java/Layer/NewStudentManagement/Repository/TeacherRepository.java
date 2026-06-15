@@ -36,12 +36,14 @@ public interface TeacherRepository extends JpaRepository<StudentTeacher,Long>
             "AND (:graduationTypeName IS NULL OR t.graduationTypeName = :graduationTypeName) " +
             "AND (:streamName IS NULL OR t.streamName = :streamName) " +
             "AND (:degreeName IS NULL OR t.degreeName = :degreeName) " +
+            "AND (:courseTypeName IS NULL OR t.courseType.courseType = :courseTypeName) " +
             "AND (:departmentName IS NULL OR t.departmentName = :departmentName)")
     List<StudentTeacher> findTeachersByFilters(
             @Param("branchCode") String branchCode,
             @Param("institutionType") String institutionType,
             @Param("graduationTypeName") String graduationTypeName,
             @Param("streamName") String streamName,
+            @Param("courseTypeName") String courseTypeName,
             @Param("degreeName") String degreeName,
             @Param("departmentName") String departmentName
     );

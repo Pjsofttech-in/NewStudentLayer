@@ -393,7 +393,8 @@ public class TeacherServiceImpl implements TeacherService
 
 
     @Override
-    public List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName, String streamName,String degreeName, String departmentName) {
+    public List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName, String streamName,
+                                               String courseTypeName, String degreeName, String departmentName) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to get teachers");
         }
@@ -406,6 +407,7 @@ public class TeacherServiceImpl implements TeacherService
                 institutionType != null && !institutionType.trim().isEmpty() ? institutionType.trim() : null,
                 graduationTypeName != null && !graduationTypeName.trim().isEmpty() ? graduationTypeName.trim() : null,
                 streamName != null && !streamName.trim().isEmpty() ? streamName.trim() : null,
+                courseTypeName != null && !courseTypeName.trim().isEmpty() ? courseTypeName.trim() : null,
                 degreeName != null && !degreeName.trim().isEmpty() ? degreeName.trim() : null,
                 departmentName != null && !departmentName.trim().isEmpty() ? departmentName.trim() : null
         );
@@ -480,6 +482,11 @@ public class TeacherServiceImpl implements TeacherService
         if (teacher.getGraduationType() != null) {
             responseDTO.setGraduationTypeId(teacher.getGraduationType().getId());
             responseDTO.setGraduationType(teacher.getGraduationType().getGraduationType());
+        }
+
+        if (teacher.getCourseType() != null) {
+            responseDTO.setCourseTypeId(teacher.getCourseType().getId());
+            responseDTO.setCourseType(teacher.getCourseType().getCourseType());
         }
 
         if (teacher.getStream() != null) {
