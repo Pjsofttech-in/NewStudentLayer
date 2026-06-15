@@ -538,7 +538,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
             dto.setStandardId(classroom.getStandard() != null ? classroom.getStandard().getSid() : null);
 
             dto.setCourseTypeId(classroom.getCourseType() != null ? classroom.getCourseType().getId() : null);
-            dto.setCourseTypeName(classroom.getCourseType() != null ? classroom.getCourseType().getCourseType() : null);
+            dto.setCourseType(classroom.getCourseType() != null ? classroom.getCourseType().getCourseType() : null);
 
             dto.setStartTime(classroom.getStartTime());
             dto.setEndTime(classroom.getEndTime());
@@ -638,7 +638,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                         newDto.setEndTime(classroom.getEndTime());
                         newDto.setGroupName(classroom.getGroupName());
                         newDto.setGraduationType(classroom.getGraduationType() != null ? classroom.getGraduationType().getGraduationType() : null);
-                        newDto.setCourseTypeName(classroom.getCourseType() != null ? classroom.getCourseType().getCourseType() : null);
+                        newDto.setCourseType(classroom.getCourseType() != null ? classroom.getCourseType().getCourseType() : null);
                         newDto.setInstitutionType(classroom.getInstitutionType());
                         newDto.setStreamName(classroom.getStream() != null ? classroom.getStream().getStream() : null);
                         newDto.setDegreeName(classroom.getDegreeName() != null ? classroom.getDegreeName().getDegreeName() : null);

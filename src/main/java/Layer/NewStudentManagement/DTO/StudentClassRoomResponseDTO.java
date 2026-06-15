@@ -25,7 +25,7 @@ public class StudentClassRoomResponseDTO {
     private String streamName;
     private String degreeName;
     private String departmentName;
-    private String courseTypeName;
+    private String courseType;
 
     private Long mediumId;
     private Long divisionId;
