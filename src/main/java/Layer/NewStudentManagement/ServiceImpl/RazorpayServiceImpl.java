@@ -7,7 +7,6 @@ import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Service.RazorpayService;
 import Layer.NewStudentManagement.Util.CryptoUtil;
-import Layer.NewStudentManagement.Util.ReceiptUtils;
 import com.razorpay.Order;
 import com.razorpay.RazorpayClient;
 import com.razorpay.Utils;
@@ -44,26 +43,14 @@ public class RazorpayServiceImpl implements RazorpayService {
         if (!staffService.hasPermission(role, email, "POST")) {
             throw new RuntimeException("You don't have permission to create order");
         }
-        // Convert Rupees to Paise
-        BigDecimal amountInPaise = amountInRupees.multiply(BigDecimal.valueOf(100));
-        String receiptId = ReceiptUtils.generateTimestampReceiptId();
-        JSONObject orderRequest = new JSONObject();
-        orderRequest.put("amount", amountInPaise.intValue());
-        orderRequest.put("currency", "INR");
-        orderRequest.put("receipt", receiptId);//Pls fix this b4 commiting
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
-        RazorpayClient razorpayClient = new RazorpayClient("", "");
-        if (Objects.nonNull(paymentGatewayDetails)) {
-            razorpayClient = new RazorpayClient(paymentGatewayDetails.getKeyId(),
-                    cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey()));
-        }
-        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId, paymentGatewayDetails);
-        // Call Razorpay API
-//        Order order = razorpayClient.orders.create(orderRequest);
-
         Map<String, Object> order = staffService.createOrder(branchCode, SYSTEM, amountInRupees.longValue());
+
+        PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
+
+        String receiptId = String.valueOf(order.get("receiptId"));
+        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId, paymentGatewayDetails);
 
         paymentTransactionsService.createOrder(role, email, amountInRupees, receiptId, order.get("id").toString(), feesCollect);
 
@@ -88,18 +75,6 @@ public class RazorpayServiceImpl implements RazorpayService {
             request.setSystemName(SYSTEM);
 
             return Boolean.TRUE.equals(staffService.verifyPayment(request).block());
-
-//            JSONObject options = new JSONObject();
-//            options.put("razorpay_order_id", orderId);
-//            options.put("razorpay_payment_id", paymentId);
-//            options.put("razorpay_signature", signature);
-
-//            PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
-//            String keySecret = "";
-//            if (Objects.nonNull(paymentGatewayDetails)) {
-//                keySecret = cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey());
-//            }
-//            return Utils.verifyPaymentSignature(options, keySecret);
         } catch (Exception e) {
             return false;
         }
