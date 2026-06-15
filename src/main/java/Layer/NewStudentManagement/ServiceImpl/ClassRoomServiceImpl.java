@@ -221,8 +221,14 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 classRoom.setStream(stream);
 
                 classRoom.setGroupName(dto.getGroupName());
-            } else {
+            } else if("Diploma".equalsIgnoreCase(graduationType.getGraduationType())) {
+                StudentStream stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
 
+                classRoom.setDepartmentName(dto.getDepartmentName());
+                classRoom.setStream(stream);
+                classRoom.setCourseType(courseType);
+            } else {
                 StudentStream stream = streamRepository.findById(dto.getStreamId())
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
 
