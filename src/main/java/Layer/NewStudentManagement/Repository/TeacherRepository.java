@@ -31,12 +31,13 @@ public interface TeacherRepository extends JpaRepository<StudentTeacher,Long>
 
 
     @Query("SELECT t FROM StudentTeacher t " +
+            "LEFT JOIN t.courseType ct " + // 🌟 Explicit left join preserves null relationships
             "WHERE t.branchCode = :branchCode " +
             "AND t.institutionType = :institutionType " +
             "AND (:graduationTypeName IS NULL OR t.graduationTypeName = :graduationTypeName) " +
             "AND (:streamName IS NULL OR t.streamName = :streamName) " +
             "AND (:degreeName IS NULL OR t.degreeName = :degreeName) " +
-            "AND (:courseTypeName IS NULL OR t.courseType.courseType = :courseTypeName) " +
+            "AND (:courseTypeName IS NULL OR ct.courseType = :courseTypeName) " +
             "AND (:departmentName IS NULL OR t.departmentName = :departmentName)")
     List<StudentTeacher> findTeachersByFilters(
             @Param("branchCode") String branchCode,
