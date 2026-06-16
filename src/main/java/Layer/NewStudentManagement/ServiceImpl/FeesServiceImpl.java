@@ -761,6 +761,10 @@ public class FeesServiceImpl implements FeesService {
         dto.setBranchCode(fees.getBranchCode());
         dto.setCreatedByEmail(fees.getCreatedByEmail());
 
+        if (fees.getCourseType()!=null) {
+            dto.setCourseType(fees.getCourseType().getCourseType());
+        }
+
         if (StringUtils.isNotBlank(fees.getCreatedByEmail())) {
             try {
                 CreatedByResponseDTO creator =

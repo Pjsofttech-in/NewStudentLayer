@@ -16,6 +16,7 @@ public class FeesFilterDTO {
     private String standardName;
     private String mediumName;
     private String streamName;
+    private String courseType;
     private String graduationTypeName;
     private String degreeName;
     private String departmentName;

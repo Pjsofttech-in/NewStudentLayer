@@ -91,6 +91,10 @@ public class StudentFees
     private StudentGroup group;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "course_type_id", nullable = true)
+    private StudentCourseType courseType;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "degree_id", nullable = true)
     private StudentDegreeName degree;
 

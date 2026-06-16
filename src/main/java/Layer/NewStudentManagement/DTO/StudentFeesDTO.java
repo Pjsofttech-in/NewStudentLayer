@@ -23,7 +23,8 @@ public class StudentFeesDTO {
     private String mediumName;
     private String streamName;          // For Jr. College students
     private String groupName;
-    private String degreeName;         // For UG/PG students
+    private String degreeName;
+    private String courseType;
     private String departmentName;     // For UG/PG students
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;

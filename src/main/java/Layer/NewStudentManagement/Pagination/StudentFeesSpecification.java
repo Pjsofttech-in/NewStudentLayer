@@ -1,13 +1,11 @@
 package Layer.NewStudentManagement.Pagination;
 
-import Layer.NewStudentManagement.DTO.CreatedByResponseDTO;
 import Layer.NewStudentManagement.DTO.FeesFilterDTO;
 import Layer.NewStudentManagement.DTO.FeesRevenueFilterDTO;
 import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.criteria.*;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -15,11 +13,9 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
-import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 public class StudentFeesSpecification
 {
@@ -43,6 +39,11 @@ public class StudentFeesSpecification
             if (dto.getStreamName() != null && !dto.getStreamName().isEmpty()) {
                 Join<StudentFees, StudentStream> streamJoin = root.join("stream", JoinType.LEFT);
                 predicates.add(criteriaBuilder.equal(streamJoin.get("stream"), dto.getStreamName()));
+            }
+
+            if (dto.getCourseType() != null && !dto.getCourseType().isEmpty()) {
+                Join<StudentFees, StudentCourseType> courseTypeJoin = root.join("courseType", JoinType.LEFT);
+                predicates.add(criteriaBuilder.equal(courseTypeJoin.get("courseType"), dto.getCourseType()));
             }
 
             if (dto.getGroupName() != null && !dto.getGroupName().isEmpty()) {
