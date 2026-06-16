@@ -6,6 +6,7 @@ import Layer.NewStudentManagement.Entity.*;
 
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.StandardFeesService;
+import io.jsonwebtoken.lang.Objects;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,9 @@ public class StandardFeesServiceImpl implements StandardFeesService
 
     @Autowired
     GraduationTypeRepository graduationTypeRepository;
+
+    @Autowired
+    CourseTypeRepository courseTypeRepository;
 
     @Autowired
     StreamRepository streamRepository;
@@ -115,8 +119,34 @@ public class StandardFeesServiceImpl implements StandardFeesService
                 standardFees.setStandardName(standard.getStandardName());
                 standardFees.setStream(stream);
                 standardFees.setStreamName(stream.getStream());
-            }
+            } else if ("Diploma".equalsIgnoreCase(graduationTypeName)) {
 
+                if (standardFees.getCourseType() == null || standardFees.getCourseType().getId() == null) {
+                    throw new RuntimeException("Course type must be provided for Diploma College students.");
+                }
+
+                if (standardFees.getStream() == null || standardFees.getStream().getId() == null) {
+                    throw new RuntimeException("Stream must be provided for Diploma College students.");
+                }
+
+                StudentStream stream = streamRepository.findById(standardFees.getStream().getId())
+                        .orElseThrow(() -> new RuntimeException("Invalid stream ID"));
+
+                StudentCourseType courseType = courseTypeRepository.findById(standardFees.getCourseType().getId())
+                        .orElseThrow(() -> new RuntimeException("Invalid course type ID"));
+
+                boolean exists = standardFeesRepository.existsByGraduationTypeAndStreamAndCourseTypeAndDepartmentAndMediumAndBranchCodeAndAcademicYear(
+                        graduationType, courseType, standardFees.getDepartmentName(), stream, medium, branchCode,academicYear);
+
+                if (exists) {
+                    throw new RuntimeException("Fees already assigned for this Course Type, stream, department, and medium.");
+                }
+
+                standardFees.setCourseType(courseType);
+                standardFees.setStream(stream);
+                standardFees.setStreamName(stream.getStream());
+                standardFees.setDepartmentName(standardFees.getDepartmentName());
+            }
             // UG/PG logic
             else {
                 if (standardFees.getDegree() == null || standardFees.getDegree().getId() == null) {
@@ -308,6 +338,20 @@ public class StandardFeesServiceImpl implements StandardFeesService
 
                 feesList = standardFeesRepository.findForUGPG(mediumId, streamId, degreeId, departmentName, branchCode);
             }
+            else if(graduationType.equalsIgnoreCase("Diploma")){
+                String courseType = Optional.ofNullable(filterDTO.getCourseType()).orElseThrow(() ->
+                        new RuntimeException("Course type is required for Diploma")).trim();
+                List<Long> courseTypeIds = courseTypeRepository.findAllIdsByName(courseType, branchCode);
+                if (courseTypeIds.size() != 1) throw new RuntimeException("Invalid or duplicate course type");
+                Long courseTypeId = courseTypeIds.getFirst();
+
+                String departmentName = Optional.ofNullable(filterDTO.getDepartmentName()).orElseThrow(() ->
+                        new RuntimeException("Department name is required for Diploma")).trim();
+
+                feesList = standardFeesRepository.findForDiploma(
+                        mediumId, streamId, courseTypeId, departmentName, branchCode
+                );
+            }
             // JR.COLLEGE
             else {
                 String standardName = Optional.ofNullable(filterDTO.getStandardName()).orElseThrow(() ->
@@ -338,6 +382,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
         dto.setSfid(entity.getSfid());
         dto.setStandardId(entity.getStandard() != null ? entity.getStandard().getSid() : null);
         dto.setMediumId(entity.getMedium() != null ? entity.getMedium().getMid() : null);
+        dto.setCourseType(entity.getCourseType() != null ? entity.getCourseType().getCourseType() : null);
 
         dto.setTuitionFee(entity.getTuitionFee());
         dto.setAdmissionFee(entity.getAdmissionFee());

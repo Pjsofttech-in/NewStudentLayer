@@ -33,6 +33,7 @@ public class StandardFeesRequestDTO
     private String institutionType;
     private String streamName;
     private String graduationTypeName;
+    private String courseType;
     private String degreeName;
     private String departmentName;
     private String groupName;

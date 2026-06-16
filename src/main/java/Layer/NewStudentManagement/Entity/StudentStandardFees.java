@@ -69,6 +69,10 @@ public class StudentStandardFees
     private StudentGraduationType graduationType;
 
     @ManyToOne
+    @JoinColumn(name = "course_type_id")
+    private StudentCourseType courseType;
+
+    @ManyToOne
     @JoinColumn(name = "degree_id")
     private StudentDegreeName degree;
 

@@ -38,6 +38,21 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
             String groupName
     );
 
+    // Diploma: graduationType + courseType + department + medium + branchCode + academicYear
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
+            "WHERE f.graduationType = :graduationType AND f.courseType = :courseType AND f.stream = :stream " +
+            "AND f.medium = :medium AND f.branchCode = :branchCode AND f.academicYear = :academicYear " +
+            "AND f.institutionType = 'College'")
+    boolean existsByGraduationTypeAndStreamAndCourseTypeAndDepartmentAndMediumAndBranchCodeAndAcademicYear(
+            StudentGraduationType graduationType,
+            StudentCourseType courseType,
+            String departmentName,
+            StudentStream stream,
+            StudentMedium medium,
+            String branchCode,
+            String academicYear
+    );
+
     // UG/PG: graduationType + degree + department + medium + branchCode + academicYear
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
             "WHERE f.graduationType = :graduationType AND f.degree = :degree " +
@@ -59,5 +74,8 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
 
     @Query("SELECT f FROM StudentStandardFees f WHERE f.medium.id = :mediumId AND f.stream.id = :streamId AND f.degree.id = :degreeId AND f.departmentName = :departmentName AND f.institutionType = 'College' AND f.branchCode = :branchCode")
     List<StudentStandardFees> findForUGPG(Long mediumId, Long streamId, Long degreeId, String departmentName,String branchCode);
+
+    @Query("SELECT f FROM StudentStandardFees f WHERE f.medium.id = :mediumId AND f.stream.id = :streamId AND f.courseType.id = :courseTypeId AND f.departmentName = :departmentName AND f.institutionType = 'College' AND f.branchCode = :branchCode")
+    List<StudentStandardFees> findForDiploma(Long mediumId, Long streamId, Long courseTypeId, String departmentName,String branchCode);
 
 }

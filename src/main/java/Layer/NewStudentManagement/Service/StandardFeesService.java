@@ -15,7 +15,4 @@ public interface StandardFeesService
     List<StandardFeesRequestDTO> getAllStandardFees(String role, String email, @Nullable String branchCodeFilter);
     void deleteStandardFee(String role, String email, Long sfid);
     List<StandardFeesRequestDTO> filterFees(String role, String email, FeesFilterDTO filterDTO);
-
-
-
 }
