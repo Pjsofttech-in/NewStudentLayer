@@ -106,6 +106,24 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                                                    @Param("academicYear") String academicYear,
                                                    Pageable pageable);
 
+    @Query("SELECT s FROM StudentEntity s " +
+            "WHERE s.institutionType = 'College' AND " +
+            "s.graduationType.id = :graduationTypeId AND " +
+            "s.medium.id = :mediumId AND " +
+            "s.stream.id = :streamId AND " +
+            "s.courseType.id = :courseTypeId AND " +
+            "s.departmentName = :departmentName AND " +
+            "s.academicYear = :academicYear AND " +
+            "s.status = 'Approved' AND " +
+            "s.classRoom IS NULL")
+    Page<StudentEntity> findUnassignedDiplomaStudents(@Param("mediumId") Long mediumId,
+                                                   @Param("streamId") Long streamId,
+                                                   @Param("graduationTypeId") Long graduationTypeId,
+                                                   @Param("courseTypeId") Long courseTypeId,
+                                                   @Param("departmentName") String departmentName,
+                                                   @Param("academicYear") String academicYear,
+                                                   Pageable pageable);
+
 
     @Query("SELECT COUNT(s) FROM StudentEntity s WHERE s.status = :status AND s.enrollmentDate BETWEEN :startDate AND :endDate")
     Long countByStatusAndDateRange(@Param("status") String status,

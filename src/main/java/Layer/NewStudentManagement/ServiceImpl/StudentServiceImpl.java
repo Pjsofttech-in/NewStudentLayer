@@ -593,6 +593,27 @@ public class StudentServiceImpl implements StudentService {
                 studentPage = studentRepository.findUnassignedUGPGStudents(
                         mediumId, streamId, degreeNameId, department, filterDTO.getAcademicYear(), pageable);
 
+            } else if (graduationType.equalsIgnoreCase("Diploma")) {
+                // Diploma
+                if (StringUtils.isBlank(filterDTO.getStreamName()) || StringUtils.isBlank(filterDTO.getCourseType())
+                        || StringUtils.isBlank(filterDTO.getDepartmentName()) || StringUtils.isBlank(filterDTO.getAcademicYear())) {
+                    throw new RuntimeException("Stream, course type, academic year, department are required for Diploma students.");
+                }
+
+                String courseType = filterDTO.getCourseType().trim();
+                List<Long> courseTypeIds = courseTypeRepository.findAllIdsByName(courseType, branchCode);
+                if (courseTypeIds.size() != 1) throw new RuntimeException("Invalid or duplicate course type");
+                Long courseTypeId = courseTypeIds.getFirst();
+
+                studentPage = studentRepository.findUnassignedDiplomaStudents(
+                        mediumId,
+                        streamId,
+                        graduationTypeId,
+                        courseTypeId,
+                        filterDTO.getDepartmentName(),
+                        filterDTO.getAcademicYear(),
+                        pageable
+                );
             } else {
                 // Jr. College
                 if (filterDTO.getStandard() == null || filterDTO.getGroupName() == null || filterDTO.getAcademicYear() == null) {

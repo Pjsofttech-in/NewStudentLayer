@@ -22,6 +22,7 @@ public class StudentClassRoomFilterDTO
     private String streamName;
     private String groupName;
     private String graduationType;
+    private String courseType;
 
 
     private String degreeName;
