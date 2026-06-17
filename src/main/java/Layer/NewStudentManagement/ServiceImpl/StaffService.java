@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Entity.StudentTeacher;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Repository.TeacherRepository;
+import Layer.NewStudentManagement.Security.InternalJwtProvider;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +29,8 @@ import java.util.Map;
 public class StaffService {
     private final WebClient webClient;
 
+    @Autowired
+    InternalJwtProvider internalJwtProvider;
 
     @Autowired
     TeacherRepository teacherRepository;
@@ -153,10 +156,7 @@ public class StaffService {
                                            String systemName,
                                            Long amount) {
 
-        HttpServletRequest request =
-                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
-        String token = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = internalJwtProvider.generateInternalToken();
 
         return webClient.post()
                 .uri(uriBuilder -> uriBuilder
@@ -165,7 +165,7 @@ public class StaffService {
                         .queryParam("systemName", systemName)
                         .queryParam("amount", amount)
                         .build())
-                .header("Authorization", token)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
@@ -174,10 +174,7 @@ public class StaffService {
 
     public Mono<Boolean> verifyPayment(RazorpayVerifyRequest request) {
 
-        HttpServletRequest httpRequest =
-                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
-        String token = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
+        String token = internalJwtProvider.generateInternalToken();
 
         return webClient.post()
                 .uri("/verifyPayment")

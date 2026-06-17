@@ -33,6 +33,9 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
 
     @Override
     public void createOrder(String role, String email, BigDecimal amountInRupees, String receiptNumber, String orderId, StudentFeesCollect feesCollect) throws Exception {
+        if (!staffService.hasPermission(role, email, "POST")) {
+            throw new RuntimeException("You don't have permission to create order");
+        }
         StudentPaymentTransactions paymentTransactions = new StudentPaymentTransactions();
         paymentTransactions.setCreatedBy(email);
         paymentTransactions.setCreatedByRole(role);
@@ -48,6 +51,10 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
     }
 
     public void updateOrder(String role, String email, boolean isAuthentic, String razorPaymentId, String orderId) {
+        if (!staffService.hasPermission(role, email, "POST")) {
+            throw new RuntimeException("You don't have permission to update order");
+        }
+
         Optional<StudentPaymentTransactions> byRazorpayOrderId = paymentTransactionsRepository.findByRazorpayOrderId(orderId);
 
         if (byRazorpayOrderId.isPresent()) {
