@@ -178,7 +178,7 @@ public class StaffService {
 
         return webClient.post()
                 .uri("/verifyPayment")
-                .header(HttpHeaders.AUTHORIZATION, token)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()

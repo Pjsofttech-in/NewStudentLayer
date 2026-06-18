@@ -1,10 +1,13 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
+import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
 import Layer.NewStudentManagement.Entity.StudentPaymentTransactions;
+import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Repository.PaymentTransactionsRepository;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
+import Layer.NewStudentManagement.Util.CryptoUtil;
 import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import org.springframework.stereotype.Service;
@@ -23,12 +26,16 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
 
     private final PaymentTransactionsRepository paymentTransactionsRepository;
     private final ClientAdminPaymentGatewayService clientAdminPaymentGatewayService;
+    private final FeesScheduleRepository feesScheduleRepository;
     private final StaffService staffService;
+    private final CryptoUtil cryptoUtil;
 
-    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService, StaffService staffService) {
+    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService, FeesScheduleRepository feesScheduleRepository, StaffService staffService, CryptoUtil cryptoUtil) {
         this.paymentTransactionsRepository = paymentTransactionsRepository;
         this.clientAdminPaymentGatewayService = clientAdminPaymentGatewayService;
+        this.feesScheduleRepository = feesScheduleRepository;
         this.staffService = staffService;
+        this.cryptoUtil = cryptoUtil;
     }
 
     @Override
@@ -68,6 +75,12 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
             Long feesCollectId = feesCollect.getId();
             feesCollect.setId(feesCollectId);
 
+            StudentFeeSchedule feeSchedule = feesCollect.getStudentFeeSchedule();
+            if(Objects.nonNull(feeSchedule)){
+                feeSchedule.setPaid(true);
+                feesScheduleRepository.save(feeSchedule);
+            }
+
             String modeOfPayment = "UNKNOWN", bankName = "", errorReason = "";
             try {
                 String branchCode = staffService.fetchBranchCodeByRole(role, email);
@@ -75,7 +88,7 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
                 RazorpayClient razorpayClient = new RazorpayClient("", "");
                 if (Objects.nonNull(paymentGatewayDetails)) {
                     razorpayClient = new RazorpayClient(paymentGatewayDetails.getKeyId(),
-                            paymentGatewayDetails.getSecretKey());
+                            cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey()));
                 }
                 Payment paymentDetails = razorpayClient.payments.fetch(razorPaymentId);
                 modeOfPayment = paymentDetails.get("method").toString().toUpperCase();
