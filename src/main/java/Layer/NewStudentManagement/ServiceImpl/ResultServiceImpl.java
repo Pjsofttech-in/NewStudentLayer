@@ -355,6 +355,8 @@ public class ResultServiceImpl implements ResultService
             throw new RuntimeException("No permission");
         }
 
+//        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
         StudentExamSubject examSubject = examSubjectRepository
                 .findByExamIdAndSubjectId(examId, subjectId)
                 .orElseThrow(() -> new RuntimeException("Exam or subject not found"));
@@ -374,7 +376,7 @@ public class ResultServiceImpl implements ResultService
                 degreeId = classRoom.getDegreeName().getId();
             }
             if(classRoom.getGraduationType()!=null) {
-                graduationId = classRoom.getDegreeName().getId();
+                graduationId = classRoom.getGraduationType().getId();
             }
             if(classRoom.getStream()!=null) {
                 streamId = classRoom.getStream().getId();
@@ -382,14 +384,14 @@ public class ResultServiceImpl implements ResultService
         }
 
         StudentSubject subject = subjectRepository.findSubjectByNameDegreeGraduationStream(subjectMarks.getSubjectName(),
-                degreeId, graduationId, streamId).orElseThrow(() -> new RuntimeException("Subject not found"));
+                degreeId, graduationId, streamId, teacher.getBranchCode()).orElseThrow(() -> new RuntimeException("Subject not found"));
 
         if (!CollectionUtils.isEmpty(teacher.getSubjects())) {
             if (teacher.getSubjects().stream().noneMatch(studentSubject -> subject.getId().equals(studentSubject.getId()))) {
                 throw new RuntimeException("Subject is not assigned to this teacher");
             }
         } else {
-            throw new RuntimeException("Subject cannot be empty");
+            throw new RuntimeException("Teacher is not assigned to any subject");
         }
 
         if (obtainedMarks > examSubject.getSubject().getMaxMarks()) {

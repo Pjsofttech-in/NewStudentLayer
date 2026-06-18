@@ -33,11 +33,13 @@ public interface SubjectRepository extends JpaRepository<StudentSubject, Long> {
     List<StudentSubject> findSubjectsByTeacherId(@Param("teacherId") Long teacherId);
 
     @Query("SELECT s FROM StudentSubject s WHERE s.subject = :subjectName " +
-            "AND s.graduationType.id = :graduationTypeId " +
-            "AND s.degree.id = :degreeId " +
-            "AND s.stream.id = :streamId ")
+            "AND (s.graduationType.id IS NULL OR s.graduationType.id = :graduationTypeId) " +
+            "AND (s.degree.id IS NULL OR s.degree.id = :degreeId) " +
+            "AND (s.stream.id IS NULL OR s.stream.id = :streamId) " +
+            "AND (s.branchCode = :branchCode) ")
     Optional<StudentSubject> findSubjectByNameDegreeGraduationStream(@Param("subjectName") String subjectName,
                                                @Param("degreeId") Long degreeId,
                                                @Param("graduationTypeId") Long graduationTypeId,
-                                               @Param("streamId") Long streamId);
+                                               @Param("streamId") Long streamId,
+                                               @Param("branchCode") String branchCode);
 }
