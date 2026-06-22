@@ -150,6 +150,9 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
     @Query("SELECT s FROM StudentEntity s WHERE s.email=:email")
     Optional<StudentEntity> findByEmail(@Param("email") String email);
 
+    @Query("SELECT s FROM StudentEntity s WHERE s.fatherEmailId=:fatherEmailId")
+    Optional<StudentEntity> findByfatherEmailId(@Param("fatherEmailId") String fatherEmailId);
+
 
     @Query("SELECT new Layer.NewStudentManagement.DTO.GenderCountResponse(" +
             "SUM(CASE WHEN s.gender = 'Male' THEN 1 ELSE 0 END), " +

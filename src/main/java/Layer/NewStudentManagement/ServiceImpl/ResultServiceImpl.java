@@ -355,8 +355,6 @@ public class ResultServiceImpl implements ResultService
             throw new RuntimeException("No permission");
         }
 
-//        String branchCode = staffService.fetchBranchCodeByRole(role, email);
-
         StudentExamSubject examSubject = examSubjectRepository
                 .findByExamIdAndSubjectId(examId, subjectId)
                 .orElseThrow(() -> new RuntimeException("Exam or subject not found"));
@@ -365,26 +363,9 @@ public class ResultServiceImpl implements ResultService
                 new RuntimeException("Teacher not found with email: " + email));
 
         StudentSubjectMarks subjectMarks = subjectMarksRepository.findById(subjectId).orElseThrow(() -> new RuntimeException("Subject marks not found"));
-        StudentClassRoom classRoom = examSubject.getExam().getClassRoom();
 
-        // Finding subject using following details from StudentSubject table
-        Long degreeId = null;
-        Long graduationId = null;
-        Long streamId = null;
-        if(classRoom != null) {
-            if(classRoom.getDegreeName()!=null) {
-                degreeId = classRoom.getDegreeName().getId();
-            }
-            if(classRoom.getGraduationType()!=null) {
-                graduationId = classRoom.getGraduationType().getId();
-            }
-            if(classRoom.getStream()!=null) {
-                streamId = classRoom.getStream().getId();
-            }
-        }
-
-        StudentSubject subject = subjectRepository.findSubjectByNameDegreeGraduationStream(subjectMarks.getSubjectName(),
-                degreeId, graduationId, streamId, teacher.getBranchCode()).orElseThrow(() -> new RuntimeException("Subject not found"));
+        StudentSubject subject = subjectRepository.findSubjectByName(subjectMarks.getSubjectName(),
+                teacher.getBranchCode()).orElseThrow(() -> new RuntimeException("Subject not found"));
 
         if (!CollectionUtils.isEmpty(teacher.getSubjects())) {
             if (teacher.getSubjects().stream().noneMatch(studentSubject -> subject.getId().equals(studentSubject.getId()))) {
@@ -433,7 +414,7 @@ public class ResultServiceImpl implements ResultService
         // Set obtained marks
         detail.setObtainedMarks(obtainedMarks);
 
-        Integer passingMarks = detail.getSubject().getPassingMarks() != null
+        int passingMarks = detail.getSubject().getPassingMarks() != null
                 ? detail.getSubject().getPassingMarks()
                 : 0;
 

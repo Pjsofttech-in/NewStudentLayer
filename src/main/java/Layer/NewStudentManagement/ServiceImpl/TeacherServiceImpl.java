@@ -135,26 +135,6 @@ public class TeacherServiceImpl implements TeacherService
             }
         }
 
-        // Validate subjects match with institution, graduationType and stream
-        for (StudentSubject subject : subjectEntities) {
-            if (subject.getInstitutionType() == null ||
-                    !institutionType.equalsIgnoreCase(subject.getInstitutionType())) {
-                throw new RuntimeException("Subject " + subject.getSubject() + " does not match institution type");
-            }
-
-            if (!"School".equalsIgnoreCase(institutionType)) {
-                if (subject.getGraduationType() == null ||
-                        !subject.getGraduationType().getId().equals(dto.getGraduationTypeId())) {
-                    throw new RuntimeException("Subject " + subject.getSubject() + " does not match graduation type");
-                }
-
-                if (subject.getStream() == null ||
-                        !subject.getStream().getId().equals(dto.getStreamId())) {
-                    throw new RuntimeException("Subject " + subject.getSubject() + " does not match stream");
-                }
-            }
-        }
-
         // Create teacher entity
         StudentTeacher teacher = new StudentTeacher();
         teacher.setTeacherName(dto.getTeacherName());

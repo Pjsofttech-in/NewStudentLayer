@@ -18,11 +18,11 @@ public interface StudentService {
 
     StudentDTO getStudentById(Long id, String role, String email);
 
-    String sendOtp(String email);
+    String sendOtp(String email, String callType);
 
-    String verifyOtp(String email, String otp);
+    String verifyOtp(String email, String otp, String callType);
 
-    String resetPassword(String email, String otp, String newPassword);
+    String resetPassword(String email, String otp, String newPassword, String callType);
 
     StudentResponseDTO updateStudent(Long id, String role, String email, StudentRequest request);
 
@@ -65,6 +65,8 @@ public interface StudentService {
                                           @Nullable String branchCodeFilter);
 
     LoginResponse studentLogin(LoginRequest request);
+
+    LoginResponse parentLogin(LoginRequest request);
 
     GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                        Long graduationTypeId, Long streamId, String groupName,

@@ -306,9 +306,17 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public String sendOtp(String email) {
-        StudentEntity student = studentRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+    public String sendOtp(String email, String callType) {
+        StudentEntity student;
+        if (StringUtils.isNotBlank(callType) && callType.equalsIgnoreCase("student")) {
+            student = studentRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+        } else if (callType.equalsIgnoreCase("parent")) {
+            student = studentRepository.findByfatherEmailId(email)
+                    .orElseThrow(() -> new RuntimeException("Parent not found"));
+        } else {
+            throw new RuntimeException("Invalid data");
+        }
 
         String otp = String.valueOf(new Random().nextInt(900000) + 100000); // 6-digit
         student.setOtp(otp);
@@ -320,15 +328,23 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public String verifyOtp(String email, String otp) {
-        StudentEntity teacher = studentRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+    public String verifyOtp(String email, String otp, String callType) {
+        StudentEntity student;
+        if (StringUtils.isNotBlank(callType) && callType.equalsIgnoreCase("student")) {
+            student = studentRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+        } else if (callType.equalsIgnoreCase("parent")) {
+            student = studentRepository.findByfatherEmailId(email)
+                    .orElseThrow(() -> new RuntimeException("Parent not found"));
+        } else {
+            throw new RuntimeException("Invalid data");
+        }
 
-        if (!otp.equals(teacher.getOtp())) {
+        if (!otp.equals(student.getOtp())) {
             throw new RuntimeException("Invalid OTP");
         }
 
-        long otpAge = System.currentTimeMillis() - teacher.getOtpRequestedTime();
+        long otpAge = System.currentTimeMillis() - student.getOtpRequestedTime();
         if (otpAge > 5 * 60 * 1000) { // 5 minutes
             throw new RuntimeException("OTP expired");
         }
@@ -337,9 +353,17 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public String resetPassword(String email, String otp, String newPassword) {
-        StudentEntity student = studentRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Student not found"));
+    public String resetPassword(String email, String otp, String newPassword, String callType) {
+        StudentEntity student;
+        if (StringUtils.isNotBlank(callType) && callType.equalsIgnoreCase("student")) {
+            student = studentRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+        } else if (callType.equalsIgnoreCase("parent")) {
+            student = studentRepository.findByfatherEmailId(email)
+                    .orElseThrow(() -> new RuntimeException("Parent not found"));
+        } else {
+            throw new RuntimeException("Invalid data");
+        }
 
         if (!otp.equals(student.getOtp())) {
             throw new RuntimeException("Invalid OTP");
@@ -350,7 +374,11 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("OTP expired");
         }
 
-        student.setPassword(passwordEncoder.encode(newPassword));
+        if (callType.equalsIgnoreCase("student")) {
+            student.setPassword(passwordEncoder.encode(newPassword));
+        } else {
+            student.setParentPassword(passwordEncoder.encode(newPassword));
+        }
         student.setOtp(null);
         student.setOtpRequestedTime(null);
         studentRepository.save(student);
@@ -1222,6 +1250,38 @@ public class StudentServiceImpl implements StudentService {
                 .orElseThrow(() -> new RuntimeException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), student.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        student.setUserRole("STUDENT");
+
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("role", student.getUserRole());
+        claims.put("branchCode", student.getBranchCode());
+
+        String token = jwtUtil.generateTokenWithClaims(
+                student.getEmail(),
+                claims,
+                Duration.ofHours(10)
+        );
+
+        Map<String, Object> studentData = new HashMap<>();
+        studentData.put("id", student.getId());
+        studentData.put("name", student.getFullName());
+        studentData.put("email", student.getEmail());
+        studentData.put("role", student.getUserRole());
+        studentData.put("branchCode", student.getBranchCode());
+
+        return new LoginResponse(token, studentData);
+    }
+
+    @Override
+    public LoginResponse parentLogin(LoginRequest request) {
+
+        StudentEntity student = studentRepository.findByfatherEmailId(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), student.getParentPassword())) {
             throw new RuntimeException("Invalid email or password");
         }
 

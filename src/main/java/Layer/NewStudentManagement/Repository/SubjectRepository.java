@@ -13,17 +13,9 @@ import java.util.Optional;
 public interface SubjectRepository extends JpaRepository<StudentSubject, Long> {
     @Query("SELECT s FROM StudentSubject s " +
             "WHERE (:branchCode IS NULL OR s.branchCode = :branchCode) " +
-            "AND (:institutionType IS NULL OR LOWER(s.institutionType) = LOWER(:institutionType)) " +
-            "AND (:graduationTypeName IS NULL OR LOWER(s.graduationTypeName) = LOWER(:graduationTypeName)) " +
-            "AND (:streamName IS NULL OR LOWER(s.streamName) = LOWER(:streamName)) " +
-            "AND (:degreeName IS NULL OR LOWER(s.degreeName) = LOWER(:degreeName)) " +
-            "AND (:departmentName IS NULL OR LOWER(s.departmentName) = LOWER(:departmentName))")
+            "AND (:institutionType IS NULL OR LOWER(s.institutionType) = LOWER(:institutionType)) ")
     List<StudentSubject> findSubjectsByFilters(@Param("branchCode") String branchCode,
-                                               @Param("institutionType") String institutionType,
-                                               @Param("graduationTypeName") String graduationTypeName,
-                                               @Param("streamName") String streamName,
-                                               @Param("degreeName") String degreeName,
-                                               @Param("departmentName") String departmentName);
+                                               @Param("institutionType") String institutionType);
 
     @Query("SELECT s FROM StudentSubject s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentSubject> findAllByBranchCode(@Param("branchCode") String branchCode);
@@ -32,14 +24,8 @@ public interface SubjectRepository extends JpaRepository<StudentSubject, Long> {
     @Query("SELECT s FROM StudentSubject s JOIN s.teachers t WHERE t.id = :teacherId")
     List<StudentSubject> findSubjectsByTeacherId(@Param("teacherId") Long teacherId);
 
-    @Query("SELECT s FROM StudentSubject s WHERE s.subject = :subjectName " +
-            "AND (s.graduationType.id IS NULL OR s.graduationType.id = :graduationTypeId) " +
-            "AND (s.degree.id IS NULL OR s.degree.id = :degreeId) " +
-            "AND (s.stream.id IS NULL OR s.stream.id = :streamId) " +
+        @Query("SELECT s FROM StudentSubject s WHERE s.subject = :subjectName " +
             "AND (s.branchCode = :branchCode) ")
-    Optional<StudentSubject> findSubjectByNameDegreeGraduationStream(@Param("subjectName") String subjectName,
-                                               @Param("degreeId") Long degreeId,
-                                               @Param("graduationTypeId") Long graduationTypeId,
-                                               @Param("streamId") Long streamId,
+    Optional<StudentSubject> findSubjectByName(@Param("subjectName") String subjectName,
                                                @Param("branchCode") String branchCode);
 }

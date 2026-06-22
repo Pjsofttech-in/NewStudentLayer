@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @Service
 public class SubjectServiceImpl implements SubjectService
 {
-
     @Autowired
     private StaffService staffService;
 
@@ -25,20 +24,6 @@ public class SubjectServiceImpl implements SubjectService
 
     @Autowired
     private SubjectRepository subjectRepository;
-
-    @Autowired
-    private StreamRepository streamRepository;
-
-    @Autowired
-    private CourseTypeRepository courseTypeRepository;
-
-    @Autowired
-    private GraduationTypeRepository graduationTypeRepository;
-
-    @Autowired
-    private DegreeNameRepository degreeRepository;
-
-
 
     @Override
     public StudentSubjectDTO saveSubject(StudentSubjectDTO dto, String role, String email) {
@@ -55,78 +40,7 @@ public class SubjectServiceImpl implements SubjectService
         subject.setInstitutionType(dto.getInstitutionType());
         subject.setSubject(dto.getSubject());
 
-        String institutionType = dto.getInstitutionType();
-        String graduationTypeName = null;
-
-        // Validate and Map based on Institution Type
-        if ("School".equalsIgnoreCase(institutionType)) {
-            // Set all academic fields null
-            subject.setGraduationType(null);
-            subject.setStream(null);
-            subject.setDegree(null);
-            subject.setDepartmentName(null);
-        }
-        else if ("College".equalsIgnoreCase(institutionType)) {
-            // Graduation Type must be present
-            if (dto.getGraduationTypeId() == null) {
-                throw new RuntimeException("Graduation Type is required for College");
-            }
-
-            StudentGraduationType graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
-                    .orElseThrow(() -> new RuntimeException("Graduation Type not found"));
-            graduationTypeName = graduationType.getGraduationType();
-            subject.setGraduationType(graduationType);
-            subject.setGraduationTypeName(graduationTypeName);
-
-            if ("Jr.College".equalsIgnoreCase(graduationTypeName)) {
-                // Only Stream is required
-                if (dto.getStreamId() == null) {
-                    throw new RuntimeException("Stream is required for Jr.College");
-                }
-                StudentStream stream = streamRepository.findById(dto.getStreamId())
-                        .orElseThrow(() -> new RuntimeException("Stream not found"));
-                subject.setStream(stream);
-                subject.setStreamName(stream.getStream());
-
-                subject.setDegree(null);
-                subject.setDepartmentName(null);
-            }
-            else if ("UG".equalsIgnoreCase(graduationTypeName) || "PG".equalsIgnoreCase(graduationTypeName)) {
-                // All fields are required
-                if (dto.getStreamId() == null || dto.getDegreeId() == null) {
-                    throw new RuntimeException("Stream, Degree, and Department are required for UG/PG");
-                }
-
-                StudentStream stream = streamRepository.findById(dto.getStreamId())
-                        .orElseThrow(() -> new RuntimeException("Stream not found"));
-                subject.setStream(stream);
-                subject.setStreamName(stream.getStream());
-
-                StudentDegreeName degree = degreeRepository.findById(dto.getDegreeId())
-                        .orElseThrow(() -> new RuntimeException("Degree not found"));
-                subject.setDegree(degree);
-                subject.setDegreeName(degree.getDegreeName());
-                subject.setDepartmentName(dto.getDepartmentName());
-            } else if ("Diploma".equalsIgnoreCase(graduationTypeName)) {
-                // All fields are required
-                if (dto.getStreamId() == null || StringUtils.isBlank(dto.getDepartmentName())) {
-                    throw new RuntimeException("Stream, Department are required for Diploma");
-                }
-
-                StudentStream stream = streamRepository.findById(dto.getStreamId())
-                        .orElseThrow(() -> new RuntimeException("Stream not found"));
-                subject.setStream(stream);
-                subject.setStreamName(stream.getStream());
-
-                subject.setDepartmentName(dto.getDepartmentName());
-            }
-            else {
-                throw new RuntimeException("Unsupported Graduation Type for College");
-            }
-        }
-        else {
-            throw new RuntimeException("Invalid institution type");
-        }
+        //subject is now stored irrespective of graduation details
 
         StudentSubject saved = subjectRepository.save(subject);
 
@@ -138,23 +52,6 @@ public class SubjectServiceImpl implements SubjectService
         response.setRole(saved.getRole());
         response.setBranchCode(saved.getBranchCode());
         response.setInstitutionType(saved.getInstitutionType());
-        response.setDepartmentName(saved.getDepartmentName());
-
-        if (saved.getGraduationType() != null) {
-            response.setGraduationTypeId(saved.getGraduationType().getId());
-            response.setGraduationType(saved.getGraduationType().getGraduationType());
-        }
-
-        if (saved.getStream() != null) {
-            response.setStreamId(saved.getStream().getId());
-            response.setStream(saved.getStream().getStream());
-        }
-
-        if (saved.getDegree() != null) {
-            response.setDegreeId(saved.getDegree().getId());
-            response.setDegreeName(saved.getDegree().getDegreeName());
-        }
-
 
         return response;
     }
@@ -221,25 +118,17 @@ public class SubjectServiceImpl implements SubjectService
     }
 
     @Override
-    public List<StudentSubjectDTO> getSubjects(String role, String email, String institutionType, String graduationTypeName, String streamName, String degreeName, String departmentName)
-    {
+    public List<StudentSubjectDTO> getSubjects(String role, String email, String institutionType, String graduationTypeName, String streamName, String degreeName, String departmentName) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to get subject");
         }
 
-
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-
 
         List<StudentSubject> subjects = subjectRepository.findSubjectsByFilters(
                 branchCode,
-                institutionType != null && !institutionType.trim().isEmpty() ? institutionType.trim() : null,
-                graduationTypeName != null && !graduationTypeName.trim().isEmpty() ? graduationTypeName.trim() : null,
-                streamName != null && !streamName.trim().isEmpty() ? streamName.trim() : null,
-                degreeName != null && !degreeName.trim().isEmpty() ? degreeName.trim() : null,
-                departmentName != null && !departmentName.trim().isEmpty() ? departmentName.trim() : null
+                institutionType != null && !institutionType.trim().isEmpty() ? institutionType.trim() : null
         );
-
 
         return subjects.stream()
                 .map(this::mapToSubjectDTO)
@@ -270,24 +159,6 @@ public class SubjectServiceImpl implements SubjectService
         dto.setRole(subject.getRole());
         dto.setBranchCode(subject.getBranchCode());
         dto.setInstitutionType(subject.getInstitutionType());
-        dto.setDepartmentName(subject.getDepartmentName());
-
-        // Graduation Type
-        if (subject.getGraduationType() != null) {
-            dto.setGraduationTypeId(subject.getGraduationType().getId());
-            dto.setGraduationType(subject.getGraduationType().getGraduationType());
-        }
-
-        // Stream
-        if (subject.getStream() != null) {
-            dto.setStreamId(subject.getStream().getId());
-            dto.setStream(subject.getStream().getStream());
-        }
-
-        if (subject.getDegree() != null) {
-            dto.setDegreeId(subject.getDegree().getId());
-            dto.setDegreeName(subject.getDegree().getDegreeName());
-        }
 
         return dto;
     }

@@ -60,17 +60,32 @@ public class StudentController
 
     @PostMapping("/sendOtpToStudent")
     public ResponseEntity<String> sendOtp(@RequestBody SendOtpRequest request) {
-        return ResponseEntity.ok(studentService.sendOtp(request.getEmail()));
+        return ResponseEntity.ok(studentService.sendOtp(request.getEmail(), "student"));
     }
 
     @PostMapping("/verifyOtpToStudent")
     public ResponseEntity<String> verifyOtp(@RequestBody VerifyOtpRequest request) {
-        return ResponseEntity.ok(studentService.verifyOtp(request.getEmail(), request.getOtp()));
+        return ResponseEntity.ok(studentService.verifyOtp(request.getEmail(), request.getOtp(), "student"));
     }
 
     @PostMapping("/resetStudentPassword")
     public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
-        return ResponseEntity.ok(studentService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword()));
+        return ResponseEntity.ok(studentService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword(), "student"));
+    }
+
+    @PostMapping("/sendOtpToParent")
+    public ResponseEntity<String> sendOtpToParent(@RequestBody SendOtpRequest request) {
+        return ResponseEntity.ok(studentService.sendOtp(request.getEmail(), "parent"));
+    }
+
+    @PostMapping("/verifyOtpToParent")
+    public ResponseEntity<String> verifyOtpToParent(@RequestBody VerifyOtpRequest request) {
+        return ResponseEntity.ok(studentService.verifyOtp(request.getEmail(), request.getOtp(), "parent"));
+    }
+
+    @PostMapping("/resetParentPassword")
+    public ResponseEntity<String> resetParentPassword(@RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(studentService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword(), "parent"));
     }
 
     @GetMapping("/getStudentById/{id}")
@@ -260,6 +275,12 @@ public class StudentController
     @PostMapping("/studentLogin")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         LoginResponse response = studentService.studentLogin(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/parentLogin")
+    public ResponseEntity<LoginResponse> parentLogin(@RequestBody LoginRequest request) {
+        LoginResponse response = studentService.parentLogin(request);
         return ResponseEntity.ok(response);
     }
 
