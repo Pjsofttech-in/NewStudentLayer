@@ -18,6 +18,12 @@ public interface StudentService {
 
     StudentDTO getStudentById(Long id, String role, String email);
 
+    String sendOtp(String email);
+
+    String verifyOtp(String email, String otp);
+
+    String resetPassword(String email, String otp, String newPassword);
+
     StudentResponseDTO updateStudent(Long id, String role, String email, StudentRequest request);
 
     void deleteStudentById(Long id, String role, String email);

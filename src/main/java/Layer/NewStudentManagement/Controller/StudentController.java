@@ -58,6 +58,21 @@ public class StudentController
         return ResponseEntity.ok(saved);
     }
 
+    @PostMapping("/sendOtpToStudent")
+    public ResponseEntity<String> sendOtp(@RequestBody SendOtpRequest request) {
+        return ResponseEntity.ok(studentService.sendOtp(request.getEmail()));
+    }
+
+    @PostMapping("/verifyOtpToStudent")
+    public ResponseEntity<String> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        return ResponseEntity.ok(studentService.verifyOtp(request.getEmail(), request.getOtp()));
+    }
+
+    @PostMapping("/resetStudentPassword")
+    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordRequest request) {
+        return ResponseEntity.ok(studentService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword()));
+    }
+
     @GetMapping("/getStudentById/{id}")
     public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id,
                                                      @RequestParam String role,

@@ -66,6 +66,8 @@ public class StudentEntity
     private String oldRegisterPhoto;
 //    private String university;
 //    private String board;
+    private String otp;
+    private Long otpRequestedTime;
 
     private boolean entranceExam;
     private String entranceExamName;
@@ -76,6 +78,8 @@ public class StudentEntity
 
     @Column(name = "father_email_id", length = 100)
     private String fatherEmailId;
+
+    private String parentPassword;
 
     @Email
     private String createdByEmail;

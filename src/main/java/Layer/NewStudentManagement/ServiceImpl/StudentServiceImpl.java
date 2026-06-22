@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Mapper.StudentMapper;
 import Layer.NewStudentManagement.Pagination.StudentSpecification;
 import Layer.NewStudentManagement.Repository.*;
+import Layer.NewStudentManagement.Security.EmailService;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
@@ -79,6 +80,8 @@ public class StudentServiceImpl implements StudentService {
     private CourseTypeRepository courseTypeRepository;
     @Autowired
     private ClassRoomTeacherSubjectRepository classRoomTeacherSubjectRepository;
+    @Autowired
+    private EmailService emailService;
 
     private void checkPermission(String role, String email, String action) {
         if (!staffService.hasPermission(role, email, action)) {
@@ -116,6 +119,8 @@ public class StudentServiceImpl implements StudentService {
         student.setCreatedByEmail(email);
         student.setRegistrationNumber(generateRegistrationNumber());
         student.setApplicationNumber(generateApplicationNumber());
+
+        student.setParentPassword(passwordEncoder.encode(request.getStudent().getParentPassword()));
 
         if (request.getGraduationTypeId() != null) {
             StudentGraduationType gradType = graduationTypeRepository.findById(request.getGraduationTypeId())
@@ -299,6 +304,60 @@ public class StudentServiceImpl implements StudentService {
         return studentMapper.toStudentDTO(student);
 
     }
+
+    @Override
+    public String sendOtp(String email) {
+        StudentEntity student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        String otp = String.valueOf(new Random().nextInt(900000) + 100000); // 6-digit
+        student.setOtp(otp);
+        student.setOtpRequestedTime(System.currentTimeMillis());
+        studentRepository.save(student);
+
+        emailService.sendOtpEmail(email, otp);
+        return "OTP sent to email.";
+    }
+
+    @Override
+    public String verifyOtp(String email, String otp) {
+        StudentEntity teacher = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        if (!otp.equals(teacher.getOtp())) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        long otpAge = System.currentTimeMillis() - teacher.getOtpRequestedTime();
+        if (otpAge > 5 * 60 * 1000) { // 5 minutes
+            throw new RuntimeException("OTP expired");
+        }
+
+        return "OTP verified";
+    }
+
+    @Override
+    public String resetPassword(String email, String otp, String newPassword) {
+        StudentEntity student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        if (!otp.equals(student.getOtp())) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        long otpAge = System.currentTimeMillis() - student.getOtpRequestedTime();
+        if (otpAge > 5 * 60 * 1000) {
+            throw new RuntimeException("OTP expired");
+        }
+
+        student.setPassword(passwordEncoder.encode(newPassword));
+        student.setOtp(null);
+        student.setOtpRequestedTime(null);
+        studentRepository.save(student);
+
+        return "Password reset successfully";
+    }
+
 
     @Override
     public StudentResponseDTO updateStudent(Long studentId, String role, String email, StudentRequest request) {
