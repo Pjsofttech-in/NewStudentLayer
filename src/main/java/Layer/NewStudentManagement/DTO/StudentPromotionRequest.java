@@ -25,4 +25,5 @@ public class StudentPromotionRequest
     private Long newClassroomId;
     private String institutionType;
     private Long graduationTypeId;
+    private Long courseTypeId;
 }

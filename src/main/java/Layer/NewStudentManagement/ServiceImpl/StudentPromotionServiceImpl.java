@@ -7,10 +7,12 @@ import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ClassRoomService;
 import Layer.NewStudentManagement.Service.StudentPromotionService;
+import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.TransactionScoped;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jdbc.core.JdbcAggregateOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -38,6 +40,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
     private final ClassRoomService classRoomService;
     private final StaffService staffService;
     private final PlatformTransactionManager transactionManager;
+    private final CourseTypeRepository courseTypeRepository;
 
 
     @Override
@@ -47,7 +50,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             Long newDegreeNameId, String newDepartmentName,
             Long newStreamId, String groupName,
             String academicYear, Long newClassroomId,
-            String institutionType, Long graduationTypeId ) {
+            String institutionType, Long graduationTypeId, Long courseTypeId) {
         try {
             if (!staffService.hasPermission(role, email, "Post")) {
                 throw new RuntimeException("You don't have permission to Promote Student");
@@ -138,6 +141,31 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
 
                     student.setDegreeName(null);
                     student.setDepartmentName(null);
+                } else if (student.getGraduationType() != null &&
+                        "Diploma".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
+
+                    if (courseTypeId != null) {
+                        StudentCourseType courseType = courseTypeRepository.findById(courseTypeId)
+                                .orElseThrow(() -> new RuntimeException("Course not found with ID: " + courseTypeId));
+                        student.setCourseType(courseType);
+                    }
+
+                    if (newMediumId != null) {
+                        StudentMedium medium = mediumRepository.findById(newMediumId)
+                                .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + newMediumId));
+                        student.setMedium(medium);
+                        student.setMediumName(medium.getMediumName());
+                    }
+
+                    if (StringUtils.isBlank(newDepartmentName)) {
+                        throw new RuntimeException("Department can not be null");
+                    }
+                    student.setDepartmentName(newDepartmentName);
+
+
+                    student.setGroupName(null);
+                    student.setStandardName(null);
+                    student.setStandard(null);
                 } else {
                     StudentDegreeName degree = degreeNameRepository.findById(newDegreeNameId)
                             .orElseThrow(() -> new RuntimeException("DegreeName not found"));
@@ -229,7 +257,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             Long newDegreeNameId, String newDepartmentName,
             Long newStreamId, String groupName,
             String academicYear, Long newClassroomId,
-            String institutionType, Long graduationTypeId) {
+            String institutionType, Long graduationTypeId, Long courseTypeId) {
         StudentBulkPromotionResponseDTO response = new StudentBulkPromotionResponseDTO();
         response.setStatus("Failed");
         try {
@@ -245,7 +273,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
                         // Database operations live here
                         try {
                             StudentPromotionResponseDTO studentPromotionResponseDTO = promoteStudent(role, email, studentId, newStandardId, newMediumId, newDegreeNameId, newDepartmentName, newStreamId, groupName,
-                                    academicYear, newClassroomId, institutionType, graduationTypeId);
+                                    academicYear, newClassroomId, institutionType, graduationTypeId, courseTypeId);
                             successfulStudentList.add(studentPromotionResponseDTO);
                         } catch (Exception e) {
                             failedStudentIds.add(studentId);

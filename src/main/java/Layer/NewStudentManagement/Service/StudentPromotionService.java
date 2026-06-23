@@ -15,14 +15,14 @@ public interface StudentPromotionService
             Long newDegreeNameId, String newDepartmentName,
             Long newStreamId, String groupName,
             String academicYear, Long newClassroomId,
-            String institutionType, Long graduationTypeId );
+            String institutionType, Long graduationTypeId, Long courseTypeId);
     public StudentBulkPromotionResponseDTO promoteStudentList(
             String role, String email, List<Long> studentIdList,
             Long newStandardId, Long newMediumId,
             Long newDegreeNameId, String newDepartmentName,
             Long newStreamId, String groupName,
             String academicYear, Long newClassroomId,
-            String institutionType, Long graduationTypeId);
+            String institutionType, Long graduationTypeId, Long courseTypeId);
     StudentPromotionResponseDTO getPromotionInfoById(String role, String email, Long studentId);
 }
 

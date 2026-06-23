@@ -37,7 +37,8 @@ public class StudentPromotionController
                 requestDTO.getAcademicYear(),
                 requestDTO.getNewClassroomId(),
                 requestDTO.getInstitutionType(),
-                requestDTO.getGraduationTypeId()
+                requestDTO.getGraduationTypeId(),
+                requestDTO.getCourseTypeId()
         );
 
         return ResponseEntity.ok(response);
@@ -62,7 +63,8 @@ public class StudentPromotionController
                 requestDTO.getAcademicYear(),
                 requestDTO.getNewClassroomId(),
                 requestDTO.getInstitutionType(),
-                requestDTO.getGraduationTypeId()
+                requestDTO.getGraduationTypeId(),
+                requestDTO.getCourseTypeId()
         );
 
         return ResponseEntity.ok(response);
