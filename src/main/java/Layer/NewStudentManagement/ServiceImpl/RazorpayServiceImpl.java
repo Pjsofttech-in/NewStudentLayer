@@ -45,12 +45,15 @@ public class RazorpayServiceImpl implements RazorpayService {
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        Map<String, Object> order = staffService.createOrder(branchCode, SYSTEM, amountInRupees.longValue());
-        String orderId = order.get("orderId").toString();
         PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
 
+        //Creating fee collect entry b4 payment gateway in case payment fails
+        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, null, studentFeeScheduleId, paymentGatewayDetails);
+
+        //Calling payment gateway for creating order
+        Map<String, Object> order = staffService.createOrder(branchCode, SYSTEM, amountInRupees.longValue());
+        String orderId = order.get("orderId").toString();
         String receiptId = String.valueOf(order.get("receiptId"));
-        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, receiptId, studentFeeScheduleId, paymentGatewayDetails);
 
         paymentTransactionsService.createOrder(role, email, amountInRupees, receiptId, orderId, feesCollect);
 

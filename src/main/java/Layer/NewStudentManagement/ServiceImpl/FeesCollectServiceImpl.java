@@ -16,6 +16,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -55,27 +56,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
         String collectionType = fees.getFeesCollectionType(); // "One Time", "Monthly", "Installment"
 
-        StudentFeeSchedule schedule = null;
-        if (!"One Time".equalsIgnoreCase(collectionType)) {
-            if (collect.getStudentFeeSchedule() == null || collect.getStudentFeeSchedule().getId() == null) {
-                throw new RuntimeException("Schedule ID must be provided for " + collectionType + " type fees.");
-            }
-
-            schedule = feesScheduleRepository.findById(collect.getStudentFeeSchedule().getId())
-                    .orElseThrow(() -> new RuntimeException("Schedule not found for ID: " + collect.getStudentFeeSchedule().getId()));
-
-            if (!schedule.getStudentFees().getFid().equals(fees.getFid())) {
-                throw new RuntimeException("Schedule does not belong to the selected Student Fees.");
-            }
-
-            if (schedule.isPaid()) {
-                throw new RuntimeException("Fees already collected for schedule: " + schedule.getMonth());
-            }
-
-            if (!schedule.getMonth().equalsIgnoreCase(collect.getMonth())) {
-                throw new RuntimeException("Schedule month mismatch. Expected: " + schedule.getMonth() + ", Found: " + collect.getMonth());
-            }
-        }
+        StudentFeeSchedule schedule = preCheckFeesCollection(collect, collectionType, fees);
 
 //        if ("Completed".equalsIgnoreCase(collect.getStatus())) {
 //            List<StudentFeesCollect> alreadyCollected = feesCollectRepository
@@ -90,8 +71,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 //            }
 //        }
 
-        Long maxId = feesCollectRepository.findMaxId();
-        String invoice = String.format("%06d", (maxId != null ? maxId + 1 : 1));
+        String invoice = getInvoice();
         collect.setInvoice(invoice);
 
         collect.setCreatedByEmail(email);
@@ -128,6 +108,36 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
         StudentFeesCollect saved = feesCollectRepository.save(collect);
         return mapToDTO(saved);
+    }
+
+    private @NonNull String getInvoice() {
+        Long maxId = feesCollectRepository.findMaxId();
+        return String.format("%06d", (maxId != null ? maxId + 1 : 1));
+    }
+
+    private @org.checkerframework.checker.nullness.qual.Nullable StudentFeeSchedule preCheckFeesCollection(StudentFeesCollect collect, String collectionType, StudentFees fees) {
+        StudentFeeSchedule schedule = null;
+        if (!"One Time".equalsIgnoreCase(collectionType)) {
+            if (collect.getStudentFeeSchedule() == null || collect.getStudentFeeSchedule().getId() == null) {
+                throw new RuntimeException("Schedule ID must be provided for " + collectionType + " type fees.");
+            }
+
+            schedule = feesScheduleRepository.findById(collect.getStudentFeeSchedule().getId())
+                    .orElseThrow(() -> new RuntimeException("Schedule not found for ID: " + collect.getStudentFeeSchedule().getId()));
+
+            if (!schedule.getStudentFees().getFid().equals(fees.getFid())) {
+                throw new RuntimeException("Schedule does not belong to the selected Student Fees.");
+            }
+
+            if (schedule.isPaid()) {
+                throw new RuntimeException("Fees already collected for schedule: " + schedule.getMonth());
+            }
+
+            if (!schedule.getMonth().equalsIgnoreCase(collect.getMonth())) {
+                throw new RuntimeException("Schedule month mismatch. Expected: " + schedule.getMonth() + ", Found: " + collect.getMonth());
+            }
+        }
+        return schedule;
     }
 
 
@@ -976,6 +986,8 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                 sfc.setAccountHolderName(paymentGatewayDTO.getAccountHolderName());
             }
 
+            sfc.setInvoice(getInvoice());
+
             sfc.setTransactionId(receiptId);
             sfc.setAmount(studentFeeSchedule.getCollectAmount());
             sfc.setMonth(studentFeeSchedule.getMonth());
@@ -987,6 +999,8 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             sfc.setCreatedByEmail(email);
             sfc.setRole(role);
             sfc.setBranchCode(branchCode);
+
+            StudentFeeSchedule studentFeeSchedule1 = preCheckFeesCollection(sfc, studentFees.getFeesCollectionType(), studentFees);
 
             return feesCollectRepository.save(sfc);
         }

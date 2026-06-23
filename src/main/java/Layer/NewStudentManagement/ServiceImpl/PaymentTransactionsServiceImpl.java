@@ -1,9 +1,7 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
-import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
-import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
-import Layer.NewStudentManagement.Entity.StudentFeesCollect;
-import Layer.NewStudentManagement.Entity.StudentPaymentTransactions;
+import Layer.NewStudentManagement.Entity.*;
+import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Repository.PaymentTransactionsRepository;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
@@ -26,13 +24,15 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
 
     private final PaymentTransactionsRepository paymentTransactionsRepository;
     private final ClientAdminPaymentGatewayService clientAdminPaymentGatewayService;
+    private final FeesRepository feesRepository;
     private final FeesScheduleRepository feesScheduleRepository;
     private final StaffService staffService;
     private final CryptoUtil cryptoUtil;
 
-    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService, FeesScheduleRepository feesScheduleRepository, StaffService staffService, CryptoUtil cryptoUtil) {
+    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService, FeesRepository feesRepository, FeesScheduleRepository feesScheduleRepository, StaffService staffService, CryptoUtil cryptoUtil) {
         this.paymentTransactionsRepository = paymentTransactionsRepository;
         this.clientAdminPaymentGatewayService = clientAdminPaymentGatewayService;
+        this.feesRepository = feesRepository;
         this.feesScheduleRepository = feesScheduleRepository;
         this.staffService = staffService;
         this.cryptoUtil = cryptoUtil;
@@ -75,12 +75,6 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
             Long feesCollectId = feesCollect.getId();
             feesCollect.setId(feesCollectId);
 
-            StudentFeeSchedule feeSchedule = feesCollect.getStudentFeeSchedule();
-            if(Objects.nonNull(feeSchedule)){
-                feeSchedule.setPaid(true);
-                feesScheduleRepository.save(feeSchedule);
-            }
-
             String modeOfPayment = "UNKNOWN", bankName = "", errorReason = "";
             try {
                 String branchCode = staffService.fetchBranchCodeByRole(role, email);
@@ -97,9 +91,35 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
                     bankName = paymentDetails.get("bank").toString();
                 }
                 feesCollect.setPaymentMode(modeOfPayment);
+                feesCollect.setTransactionId(paymentTransactions.getReceiptNo());
                 if (isAuthentic) {
                     paymentTransactions.setStatus(SUCCESS);
                     feesCollect.setStatus("COMPLETED");
+
+                    StudentFeeSchedule feeSchedule = feesCollect.getStudentFeeSchedule();
+                    if(Objects.nonNull(feeSchedule)){
+                        feeSchedule.setPaid(true);
+                        feesScheduleRepository.save(feeSchedule);
+
+                        if (Objects.nonNull(feeSchedule.getStudentFees())) {
+                            StudentFees studentFees = feeSchedule.getStudentFees();
+                            double totalAmount = studentFees.getTotalamount();
+                            double paidAmount = studentFees.getPaidAmount();
+                            double pendingAmount = 0.0;
+
+                            paidAmount += feesCollect.getAmount();
+                            pendingAmount = studentFees.getTotalamount() - paidAmount;
+
+                            studentFees.setPendingAmount(pendingAmount);
+                            studentFees.setPaidAmount(paidAmount);
+
+                            if(paidAmount >= totalAmount){
+                                studentFees.setFeesStatus("Completed");
+                            }
+                            feesRepository.save(studentFees);
+                        }
+                    }
+
                 } else {
                     paymentTransactions.setStatus(FAILED);
                     feesCollect.setStatus("FAILED");
