@@ -20,11 +20,15 @@ public interface StudentPromotionRepository extends JpaRepository<StudentPromoti
     List<StudentPromotionRecord> findAllByStudentIdOrderByPromotionDate(@Param("studentId") Long studentId);
 
     @Query("""
-            SELECT r FROM StudentPromotionRecord r WHERE r.student.id = :studentId AND r.standard.sid = :standardId
-                    AND r.isCurrent = true
+            SELECT r FROM StudentPromotionRecord r 
+            WHERE r.student.id = :studentId 
+            AND (:standardId IS NULL OR r.standard.sid = :standardId)
+            AND (:departmentName IS NULL OR r.departmentName = :departmentName)
+            AND r.isCurrent = true
             """)
     Optional<StudentPromotionRecord> findCurrentByStudentIdStandardId(@Param("studentId") Long studentId,
-                                                                      @Param("standardId") Long standardId);
+                                                                      @Param("standardId") Long standardId,
+                                                                      @Param("departmentName") String departmentName);
 
 
 //    List<StudentPromotionRecord> findAllByStudentIdOrderByPromotionDateDesc(Long studentId);

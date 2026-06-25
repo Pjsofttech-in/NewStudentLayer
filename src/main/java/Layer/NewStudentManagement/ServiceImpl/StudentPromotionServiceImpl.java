@@ -63,8 +63,12 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
                 throw new RuntimeException("Student cannot be promoted. Status must be 'Approved'.");
             }
 
+            Long sid = null;
+            if (student.getStandard() != null) {
+                sid = student.getStandard().getSid();
+            }
             // Step 1: Save current record as previous promotion
-            Optional<StudentPromotionRecord> previousOpt = promotionRecordRepository.findCurrentByStudentIdStandardId(studentId, student.getStandard().getSid());
+            Optional<StudentPromotionRecord> previousOpt = promotionRecordRepository.findCurrentByStudentIdStandardId(studentId, sid, student.getDepartmentName());
             StudentPromotionRecord previous = previousOpt.orElse(new StudentPromotionRecord());
             previous.setStudent(student);
             previous.setAcademicYear(student.getAcademicYear());
