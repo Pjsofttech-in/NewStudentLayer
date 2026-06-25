@@ -85,7 +85,7 @@ public class StudentPromotionServiceImpl implements StudentPromotionService
             }
 
             previous.setStandard(student.getStandard());
-            previous.setStandardName(student.getStandard().getStandardName());
+            previous.setStandardName(student.getStandard()!=null ? student.getStandard().getStandardName() : null);
             previous.setMedium(student.getMedium());
             previous.setMediumName(student.getMediumName());
             previous.setDegree(student.getDegreeName());
