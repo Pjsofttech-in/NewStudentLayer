@@ -2,6 +2,7 @@ package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.AssignmentResponseDTO;
 import Layer.NewStudentManagement.Entity.StudentAssignment;
+import Layer.NewStudentManagement.Entity.StudentAssignmentSubmission;
 import Layer.NewStudentManagement.Repository.AssignmentRepository;
 import Layer.NewStudentManagement.Service.AssignmentService;
 import Layer.NewStudentManagement.Service.S3Service;
@@ -11,11 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class AssignmentServiceImpl implements AssignmentService
-{
+public class AssignmentServiceImpl implements AssignmentService {
 
     @Autowired
     AssignmentRepository assignmentRepository;
@@ -51,6 +52,15 @@ public class AssignmentServiceImpl implements AssignmentService
         dto.setCreatedByEmail(assignment.getCreatedByEmail());
         dto.setRole(assignment.getRole());
         dto.setBranchCode(assignment.getBranchCode());
+        List<StudentAssignmentSubmission> submissions = assignment.getSubmissions();
+        if (!submissions.isEmpty()) {
+            Optional<StudentAssignmentSubmission> first = submissions.stream().findFirst();
+            first.ifPresent(studentAssignmentSubmission -> dto.setAssignmentStatus(studentAssignmentSubmission.getStatus()));
+        } else {
+            if (LocalDate.now().isAfter(assignment.getDueDate())) {
+                dto.setAssignmentStatus("Overdue");
+            }
+        }
         return dto;
     }
 
@@ -109,8 +119,7 @@ public class AssignmentServiceImpl implements AssignmentService
     }
 
     @Override
-    public AssignmentResponseDTO getAssignmentById(Long id,String role, String email)
-    {
+    public AssignmentResponseDTO getAssignmentById(Long id, String role, String email) {
         validateRole(role, "TEACHER");
         checkPermission(role, email, "Get");
         return assignmentRepository.findById(id)
@@ -119,7 +128,7 @@ public class AssignmentServiceImpl implements AssignmentService
     }
 
     @Override
-    public List<AssignmentResponseDTO> getAssignmentsByClassRoom(Long classRoomId,String role, String email) {
+    public List<AssignmentResponseDTO> getAssignmentsByClassRoom(Long classRoomId, String role, String email) {
 
         checkPermission(role, email, "Get");
         return assignmentRepository.findByClassRoomId(classRoomId)
@@ -129,8 +138,7 @@ public class AssignmentServiceImpl implements AssignmentService
     }
 
     @Override
-    public List<AssignmentResponseDTO> getAssignmentsByCreator(String role, String email)
-    {
+    public List<AssignmentResponseDTO> getAssignmentsByCreator(String role, String email) {
 
         checkPermission(role, email, "Get");
         return assignmentRepository.findAssignmentsByCreator(email, role)

@@ -24,4 +24,5 @@ public class AssignmentResponseDTO
     private String createdByEmail;
     private String role;
     private String branchCode;
+    private String assignmentStatus;
 }
