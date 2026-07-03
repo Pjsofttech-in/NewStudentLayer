@@ -56,6 +56,8 @@ public interface StudentService {
 
     StudentDTO getStudentByRegistrationNumber(String role, String email, String registrationNumber);
 
+    Map<Long, Object> sendWhatsappMessage(String role, String email, WhatsappMessageDTO whatsappMessageDTO);
+
     void deleteEducationById(String role, String email, Long educationId);
 
     Map<String, Long> getApplicationCount(String role, String email, String filter, LocalDate customStart, LocalDate customEnd,

@@ -12,9 +12,11 @@ import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
+import Layer.NewStudentManagement.Util.HelperUtil;
 import io.jsonwebtoken.Claims;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
+import netscape.javascript.JSObject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +27,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -1074,6 +1078,67 @@ public class StudentServiceImpl implements StudentService {
         }
 
         studentRepository.save(student);
+        if ("Approved".equalsIgnoreCase(status)) {
+            WhatsappMessageDTO request = WhatsappMessageDTO.builder().whatsappNumber(getContactWithCountryCode(student))
+                    .templateName("admission").branchCode(student.getBranchCode()).build();
+            List<Map<String, Object>> stringMono = staffService.sendWhatsappMessage(request);
+            System.out.println(stringMono);
+        }
+    }
+
+    @Override
+    public Map<Long, Object> sendWhatsappMessage(String role, String email, WhatsappMessageDTO whatsappMessageDTO) {
+        checkPermission(role, email, "Put");
+        List<StudentEntity> studentEntityList = studentRepository.findAllById(whatsappMessageDTO.getStudentIdList());
+        Map<Long, Object> result = new HashMap<>();
+        if (!CollectionUtils.isEmpty(studentEntityList)) {
+            Map<String, Object> parameters = whatsappMessageDTO.getParameters();
+            for (StudentEntity studentEntity : studentEntityList) {
+                Map<String, Object> newMap = new HashMap<>();
+                if (parameters != null) {
+                    parameters.forEach((s, o) -> {
+                        switch (o.toString()) {
+                            case "name":
+                                newMap.put(s, studentEntity.getFullName());
+                                break;
+                            case "rollNo":
+                                newMap.put(s, studentEntity.getRollNo());
+                                break;
+                            case "enrollmentDate":
+                                newMap.put(s, HelperUtil.getDateWithFormat(studentEntity.getEnrollmentDate()));
+                                break;
+                            case "registrationNumber":
+                                newMap.put(s, studentEntity.getRegistrationNumber());
+                                break;
+                            case "standard":
+                                newMap.put(s, studentEntity.getStandard().getStandardName());
+                                break;
+                        }
+                    });
+                }
+                whatsappMessageDTO.setWhatsappNumber(getContactWithCountryCode(studentEntity));
+                whatsappMessageDTO.setParameters(newMap);
+                List<Map<String, Object>> response;
+                String status;
+                try {
+//                    response = ;
+                    response = staffService.sendWhatsappMessage(whatsappMessageDTO);
+                    status = !response.isEmpty() ? String.valueOf(response.getFirst().get("status")) : "Failed";
+                } catch (Exception e) {
+                    status = "Failed";
+                }
+                result.put(studentEntity.getId(), status);
+            }
+        }
+        return result;
+    }
+
+    private static String getContactWithCountryCode(StudentEntity student) {
+        String contact = student.getContact();
+        if(StringUtils.isNotBlank(contact)){
+            return contact.length() == 10 ? "91" + contact : contact;
+        }
+        return contact;
     }
 
     @Transactional

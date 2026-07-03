@@ -94,8 +94,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
         StudentDivision division = divisionRepository.findById(dto.getDivisionId())
                 .orElseThrow(() -> new RuntimeException("Division not found"));
 
-        StudentCourseType courseType = courseTypeRepository.findById(dto.getCourseTypeId())
-                .orElseThrow(() -> new RuntimeException("Course Type not found"));
+        StudentCourseType courseType = null;
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         String institutionType = dto.getInstitutionType();
@@ -147,6 +146,9 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 streamId = dto.getStreamId();
                 courseTypeId = dto.getCourseTypeId();
                 departmentName = dto.getDepartmentName();
+
+                courseType = courseTypeRepository.findById(dto.getCourseTypeId())
+                        .orElseThrow(() -> new RuntimeException("Course Type not found"));
             }
             // UG / PG
             else {

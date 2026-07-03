@@ -1,8 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.*;
-import Layer.NewStudentManagement.Entity.StudentDocument;
-import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
@@ -22,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -254,6 +251,16 @@ public class StudentController
     ) {
         StudentDTO student = studentService.getStudentByRegistrationNumber(role, email, registrationNumber);
         return ResponseEntity.ok(student);
+    }
+
+    @PostMapping("/sendWhatsappMessage")
+    public ResponseEntity<Map<Long, Object>> sendWhatsappMessage(
+            @RequestParam String role,
+            @RequestParam String email,
+            @RequestBody WhatsappMessageDTO whatsappMessageDTO
+    ) {
+        Map<Long, Object> result = studentService.sendWhatsappMessage(role, email, whatsappMessageDTO);
+        return ResponseEntity.ok(result);
     }
 
 

@@ -419,4 +419,23 @@ public class StaffService {
                 .bodyToMono(String.class);
     }
 
+    public List<Map<String, Object>> sendWhatsappMessage(WhatsappMessageDTO request) {
+        String token = internalJwtProvider.generateInternalToken();
+
+        return webClient.post()
+                .uri("/watiTemplate/sendMessageFromOutside")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(error -> Mono.error(new RuntimeException("Sending message Failed: " + error)))
+                )
+                .bodyToFlux(Map.class)
+                .map(staff -> Map.of(
+                        "status", staff.get("success")
+                ))
+                .collectList().block();
+    }
+
 }
