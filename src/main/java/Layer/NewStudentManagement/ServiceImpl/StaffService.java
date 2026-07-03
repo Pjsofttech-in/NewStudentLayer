@@ -438,4 +438,22 @@ public class StaffService {
                 .collectList().block();
     }
 
+    public List<WatiTemplateDTO> getWatiTemplatesByBranchCode(String branchCode) {
+        String token = internalJwtProvider.generateInternalToken();
+
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/watiTemplate/getByBranchCode")
+                        .queryParam("branchCode", branchCode)
+                        .build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(String.class)
+                                .flatMap(error -> Mono.error(new RuntimeException("Sending message Failed: " + error)))
+                )
+                .bodyToFlux(WatiTemplateDTO.class)
+                .collectList().block();
+    }
+
 }

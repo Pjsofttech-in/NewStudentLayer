@@ -16,7 +16,6 @@ import Layer.NewStudentManagement.Util.HelperUtil;
 import io.jsonwebtoken.Claims;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
-import netscape.javascript.JSObject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -87,12 +85,19 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     private EmailService emailService;
 
+    private static String getContactWithCountryCode(StudentEntity student) {
+        String contact = student.getContact();
+        if (StringUtils.isNotBlank(contact)) {
+            return contact.length() == 10 ? "91" + contact : contact;
+        }
+        return contact;
+    }
+
     private void checkPermission(String role, String email, String action) {
         if (!staffService.hasPermission(role, email, action)) {
             throw new RuntimeException("You don't have permission to " + action.toLowerCase() + " student");
         }
     }
-
 
     @Override
     public StudentResponseDTO saveStudent(String role, String email, StudentRequest request, String token) {
@@ -296,7 +301,6 @@ public class StudentServiceImpl implements StudentService {
         return mapToDTO(savedStudent);
     }
 
-
     @Override
     public StudentDTO getStudentById(Long id, String role, String email) {
         if (role != null && email != null) {
@@ -390,7 +394,6 @@ public class StudentServiceImpl implements StudentService {
         return "Password reset successfully";
     }
 
-
     @Override
     public StudentResponseDTO updateStudent(Long studentId, String role, String email, StudentRequest request) {
         checkPermission(role, email, "Put");
@@ -476,7 +479,6 @@ public class StudentServiceImpl implements StudentService {
         return mapToDTO(savedStudent);
     }
 
-
     @Override
     public void deleteStudentById(Long id, String role, String email) {
         checkPermission(role, email, "Delete");
@@ -536,7 +538,6 @@ public class StudentServiceImpl implements StudentService {
         return studentRepository.findAll(spec, pageable)
                 .map(this::mapToDTO);
     }
-
 
     public StudentDocumentDTO uploadStudentDocuments(
             Long studentId, String role, String email,
@@ -734,7 +735,6 @@ public class StudentServiceImpl implements StudentService {
         return studentPage.map(this::mapToDTO);
     }
 
-
     @Override
     public StudentDTO getStudentByRegistrationNumber(String role, String email, String registrationNumber) {
         checkPermission(role, email, "Get");
@@ -744,7 +744,6 @@ public class StudentServiceImpl implements StudentService {
 
         return studentMapper.toStudentDTO(student); // or manually map to StudentDTO
     }
-
 
     private void updateStudentFields(StudentEntity existing, StudentEntity incoming) {
         if (incoming.getTitle() != null) existing.setTitle(incoming.getTitle());
@@ -782,7 +781,6 @@ public class StudentServiceImpl implements StudentService {
 ////            collegeDetails.setStudent(existing);
 //        }
     }
-
 
     public StudentResponseDTO mapToDTO(StudentEntity student) {
         StudentResponseDTO dto = new StudentResponseDTO();
@@ -909,7 +907,6 @@ public class StudentServiceImpl implements StudentService {
 
         return dto;
     }
-
 
     @Override
     public StudentDocumentDTO updateStudentDocuments(Long studentId, String role, String email,
@@ -1055,7 +1052,6 @@ public class StudentServiceImpl implements StudentService {
         return dto;
     }
 
-
     @Override
     public List<StudentResponseDTO> getStudentsByClassRoomId(String role, String email, Long classRoomId) {
         checkPermission(role, email, "Get");
@@ -1131,14 +1127,6 @@ public class StudentServiceImpl implements StudentService {
             }
         }
         return result;
-    }
-
-    private static String getContactWithCountryCode(StudentEntity student) {
-        String contact = student.getContact();
-        if(StringUtils.isNotBlank(contact)){
-            return contact.length() == 10 ? "91" + contact : contact;
-        }
-        return contact;
     }
 
     @Transactional
@@ -1999,5 +1987,16 @@ public class StudentServiceImpl implements StudentService {
         }
         return staffService.getStaffNamesAndEmails(branchCode, deptEmail);
 
+    }
+
+    @Override
+    public List<WatiTemplateDTO> getWatiTemplatesByBranchCode(String role, String email) {
+        try {
+            checkPermission(role, email, "GET");
+            String branchCode = staffService.fetchBranchCodeByRole(role, email);
+            return staffService.getWatiTemplatesByBranchCode(branchCode);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

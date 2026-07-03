@@ -21,13 +21,14 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 //@CrossOrigin(origins = "http://localhost:3000")
 //@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
-public class StudentController
-{
+public class StudentController {
     @Autowired
     StudentService studentService;
 
@@ -42,16 +43,15 @@ public class StudentController
 
     @PostMapping("/createStudent")
     public ResponseEntity<StudentResponseDTO> saveStudent(@RequestParam String role,
-                                                     @RequestParam(required = false) String email,
-                                                     @RequestBody StudentRequest request,
-                                                     @RequestHeader(name = "Authorization", required = false) String authorizationHeader)
-    {
+                                                          @RequestParam(required = false) String email,
+                                                          @RequestBody StudentRequest request,
+                                                          @RequestHeader(name = "Authorization", required = false) String authorizationHeader) {
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             token = authorizationHeader.substring(7);
         }
 
-        StudentResponseDTO saved = studentService.saveStudent(role, email,request,token);
+        StudentResponseDTO saved = studentService.saveStudent(role, email, request, token);
         return ResponseEntity.ok(saved);
     }
 
@@ -108,7 +108,7 @@ public class StudentController
             @RequestBody(required = false) StudentFilterDTO filterDTO
     ) {
         String[] arr = sort.split(",");
-        Sort.Direction dir = "DESC".equalsIgnoreCase(arr[1])? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort.Direction dir = "DESC".equalsIgnoreCase(arr[1]) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, arr[0]));
 
         Page<StudentResponseDTO> studentPage =
@@ -128,7 +128,6 @@ public class StudentController
 
         return ResponseEntity.ok(response); // ✅ FIXED
     }
-
 
 
     @PutMapping("/updateStudent/{id}")
@@ -167,18 +166,17 @@ public class StudentController
             @RequestParam(required = false) MultipartFile graduationMarksheetCert,
             @RequestParam(required = false) MultipartFile nonCreamyLayerCert,
             @RequestParam(required = false) MultipartFile incomeCertificateCert,
-            @RequestHeader(value = "Authorization", required = false) String authorizationHeader)
-    {
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             token = authorizationHeader.substring(7);  // Extract token after "Bearer "
         }
 
         StudentDocumentDTO academicYear = studentService.uploadStudentDocuments(studentId, role, email,
-                    studentPhoto, aadharcardPhoto, pancardPhoto, casteValidationPhoto, casteCertificatePhoto,
-                    leavingCertificatePhoto, domicilePhoto, birthCertificatePhoto, disabilityCertificate, studentSignPhoto,
+                studentPhoto, aadharcardPhoto, pancardPhoto, casteValidationPhoto, casteCertificatePhoto,
+                leavingCertificatePhoto, domicilePhoto, birthCertificatePhoto, disabilityCertificate, studentSignPhoto,
                 marksheet10thCert, marksheet12thCert, graduationMarksheetCert, nonCreamyLayerCert, incomeCertificateCert, token);
-            return ResponseEntity.ok(academicYear);
+        return ResponseEntity.ok(academicYear);
 
     }
 
@@ -228,8 +226,8 @@ public class StudentController
     }
 
     @GetMapping("/getStudentByClassRoomId")
-    public ResponseEntity<List<StudentResponseDTO>> getStudentsByClassRoomId(@RequestParam String role, @RequestParam String email,@RequestParam Long classRoomId) {
-        List<StudentResponseDTO> students = studentService.getStudentsByClassRoomId(role , email,classRoomId);
+    public ResponseEntity<List<StudentResponseDTO>> getStudentsByClassRoomId(@RequestParam String role, @RequestParam String email, @RequestParam Long classRoomId) {
+        List<StudentResponseDTO> students = studentService.getStudentsByClassRoomId(role, email, classRoomId);
         return ResponseEntity.ok(students);
     }
 
@@ -239,7 +237,7 @@ public class StudentController
             @RequestParam String role, @RequestParam String email,
             @RequestParam Long studentId, @RequestParam String status,
             @RequestParam(required = false) String reason) {
-        studentService.updateStatus(role,email,studentId, status,reason);
+        studentService.updateStatus(role, email, studentId, status, reason);
         return ResponseEntity.ok("Status updated successfully");
     }
 
@@ -265,9 +263,8 @@ public class StudentController
 
 
     @DeleteMapping("/deleteEducationById")
-    public ResponseEntity<String> deleteEducationDetail(@RequestParam String role,@RequestParam String email,@RequestParam Long educationId)
-    {
-        studentService.deleteEducationById(role, email,educationId);
+    public ResponseEntity<String> deleteEducationDetail(@RequestParam String role, @RequestParam String email, @RequestParam Long educationId) {
+        studentService.deleteEducationById(role, email, educationId);
         return ResponseEntity.ok("Education deleted successfully with ID: " + educationId);
     }
 
@@ -275,7 +272,7 @@ public class StudentController
     public ResponseEntity<String> updateStudentFormStatus(
             @RequestParam String role, @RequestParam String email,
             @RequestParam Long studentId) {
-        studentService.updateFormStatus(role,email,studentId);
+        studentService.updateFormStatus(role, email, studentId);
         return ResponseEntity.ok("Status updated successfully");
     }
 
@@ -293,9 +290,9 @@ public class StudentController
 
 
     @GetMapping("/getDataForTc")
-    public ResponseEntity<?> getDataForTc(@RequestParam Long studentId,@RequestParam String role, @RequestParam String email) {
+    public ResponseEntity<?> getDataForTc(@RequestParam Long studentId, @RequestParam String role, @RequestParam String email) {
         try {
-            DataForTcDTO dto = studentService.getDataForTc(studentId,role,email);
+            DataForTcDTO dto = studentService.getDataForTc(studentId, role, email);
             return ResponseEntity.ok(dto);
         } catch (RuntimeException ex) {
             return ResponseEntity
@@ -318,7 +315,7 @@ public class StudentController
             @RequestParam(defaultValue = "id,DESC") String sort
     ) {
         String[] arr = sort.split(",");
-        Sort.Direction dir = "DESC".equalsIgnoreCase(arr[1])? Sort.Direction.DESC : Sort.Direction.ASC;
+        Sort.Direction dir = "DESC".equalsIgnoreCase(arr[1]) ? Sort.Direction.DESC : Sort.Direction.ASC;
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, arr[0]));
 
         return studentService.getStudentsByBranchCode(role, email, filter, timeFrame,
@@ -345,7 +342,7 @@ public class StudentController
             mapper.findAndRegisterModules(); // handles LocalDate
             StudentRegisterRequest request = mapper.readValue(studentJson, StudentRegisterRequest.class);
 
-            StudentResponseDTO response = studentService.registerStudent(role, email, request, oldRegisterPhoto, entranceMarkSheet,token);
+            StudentResponseDTO response = studentService.registerStudent(role, email, request, oldRegisterPhoto, entranceMarkSheet, token);
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -359,7 +356,14 @@ public class StudentController
             @RequestParam String role,
             @RequestParam String email) {
 
-        return studentService.getStaffInfo(role, email,deptEmail);
+        return studentService.getStaffInfo(role, email, deptEmail);
+    }
+
+    @GetMapping("/getWatiTemplatesByBranchCode")
+    public List<WatiTemplateDTO> getWatiTemplatesByBranchCode(
+            @RequestParam String role,
+            @RequestParam String email) {
+        return studentService.getWatiTemplatesByBranchCode(role, email);
     }
 
 }
