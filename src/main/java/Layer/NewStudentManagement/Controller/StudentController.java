@@ -261,6 +261,15 @@ public class StudentController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/getWhatsappParameterOptions")
+    public ResponseEntity<Map<String, String>> getWhatsappParameterOptions(
+            @RequestParam String role,
+            @RequestParam String email
+    ) {
+        Map<String, String> result = studentService.getWhatsappParameterOptions(role, email);
+        return ResponseEntity.ok(result);
+    }
+
 
     @DeleteMapping("/deleteEducationById")
     public ResponseEntity<String> deleteEducationDetail(@RequestParam String role, @RequestParam String email, @RequestParam Long educationId) {

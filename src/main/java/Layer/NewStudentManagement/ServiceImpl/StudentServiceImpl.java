@@ -13,6 +13,7 @@ import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
 import Layer.NewStudentManagement.Util.HelperUtil;
+import com.beust.jcommander.internal.Maps;
 import io.jsonwebtoken.Claims;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
@@ -1097,7 +1098,7 @@ public class StudentServiceImpl implements StudentService {
                             case "name":
                                 newMap.put(s, studentEntity.getFullName());
                                 break;
-                            case "rollNo":
+                            case "roleNo":
                                 newMap.put(s, studentEntity.getRollNo());
                                 break;
                             case "enrollmentDate":
@@ -1126,6 +1127,19 @@ public class StudentServiceImpl implements StudentService {
                 result.put(studentEntity.getId(), status);
             }
         }
+        return result;
+    }
+
+    @Override
+    public Map<String, String> getWhatsappParameterOptions(String role, String email) {
+        checkPermission(role, email, "Get");
+        Map<String, String> result = Maps.newHashMap();
+        result.put("Full Name", "name");
+        result.put("Role No", "roleNo");
+        result.put("Enrollment Date", "enrollmentDate");
+        result.put("Registration No", "registrationNumber");
+        result.put("Standard", "standard");
+
         return result;
     }
 

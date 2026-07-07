@@ -58,6 +58,8 @@ public interface StudentService {
 
     Map<Long, Object> sendWhatsappMessage(String role, String email, WhatsappMessageDTO whatsappMessageDTO);
 
+    Map<String, String> getWhatsappParameterOptions(String role, String email);
+
     void deleteEducationById(String role, String email, Long educationId);
 
     Map<String, Long> getApplicationCount(String role, String email, String filter, LocalDate customStart, LocalDate customEnd,
