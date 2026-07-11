@@ -23,6 +23,7 @@ public class StudentAssignment
     private Long id;
 
     private String assignmentTitle;
+    @Lob
     private String description;
     private LocalDate dueDate;
     private LocalDate createdDate;
