@@ -83,6 +83,9 @@ public class StudentResponseDTO {
     private Integer eMarksOutOff;
     private String entranceMarkSheet;
 
+    private Double scholarshipAmount;
+    private String admissionType;
+
     @Email
     private String createdByEmail;
     private String role;

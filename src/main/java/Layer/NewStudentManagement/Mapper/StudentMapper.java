@@ -49,6 +49,8 @@ public class StudentMapper {
         dto.setFormStatus(student.getFormStatus());
         dto.setReason(student.getReason());
         dto.setFatherEmailId(student.getFatherEmailId());
+        dto.setScholarshipAmount(student.getScholarshipAmount());
+        dto.setAdmissionType(student.getAdmissionType());
 //            dto.setDiscount(student.getDiscount());
         dto.setTcGenrated(student.isTcGenrated());
         dto.setOldRegisterPhoto(student.getOldRegisterPhoto());

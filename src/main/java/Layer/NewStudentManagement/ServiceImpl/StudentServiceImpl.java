@@ -777,6 +777,8 @@ public class StudentServiceImpl implements StudentService {
         if (incoming.getGroupName() != null) existing.setGroupName(incoming.getGroupName());
         if (incoming.getSemister() != null) existing.setSemister(incoming.getSemister());
         if (incoming.getInstitutionType() != null) existing.setInstitutionType(incoming.getInstitutionType());
+        if (incoming.getScholarshipAmount() != null) existing.setScholarshipAmount(incoming.getScholarshipAmount());
+        if (incoming.getAdmissionType() != null) existing.setAdmissionType(incoming.getAdmissionType());
 //        if (incoming.getCollegeDetails() != null && existing.getCollegeDetails() !=null) {
 //            StudentCollegeDetails collegeDetails = existing.getCollegeDetails();
 ////            collegeDetails.setStudent(existing);
@@ -828,6 +830,9 @@ public class StudentServiceImpl implements StudentService {
         dto.setEMarksOutOff(student.getEMarksOutOff());
         dto.setEntranceMarkSheet(student.getEntranceMarkSheet());
         dto.setDepartmentName(student.getDepartmentName());
+
+        dto.setScholarshipAmount(student.getScholarshipAmount());
+        dto.setAdmissionType(student.getAdmissionType());
 
         dto.setCollegeDetailsDTO(StudentMapper.toStudentCollegeDetailsDTO(student.getCollegeDetails()));
         dto.setDocumentDTO(StudentMapper.toStudentDocumentDTO(student.getDocuments()));

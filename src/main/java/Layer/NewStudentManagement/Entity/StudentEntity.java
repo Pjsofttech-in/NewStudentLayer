@@ -57,6 +57,8 @@ public class StudentEntity
     private String institutionType;
     private String formStatus ;
     private String reason;
+    private Double scholarshipAmount;
+    private String admissionType;
 //    private Double discount;
     private String userRole;
     private boolean isTcGenrated = true;
