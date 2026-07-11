@@ -54,4 +54,11 @@ public class NotificationController
         List<StudentNotification> notification = notificationService.getNotificationByBranchCode(role, email);
         return ResponseEntity.ok(notification);
     }
+
+    @DeleteMapping("/deleteNotification/{id}")
+    public ResponseEntity<String> deleteNotification(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
+    {
+        notificationService.deleteNotification(role, email, id);
+        return ResponseEntity.ok("Success");
+    }
 }

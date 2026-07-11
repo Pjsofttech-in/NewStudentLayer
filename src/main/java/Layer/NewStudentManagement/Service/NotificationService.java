@@ -10,7 +10,12 @@ public interface NotificationService
     StudentNotification updateNotification(StudentNotification notification, Long id, String role, String email);
     List<StudentNotification> getNotificationByClassroom(String role, String email,Long classRoomId);
     List<StudentNotification> getNotificationByBranchCode(String role, String email);
-    void deletePeriod(String role, String email,Long id);
+
+    void deleteNotification(String role, String email, Long id);
+
+    void deleteOlderNotification();
+
+    void deletePeriod(String role, String email, Long id);
     StudentNotification getNotificationById(Long id, String role, String email);
 
 }

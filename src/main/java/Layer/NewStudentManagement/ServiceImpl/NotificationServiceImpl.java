@@ -7,6 +7,7 @@ import Layer.NewStudentManagement.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -85,6 +86,24 @@ public class NotificationServiceImpl implements NotificationService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         return notificationRepository.getNoticesByBranchCode(branchCode);
 
+    }
+
+    @Override
+    public void deleteNotification(String role, String email, Long id)
+    {
+        if (!staffService.hasPermission(role, email, "DELETE")) {
+            throw new RuntimeException("You don't have permission to Delete Notification");
+        }
+        notificationRepository.deleteById(id);
+        System.out.println("Student Notification Row deleted with id " + id);
+    }
+
+    @Override
+    public void deleteOlderNotification()
+    {
+        LocalDate ninetyDaysAgo = LocalDate.now().minusDays(90);
+        int noOfRows = notificationRepository.deleteRecordsOlderThan(ninetyDaysAgo);
+        System.out.println("Cleanup complete for records " + noOfRows + " older than 90 days.");
     }
 
     @Override
