@@ -365,7 +365,7 @@ public class ResultServiceImpl implements ResultService
         StudentSubjectMarks subjectMarks = subjectMarksRepository.findById(subjectId).orElseThrow(() -> new RuntimeException("Subject marks not found"));
 
         StudentSubject subject = subjectRepository.findSubjectByName(subjectMarks.getSubjectName(),
-                teacher.getBranchCode()).orElseThrow(() -> new RuntimeException("Subject not found"));
+                teacher.getBranchCode(), teacher.getInstitutionType()).orElseThrow(() -> new RuntimeException("Subject not found"));
 
         if (!CollectionUtils.isEmpty(teacher.getSubjects())) {
             if (teacher.getSubjects().stream().noneMatch(studentSubject -> subject.getId().equals(studentSubject.getId()))) {

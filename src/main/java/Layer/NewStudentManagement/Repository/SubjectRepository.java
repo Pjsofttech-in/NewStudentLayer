@@ -25,7 +25,8 @@ public interface SubjectRepository extends JpaRepository<StudentSubject, Long> {
     List<StudentSubject> findSubjectsByTeacherId(@Param("teacherId") Long teacherId);
 
         @Query("SELECT s FROM StudentSubject s WHERE s.subject = :subjectName " +
-            "AND (s.branchCode = :branchCode) ")
+            "AND (s.branchCode = :branchCode) AND (s.institutionType = :institutionType) ")
     Optional<StudentSubject> findSubjectByName(@Param("subjectName") String subjectName,
-                                               @Param("branchCode") String branchCode);
+                                               @Param("branchCode") String branchCode,
+                                               @Param("institutionType") String institutionType);
 }
