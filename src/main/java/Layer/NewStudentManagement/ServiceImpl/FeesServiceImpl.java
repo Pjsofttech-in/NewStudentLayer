@@ -12,10 +12,7 @@ import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +23,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -405,6 +406,8 @@ public class FeesServiceImpl implements FeesService {
 
         Tuple result = entityManager.createQuery(cq).getSingleResult();
 
+        Double totalPaid = calculateDynamicTotalPaidAmount(branchCode, calculatedStartDate, calculatedEndDate, filters);
+
         return new FeesRevenueProjection() {
             @Override
             public Double getTotalFees() {
@@ -414,8 +417,8 @@ public class FeesServiceImpl implements FeesService {
 
             @Override
             public Double getTotalPaid() {
-                Double v = result.get("totalPaid", Double.class);
-                return v != null ? v : 0.0;
+//                Double v = result.get("totalPaid", Double.class);
+                return totalPaid != null ? totalPaid : 0.0;
             }
 
             @Override
@@ -424,6 +427,110 @@ public class FeesServiceImpl implements FeesService {
                 return v != null ? v : 0.0;
             }
         };
+    }
+
+    public Double calculateDynamicTotalPaidAmount(String branchCode, LocalDate startDate, LocalDate endDate, FeesRevenueFilterDTO filters) {
+
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Double> query = cb.createQuery(Double.class);
+        Root<StudentFeesCollect> root = query.from(StudentFeesCollect.class);
+
+        // 1. Select the Sum of the 'amount' field (using COALESCE to prevent nulls)
+        query.select(cb.coalesce(cb.sum(root.get("amount")), 0.0));
+
+        // Create a list to hold all our dynamic AND conditions
+        List<Predicate> predicates = new ArrayList<>();
+
+        // 2. Base Filters (Status and Branch)
+        predicates.add(cb.equal(cb.upper(root.get("status")), "COMPLETED")); // Case-insensitive success check
+
+        if (branchCode != null && !branchCode.isBlank()) {
+            predicates.add(cb.equal(root.get("branchCode"), branchCode));
+        }
+
+        // 3. Date Filters on the paymentDate
+        if (startDate != null && endDate != null) {
+            predicates.add(cb.between(root.get("paymentDate"), startDate, endDate));
+        }
+
+        if (filters.getMonth() != null && !filters.getMonth().isBlank() && filters.getYear() != null) {
+            try {
+                DateTimeFormatter formatter = new DateTimeFormatterBuilder()
+                        .parseCaseInsensitive()
+                        .appendPattern("MMM")
+                        .toFormatter(Locale.ENGLISH);
+
+                Month month = Month.from(formatter.parse(filters.getMonth()));
+                int monthValue = month.getValue();
+                int yearValue = filters.getYear().intValue();
+
+                LocalDate monthStart = LocalDate.of(yearValue, monthValue, 1);
+                LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
+
+                predicates.add(cb.between(root.get("paymentDate"), monthStart, monthEnd));
+            } catch (DateTimeParseException ex) {
+                throw new RuntimeException("Invalid month name: " + filters.getMonth() + ". Please use formats like Jan, Feb, Mar...");
+            }
+        }
+
+        // ==========================================
+        // 4. PARENT TABLE FILTERS (Using Explicit Joins)
+        // ==========================================
+
+        // We join to the parent 'studentFees' table mapped in your entity
+        Join<Object, Object> studentFeesJoin = root.join("studentFees", JoinType.INNER);
+
+        if (filters.getInstitutionType() != null && !filters.getInstitutionType().isBlank()) {
+            predicates.add(cb.equal(studentFeesJoin.get("institutionType"), filters.getInstitutionType()));
+        }
+
+        if (filters.getAcademicYear() != null && !filters.getAcademicYear().isBlank()) {
+            predicates.add(cb.equal(studentFeesJoin.get("student").get("academicYear"), filters.getAcademicYear()));
+        }
+
+        if (filters.getStandardName() != null && !filters.getStandardName().isBlank()) {
+            predicates.add(cb.equal(studentFeesJoin.get("standardName"), filters.getStandardName()));
+        }
+
+        if (filters.getMediumName() != null && !filters.getMediumName().isBlank()) {
+            predicates.add(cb.equal(studentFeesJoin.get("mediumName"), filters.getMediumName()));
+        }
+
+        if (filters.getStreamName() != null && !filters.getStreamName().isBlank()) {
+            predicates.add(cb.equal(studentFeesJoin.get("streamName"), filters.getStreamName()));
+        }
+
+        if (filters.getGraduationTypeName() != null && !filters.getGraduationTypeName().isBlank()) {
+            predicates.add(cb.equal(studentFeesJoin.get("degreeName"), filters.getGraduationTypeName()));
+        }
+
+        if (filters.getGroupName() != null && !filters.getGroupName().isBlank()) {
+            predicates.add(cb.equal(cb.lower(studentFeesJoin.get("groupName")), filters.getGroupName().toLowerCase()));
+        }
+
+        if (filters.getDegreeName() != null && !filters.getDegreeName().isBlank()) {
+            predicates.add(cb.equal(cb.lower(studentFeesJoin.get("degreeName")), filters.getDegreeName().toLowerCase()));
+        }
+
+        if (filters.getDepartmentName() != null && !filters.getDepartmentName().isBlank()) {
+            predicates.add(cb.equal(cb.lower(studentFeesJoin.get("departmentName")), filters.getDepartmentName().toLowerCase()));
+        }
+
+        if (filters.getFeesStatus() != null && !filters.getFeesStatus().isBlank()) {
+            predicates.add(cb.equal(cb.lower(studentFeesJoin.get("feesStatus")), filters.getFeesStatus().toLowerCase()));
+        }
+
+        if (filters.getFeesCollectionType() != null && !filters.getFeesCollectionType().isBlank()) {
+            predicates.add(cb.equal(cb.lower(studentFeesJoin.get("feesCollectionType")), filters.getFeesCollectionType().toLowerCase()));
+        }
+
+        // Add any other parent fields here using the studentFeesJoin...
+
+        // 5. Apply all predicates to the WHERE clause
+        query.where(cb.and(predicates.toArray(new Predicate[0])));
+
+        // 6. Execute and return the single Double value
+        return entityManager.createQuery(query).getSingleResult();
     }
 
 
