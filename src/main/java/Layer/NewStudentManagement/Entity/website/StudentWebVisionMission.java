@@ -1,0 +1,51 @@
+package Layer.NewStudentManagement.Entity.website;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class StudentWebVisionMission {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "vision", nullable = false, length = 1500)
+    private String vision;
+
+    @Column(name = "mission", nullable = false, length = 1500)
+    private String mission;
+
+    private String visionmissionColor;
+
+    @Column(name = "directorMessage", length = 2000)
+    private String directorMessage;
+
+    @Column(name = "directorName", length = 255)
+    private String directorName;
+
+    @Column(name = "directorImage")
+    private String directorImage;
+
+    @Column(name = "description", length = 3000)
+    private String description;
+    private String url;
+
+    @Email
+    private String createdByEmail;
+    private String role;
+    private String branchCode;
+
+    @ManyToOne
+    @JoinColumn(name = "security_url_id")
+    @JsonIgnore
+    private StudentWebSecurityUrl webSecurityUrl;
+}

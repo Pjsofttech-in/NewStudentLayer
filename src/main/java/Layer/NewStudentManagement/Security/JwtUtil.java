@@ -84,5 +84,13 @@ public class JwtUtil {
         return extractAllClaims(token).get("role", String.class);
     }
 
+    public String generateTokenFromUrl(String url) {
+        return Jwts.builder()
+                .setSubject(url)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey())
+                .compact();
+    }
 
 }
