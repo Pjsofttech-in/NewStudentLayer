@@ -240,7 +240,7 @@ public class StaffService {
             case "TEACHER" -> {
                 try {
                     System.out.println("Checking role for Teacher: " + email + " Action: " + action);
-                    boolean exists = teacherRepository.existsByTeacherEmail(email);
+                    boolean exists = teacherRepository.existsByTeacherEmailAndActiveTrue(email);
                     return exists && ("POST".equalsIgnoreCase(action) || "GET".equalsIgnoreCase(action) || "PUT".equalsIgnoreCase(action));
                 } catch (Exception e) {
                     System.err.println("Error checking teacher permission: " + e.getMessage());

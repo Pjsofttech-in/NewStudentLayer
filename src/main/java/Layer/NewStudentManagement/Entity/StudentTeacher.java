@@ -47,6 +47,9 @@ public class StudentTeacher
     private String education;
     private String experience;
     private String reserch;
+
+    private boolean active = true;
+
     @Email
     private String createdByEmail;
 

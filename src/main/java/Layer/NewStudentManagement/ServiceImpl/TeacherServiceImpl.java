@@ -13,6 +13,7 @@ import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.TeacherService;
 import io.micrometer.common.util.StringUtils;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -191,7 +192,7 @@ public class TeacherServiceImpl implements TeacherService
         {
             throw new RuntimeException("You don't have permission to get teacher");
         }
-        StudentTeacher teacher = teacherRepository.findById(id)
+        StudentTeacher teacher = teacherRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(()->new RuntimeException("Teacher not found"));
         return mapToResponseDTO(teacher);
     }
@@ -204,7 +205,7 @@ public class TeacherServiceImpl implements TeacherService
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        StudentTeacher existingTeacher = teacherRepository.findById(id)
+        StudentTeacher existingTeacher = teacherRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new RuntimeException("Teacher not found"));
 
         if (profilePhoto != null && !profilePhoto.isEmpty()) {
@@ -256,14 +257,20 @@ public class TeacherServiceImpl implements TeacherService
 
 
     @Override
+    @Transactional
     public void deleteTeacherById(Long id,String role,String email)
     {
         if(!staffService.hasPermission(role,email,"Delete"))
         {
             throw new RuntimeException("You don't have permission to delete teacher");
         }
-        teacherRepository.deleteById(id);
 
+        try {
+            teacherRepository.deactivateTeacherById(id);
+        }
+        catch (Exception ex) {
+            throw new RuntimeException("Teacher not found");
+        }
     }
 
     @Override
