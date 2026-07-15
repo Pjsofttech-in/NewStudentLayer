@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+
 //@CrossOrigin(origins = "http://localhost:3000")
 //@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
-public class FeesController
-{
+public class FeesController {
     @Autowired
     StaffService staffService;
 
@@ -23,38 +23,50 @@ public class FeesController
     private FeesService feesService;
 
     @PostMapping("/assignFeesToStudent")
-    public ResponseEntity<StudentFeesDTO> createStudentFees(@RequestParam String role, @RequestParam String email, @RequestBody StudentFees fees)
-    {
+    public ResponseEntity<StudentFeesDTO> createStudentFees(@RequestParam String role, @RequestParam String email, @RequestBody StudentFees fees) {
         StudentFeesDTO fees1 = feesService.assignFeesToStudent(role, email, fees);
         return ResponseEntity.ok(fees1);
     }
 
     @PutMapping("/updateStudentFees/{id}")
-    public ResponseEntity<StudentFeesDTO> updateStudentFees(@PathVariable Long id, @RequestParam String role, @RequestParam String email,@RequestBody StudentFees fees)
-    {
-        StudentFeesDTO feesDTO = feesService.updateFees(id, fees, role,email);
+    public ResponseEntity<StudentFeesDTO> updateStudentFees(@PathVariable Long id, @RequestParam String role, @RequestParam String email, @RequestBody StudentFees fees) {
+        StudentFeesDTO feesDTO = feesService.updateFees(id, fees, role, email);
         return ResponseEntity.ok(feesDTO);
     }
 
+    @PatchMapping("/updateFeeSchedule/{scheduleId}")
+    public ResponseEntity<?> editInstallment(
+            @RequestParam String role, @RequestParam String email,
+            @PathVariable Long scheduleId,
+            @RequestBody EditInstallmentRequest request) {
+        return ResponseEntity.ok(feesService.editInstallment(role, email, scheduleId, request));
+    }
+
+    @PostMapping("/addFeeSchedule/{studentFeesId}")
+    public ResponseEntity<?> addInstallment(
+            @RequestParam String role, @RequestParam String email,
+            @PathVariable Long studentFeesId,
+            @RequestBody AddInstallmentRequest request) {
+        return ResponseEntity.ok(feesService.addInstallment(role, email, studentFeesId, request));
+    }
+
     @GetMapping("/getStudentFeesById/{id}")
-    public ResponseEntity<StudentFeesDTO> getStudentFeesById(@PathVariable Long id,@RequestParam String role, @RequestParam String email)
-    {
-        StudentFeesDTO feesDTO =feesService.getFeesById(id, role, email);
+    public ResponseEntity<StudentFeesDTO> getStudentFeesById(@PathVariable Long id, @RequestParam String role, @RequestParam String email) {
+        StudentFeesDTO feesDTO = feesService.getFeesById(id, role, email);
         return ResponseEntity.ok(feesDTO);
     }
 
 
     @DeleteMapping("/deleteStudentFees/{id}")
-    public ResponseEntity<Void> deleteStudentFees(@RequestParam Long id,@RequestParam String role, @RequestParam String email)
-    {
-        feesService.deleteFees(id,role,email);
+    public ResponseEntity<Void> deleteStudentFees(@RequestParam Long id, @RequestParam String role, @RequestParam String email) {
+        feesService.deleteFees(id, role, email);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/getStudentFeesByStudentId")
-    public ResponseEntity<List<StudentFeesDTO>> getAllFeesByStudentId(@RequestParam Long studentId,@RequestParam String role, @RequestParam String email) {
+    public ResponseEntity<List<StudentFeesDTO>> getAllFeesByStudentId(@RequestParam Long studentId, @RequestParam String role, @RequestParam String email) {
 
-        List<StudentFeesDTO> feesDTO = feesService.getAllFeesForStudent(studentId,role, email);
+        List<StudentFeesDTO> feesDTO = feesService.getAllFeesForStudent(studentId, role, email);
         return ResponseEntity.ok(feesDTO);
     }
 
@@ -81,7 +93,7 @@ public class FeesController
                                                                         @RequestParam(required = false) LocalDate endDate,
                                                                         @RequestBody FeesRevenueFilterDTO filters) {
 
-        FeesRevenueProjection summary = feesService.getFeesRevenueByBranch(role,email,timeFrame,startDate,endDate,filters);
+        FeesRevenueProjection summary = feesService.getFeesRevenueByBranch(role, email, timeFrame, startDate, endDate, filters);
         return ResponseEntity.ok(summary);
     }
 

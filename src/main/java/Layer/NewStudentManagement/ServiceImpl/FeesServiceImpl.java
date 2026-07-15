@@ -13,6 +13,7 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -257,6 +259,76 @@ public class FeesServiceImpl implements FeesService {
         StudentFees fees = feesRepository.save(existing);
         return mapToDTOFees(fees);
 
+    }
+
+    // ==========================================
+    // API 1: EDIT EXISTING INSTALLMENT
+    // ==========================================
+    @Transactional
+    @Override
+    public StudentFeeSchedule editInstallment(String role, String email, Long scheduleId, EditInstallmentRequest request) {
+        checkPermission(role, email, "POST");
+        StudentFeeSchedule schedule = feesScheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new IllegalArgumentException("Installment not found"));
+
+        if (schedule.isPaid()) {
+            throw new IllegalArgumentException("Cannot edit an installment that is already paid.");
+        }
+
+        StudentFees parentFees = schedule.getStudentFees();
+
+        // 1. Calculate what the sum WOULD be if we allow this edit
+        double currentScheduledTotal = parentFees.getScheduleList().stream()
+                .mapToDouble(StudentFeeSchedule::getCollectAmount)
+                .sum();
+
+        double proposedScheduledTotal = currentScheduledTotal - schedule.getCollectAmount() + request.getNewAmount();
+
+        // 2. Safeguard: Prevent scheduling more money than the student actually owes
+        if (proposedScheduledTotal > parentFees.getTotalamount()) {
+            throw new IllegalArgumentException("Error: Editing this increases scheduled total beyond the total fees (" + parentFees.getTotalamount() + ")");
+        }
+
+        // 3. Apply changes
+        schedule.setCollectAmount(request.getNewAmount());
+        if (request.getDueDate() != null) schedule.setDueDate(request.getDueDate());
+        if (request.getMonth() != null) schedule.setMonth(request.getMonth());
+
+        return feesScheduleRepository.save(schedule);
+    }
+
+    // ==========================================
+    // API 2: ADD NEW INSTALLMENT
+    // ==========================================
+    @Transactional
+    @Override
+    public StudentFeeSchedule addInstallment(String role, String email, Long studentFeesId, AddInstallmentRequest request) {
+        checkPermission(role, email, "POST");
+        StudentFees parentFees = feesRepository.findById(studentFeesId)
+                .orElseThrow(() -> new IllegalArgumentException("Student Fees record not found"));
+
+        // 1. Calculate current scheduled total
+        double currentScheduledTotal = parentFees.getScheduleList().stream()
+                .mapToDouble(StudentFeeSchedule::getCollectAmount)
+                .sum();
+
+        // 2. Safeguard: Ensure there is actually "unscheduled" money left to schedule
+        double unscheduledBalance = parentFees.getTotalamount() - currentScheduledTotal;
+
+        if (request.getAmount() > unscheduledBalance) {
+            throw new IllegalArgumentException("Cannot add installment. Only " + unscheduledBalance + " is left to be scheduled.");
+        }
+
+        // 3. Create and link new schedule
+        StudentFeeSchedule newSchedule = new StudentFeeSchedule();
+        newSchedule.setStudentFees(parentFees);
+        newSchedule.setCollectAmount(request.getAmount());
+        newSchedule.setDueDate(request.getDueDate());
+        newSchedule.setMonth(request.getMonth());
+        newSchedule.setFeesType(request.getFeesType());
+        newSchedule.setPaid(false);
+
+        return feesScheduleRepository.save(newSchedule);
     }
 
     @Override
