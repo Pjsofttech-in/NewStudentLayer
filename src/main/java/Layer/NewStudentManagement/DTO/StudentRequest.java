@@ -21,6 +21,12 @@ public class StudentRequest
     private Long degreeNameId;
     private String departmentName;
 
+    private boolean entranceExam;
+    private String entranceExamName;
+    private Integer entranceMarks;
+    private Integer eMarksOutOff;
+    private String entranceMarkSheet;
+
     private StudentEntity student;
     private StudentCollegeDetails collegeDetails;
     private StudentAddress address;

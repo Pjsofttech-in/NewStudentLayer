@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface StudentService {
-    StudentResponseDTO saveStudent(String role, String email, StudentRequest request, String token);
+    StudentResponseDTO saveStudent(String role, String email, StudentRequest request, String token, MultipartFile oldRegisterPhoto,
+                                   MultipartFile entranceMarkSheet);
 
     StudentDTO getStudentById(Long id, String role, String email);
 

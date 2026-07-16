@@ -101,7 +101,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public StudentResponseDTO saveStudent(String role, String email, StudentRequest request, String token) {
+    public StudentResponseDTO saveStudent(String role, String email, StudentRequest request, String token, MultipartFile oldRegisterPhoto,
+                                          MultipartFile entranceMarkSheet) {
 
         String branchCode;
         if ("USER".equalsIgnoreCase(role)) {
@@ -149,6 +150,16 @@ public class StudentServiceImpl implements StudentService {
                     .orElseThrow(() -> new RuntimeException("Stream not found with ID: " + request.getStreamId()));
             student.setStream(stream);
             student.setStreamName(stream.getStream());
+        }
+
+        // ---- Upload Photo ----
+        if (oldRegisterPhoto != null && !oldRegisterPhoto.isEmpty()) {
+            String fileUrl = s3Service.uploadFile(oldRegisterPhoto, branchCode);
+            student.setOldRegisterPhoto(fileUrl);
+        }
+        if (entranceMarkSheet != null && !entranceMarkSheet.isEmpty()) {
+            String marksheetUrl = s3Service.uploadFile(entranceMarkSheet, branchCode);
+            student.setEntranceMarkSheet(marksheetUrl);
         }
 
         if ("School".equalsIgnoreCase(student.getInstitutionType())) {

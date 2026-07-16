@@ -45,13 +45,15 @@ public class StudentController {
     public ResponseEntity<StudentResponseDTO> saveStudent(@RequestParam String role,
                                                           @RequestParam(required = false) String email,
                                                           @RequestBody StudentRequest request,
+                                                          @RequestPart(value = "entranceMarkSheet", required = false) MultipartFile entranceMarkSheet,
+                                                          @RequestPart(value = "oldRegisterPhoto", required = false) MultipartFile oldRegisterPhoto,
                                                           @RequestHeader(name = "Authorization", required = false) String authorizationHeader) {
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             token = authorizationHeader.substring(7);
         }
 
-        StudentResponseDTO saved = studentService.saveStudent(role, email, request, token);
+        StudentResponseDTO saved = studentService.saveStudent(role, email, request, token, oldRegisterPhoto, entranceMarkSheet);
         return ResponseEntity.ok(saved);
     }
 
