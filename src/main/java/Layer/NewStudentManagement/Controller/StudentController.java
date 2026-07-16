@@ -1,13 +1,20 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.*;
+import Layer.NewStudentManagement.Entity.StudentAssignmentSubmission;
+import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,7 +51,7 @@ public class StudentController {
     @PostMapping("/createStudent")
     public ResponseEntity<StudentResponseDTO> saveStudent(@RequestParam String role,
                                                           @RequestParam(required = false) String email,
-                                                          @RequestBody StudentRequest request,
+                                                          @RequestPart("request") String studentJson,
                                                           @RequestPart(value = "entranceMarkSheet", required = false) MultipartFile entranceMarkSheet,
                                                           @RequestPart(value = "oldRegisterPhoto", required = false) MultipartFile oldRegisterPhoto,
                                                           @RequestHeader(name = "Authorization", required = false) String authorizationHeader) {
@@ -53,7 +60,22 @@ public class StudentController {
             token = authorizationHeader.substring(7);
         }
 
-        StudentResponseDTO saved = studentService.saveStudent(role, email, request, token, oldRegisterPhoto, entranceMarkSheet);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule()); // 👈 add this
+        // Tell Jackson not to crash if it sees // or /* */
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        // 2. Ignore unknown properties (Fixes the "discount" error)
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        StudentRequest studentRequest;
+        try {
+            studentRequest = mapper.readValue(studentJson, StudentRequest.class);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        StudentResponseDTO saved = studentService.saveStudent(role, email, studentRequest, token, oldRegisterPhoto, entranceMarkSheet);
         return ResponseEntity.ok(saved);
     }
 
