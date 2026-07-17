@@ -49,7 +49,8 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/stafflogin","/teacherLogin","/verifyOtpToTeacher","/sendOtpToTeacher","/resetTeacherPassword",
-                                "/studentLogin","/getSchoolProfileByBranchCode","/school/{slug}","/error","/getStudentCountByCastCategory").permitAll()
+                                "/studentLogin","/getSchoolProfileByBranchCode","/school/{slug}","/error","/getStudentCountByCastCategory",
+                                "/parentLogin","/verifyOtpToParent","/sendOtpToParent","/verifyOtpToStudent","/sendOtpToStudent").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
