@@ -17,7 +17,7 @@ public class InternalJwtProvider {
 
     public String generateInternalToken() {
         return Jwts.builder()
-                .setIssuer("admission-service")
+                .setIssuer("student-service")
                 .claim("type", "INTERNAL")
                 .claim("scope", "PAYMENT_ACCESS")
                 .setIssuedAt(new Date())
