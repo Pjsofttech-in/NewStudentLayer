@@ -24,6 +24,7 @@ public class StudentNotification
     private String noticeName;
     @Column(length = 5000)
     private String noticeDescription;
+    private String institutionType;
     private LocalDate createdAt = LocalDate.now();
     private Long classRoomId;
 

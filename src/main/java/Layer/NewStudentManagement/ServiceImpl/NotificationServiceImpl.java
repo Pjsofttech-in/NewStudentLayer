@@ -11,8 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
-public class NotificationServiceImpl implements NotificationService
-{
+public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     NotificationRepository notificationRepository;
@@ -20,8 +19,7 @@ public class NotificationServiceImpl implements NotificationService
     @Autowired
     StaffService staffService;
 
-    public StudentNotification createNotification(StudentNotification notification, String role, String email)
-    {
+    public StudentNotification createNotification(StudentNotification notification, String role, String email) {
         if (!staffService.hasPermission(role, email, "POST")) {
             throw new RuntimeException("You don't have permission to create Notification");
         }
@@ -43,8 +41,7 @@ public class NotificationServiceImpl implements NotificationService
     }
 
     @Override
-    public StudentNotification updateNotification(StudentNotification notification, Long id, String role, String email)
-    {
+    public StudentNotification updateNotification(StudentNotification notification, Long id, String role, String email) {
         if (!staffService.hasPermission(role, email, "PUT")) {
             throw new RuntimeException("You don't have permission to Update Notification");
         }
@@ -66,8 +63,7 @@ public class NotificationServiceImpl implements NotificationService
     }
 
     @Override
-    public List<StudentNotification> getNotificationByClassroom(String role, String email,Long classRoomId)
-    {
+    public List<StudentNotification> getNotificationByClassroom(String role, String email, Long classRoomId) {
         if (!staffService.hasPermission(role, email, "GET")) {
             throw new RuntimeException("You don't have permission to View Notification");
         }
@@ -77,8 +73,7 @@ public class NotificationServiceImpl implements NotificationService
     }
 
     @Override
-    public List<StudentNotification> getNotificationByBranchCode(String role, String email)
-    {
+    public List<StudentNotification> getNotificationByBranchCode(String role, String email) {
         if (!staffService.hasPermission(role, email, "GET")) {
             throw new RuntimeException("You don't have permission to View Notification");
         }
@@ -89,8 +84,17 @@ public class NotificationServiceImpl implements NotificationService
     }
 
     @Override
-    public void deleteNotification(String role, String email, Long id)
-    {
+    public List<StudentNotification> getNotificationByInstitutionType(String role, String email, String institutionType) {
+        if (!staffService.hasPermission(role, email, "GET")) {
+            throw new RuntimeException("You don't have permission to View Notification");
+        }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        return notificationRepository.getNoticesByInstitutionType(branchCode, institutionType);
+    }
+
+    @Override
+    public void deleteNotification(String role, String email, Long id) {
         if (!staffService.hasPermission(role, email, "DELETE")) {
             throw new RuntimeException("You don't have permission to Delete Notification");
         }
@@ -99,29 +103,7 @@ public class NotificationServiceImpl implements NotificationService
     }
 
     @Override
-    public void deleteOlderNotification()
-    {
-        LocalDate ninetyDaysAgo = LocalDate.now().minusDays(90);
-        int noOfRows = notificationRepository.deleteRecordsOlderThan(ninetyDaysAgo);
-        System.out.println("Cleanup complete for records " + noOfRows + " older than 90 days.");
-    }
-
-    @Override
-    public void deletePeriod(String role, String email,Long id)
-    {
-        if (!staffService.hasPermission(role, email, "GET")) {
-            throw new RuntimeException("You don't have permission to View Notification");
-        }
-        StudentNotification notice = notificationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Notice not found"));
-
-        notificationRepository.save(notice);
-
-    }
-
-    @Override
-    public StudentNotification getNotificationById(Long id, String role, String email)
-    {
+    public StudentNotification getNotificationById(Long id, String role, String email) {
         if (!staffService.hasPermission(role, email, "GET")) {
             throw new RuntimeException("You don't have permission to View Notification");
         }

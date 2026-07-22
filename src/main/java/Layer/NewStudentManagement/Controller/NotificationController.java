@@ -55,6 +55,14 @@ public class NotificationController
         return ResponseEntity.ok(notification);
     }
 
+    @GetMapping("/getNotificationByInsitutionType")
+    public ResponseEntity<List<StudentNotification>> getNotificationByBranchCode(@RequestParam String role, @RequestParam String email,
+                                                                                 @RequestParam String institutionType)
+    {
+        List<StudentNotification> notification = notificationService.getNotificationByInstitutionType(role, email, institutionType);
+        return ResponseEntity.ok(notification);
+    }
+
     @DeleteMapping("/deleteNotification/{id}")
     public ResponseEntity<String> deleteNotification(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
     {

@@ -19,6 +19,10 @@ public interface NotificationRepository extends JpaRepository<StudentNotificatio
     @Query("SELECT n FROM StudentNotification n WHERE n.branchCode = :branchCode AND n.classRoomId IS NULL")
     List<StudentNotification> getNoticesByBranchCode(@Param("branchCode") String branchCode);
 
+    @Query("SELECT n FROM StudentNotification n WHERE n.branchCode = :branchCode AND n.institutionType = :institutionType " +
+            " AND n.classRoomId IS NULL")
+    List<StudentNotification> getNoticesByInstitutionType(@Param("branchCode") String branchCode, @Param("institutionType") String institutionType);
+
 
     @Query("SELECT n FROM StudentNotification n WHERE n.classRoomId = :classId")
     List<StudentNotification> getNoticesByClassId(@Param("classId") Long classId);
