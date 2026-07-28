@@ -1354,6 +1354,7 @@ public class StudentServiceImpl implements StudentService {
         studentData.put("email", student.getEmail());
         studentData.put("role", student.getUserRole());
         studentData.put("branchCode", student.getBranchCode());
+        studentData.put("classroomId", Objects.nonNull(student.getClassRoom()) ? student.getClassRoom().getId() : -1);
 
         return new LoginResponse(token, studentData);
     }
