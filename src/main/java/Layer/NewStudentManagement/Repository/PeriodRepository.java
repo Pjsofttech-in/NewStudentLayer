@@ -14,6 +14,7 @@ public interface PeriodRepository extends JpaRepository<StudentPeriod, Long> {
     @Query("SELECT s FROM StudentPeriod s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentPeriod> getAllByBranchCode(@Param("branchCode") String branchCode);
 
-    boolean existsByStartTimeAndEndTime(LocalTime startTime, LocalTime endTime);
+    // Added branchCode to the derived query method
+    boolean existsByBranchCodeAndStartTimeAndEndTime(String branchCode, LocalTime startTime, LocalTime endTime);
 
 }
