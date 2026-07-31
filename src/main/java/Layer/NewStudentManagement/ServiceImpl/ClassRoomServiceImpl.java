@@ -71,6 +71,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
     @Override
     @Transactional
     public StudentClassRoomResponseDTO createClassRoom(String role, String email, ClassRoomRequestDTO dto) {
+        StudentDivision division = null;
 
         if (!staffService.hasPermission(role, email, "Post")) {
             throw new RuntimeException("You don't have permission to create ClassRoom");
@@ -80,8 +81,9 @@ public class ClassRoomServiceImpl implements ClassRoomService {
             throw new RuntimeException("Medium is required for ClassRoom");
         }
 
-        if (dto.getDivisionId() == null) {
-            throw new RuntimeException("Division is required for ClassRoom");
+        if (dto.getDivisionId() != null) {
+            division = divisionRepository.findById(dto.getDivisionId())
+                    .orElseThrow(() -> new RuntimeException("Division not found"));
         }
 
         if (dto.getYear() == null || dto.getYear().isEmpty()) {
@@ -90,9 +92,6 @@ public class ClassRoomServiceImpl implements ClassRoomService {
 
         StudentMedium medium = mediumRepository.findById(dto.getMediumId())
                 .orElseThrow(() -> new RuntimeException("Medium not found"));
-
-        StudentDivision division = divisionRepository.findById(dto.getDivisionId())
-                .orElseThrow(() -> new RuntimeException("Division not found"));
 
         StudentCourseType courseType = null;
 
@@ -223,7 +222,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 classRoom.setStream(stream);
 
                 classRoom.setGroupName(dto.getGroupName());
-            } else if("Diploma".equalsIgnoreCase(graduationType.getGraduationType())) {
+            } else if ("Diploma".equalsIgnoreCase(graduationType.getGraduationType())) {
                 StudentStream stream = streamRepository.findById(dto.getStreamId())
                         .orElseThrow(() -> new RuntimeException("Stream not found"));
 
