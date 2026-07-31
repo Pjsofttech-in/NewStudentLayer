@@ -41,8 +41,8 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
     // Diploma: graduationType + courseType + department + medium + branchCode + academicYear
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
             "WHERE f.graduationType = :graduationType AND f.courseType = :courseType AND f.stream = :stream " +
-            "AND f.medium = :medium AND f.branchCode = :branchCode AND f.academicYear = :academicYear " +
-            "AND f.institutionType = 'College'")
+            "AND f.departmentName = :departmentName  AND f.medium = :medium AND f.branchCode = :branchCode " +
+            "AND f.academicYear = :academicYear AND f.institutionType = 'College'")
     boolean existsByGraduationTypeAndStreamAndCourseTypeAndDepartmentAndMediumAndBranchCodeAndAcademicYear(
             StudentGraduationType graduationType,
             StudentCourseType courseType,
