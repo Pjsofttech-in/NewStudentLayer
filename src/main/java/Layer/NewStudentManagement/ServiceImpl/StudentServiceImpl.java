@@ -74,6 +74,8 @@ public class StudentServiceImpl implements StudentService {
     @Autowired
     private StreamRepository streamRepository;
     @Autowired
+    private CertificationRepository certificationRepository;
+    @Autowired
     private JwtUtil jwtUtil;
     @Autowired
     private TCDataRepository tcDataRepository;
@@ -150,6 +152,12 @@ public class StudentServiceImpl implements StudentService {
                     .orElseThrow(() -> new RuntimeException("Stream not found with ID: " + request.getStreamId()));
             student.setStream(stream);
             student.setStreamName(stream.getStream());
+        }
+
+        if (request.getCertificationId() != null) {
+            StudentCertification studentCertification = certificationRepository.findById(request.getCertificationId())
+                    .orElseThrow(() -> new RuntimeException("Certification course not found with ID: " + request.getCertificationId()));
+            student.setCertification(studentCertification);
         }
 
         // ---- Upload Photo ----
@@ -244,6 +252,13 @@ public class StudentServiceImpl implements StudentService {
                 student.setMedium(medium);
                 student.setMediumName(medium.getMediumName());
             }
+            Long certificationId = request.getCertificationId();
+            if (certificationId != null) {
+                StudentCertification certification = certificationRepository.findById(certificationId)
+                        .orElseThrow(() -> new RuntimeException("Certification not found with ID: " + mediumId));
+                student.setCertification(certification);
+            }
+
             student.setDepartmentName(request.getDepartmentName());
 
 
@@ -891,6 +906,11 @@ public class StudentServiceImpl implements StudentService {
             dto.setStandardName(student.getStandard().getStandardName());
         }
 
+        if (student.getCertification() != null) {
+            dto.setCertificationId(student.getCertification().getId());
+            dto.setCertificationName(student.getCertification().getCertification());
+        }
+
         if (student.getMedium() != null) {
             dto.setMediumId(student.getMedium().getMid());
             dto.setMediumName(student.getMedium().getMediumName());
@@ -1394,7 +1414,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                               Long graduationTypeId, Long streamId, String groupName,
-                                              Long degreeNameId, String departmentName, String academicYear,
+                                              Long degreeNameId, Long certificationId, String departmentName, String academicYear,
                                               @Nullable String branchCodeFilter) {
 
         if (!staffService.hasPermission(role, email, "GET")) {
@@ -1426,7 +1446,7 @@ public class StudentServiceImpl implements StudentService {
             for (String branchCode : branchCodes) {
                 GenderCountResponse resp = studentRepository.getGenderCountByFilters(
                         branchCode, institutionType, graduationTypeId, streamId,
-                        degreeNameId, departmentName, standardId, mediumId, groupName, academicYear);
+                        degreeNameId, certificationId, departmentName, standardId, mediumId, groupName, academicYear);
 
                 if (resp != null) {
                     aggregatedResponse.setMaleCount(safeSum(aggregatedResponse.getMaleCount(), resp.getMaleCount()));
@@ -1453,7 +1473,7 @@ public class StudentServiceImpl implements StudentService {
 
             GenderCountResponse resp = studentRepository.getGenderCountByFilters(
                     branchCodeToUse, institutionType, graduationTypeId, streamId,
-                    degreeNameId, departmentName, standardId, mediumId, groupName, academicYear);
+                    degreeNameId, certificationId, departmentName, standardId, mediumId, groupName, academicYear);
 
             if (resp != null) {
                 aggregatedResponse = new GenderCountResponse(
@@ -1534,7 +1554,7 @@ public class StudentServiceImpl implements StudentService {
     @Override
     public List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
             String role, String email, String graduationType, String standardName,
-            String mediumName, String streamName, String courseType, String degreeName, String departmentName,
+            String mediumName, String streamName, String courseType, String degreeName, String certificationName, String departmentName,
             String institutionType, String academicYear, @Nullable String branchCodeFilter) {
 
         checkPermission(role, email, "Get");
@@ -1569,6 +1589,7 @@ public class StudentServiceImpl implements StudentService {
                             streamName != null && !streamName.trim().isEmpty() ? streamName : null,
                             courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                             degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                            certificationName != null && !certificationName.trim().isEmpty() ? certificationName : null,
                             departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
                             institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                             academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
@@ -1582,6 +1603,7 @@ public class StudentServiceImpl implements StudentService {
                             streamName != null && !streamName.trim().isEmpty() ? streamName : null,
                             courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                             degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                            certificationName != null && !certificationName.trim().isEmpty() ? certificationName : null,
                             institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                             academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
                     );
@@ -1593,6 +1615,7 @@ public class StudentServiceImpl implements StudentService {
                             mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
                             streamName != null && !streamName.trim().isEmpty() ? streamName : null,
                             courseType != null && !courseType.trim().isEmpty() ? courseType : null,
+                            certificationName != null && !certificationName.trim().isEmpty() ? certificationName : null,
                             institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                             academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
                     );
@@ -1603,6 +1626,7 @@ public class StudentServiceImpl implements StudentService {
                             mediumName != null && !mediumName.trim().isEmpty() ? mediumName : null,
                             streamName != null && !streamName.trim().isEmpty() ? streamName : null,
                             courseType != null && !courseType.trim().isEmpty() ? courseType : null,
+                            certificationName != null && !certificationName.trim().isEmpty() ? certificationName : null,
                             institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                             academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
                     );
@@ -1629,6 +1653,7 @@ public class StudentServiceImpl implements StudentService {
                     degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
                     courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                     departmentName != null && !departmentName.trim().isEmpty() ? departmentName : null,
+                    certificationName != null && !certificationName.trim().isEmpty() ? certificationName : null,
                     institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                     academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
             );
@@ -1641,6 +1666,7 @@ public class StudentServiceImpl implements StudentService {
                     streamName != null && !streamName.trim().isEmpty() ? streamName : null,
                     courseType != null && !courseType.trim().isEmpty() ? courseType : null,
                     degreeName != null && !degreeName.trim().isEmpty() ? degreeName : null,
+                    certificationName != null && !certificationName.trim().isEmpty() ? certificationName : null,
                     institutionType != null && !institutionType.trim().isEmpty() ? institutionType : null,
                     academicYear != null && !academicYear.trim().isEmpty() ? academicYear : null
             );

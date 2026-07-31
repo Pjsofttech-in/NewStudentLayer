@@ -641,6 +641,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                         newDto.setGroupName(classroom.getGroupName());
                         newDto.setGraduationType(classroom.getGraduationType() != null ? classroom.getGraduationType().getGraduationType() : null);
                         newDto.setCourseType(classroom.getCourseType() != null ? classroom.getCourseType().getCourseType() : null);
+                        newDto.setCertification(classroom.getCertification() != null ? classroom.getCertification().getCertification() : null);
                         newDto.setInstitutionType(classroom.getInstitutionType());
                         newDto.setStreamName(classroom.getStream() != null ? classroom.getStream().getStream() : null);
                         newDto.setDegreeName(classroom.getDegreeName() != null ? classroom.getDegreeName().getDegreeName() : null);

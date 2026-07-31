@@ -65,6 +65,10 @@ public class StudentClassRoom
     private StudentDegreeName degreeName;
 
     @ManyToOne
+    @JoinColumn(name = "certification_id", nullable = true)
+    private StudentCertification certification;
+
+    @ManyToOne
     @JoinColumn(name = "course_type_id", nullable = true)
     private StudentCourseType courseType;
 

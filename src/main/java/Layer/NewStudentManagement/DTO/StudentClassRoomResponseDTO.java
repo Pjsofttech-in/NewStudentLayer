@@ -26,11 +26,13 @@ public class StudentClassRoomResponseDTO {
     private String degreeName;
     private String departmentName;
     private String courseType;
+    private String certification;
 
     private Long mediumId;
     private Long divisionId;
     private Long standardId;
     private Long courseTypeId;
+    private Long certificationId;
 
     private Long graduationTypeId;
     private Long streamId;

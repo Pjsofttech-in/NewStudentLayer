@@ -19,6 +19,7 @@ public class StudentRequest
     private Long streamId;
     private Long graduationTypeId;
     private Long degreeNameId;
+    private Long certificationId;
     private String departmentName;
 
     private boolean entranceExam;

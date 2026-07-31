@@ -159,7 +159,7 @@ public class StandardFeesServiceImpl implements StandardFeesService
                         .orElseThrow(() -> new RuntimeException("Invalid degree ID"));
 
                 boolean exists = standardFeesRepository.existsByGraduationTypeAndDegreeAndDepartmentAndMediumAndBranchCodeAndAcademicYear(
-                        graduationType, degree, medium, branchCode,academicYear);
+                        graduationType, degree, standardFees.getDepartmentName(), stream, medium, branchCode,academicYear);
 
                 if (exists) {
                     throw new RuntimeException("Fees already assigned for this graduation type, degree, department, and medium.");

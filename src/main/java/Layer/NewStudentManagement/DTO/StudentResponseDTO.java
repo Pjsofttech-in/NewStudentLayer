@@ -55,6 +55,8 @@ public class StudentResponseDTO {
     private String courseType;
     private Long degreeNameId;
     private String degreeName;
+    private Long certificationId;
+    private String certificationName;
 
     private String departmentName;
     private String institutionType;

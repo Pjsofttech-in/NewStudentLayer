@@ -75,14 +75,14 @@ public interface StudentService {
 
     GenderCountResponse getGenderCount(String role, String email, String institutionType, Long standardId, Long mediumId,
                                        Long graduationTypeId, Long streamId, String groupName,
-                                       Long degreeNameId, String departmentName, String academicYear,
+                                       Long degreeNameId, Long certificationId, String departmentName, String academicYear,
                                        @Nullable String branchCodeFilter);
 
     DataForTcDTO getDataForTc(Long studentId, String role, String email);
 
     List<ClassRoomStudentCountProjection> getStudentCountByClassRoom(
             String role, String email, String graduationType, String standardName,
-            String mediumName, String streamName, String courseType, String degreeName, String departmentName,
+            String mediumName, String streamName, String courseType, String degreeName, String certificationName, String departmentName,
             String institutionType, String academicYear, @Nullable String branchCodeFilter);
 
     StudentPageResponseDTO getStudentsByBranchCode(String role, String email, StudentFilterDTO filter, String timeFrame,

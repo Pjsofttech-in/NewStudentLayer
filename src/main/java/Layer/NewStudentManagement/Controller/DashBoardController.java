@@ -71,12 +71,13 @@ public class DashBoardController {
             @RequestParam(required = false) Long streamId,
             @RequestParam(required = false) String groupName,
             @RequestParam(required = false) Long degreeNameId,
+            @RequestParam(required = false) Long certificationId,
             @RequestParam(required = false) String departmentName,
             @RequestParam(required = false) String academicYear,
             @RequestParam(required = false) String branchCode) {
 
         return studentService.getGenderCount(role, email, institutionType, standardId, mediumId,
-                graduationTypeId, streamId, groupName, degreeNameId, departmentName, academicYear, branchCode);
+                graduationTypeId, streamId, groupName, degreeNameId, certificationId, departmentName, academicYear, branchCode);
     }
 
 
@@ -91,6 +92,7 @@ public class DashBoardController {
             @RequestParam(required = false) String degreeName,
             @RequestParam(required = false) String courseType,
             @RequestParam(required = false) String departmentName,
+            @RequestParam(required = false) String certificationName,
             @RequestParam(required = false) String institutionType,
             @RequestParam(required = false) String academicYear,
             @RequestParam(required = false) String branchCode) {
@@ -100,7 +102,7 @@ public class DashBoardController {
         } else {
             return studentService.getStudentCountByClassRoom(
                     role, email, graduationType, standardName, mediumName, streamName, courseType,
-                    degreeName, departmentName, institutionType, academicYear, branchCode);
+                    degreeName, certificationName, departmentName, institutionType, academicYear, branchCode);
         }
     }
 

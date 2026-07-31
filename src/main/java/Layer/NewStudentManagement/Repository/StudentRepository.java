@@ -164,6 +164,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             "AND (:graduationTypeId IS NULL OR s.graduationType.id = :graduationTypeId) " +
             "AND (:streamId IS NULL OR s.stream.id = :streamId) " +
             "AND (:degreeNameId IS NULL OR s.degreeName.id = :degreeNameId) " +
+            "AND (:certificationId IS NULL OR s.certification.id = :certificationId) " +
             "AND (:departmentName IS NULL OR s.departmentName = :departmentName) " +
             "AND (:standardId IS NULL OR s.standard.id = :standardId) " +
             "AND (:mediumId IS NULL OR s.medium.id = :mediumId) " +
@@ -176,6 +177,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             @Param("graduationTypeId") Long graduationTypeId,
             @Param("streamId") Long streamId,
             @Param("degreeNameId") Long degreeNameId,
+            @Param("certificationId") Long certificationId,
             @Param("departmentName") String departmentName,
             @Param("standardId") Long standardId,
             @Param("mediumId") Long mediumId,
@@ -191,6 +193,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                        d.degreeName AS degree,
                        s.academicYear AS academicYear,
                        s.departmentName AS departmentName,
+                       cert.certification AS certification,
                        COUNT(s.id) AS studentCount
                 FROM StudentEntity s
                 JOIN s.classRoom c
@@ -199,6 +202,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 LEFT JOIN s.stream st
                 LEFT JOIN s.degreeName d
                 LEFT JOIN s.courseType ct
+                LEFT JOIN s.certification cert
                 WHERE s.branchCode = :branchCode
                   AND (:graduationType IS NULL OR g.graduationType = :graduationType)
                   AND (:standardName IS NULL OR s.standardName = :standardName)
@@ -207,6 +211,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:degreeName IS NULL OR d.degreeName = :degreeName)
                   AND (:courseType IS NULL OR ct.courseType = :courseType)
                   AND (:departmentName IS NULL OR s.departmentName = :departmentName)
+                  AND (:certification IS NULL OR cert.certification = :certification)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
                   AND s.status = 'APPROVED'
@@ -220,6 +225,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             @Param("streamName") String streamName,
             @Param("courseType") String courseType,
             @Param("degreeName") String degreeName,
+            @Param("certification") String certification,
             @Param("departmentName") String departmentName,
             @Param("institutionType") String institutionType,
             @Param("academicYear") String academicYear
@@ -231,6 +237,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                        st.stream AS stream,
                        ct.courseType AS courseType,
                        d.degreeName AS degree,
+                       cert.certification AS certification,
                        s.academicYear AS academicYear,
                        COUNT(s.id) AS studentCount
                 FROM StudentEntity s
@@ -240,6 +247,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 LEFT JOIN s.stream st
                 LEFT JOIN s.degreeName d
                 LEFT JOIN s.courseType ct
+                LEFT JOIN s.certification cert
                 WHERE s.branchCode = :branchCode
                   AND (:graduationType IS NULL OR g.graduationType = :graduationType)
                   AND (:standardName IS NULL OR s.standardName = :standardName)
@@ -247,6 +255,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                   AND (:streamName IS NULL OR st.stream = :streamName)
                   AND (:degreeName IS NULL OR d.degreeName = :degreeName)
                   AND (:courseType IS NULL OR ct.courseType = :courseType)
+                  AND (:certification IS NULL OR cert.certification = :certification)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
                   AND s.status = 'APPROVED'
@@ -260,6 +269,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             @Param("streamName") String streamName,
             @Param("courseType") String courseType,
             @Param("degreeName") String degreeName,
+            @Param("certification") String certification,
             @Param("institutionType") String institutionType,
             @Param("academicYear") String academicYear
     );
@@ -269,6 +279,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                        m.mediumName AS mediumName,
                        st.stream AS stream,
                        ct.courseType AS courseType,
+                       cert.certification AS certification,
                        s.academicYear AS academicYear,
                        COUNT(s.id) AS studentCount
                 FROM StudentEntity s
@@ -277,12 +288,14 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 LEFT JOIN s.medium m
                 LEFT JOIN s.stream st
                 LEFT JOIN s.courseType ct
+                LEFT JOIN s.certification cert
                 WHERE s.branchCode = :branchCode
                   AND (:graduationType IS NULL OR g.graduationType = :graduationType)
                   AND (:standardName IS NULL OR s.standardName = :standardName)
                   AND (:mediumName IS NULL OR m.mediumName = :mediumName)
                   AND (:streamName IS NULL OR st.stream = :streamName)
                   AND (:courseType IS NULL OR ct.courseType = :courseType)
+                  AND (:certification IS NULL OR cert.certification = :certification)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
                   AND s.status = 'APPROVED'
@@ -295,6 +308,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             @Param("mediumName") String mediumName,
             @Param("streamName") String streamName,
             @Param("courseType") String courseType,
+            @Param("certification") String certification,
             @Param("institutionType") String institutionType,
             @Param("academicYear") String academicYear
     );
@@ -304,6 +318,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                        m.mediumName AS mediumName,
                        st.stream AS stream,
                        ct.courseType AS courseType,
+                       cert.certification AS certification,
                        s.academicYear AS academicYear,
                        COUNT(s.id) AS studentCount
                 FROM StudentEntity s
@@ -311,11 +326,13 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
                 LEFT JOIN s.courseType ct
                 LEFT JOIN s.medium m
                 LEFT JOIN s.stream st
+                LEFT JOIN s.certification cert
                 WHERE s.branchCode = :branchCode
                   AND (:standardName IS NULL OR s.standardName = :standardName)
                   AND (:mediumName IS NULL OR m.mediumName = :mediumName)
                   AND (:streamName IS NULL OR st.stream = :streamName)
                   AND (:courseType IS NULL OR ct.courseType = :courseType)
+                  AND (:certification IS NULL OR cert.certification = :certification)
                   AND (:institutionType IS NULL OR c.institutionType = :institutionType)
                   AND (:academicYear IS NULL OR s.academicYear = :academicYear)
                   AND s.status = 'APPROVED'
@@ -327,6 +344,7 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             @Param("mediumName") String mediumName,
             @Param("streamName") String streamName,
             @Param("courseType") String courseType,
+            @Param("certification") String certification,
             @Param("institutionType") String institutionType,
             @Param("academicYear") String academicYear
     );

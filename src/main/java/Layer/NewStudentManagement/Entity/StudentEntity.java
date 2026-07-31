@@ -115,6 +115,10 @@ public class StudentEntity
     private StudentMedium medium;
 
     @ManyToOne
+    @JoinColumn(name = "certification_id")
+    private StudentCertification certification;
+
+    @ManyToOne
     @JoinColumn(name = "standard_id")
     private StudentStandard standard;
 
