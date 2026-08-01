@@ -36,12 +36,14 @@ public interface TeacherRepository extends JpaRepository<StudentTeacher,Long>
 
     @Query("SELECT t FROM StudentTeacher t " +
             "LEFT JOIN t.courseType ct " + // 🌟 Explicit left join preserves null relationships
+            "LEFT JOIN t.certification cert " + // 🌟 Explicit left join preserves null relationships
             "WHERE t.branchCode = :branchCode " +
             "AND t.institutionType = :institutionType " +
             "AND (:graduationTypeName IS NULL OR t.graduationTypeName = :graduationTypeName) " +
             "AND (:streamName IS NULL OR t.streamName = :streamName) " +
             "AND (:degreeName IS NULL OR t.degreeName = :degreeName) " +
             "AND (:courseTypeName IS NULL OR ct.courseType = :courseTypeName) " +
+            "AND (:certification IS NULL OR cert.certification = :certification) " +
             "AND (:departmentName IS NULL OR t.departmentName = :departmentName) " +
             "AND t.active = true")
     List<StudentTeacher> findTeachersByFilters(
@@ -50,6 +52,7 @@ public interface TeacherRepository extends JpaRepository<StudentTeacher,Long>
             @Param("graduationTypeName") String graduationTypeName,
             @Param("streamName") String streamName,
             @Param("courseTypeName") String courseTypeName,
+            @Param("certification") String certificationName,
             @Param("degreeName") String degreeName,
             @Param("departmentName") String departmentName
     );

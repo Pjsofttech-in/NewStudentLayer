@@ -31,6 +31,8 @@ public class TeacherServiceImpl implements TeacherService
     private TeacherRepository teacherRepository;
     @Autowired
     private CourseTypeRepository courseTypeRepository;
+    @Autowired
+    private CertificationRepository certificationRepository;
 
     @Autowired
     private SubjectRepository subjectRepository;
@@ -85,54 +87,69 @@ public class TeacherServiceImpl implements TeacherService
         StudentStream stream = null;
         StudentDegreeName degree = null;
         StudentCourseType courseType = null;
+        StudentCertification certification = null;
 
         if ("School".equalsIgnoreCase(institutionType)) {
             // School: no further checks
         } else {
-            // For College, graduationType is required
-            if (dto.getGraduationTypeId() == null) {
-                throw new RuntimeException("Graduation Type ID is required for College");
-            }
 
-            graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
-                    .orElseThrow(() -> new RuntimeException("Graduation Type not found"));
+            if (dto.getCertificateId() == null) {
 
-            String gradTypeName = graduationType.getGraduationType();
-
-            if ("Jr.College".equalsIgnoreCase(gradTypeName)) {
-                if (dto.getStreamId() == null) {
-                    throw new RuntimeException("Stream ID is required for Jr.College");
+                // For College, graduationType is required
+                if (dto.getGraduationTypeId() == null) {
+                    throw new RuntimeException("Graduation Type ID is required for College");
                 }
 
-                stream = streamRepository.findById(dto.getStreamId())
-                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+                graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
+                        .orElseThrow(() -> new RuntimeException("Graduation Type not found"));
 
-            } else if ("UG".equalsIgnoreCase(gradTypeName) || "PG".equalsIgnoreCase(gradTypeName)) {
-                if (dto.getStreamId() == null || dto.getDegreeId() == null) {
-                    throw new RuntimeException("Stream, Degree, and Department are required for UG/PG");
+                String gradTypeName = graduationType.getGraduationType();
+
+                if ("Jr.College".equalsIgnoreCase(gradTypeName)) {
+                    if (dto.getStreamId() == null) {
+                        throw new RuntimeException("Stream ID is required for Jr.College");
+                    }
+
+                    stream = streamRepository.findById(dto.getStreamId())
+                            .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+                } else if ("UG".equalsIgnoreCase(gradTypeName) || "PG".equalsIgnoreCase(gradTypeName)) {
+                    if (dto.getStreamId() == null || dto.getDegreeId() == null) {
+                        throw new RuntimeException("Stream, Degree, and Department are required for UG/PG");
+                    }
+
+                    stream = streamRepository.findById(dto.getStreamId())
+                            .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+                    degree = degreeRepository.findById(dto.getDegreeId())
+                            .orElseThrow(() -> new RuntimeException("Degree not found"));
+
+
+                } else if ("Diploma".equalsIgnoreCase(gradTypeName)) {
+                    if (dto.getStreamId() == null ||
+                            dto.getCourseTypeId() == null || StringUtils.isBlank(dto.getDepartmentName())) {
+                        throw new RuntimeException("Stream, Course Type, Department Name are required for Diploma");
+                    }
+
+                    stream = streamRepository.findById(dto.getStreamId())
+                            .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+                    courseType = courseTypeRepository.findById(dto.getCourseTypeId())
+                            .orElseThrow(() -> new RuntimeException("Course Type not found"));
+
+                } else {
+                    throw new RuntimeException("Unsupported Graduation Type for College");
                 }
-
-                stream = streamRepository.findById(dto.getStreamId())
-                        .orElseThrow(() -> new RuntimeException("Stream not found"));
-
-                degree = degreeRepository.findById(dto.getDegreeId())
-                        .orElseThrow(() -> new RuntimeException("Degree not found"));
-
-
-            } else if ("Diploma".equalsIgnoreCase(gradTypeName)) {
-                if (dto.getStreamId() == null ||
-                        dto.getCourseTypeId() == null || StringUtils.isBlank(dto.getDepartmentName())) {
-                    throw new RuntimeException("Stream, Course Type, Department Name are required for Diploma");
-                }
-
-                stream = streamRepository.findById(dto.getStreamId())
-                        .orElseThrow(() -> new RuntimeException("Stream not found"));
-
-                courseType = courseTypeRepository.findById(dto.getCourseTypeId())
-                        .orElseThrow(() -> new RuntimeException("Course Type not found"));
-
             } else {
-                throw new RuntimeException("Unsupported Graduation Type for College");
+                if (dto.getStreamId() == null) {
+                    throw new RuntimeException("Stream is required for Certification");
+                }
+
+                stream = streamRepository.findById(dto.getStreamId())
+                        .orElseThrow(() -> new RuntimeException("Stream not found"));
+
+                certification = certificationRepository.findById(dto.getCertificateId())
+                        .orElseThrow(() -> new RuntimeException("Certification not found"));
             }
         }
 
@@ -162,6 +179,10 @@ public class TeacherServiceImpl implements TeacherService
 
         if (courseType != null) {
             teacher.setCourseType(courseType);
+        }
+
+        if (certification != null) {
+            teacher.setCertification(certification);
         }
 
         if (stream != null) {
@@ -234,6 +255,11 @@ public class TeacherServiceImpl implements TeacherService
         if (teacher.getStreamId() != null) {
             StudentStream stream = streamRepository.findById(teacher.getStreamId()).orElse(null);
             existingTeacher.setStream(stream);
+        }
+
+        if (teacher.getCertificateId() != null) {
+            StudentCertification certification = certificationRepository.findById(teacher.getCertificateId()).orElse(null);
+            existingTeacher.setCertification(certification);
         }
 
         if (teacher.getDegreeId() != null) {
@@ -381,7 +407,7 @@ public class TeacherServiceImpl implements TeacherService
 
     @Override
     public List<StudentTeacherDTO> getTeachers(String role, String email, String institutionType, String graduationTypeName, String streamName,
-                                               String courseTypeName, String degreeName, String departmentName) {
+                                               String courseTypeName, String certificationName, String degreeName, String departmentName) {
         if (!staffService.hasPermission(role, email, "Get")) {
             throw new RuntimeException("You don't have permission to get teachers");
         }
@@ -395,6 +421,7 @@ public class TeacherServiceImpl implements TeacherService
                 graduationTypeName != null && !graduationTypeName.trim().isEmpty() ? graduationTypeName.trim() : null,
                 streamName != null && !streamName.trim().isEmpty() ? streamName.trim() : null,
                 courseTypeName != null && !courseTypeName.trim().isEmpty() ? courseTypeName.trim() : null,
+                certificationName != null && !certificationName.trim().isEmpty() ? certificationName.trim() : null,
                 degreeName != null && !degreeName.trim().isEmpty() ? degreeName.trim() : null,
                 departmentName != null && !departmentName.trim().isEmpty() ? departmentName.trim() : null
         );
@@ -474,6 +501,11 @@ public class TeacherServiceImpl implements TeacherService
         if (teacher.getCourseType() != null) {
             responseDTO.setCourseTypeId(teacher.getCourseType().getId());
             responseDTO.setCourseType(teacher.getCourseType().getCourseType());
+        }
+
+        if (teacher.getCertification() != null) {
+            responseDTO.setCertificationId(teacher.getCertification().getId());
+            responseDTO.setCertification(teacher.getCertification().getCertification());
         }
 
         if (teacher.getStream() != null) {

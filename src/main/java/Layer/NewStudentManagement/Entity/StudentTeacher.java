@@ -75,6 +75,10 @@ public class StudentTeacher
     private StudentCourseType courseType;
 
     @ManyToOne
+    @JoinColumn(name = "certification_id", nullable = true)
+    private StudentCertification certification;
+
+    @ManyToOne
     @JoinColumn(name = "stream_id", nullable = true)
     private StudentStream stream;
 

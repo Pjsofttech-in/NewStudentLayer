@@ -25,6 +25,8 @@ public class StudentTeacherDTO
     private String courseType;
     private Long streamId;
     private String stream;
+    private Long certificationId;
+    private String certification;
     private String degreeName;
     private Long degreeId;
     private String departmentName;
