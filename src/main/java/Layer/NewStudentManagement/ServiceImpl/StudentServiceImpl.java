@@ -96,6 +96,14 @@ public class StudentServiceImpl implements StudentService {
         return contact;
     }
 
+    private static String getGraduationType(StudentEntity student) {
+        return Optional.ofNullable(student)
+                .map(StudentEntity::getGraduationType)
+                .map(StudentGraduationType::getGraduationType) // Replace with your actual class name if different
+                .filter(StringUtils::isNotBlank)
+                .orElse("");
+    }
+
     private void checkPermission(String role, String email, String action) {
         if (!staffService.hasPermission(role, email, action)) {
             throw new RuntimeException("You don't have permission to " + action.toLowerCase() + " student");
@@ -191,7 +199,7 @@ public class StudentServiceImpl implements StudentService {
             student.setDegreeName(null);
             student.setDepartmentName(null);
         } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
-                "Jr.College".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
+                "Jr.College".equalsIgnoreCase(getGraduationType(student))) {
 
             Long standardId = request.getStandardId();
             if (standardId != null) {
@@ -212,7 +220,7 @@ public class StudentServiceImpl implements StudentService {
             student.setDegreeName(null);
             student.setDepartmentName(null);
         } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
-                "Diploma".equalsIgnoreCase(student.getGraduationType().getGraduationType())) {
+                "Diploma".equalsIgnoreCase(getGraduationType(student))) {
 
             if (request.getCourseTypeId() != null) {
                 StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
@@ -692,67 +700,78 @@ public class StudentServiceImpl implements StudentService {
             if (streamIds.size() != 1) throw new RuntimeException("Invalid or duplicate stream");
             Long streamId = streamIds.get(0);
 
-            // Graduation Type
-            String graduationType = filterDTO.getGraduationType().trim();
-            List<Long> graduationTypeIds = graduationTypeRepository.findIdsByNameAndStreamAndBranchCode(graduationType, streamId, branchCode);
-            if (graduationTypeIds.size() != 1) throw new RuntimeException("Invalid or duplicate graduation type");
-            Long graduationTypeId = graduationTypeIds.get(0);
+            if (StringUtils.isNotBlank(filterDTO.getCertification())) {
+                List<Long> certificationIds = certificationRepository.findIdsByBranchCodeAndCertificationAndStudentStreamId(branchCode, filterDTO.getCertification(),
+                        streamId);
+                if (certificationIds.size() != 1) throw new RuntimeException("Invalid or duplicate certification name");
+                Long certificationId = certificationIds.get(0);
 
-            if (filterDTO.getDegreeName() != null && filterDTO.getDepartmentName() != null) {
-                // Degree Name
-                String degreeName = filterDTO.getDegreeName().trim();
-                List<Long> degreeIds = degreeNameRepository.findIdsByNameAndGraduationTypeAndBranchCode(degreeName, graduationTypeId, branchCode);
-                if (degreeIds.size() != 1) throw new RuntimeException("Invalid or duplicate degree name");
-                Long degreeNameId = degreeIds.get(0);
-
-                //  Department
-                String department = filterDTO.getDepartmentName().trim();
-
-                // Final UG/PG student search
-                studentPage = studentRepository.findUnassignedUGPGStudents(
-                        mediumId, streamId, degreeNameId, department, filterDTO.getAcademicYear(), pageable);
-
-            } else if (graduationType.equalsIgnoreCase("Diploma")) {
-                // Diploma
-                if (StringUtils.isBlank(filterDTO.getStreamName()) || StringUtils.isBlank(filterDTO.getCourseType())
-                        || StringUtils.isBlank(filterDTO.getDepartmentName()) || StringUtils.isBlank(filterDTO.getAcademicYear())) {
-                    throw new RuntimeException("Stream, course type, academic year, department are required for Diploma students.");
-                }
-
-                String courseType = filterDTO.getCourseType().trim();
-                List<Long> courseTypeIds = courseTypeRepository.findAllIdsByName(courseType, branchCode);
-                if (courseTypeIds.size() != 1) throw new RuntimeException("Invalid or duplicate course type");
-                Long courseTypeId = courseTypeIds.getFirst();
-
-                studentPage = studentRepository.findUnassignedDiplomaStudents(
-                        mediumId,
-                        streamId,
-                        graduationTypeId,
-                        courseTypeId,
-                        filterDTO.getDepartmentName(),
-                        filterDTO.getAcademicYear(),
-                        pageable
-                );
+                // Certification student search
+                studentPage = studentRepository.findUnassignedCertificationStudents(
+                        mediumId, streamId, certificationId, filterDTO.getAcademicYear(), pageable);
             } else {
-                // Jr. College
-                if (filterDTO.getStandard() == null || filterDTO.getGroupName() == null || filterDTO.getAcademicYear() == null) {
-                    throw new RuntimeException("Standard, group name, and academic year are required for Jr. College students.");
+                // Graduation Type
+                String graduationType = filterDTO.getGraduationType().trim();
+                List<Long> graduationTypeIds = graduationTypeRepository.findIdsByNameAndStreamAndBranchCode(graduationType, streamId, branchCode);
+                if (graduationTypeIds.size() != 1) throw new RuntimeException("Invalid or duplicate graduation type");
+                Long graduationTypeId = graduationTypeIds.get(0);
+
+                if (filterDTO.getDegreeName() != null && filterDTO.getDepartmentName() != null) {
+                    // Degree Name
+                    String degreeName = filterDTO.getDegreeName().trim();
+                    List<Long> degreeIds = degreeNameRepository.findIdsByNameAndGraduationTypeAndBranchCode(degreeName, graduationTypeId, branchCode);
+                    if (degreeIds.size() != 1) throw new RuntimeException("Invalid or duplicate degree name");
+                    Long degreeNameId = degreeIds.get(0);
+
+                    //  Department
+                    String department = filterDTO.getDepartmentName().trim();
+
+                    // Final UG/PG student search
+                    studentPage = studentRepository.findUnassignedUGPGStudents(
+                            mediumId, streamId, degreeNameId, department, filterDTO.getAcademicYear(), pageable);
+
+                } else if (graduationType.equalsIgnoreCase("Diploma")) {
+                    // Diploma
+                    if (StringUtils.isBlank(filterDTO.getStreamName()) || StringUtils.isBlank(filterDTO.getCourseType())
+                            || StringUtils.isBlank(filterDTO.getDepartmentName()) || StringUtils.isBlank(filterDTO.getAcademicYear())) {
+                        throw new RuntimeException("Stream, course type, academic year, department are required for Diploma students.");
+                    }
+
+                    String courseType = filterDTO.getCourseType().trim();
+                    List<Long> courseTypeIds = courseTypeRepository.findAllIdsByName(courseType, branchCode);
+                    if (courseTypeIds.size() != 1) throw new RuntimeException("Invalid or duplicate course type");
+                    Long courseTypeId = courseTypeIds.getFirst();
+
+                    studentPage = studentRepository.findUnassignedDiplomaStudents(
+                            mediumId,
+                            streamId,
+                            graduationTypeId,
+                            courseTypeId,
+                            filterDTO.getDepartmentName(),
+                            filterDTO.getAcademicYear(),
+                            pageable
+                    );
+                } else {
+                    // Jr. College
+                    if (filterDTO.getStandard() == null || filterDTO.getGroupName() == null || filterDTO.getAcademicYear() == null) {
+                        throw new RuntimeException("Standard, group name, and academic year are required for Jr. College students.");
+                    }
+
+                    String standard = filterDTO.getStandard().trim();
+                    List<Long> standardIds = standardRepository.findIdsByName(standard, branchCode);
+                    if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
+                    Long standardId = standardIds.get(0);
+
+                    studentPage = studentRepository.findUnassignedJrCollegeStudents(
+                            graduationTypeId,
+                            standardId,
+                            mediumId,
+                            streamId,
+                            filterDTO.getGroupName(),
+                            filterDTO.getAcademicYear(),
+                            pageable
+                    );
                 }
-
-                String standard = filterDTO.getStandard().trim();
-                List<Long> standardIds = standardRepository.findIdsByName(standard, branchCode);
-                if (standardIds.size() != 1) throw new RuntimeException("Invalid or duplicate standard");
-                Long standardId = standardIds.get(0);
-
-                studentPage = studentRepository.findUnassignedJrCollegeStudents(
-                        graduationTypeId,
-                        standardId,
-                        mediumId,
-                        streamId,
-                        filterDTO.getGroupName(),
-                        filterDTO.getAcademicYear(),
-                        pageable
-                );
             }
 
         } else {
@@ -930,7 +949,7 @@ public class StudentServiceImpl implements StudentService {
         }
         if (student.getGraduationType() != null) {
             dto.setGraduationTypeId(student.getGraduationType().getId());
-            dto.setGraduationType(student.getGraduationType().getGraduationType());
+            dto.setGraduationType(getGraduationType(student));
         }
         if (student.getAdditionalInfo() != null) {
             dto.setEarthquake(student.getAdditionalInfo().isEarthquake());
@@ -1528,9 +1547,11 @@ public class StudentServiceImpl implements StudentService {
         dto.setStreamId(student.getStream() != null ? student.getStream().getId() : null);
         dto.setGroupName(student.getGroupName());
         dto.setGraduationTypeId(student.getGraduationType() != null ? student.getGraduationType().getId() : null);
-        dto.setGraduationType(student.getGraduationType() != null ? student.getGraduationType().getGraduationType() : null);
+        dto.setGraduationType(student.getGraduationType() != null ? getGraduationType(student) : null);
         dto.setDegreeNameId(student.getDegreeName() != null ? student.getDegreeName().getId() : null);
         dto.setDegreeName(student.getDegreeName() != null ? student.getDegreeName().getDegreeName() : null);
+        dto.setCertification(student.getCertification() != null ? student.getCertification().getCertification() : null);
+        dto.setCertificationId(student.getCertification() != null ? student.getCertification().getId() : null);
         dto.setDepartmentName(student.getDepartmentName());
         dto.setAcademicYear(student.getAcademicYear());
         dto.setRegistrationNumber(student.getRegistrationNumber());
@@ -1905,6 +1926,12 @@ public class StudentServiceImpl implements StudentService {
             student.setCourseType(courseType);
         }
 
+        if (request.getCertificationId() != null) {
+            StudentCertification certification = certificationRepository.findById(request.getCertificationId())
+                    .orElseThrow(() -> new RuntimeException("Certification not found with ID: " + request.getCertificationId()));
+            student.setCertification(certification);
+        }
+
         if (request.getStreamId() != null) {
             StudentStream stream = streamRepository.findById(request.getStreamId())
                     .orElseThrow(() -> new RuntimeException("Stream not found with ID: " + request.getStreamId()));
@@ -1999,6 +2026,32 @@ public class StudentServiceImpl implements StudentService {
             student.setGroupName(null);
             student.setStandardName(null);
             student.setStandard(null);
+        }
+        if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
+                request.getGraduationTypeId() == null &&
+                request.getCertificationId() != null) {
+            //Certification Students
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+
+            Long certificationId = request.getCertificationId();
+            if (certificationId != null) {
+                StudentCertification certification = certificationRepository.findById(certificationId)
+                        .orElseThrow(() -> new RuntimeException("Certification not found with ID: " + certificationId));
+                student.setCertification(certification);
+            }
+
+            student.setStandard(null);
+            student.setStandardName(null);
+            student.setGroupName(null);
+            student.setSemister(request.getSemister());
+            student.setDegreeName(null);
+            student.setDepartmentName(null);
         } else {
             if (request.getDegreeNameId() != null) {
                 StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())

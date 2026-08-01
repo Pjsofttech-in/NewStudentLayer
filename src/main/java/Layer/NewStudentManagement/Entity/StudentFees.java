@@ -95,6 +95,10 @@ public class StudentFees
     private StudentCourseType courseType;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "certification_id", nullable = true)
+    private StudentCertification certification;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "degree_id", nullable = true)
     private StudentDegreeName degree;
 

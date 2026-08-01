@@ -33,6 +33,8 @@ public class ClassRoomRequestDTO
 
     private Long degreeNameId;
 
+    private Long certificationId;
+
     private Map<Long, List<Long>> teacherSubjectMap; // teacherId -> List<subjectId>
 
     private String institutionType; // "School", "College"

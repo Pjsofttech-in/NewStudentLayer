@@ -25,6 +25,7 @@ public class StudentFeesDTO {
     private String groupName;
     private String degreeName;
     private String courseType;
+    private String certification;
     private String departmentName;     // For UG/PG students
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate approvalDate;

@@ -57,6 +57,9 @@ public class StudentDTO {
     private String degreeName;
     private String fatherEmailId;
 
+    private Long certificationId;
+    private String certificationName;
+
     private Double scholarshipAmount;
     private String admissionType;
     private String departmentName;

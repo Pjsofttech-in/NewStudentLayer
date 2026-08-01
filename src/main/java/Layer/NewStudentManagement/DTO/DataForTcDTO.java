@@ -32,6 +32,9 @@ public class DataForTcDTO {
     private Long degreeNameId;
     private String degreeName;
 
+    private Long certificationId;
+    private String certification;
+
     private String departmentName;
     private String academicYear;
     private String registrationNumber;

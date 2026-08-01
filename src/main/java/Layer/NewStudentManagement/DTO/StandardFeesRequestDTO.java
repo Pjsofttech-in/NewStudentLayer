@@ -30,6 +30,7 @@ public class StandardFeesRequestDTO
     private Double feesAmount;
     private String standardName;
     private String mediumName;
+    private String certification;
     private String institutionType;
     private String streamName;
     private String graduationTypeName;

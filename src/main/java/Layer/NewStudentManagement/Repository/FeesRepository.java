@@ -38,6 +38,14 @@ public interface FeesRepository extends JpaRepository<StudentFees, Long>, JpaSpe
                                 @Param("standardName") String standardName,
                                 @Param("streamName") String streamName);
 
+    // For Certification
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
+            "WHERE f.student = :student AND f.certification.certification = :certificationName AND f.streamName = :streamName AND f.mediumName = :mediumName")
+    boolean existsCertificationFees(@Param("student") StudentEntity student,
+                                @Param("mediumName") String mediumName,
+                                @Param("streamName") String streamName,
+                                @Param("certificationName") String certificationName);
+
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentFees f " +
             "WHERE f.student = :student AND f.standard.sid = :standardId AND f.medium.mid = :mediumId")
     boolean existsByStandardAndMedium(@Param("student") StudentEntity student,

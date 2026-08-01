@@ -25,6 +25,8 @@ public class StudentClassRoomRequestDTO
     private Long divisionId;
     private Long standardId;
 
+    private Long certificationId;
+
     private Long graduationTypeId;
     private Long courseTypeId;
     private Long streamId;

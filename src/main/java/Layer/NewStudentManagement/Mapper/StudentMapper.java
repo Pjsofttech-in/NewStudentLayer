@@ -74,6 +74,11 @@ public class StudentMapper {
             dto.setMediumName(student.getMedium().getMediumName());
         }
 
+        if (student.getCertification() != null) {
+            dto.setCertificationId(student.getCertification().getId());
+            dto.setCertificationName(student.getCertification().getCertification());
+        }
+
         if (student.getStream() != null) {
             dto.setStreamId(student.getStream().getId());
             dto.setStreamName(student.getStream().getStream());

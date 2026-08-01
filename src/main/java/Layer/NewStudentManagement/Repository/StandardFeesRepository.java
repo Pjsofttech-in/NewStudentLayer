@@ -38,6 +38,19 @@ public interface StandardFeesRepository extends JpaRepository<StudentStandardFee
             String groupName
     );
 
+    // Certification Course: stream + medium + branchCode + academicYear + certification
+    @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
+            "WHERE f.stream = :stream AND f.medium = :medium AND " +
+            "f.branchCode = :branchCode AND f.academicYear = :academicYear AND f.certification = :certification " +
+            "AND f.institutionType = 'College' ")
+    boolean existsByStreamAndMediumAndBranchCodeAndAcademicYearAndCertification(
+            StudentStream stream,
+            StudentMedium medium,
+            String branchCode,
+            String academicYear,
+            StudentCertification certification
+    );
+
     // Diploma: graduationType + courseType + department + medium + branchCode + academicYear
     @Query("SELECT CASE WHEN COUNT(f) > 0 THEN true ELSE false END FROM StudentStandardFees f " +
             "WHERE f.graduationType = :graduationType AND f.courseType = :courseType AND f.stream = :stream " +

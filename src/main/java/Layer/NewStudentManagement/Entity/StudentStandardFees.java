@@ -73,6 +73,10 @@ public class StudentStandardFees
     private StudentCourseType courseType;
 
     @ManyToOne
+    @JoinColumn(name = "certification_id")
+    private StudentCertification certification;
+
+    @ManyToOne
     @JoinColumn(name = "degree_id")
     private StudentDegreeName degree;
 

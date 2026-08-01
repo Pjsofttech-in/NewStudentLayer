@@ -94,6 +94,18 @@ public interface StudentRepository extends JpaRepository<StudentEntity, Long>, J
             "WHERE s.institutionType = 'College' AND " +
             "s.medium.id = :mediumId AND " +
             "s.stream.id = :streamId AND " +
+            "s.certification.id = :certificationId AND " +
+            "s.academicYear = :academicYear AND " +
+            "s.status = 'Approved' AND " +
+            "s.classRoom IS NULL")
+    Page<StudentEntity> findUnassignedCertificationStudents(Long mediumId,
+                                                        Long streamId, Long certificationId, String academicYear,
+                                                        Pageable pageable);
+
+    @Query("SELECT s FROM StudentEntity s " +
+            "WHERE s.institutionType = 'College' AND " +
+            "s.medium.id = :mediumId AND " +
+            "s.stream.id = :streamId AND " +
             "s.degreeName.id = :degreeNameId AND " +
             "s.departmentName = :departmentName AND " +
             "s.academicYear = :academicYear AND " +

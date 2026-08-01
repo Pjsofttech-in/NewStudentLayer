@@ -23,6 +23,7 @@ public class StudentClassRoomFilterDTO
     private String groupName;
     private String graduationType;
     private String courseType;
+    private String certification;
 
 
     private String degreeName;

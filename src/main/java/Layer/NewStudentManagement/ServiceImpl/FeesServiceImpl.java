@@ -52,6 +52,8 @@ public class FeesServiceImpl implements FeesService {
     @Autowired
     private MediumRepository mediumRepository;
 
+    @Autowired
+    private CertificationRepository certificationRepository;
 
     @Autowired
     private DegreeNameRepository degreeNameRepository;
@@ -89,6 +91,7 @@ public class FeesServiceImpl implements FeesService {
         fees.setRollNo(student.getRollNo());
         boolean isUGPG = student.getDegreeName() != null && student.getStream() != null;
         boolean isJrCollege = student.getStream() != null && student.getGroupName() != null && !isUGPG;
+        boolean isCertification = student.getStream() != null && student.getCertification() != null && !isJrCollege;
 
         // === Fetch and set Degree & Department if UG/PG ===
         if (isUGPG) {
@@ -121,6 +124,35 @@ public class FeesServiceImpl implements FeesService {
             fees.setStreamName(stream.getStream());
         }
 
+        // === Fetch and set Stream if Certification ===
+        if (isCertification) {
+            if (fees.getStream() == null || fees.getStream().getId() == null) {
+                throw new RuntimeException("Stream must be provided for Certification student.");
+            }
+
+            if (fees.getMedium() == null || fees.getMedium().getMid() == null) {
+                throw new RuntimeException("Medium must be provided for Certification student.");
+            }
+
+            if (fees.getCertification() == null || fees.getCertification().getId() == null) {
+                throw new RuntimeException("Certification must be provided for Certification student.");
+            }
+
+            StudentStream stream = streamRepository.findById(fees.getStream().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid stream ID"));
+            fees.setStream(stream);
+            fees.setStreamName(stream.getStream());
+
+            StudentMedium medium = mediumRepository.findById(fees.getMedium().getMid())
+                    .orElseThrow(() -> new RuntimeException("Invalid medium ID"));
+            fees.setMedium(medium);
+            fees.setMediumName(medium.getMediumName());
+
+            StudentCertification certification = certificationRepository.findById(fees.getCertification().getId())
+                    .orElseThrow(() -> new RuntimeException("Invalid certification ID"));
+            fees.setCertification(certification);
+        }
+
         // === Optional: Standard ===
         if (fees.getStandard() != null && fees.getStandard().getSid() != null) {
             StudentStandard standard = standardRepository.findById(fees.getStandard().getSid())
@@ -135,6 +167,13 @@ public class FeesServiceImpl implements FeesService {
                     .orElseThrow(() -> new RuntimeException("Medium not found"));
             fees.setMedium(medium);
             fees.setMediumName(medium.getMediumName());
+        }
+
+        // === Optional: Certification ===
+        if (fees.getCertification() != null && fees.getCertification().getId() != null) {
+            StudentCertification certification = certificationRepository.findById(fees.getCertification().getId())
+                    .orElseThrow(() -> new RuntimeException("Certification not found"));
+            fees.setCertification(certification);
         }
 
         // === Optional: Group ===
@@ -154,6 +193,12 @@ public class FeesServiceImpl implements FeesService {
         // Jr College check
         if (isJrCollege && feesRepository.existsJrCollegeFees(student, fees.getStandard().getStandardName(), fees.getStream().getStream())) {
             throw new RuntimeException("Fees already assigned for this student and stream.");
+        }
+
+        // Jr College check
+        if (isCertification && feesRepository.existsCertificationFees(student, fees.getMedium().getMediumName(), fees.getStream().getStream(),
+                fees.getCertification().getCertification())) {
+            throw new RuntimeException("Fees already assigned for this student and stream and medium and certification.");
         }
 
         // Standard + Medium check
@@ -906,6 +951,7 @@ public class FeesServiceImpl implements FeesService {
         dto.setGroupName(fees.getGroupName());
         dto.setDegreeName(fees.getDegreeName());
         dto.setDepartmentName(fees.getDepartmentName());
+        dto.setCertification(fees.getCertification()!=null ? fees.getCertification().getCertification() : null);
 //        dto.setFeesType (fees.getFeesType());
         dto.setApprovalDate(fees.getApprovalDate());
         dto.setFeesStatus(fees.getFeesStatus());
