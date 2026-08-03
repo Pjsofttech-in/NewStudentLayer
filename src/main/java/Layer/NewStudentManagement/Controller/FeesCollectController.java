@@ -72,7 +72,7 @@ public class FeesCollectController
             @RequestParam String email,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "fid,DESC") String sort,
+            @RequestParam(defaultValue = "x,DESC") String sort,
             @RequestParam(required = false, defaultValue = "all") String timeFrame,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,

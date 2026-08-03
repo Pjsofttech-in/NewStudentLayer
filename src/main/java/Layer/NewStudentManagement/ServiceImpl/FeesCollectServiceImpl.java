@@ -13,9 +13,8 @@ import Layer.NewStudentManagement.Service.FeesService;
 import Layer.NewStudentManagement.Util.HelperUtil;
 import io.micrometer.common.util.StringUtils;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import jakarta.persistence.criteria.Subquery;
+import jakarta.persistence.criteria.*;
+import jakarta.persistence.metamodel.Attribute;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
@@ -574,6 +573,13 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
         Pageable pageable = PageRequest.of(page, size, Sort.by(dir, arr[0]));
 
+        // 1. Extract the Sort from the incoming Pageable (from the client)
+        Sort clientSort = pageable.getSort();
+
+        // 2. Create a clean, UNSORTED Pageable to pass to the repository.
+        // This prevents Spring from throwing PropertyReferenceException or overriding our logic.
+        Pageable unsortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+
         LocalDate today = LocalDate.now();
         LocalDate fromDate = null;
         LocalDate toDate = null;
@@ -685,7 +691,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                 String paymentMode = filterDTO.getPaymentMode();
                 if (StringUtils.isNotBlank(bankAccountName) || StringUtils.isNotBlank(paymentMode)) {
                     Subquery<Long> subquery = null;
-                    subquery = query.subquery(Long.class);
+                    subquery = Objects.requireNonNull(query).subquery(Long.class);
                     Root<StudentFeesCollect> childRoot = subquery.from(StudentFeesCollect.class);
 
                     // 2. Define the link between Parent and Child
@@ -694,8 +700,8 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 //                    Predicate studentLink = cb.equal(childRoot.get("studentFees").get("student"), root);
 
                     // 3. Define your nested filters
-                    Predicate bankAccountNamePred = cb.like(childRoot.get("accountHolderName"), "%"+filterDTO.getBankAccountName()+"%");
-                    Predicate paymentModePred = cb.like(childRoot.get("paymentMode"), "%"+filterDTO.getPaymentMode()+"%");
+                    Predicate bankAccountNamePred = cb.like(childRoot.get("accountHolderName"), "%" + filterDTO.getBankAccountName() + "%");
+                    Predicate paymentModePred = cb.like(childRoot.get("paymentMode"), "%" + filterDTO.getPaymentMode() + "%");
 
                     // 4. Configure the subquery to select IDs where conditions match
                     List<Predicate> predArr = new ArrayList<>();
@@ -718,8 +724,52 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                 predicates.add(cb.between(root.get("approvalDate"), finalFromDate, finalToDate));
             }
 
+
+//             3. Only apply sorting if we are building the Data query (not the Count query)
+            if (Objects.requireNonNull(query).getResultType() != Long.class && query.getResultType() != long.class) {
+
+                List<Order> jpaOrders = new ArrayList<>();
+
+                if (clientSort.isSorted()) {
+                    // OPTIMIZATION 1: Cache the valid properties into a Set ONCE before the loop.
+                    // This prevents Java from re-streaming and evaluating the Metamodel for every single sort parameter.
+                    Set<String> validProperties = root.getModel().getAttributes().stream()
+                            .map(Attribute::getName)
+                            .collect(Collectors.toSet());
+
+                    for (Sort.Order order : clientSort) {
+                        String propertyName = order.getProperty();
+
+                        // O(1) instant lookup instead of O(N) stream matching
+                        if (validProperties.contains(propertyName)) {
+                            Path<Object> path = root.get(propertyName);
+                            jpaOrders.add(order.isAscending() ? cb.asc(path) : cb.desc(path));
+                        } else {
+                            System.out.println("Warning: Sort property '" + propertyName + "' does not exist.");
+                        }
+                    }
+                }
+
+                // OPTIMIZATION 2: Move the Subquery OUTSIDE the loop.
+                // Only build this heavy subquery if the user didn't provide any valid sorts,
+                // OR if you want to use it as a permanent fallback/secondary sort.
+
+                // In this example, we apply it if no valid sorts were found from the client:
+                if (jpaOrders.isEmpty()) {
+                    Subquery<LocalDate> maxPaymentDateSubquery = query.subquery(LocalDate.class);
+                    Root<StudentFeesCollect> collectRoot = maxPaymentDateSubquery.from(StudentFeesCollect.class);
+                    maxPaymentDateSubquery.select(cb.greatest(collectRoot.<LocalDate>get("paymentDate")));
+                    maxPaymentDateSubquery.where(cb.equal(collectRoot.get("studentFees"), root));
+
+                    jpaOrders.add(cb.desc(maxPaymentDateSubquery));
+                }
+
+                // OPTIMIZATION 3: Apply the order to the query exactly ONCE at the very end.
+                query.orderBy(jpaOrders);
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
-        }, pageable);
+        }, unsortedPageable);
 
         List<StudentFeesHistoryDTO> result = new ArrayList<>();
 
