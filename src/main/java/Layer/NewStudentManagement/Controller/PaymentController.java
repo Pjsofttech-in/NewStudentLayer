@@ -64,6 +64,17 @@ public class PaymentController {
         }
     }
 
+    // Call this when the modal returns success verification maps
+    @PostMapping("/cancelPayment")
+    public ResponseEntity<?> cancelPayment(@RequestBody RazorPayVerifyPaymentDTO requestDTO) {
+        String email = requestDTO.getEmail();
+        String role = requestDTO.getRole();
+        String orderId = requestDTO.getRazorpay_order_id();
+
+        paymentTransactionsService.cancelOrderPayment(role, email, orderId);
+        return ResponseEntity.badRequest().body("Transaction cancelled by user.");
+    }
+
     @GetMapping("/getPaymentGatewayDetailsByBrahchCode")
     public ResponseEntity<String> getGateway(
             @RequestParam String role,

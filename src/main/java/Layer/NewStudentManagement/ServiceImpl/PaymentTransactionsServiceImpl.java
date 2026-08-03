@@ -6,6 +6,7 @@ import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Repository.PaymentTransactionsRepository;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Util.CryptoUtil;
+import com.razorpay.Order;
 import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import org.springframework.stereotype.Service;
@@ -131,6 +132,64 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
             }
             // This ensures a malicious user cannot fake successful checkout payloads
             paymentTransactionsRepository.save(paymentTransactions);
+        }
+    }
+
+    @Override
+    public void cancelOrderPayment(String role, String email, String orderId) {
+        if (!staffService.hasPermission(role, email, "POST")) {
+            throw new RuntimeException("You don't have permission to update order");
+        }
+
+        // Fetch the transaction using only the Order ID, as Payment ID is null on cancellation
+        Optional<StudentPaymentTransactions> byRazorpayOrderId = paymentTransactionsRepository.findByRazorpayOrderId(orderId);
+
+        if (byRazorpayOrderId.isPresent()) {
+            StudentPaymentTransactions paymentTransactions = byRazorpayOrderId.get();
+
+            // If it's already processed (Success or Failed), don't override it
+            if (paymentTransactions.getStatus() != StudentPaymentTransactions.TransactionStatus.CREATED) {
+                return;
+            }
+
+            paymentTransactions.setUpdatedBy(email);
+            paymentTransactions.setUpdatedByRole(role);
+
+            // Mark as failed due to user cancellation
+            paymentTransactions.setStatus(StudentPaymentTransactions.TransactionStatus.FAILED);
+            paymentTransactions.setErrorReason("payment_cancelled_by_user");
+
+            StudentFeesCollect feesCollect = paymentTransactions.getFeesCollect();
+            if (feesCollect != null) {
+                feesCollect.setStatus("FAILED");
+            }
+
+//            // Optional: You can still try to fetch the Order from Razorpay to get exact status
+//            try {
+//                String branchCode = staffService.fetchBranchCodeByRole(role, email);
+//                PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
+//                RazorpayClient razorpayClient = new RazorpayClient("", "");
+//
+//                if (Objects.nonNull(paymentGatewayDetails)) {
+//                    razorpayClient = new RazorpayClient(paymentGatewayDetails.getKeyId(),
+//                            cryptoUtil.decrypt(paymentGatewayDetails.getSecretKey()));
+//                }
+//
+//                // Fetch the order to see if Razorpay recorded any attempts
+//                Order razorpayOrder = razorpayClient.orders.fetch(orderId);
+//                String orderStatus = razorpayOrder.get("status");
+//
+//                // If the order status is just 'created' or 'attempted' but we are cancelling,
+//                // we can add that metadata.
+//                System.out.println("Razorpay Order Status during cancellation: " + orderStatus);
+//
+//            } catch (Exception e) {
+//                System.err.println("Failed to fetch order metadata from Razorpay during cancellation: " + e.getMessage());
+//            }
+
+            paymentTransactionsRepository.save(paymentTransactions);
+        } else {
+            throw new RuntimeException("Transaction not found for Order ID: " + orderId);
         }
     }
 

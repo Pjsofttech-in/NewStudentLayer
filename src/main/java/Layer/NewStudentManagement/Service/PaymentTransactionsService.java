@@ -9,4 +9,6 @@ public interface PaymentTransactionsService {
     public void createOrder(String role, String email, BigDecimal amountInRupees, String receiptNumber, String orderId, StudentFeesCollect feesCollect) throws Exception;
 
     public void updateOrder(String role, String email, boolean isAuthentic, String razorPaymentId, String orderId);
+
+    void cancelOrderPayment(String role, String email, String orderId);
 }
