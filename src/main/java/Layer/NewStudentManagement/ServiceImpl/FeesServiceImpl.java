@@ -22,7 +22,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.Month;
@@ -96,7 +95,8 @@ public class FeesServiceImpl implements FeesService {
         // === Fetch and set Degree & Department if UG/PG ===
         if (isUGPG) {
             if (fees.getDegree() == null || fees.getDegree().getId() == null ||
-                    fees.getStream() == null || fees.getStream().getId() == null) {
+                    fees.getStream() == null || fees.getStream().getId() == null
+                    || StringUtils.isBlank(fees.getDepartmentName())) {
                 throw new RuntimeException("Stream, Degree and Department  must be provided for UG/PG student.");
             }
 
@@ -186,7 +186,7 @@ public class FeesServiceImpl implements FeesService {
         // === Existence Checks AFTER setting entities ===
 
         // UGPG check
-        if (isUGPG && feesRepository.existsUGPGFees(student, fees.getDegree().getId())) {
+        if (isUGPG && feesRepository.existsUGPGFees(student, fees.getDegree().getId(), fees.getDepartmentName())) {
             throw new RuntimeException("Fees already assigned for this student, degree, and department.");
         }
 
@@ -195,7 +195,7 @@ public class FeesServiceImpl implements FeesService {
             throw new RuntimeException("Fees already assigned for this student and stream.");
         }
 
-        // Jr College check
+        // Certification check
         if (isCertification && feesRepository.existsCertificationFees(student, fees.getMedium().getMediumName(), fees.getStream().getStream(),
                 fees.getCertification().getCertification())) {
             throw new RuntimeException("Fees already assigned for this student and stream and medium and certification.");
@@ -223,11 +223,12 @@ public class FeesServiceImpl implements FeesService {
 
         // Medium + Stream + Degree + Department check
         if (fees.getMedium() != null && fees.getStream() != null &&
-                fees.getDegree() != null) {
+                fees.getDegree() != null && StringUtils.isNotBlank(fees.getDepartmentName())) {
             if (feesRepository.existsByMediumStreamDegreeDepartment(student,
                     fees.getMedium().getMid(),
                     fees.getStream().getId(),
-                    fees.getDegree().getId())) {
+                    fees.getDegree().getId(),
+                    fees.getDepartmentName())) {
                 throw new RuntimeException("Fees already assigned for this student with same Medium, Stream, Degree, and Department.");
             }
         }
@@ -951,7 +952,7 @@ public class FeesServiceImpl implements FeesService {
         dto.setGroupName(fees.getGroupName());
         dto.setDegreeName(fees.getDegreeName());
         dto.setDepartmentName(fees.getDepartmentName());
-        dto.setCertification(fees.getCertification()!=null ? fees.getCertification().getCertification() : null);
+        dto.setCertification(fees.getCertification() != null ? fees.getCertification().getCertification() : null);
 //        dto.setFeesType (fees.getFeesType());
         dto.setApprovalDate(fees.getApprovalDate());
         dto.setFeesStatus(fees.getFeesStatus());
@@ -986,7 +987,7 @@ public class FeesServiceImpl implements FeesService {
         dto.setBranchCode(fees.getBranchCode());
         dto.setCreatedByEmail(fees.getCreatedByEmail());
 
-        if (fees.getCourseType()!=null) {
+        if (fees.getCourseType() != null) {
             dto.setCourseType(fees.getCourseType().getCourseType());
         }
 
