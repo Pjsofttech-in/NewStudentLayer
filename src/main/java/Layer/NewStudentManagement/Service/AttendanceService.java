@@ -33,4 +33,7 @@ public interface AttendanceService
                                                        Pageable pageable);
 
     Map<String, Long> getAttendanceCount(Long studentId, String filter, LocalDate startDate, LocalDate endDate);
+
+    // Note: We now require the 'scheduledPeriodId' from the frontend to know WHICH lecture is happening
+    String markStudentsAttendanceForLecture(List<Integer> rollNos, Long classroomId, Long scheduledPeriodId);
 }

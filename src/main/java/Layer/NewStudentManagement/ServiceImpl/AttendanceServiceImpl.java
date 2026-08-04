@@ -2,17 +2,16 @@ package Layer.NewStudentManagement.ServiceImpl;
 import Layer.NewStudentManagement.DTO.AttendanceCountDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendaceDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
-import Layer.NewStudentManagement.Entity.StudentAttendance;
-import Layer.NewStudentManagement.Entity.StudentClassRoom;
-import Layer.NewStudentManagement.Entity.StudentEntity;
+import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Pagination.StudentAttendanceSpecification;
 import Layer.NewStudentManagement.Repository.AttendanceRepository;
 import Layer.NewStudentManagement.Repository.ClassRoomRepository;
+import Layer.NewStudentManagement.Repository.ScheduledPeriodRepository;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Service.AttendanceService;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,7 +26,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -42,8 +40,9 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Autowired
     AttendanceRepository attendanceRepository;
 
+    // Assuming you have a repository to fetch the specific lecture period details
     @Autowired
-    private RestTemplate restTemplate;
+    private ScheduledPeriodRepository scheduledPeriodRepository;
 
     @Autowired
     private ClassRoomRepository classRoomRepository;
@@ -656,7 +655,95 @@ public class AttendanceServiceImpl implements AttendanceService {
         return result;
     }
 
+    @Override
+    public String markStudentsAttendanceForLecture(List<Integer> rollNos, Long classroomId, Long scheduledPeriodId) {
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+        String systemName = "student-sys";
 
+        // 1. Fetch Classroom
+        StudentClassRoom classRoom = classRoomRepository.findById(classroomId)
+                .orElseThrow(() -> new RuntimeException("Classroom not found with ID: " + classroomId));
+        String branchCode = classRoom.getBranchCode();
+
+        // 2. Fetch the specific Lecture Period (from your timetable)
+        StudentScheduledPeriod lecturePeriod = scheduledPeriodRepository.findById(scheduledPeriodId)
+                .orElseThrow(() -> new RuntimeException("Lecture Period not found with ID: " + scheduledPeriodId));
+
+        // 3. Time Validation logic based on LECTURE TIME, not Classroom time
+        String status = getStatus(lecturePeriod, now);
+
+        // 4. Validate all students belong to the classroom
+        List<StudentEntity> students = studentRepository.findByClassRoomIdAndRollNos(classroomId, rollNos);
+
+        if (students.size() != rollNos.size()) {
+            List<Integer> foundRollNos = students.stream()
+                    .map(StudentEntity::getRollNo)
+                    .toList();
+
+            List<Integer> missingRollNos = rollNos.stream()
+                    .filter(rn -> !foundRollNos.contains(rn))
+                    .toList();
+
+            throw new RuntimeException("Students not found with rollNos: " + missingRollNos + " in ClassRoom ID: " + classroomId);
+        }
+
+        Map<Integer, String> rollNoToNameMap = students.stream()
+                .collect(Collectors.toMap(StudentEntity::getRollNo, StudentEntity::getFullName));
+
+        List<StudentAttendance> toSave = new ArrayList<>();
+
+        // 5. Check for duplicates PER LECTURE and save
+        for (Integer rollNo : rollNos) {
+
+            // NEW: Updated repository method name to match the foreign key traversal
+            Optional<StudentAttendance> existing = attendanceRepository
+                    .findByRollNoAndClassroomIdAndScheduledPeriodIdAndDate(rollNo, classroomId, scheduledPeriodId, today);
+
+            if (existing.isPresent()) {
+                continue; // Skip if already marked for this specific lecture
+            }
+
+            StudentAttendance attendance = new StudentAttendance();
+            attendance.setRollNo(rollNo);
+            attendance.setBranchCode(branchCode);
+            attendance.setStudentName(rollNoToNameMap.get(rollNo));
+            attendance.setClassroomId(classroomId);
+
+            // Link attendance to this specific lecture via the entity relationship
+            attendance.setScheduledPeriodId(scheduledPeriodId);
+
+            attendance.setSubjectName(Optional.ofNullable(lecturePeriod.getSubject()).map(StudentSubject::getSubject).orElse("")); // Optional: Set subject name if available
+
+            attendance.setSystemName(systemName);
+            attendance.setDate(today);
+            attendance.setLoginTime(now);
+            attendance.setStatus(status);
+
+            toSave.add(attendance);
+        }
+
+        if (!toSave.isEmpty()) {
+            attendanceRepository.saveAll(toSave);
+        }
+
+        return toSave.size() + " student(s) marked present successfully for the lecture.";
+    }
+
+    private static @NonNull String getStatus(StudentScheduledPeriod lecturePeriod, LocalTime now) {
+        LocalTime lectureStartTime = lecturePeriod.getPeriodSlot().getStartTime(); // Assuming StudentScheduledPeriod has getStartTime()
+        LocalTime lectureEndTime = lecturePeriod.getPeriodSlot().getEndTime(); // Assuming StudentScheduledPeriod has getStartTime()
+        LocalTime earliestAllowed = lectureStartTime.minusMinutes(0); // Usually 30 mins before lecture is enough
+        LocalTime latestAllowed = lectureEndTime.plusMinutes(0);    // Allowed up to 60 mins late
+
+        if (now.isBefore(earliestAllowed) || now.isAfter(latestAllowed)) {
+            throw new RuntimeException("Attendance can only be marked between " +
+                    earliestAllowed + " and " + latestAllowed + " for lecture starting at " + lectureStartTime);
+        }
+
+        // Calculate status based on lecture start time
+        return now.isAfter(lectureStartTime) ? "Late" : "On Time";
+    }
 
 
 }

@@ -24,6 +24,14 @@ public interface AttendanceRepository extends JpaRepository<StudentAttendance,Lo
             @Param("date") LocalDate date
     );
 
+    // NEW METHOD: Spring Data JPA uses an underscore '_' to traverse into the child entity's ID
+    Optional<StudentAttendance> findByRollNoAndClassroomIdAndScheduledPeriodIdAndDate(
+            int rollNo,
+            Long classroomId,
+            Long scheduledPeriodId,
+            LocalDate date
+    );
+
 
     @Query("SELECT s FROM StudentAttendance s WHERE s.rollNo = :rollNo AND s.date = :date AND s.classroomId = :classroomId")
     Optional<StudentAttendance> findByRollNoAndDateAndClassroomId(@Param("rollNo") String rollNo,

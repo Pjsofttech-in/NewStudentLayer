@@ -3,7 +3,6 @@ package Layer.NewStudentManagement.Controller;
 import Layer.NewStudentManagement.DTO.AttendanceCountDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendaceDTO;
 import Layer.NewStudentManagement.DTO.StudentAttendanceFilterDTO;
-import Layer.NewStudentManagement.Entity.StudentAttendance;
 import Layer.NewStudentManagement.Service.AttendanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,11 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
+
 //@CrossOrigin(origins = "http://localhost:3000")
 //@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
-public class AttendanceController
-{
+public class AttendanceController {
 
     @Autowired
     AttendanceService attendanceService;
@@ -84,7 +83,7 @@ public class AttendanceController
             @RequestParam String timeFrame,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customStartDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate customEndDate) {
-        return ResponseEntity.ok(attendanceService.getAttendanceCountByTimeFrame(classroomId,timeFrame,customStartDate,customEndDate));
+        return ResponseEntity.ok(attendanceService.getAttendanceCountByTimeFrame(classroomId, timeFrame, customStartDate, customEndDate));
     }
 
 
@@ -106,7 +105,28 @@ public class AttendanceController
     }
 
 
+    /**
+     * Marks attendance for a specific lecture period.
+     * <p>
+     * Example URL: POST http://localhost:8080/api/attendance/classroom/1/period/5
+     * <p>
+     * Example JSON Body:
+     * [101, 102, 103, 105]
+     *
+     * @param classroomId       The ID of the classroom.
+     * @param scheduledPeriodId The ID of the specific lecture/period taking place.
+     * @param rollNos           List of student roll numbers who are PRESENT.
+     * @return Success message with the count of students marked.
+     */
+    @PostMapping("/markStudentAttenndance/classroom/{classroomId}/period/{scheduledPeriodId}")
+    public ResponseEntity<String> markStudentsAttendanceForLecture(
+            @PathVariable Long classroomId,
+            @PathVariable Long scheduledPeriodId,
+            @RequestBody List<Integer> rollNos) {
 
+        String responseMessage = attendanceService.markStudentsAttendanceForLecture(rollNos, classroomId, scheduledPeriodId);
+        return ResponseEntity.ok(responseMessage);
+    }
 
 
 }
