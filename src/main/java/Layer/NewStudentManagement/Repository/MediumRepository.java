@@ -20,6 +20,9 @@ public interface MediumRepository extends JpaRepository<StudentMedium,Long>
             "WHERE TRIM(LOWER(s.mediumName)) = TRIM(LOWER(:medium)) AND s.branchCode=:branchCode")
     List<Long> findIdsByName(@Param("medium") String medium,@Param("branchCode") String branchCode);
 
+    @Query("SELECT s FROM StudentMedium s " +
+            "WHERE TRIM(LOWER(s.mediumName)) = TRIM(LOWER(:medium)) AND s.branchCode=:branchCode")
+    List<StudentMedium> findByName(@Param("medium") String medium,@Param("branchCode") String branchCode);
 
     boolean existsByMediumNameIgnoreCaseAndBranchCode(String mediumName, String branchCode);
 

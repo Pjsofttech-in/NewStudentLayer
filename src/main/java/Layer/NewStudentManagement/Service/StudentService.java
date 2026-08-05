@@ -104,4 +104,6 @@ public interface StudentService {
     List<ClassRoomStudentCountProjection> getStudentCountByStandard(String role, String email, String academicYear, String mediumName);
 
     List<WatiTemplateDTO> getWatiTemplatesByBranchCode(String role, String email);
+
+    List<String> uploadStudentsFromCsv(MultipartFile file, String role, String email);
 }

@@ -28,6 +28,14 @@ public interface DegreeNameRepository extends JpaRepository<StudentDegreeName,Lo
                                                            @Param("graduationTypeId") Long graduationTypeId,
                                                            @Param("branchCode") String branchCode);
 
+    @Query("SELECT d FROM StudentDegreeName d " +
+            "WHERE TRIM(LOWER(d.degreeName)) = TRIM(LOWER(:degreeName)) " +
+            "AND d.graduationType.id = :graduationTypeId " +
+            "AND d.branchCode = :branchCode")
+    List<StudentDegreeName> findByNameAndGraduationTypeAndBranchCode(@Param("degreeName") String degreeName,
+                                                           @Param("graduationTypeId") Long graduationTypeId,
+                                                           @Param("branchCode") String branchCode);
+
     @Query("SELECT d FROM StudentDegreeName d WHERE LOWER(d.degreeName) = LOWER(:degreeName)")
     Optional<StudentDegreeName> findByDegreeName(@Param("degreeName") String degreeName);
 

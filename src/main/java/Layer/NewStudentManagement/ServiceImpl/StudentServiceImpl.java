@@ -14,9 +14,14 @@ import Layer.NewStudentManagement.Service.StudentService;
 import Layer.NewStudentManagement.Util.BeanCopyUtils;
 import Layer.NewStudentManagement.Util.HelperUtil;
 import com.beust.jcommander.internal.Maps;
+import com.opencsv.CSVReaderHeaderAware;
 import io.jsonwebtoken.Claims;
 import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +35,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
 public class StudentServiceImpl implements StudentService {
     private static final Logger logger = LoggerFactory.getLogger(StudentServiceImpl.class);
+    // Define the date format expected in the CSV (e.g., "yyyy-MM-dd" or "dd/MM/yyyy")
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final String PHONE_REGEX = "^[0-9]{10}$";
     @Autowired
     PasswordEncoder passwordEncoder;
     @Autowired
@@ -841,7 +855,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setMotherTongue(student.getMotherTongue());
         dto.setMaritalStatus(student.getMaritalStatus());
 
-        dto.setContact(student.getContact() != null ? String.valueOf(student.getContact()) : null); // Safely convert
+        dto.setContact(student.getContact() != null ? student.getContact() : null); // Safely convert
         dto.setAge(student.getAge());
         dto.setEmail(student.getEmail());
         dto.setDateOfBirth(student.getDateOfBirth());
@@ -2108,5 +2122,278 @@ public class StudentServiceImpl implements StudentService {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public List<String> uploadStudentsFromCsv(MultipartFile file, String role, String email) {
+
+        if (!staffService.hasPermission(role, email, "POST")) {
+            throw new RuntimeException("You don't have permission to bulk upload students.");
+        }
+
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
+        List<String> errorMessages = new ArrayList<>();
+        List<StudentEntity> studentsToSave = new ArrayList<>();
+
+        // Data structures to track duplicates WITHIN the CSV file itself
+        Set<String> csvEmails = new HashSet<>();
+        Set<String> csvRegistrationNumbers = new HashSet<>();
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        Validator validator = factory.getValidator();
+
+        try (
+                Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+                CSVReaderHeaderAware csvReader = new CSVReaderHeaderAware(reader)
+        ) {
+            Map<String, String> values;
+            int rowNumber = 1; // Start at 1 (Header is row 0 conceptually)
+
+            while ((values = csvReader.readMap()) != null) {
+                rowNumber++;
+
+                // Skip completely empty rows
+                if (isEmptyRow(values)) {
+                    continue;
+                }
+
+                StudentEntity student = new StudentEntity();
+
+                // --- String Properties ---
+                student.setTitle(parseString(values.get("Title")));
+                student.setFullName(parseString(values.get("FullName")));
+                student.setGender(parseString(values.get("Gender")));
+                student.setBloodGroup(parseString(values.get("BloodGroup")));
+                student.setMotherTongue(parseString(values.get("MotherTongue")));
+                student.setMaritalStatus(parseString(values.get("MaritalStatus")));
+                student.setContact(parseString(values.get("Contact")));
+                student.setBirthPlace(parseString(values.get("BirthPlace")));
+                student.setBirthCountry(parseString(values.get("BirthCountry")));
+                student.setPancardNumber(parseString(values.get("PancardNumber")));
+                student.setStandardName(parseString(values.get("StandardName")));
+                student.setAcademicYear(parseString(values.get("AcademicYear")));
+                student.setUdiseNo(parseString(values.get("UdiseNo")));
+                student.setApaarId(parseString(values.get("ApaarId")));
+                student.setMediumName(parseString(values.get("MediumName")));
+                student.setStatus(parseString(values.get("Status")));
+                student.setApplyFor(parseString(values.get("ApplyFor")));
+                student.setStreamName(parseString(values.get("StreamName")));
+                student.setGroupName(parseString(values.get("GroupName")));
+                student.setDepartmentName(parseString(values.get("DepartmentName")));
+                student.setSemister(parseString(values.get("Semester")));
+                // ✅ Password handling (unchanged)
+                String rawPassword = parseString(values.get("Password"));
+                student.setPassword(StringUtils.isNotBlank(rawPassword)
+                        ? passwordEncoder.encode(rawPassword.trim())
+                        : null);
+                student.setInstitutionType(parseString(values.get("InstitutionType")));
+                student.setFormStatus(parseString(values.get("FormStatus")));
+                student.setReason(parseString(values.get("Reason")));
+                student.setAdmissionType(parseString(values.get("AdmissionType")));
+                student.setUserRole(parseString(values.get("UserRole")));
+                student.setApplicationNumber(parseString(values.get("ApplicationNumber")));
+                student.setOldRegisterPhoto(parseString(values.get("OldRegisterPhoto")));
+                student.setEntranceExamName(parseString(values.get("EntranceExamName")));
+                student.setEntranceMarkSheet(parseString(values.get("EntranceMarkSheet")));
+                student.setPermanentEducationNumber(parseString(values.get("PermanentEducationNumber")));
+                student.setFatherEmailId(parseString(values.get("FatherEmailId")));
+                student.setParentPassword(parseString(values.get("ParentPassword")));
+
+                // --- Numeric & Boolean Properties ---
+                student.setAge(parseLong(values.get("Age")));
+                student.setAadharNumber(parseLong(values.get("AadharNumber")));
+                student.setRollNo(parseInteger(values.get("RollNo")) != null ? parseInteger(values.get("RollNo")) : Integer.valueOf(0));
+                student.setScholarshipAmount(parseDouble(values.get("ScholarshipAmount")));
+                student.setEntranceMarks(parseInteger(values.get("EntranceMarks")));
+                student.setEMarksOutOff(parseInteger(values.get("EMarksOutOff")));
+                student.setEntranceExam(parseBoolean(values.get("EntranceExam")));
+
+                // TC Generated default logic from entity
+                student.setTcGenrated(values.get("IsTcGenrated") == null || parseBoolean(values.get("IsTcGenrated")));
+
+                // --- Date Properties ---
+                student.setDateOfBirth(parseDate(values.get("DateOfBirth")));
+                student.setEnrollmentDate(parseDate(values.get("EnrollmentDate")));
+                student.setApprovalDate(parseDate(values.get("ApprovalDate")));
+
+                String studentEmail = parseString(values.get("Email"));
+                if (studentEmail != null) {
+                    if (!csvEmails.add(studentEmail)) {
+                        errorMessages.add("Row " + rowNumber + ": Duplicate Email found within the CSV file - " + studentEmail);
+                    } else if (studentRepository.existsByEmail(studentEmail)) {
+                        errorMessages.add("Row " + rowNumber + ": Email already exists in the database - " + studentEmail);
+                    }
+                    student.setEmail(studentEmail);
+                } else {
+                    errorMessages.add("Row " + rowNumber + ": Email is required.");
+                }
+
+                String regNo = parseString(values.get("RegistrationNumber"));
+                if (regNo != null) {
+                    if (!csvRegistrationNumbers.add(regNo)) {
+                        errorMessages.add("Row " + rowNumber + ": Duplicate Registration Number found within the CSV - " + regNo);
+                    } else if (studentRepository.existsByRegistrationNumber(regNo)) {
+                        errorMessages.add("Row " + rowNumber + ": Registration Number already exists in the database - " + regNo);
+                    }
+                    student.setRegistrationNumber(regNo);
+                }
+
+                List<StudentStandard> standardByName = standardRepository.findStandardByName(student.getStandardName(), branchCode);
+                if (CollectionUtils.isEmpty(standardByName)) {
+                    student.setStandard(null);
+                    student.setStandardName(null);
+                } else {
+                    student.setStandard(standardByName.getFirst());
+                }
+
+                List<StudentMedium> mediumList = mediumRepository.findByName(student.getMediumName(), branchCode);
+                if (CollectionUtils.isEmpty(mediumList)) {
+                    student.setMedium(null);
+                    student.setMediumName(null);
+                } else {
+                    student.setMedium(mediumList.getFirst());
+                }
+
+                String degreeName = parseString(values.get("DegreeName"));
+                String certificationName = parseString(values.get("CertificationName"));
+                String courseTypeName = parseString(values.get("CourseTypeName"));
+                String graduationTypeName = parseString(values.get("GraduationTypeName"));
+
+                List<StudentStream> streamList = streamRepository.findByNameAndBranchCode(student.getStreamName(), branchCode);
+                if (CollectionUtils.isEmpty(streamList)) {
+                    student.setStream(null);
+                    student.setStreamName(null);
+                } else {
+                    student.setStream(streamList.getFirst());
+
+                    List<StudentCertification> certifications = certificationRepository.findByBranchCodeAndCertificationAndStudentStreamId(branchCode,
+                            certificationName,
+                            student.getStream().getId());
+                    if (CollectionUtils.isEmpty(certifications)) {
+                        student.setCertification(null);
+                    } else {
+                        student.setCertification(certifications.getFirst());
+                    }
+
+                    List<StudentGraduationType> graduationTypes = graduationTypeRepository.findByNameAndStreamAndBranchCode(graduationTypeName,
+                            student.getStream().getId(), branchCode);
+                    if (CollectionUtils.isEmpty(graduationTypes)) {
+                        student.setGraduationType(null);
+                    } else {
+                        student.setGraduationType(graduationTypes.getFirst());
+
+                        List<StudentDegreeName> degrees = degreeNameRepository.findByNameAndGraduationTypeAndBranchCode(degreeName, student.getGraduationType().getId(),
+                                branchCode);
+                        if (CollectionUtils.isEmpty(degrees)) {
+                            student.setDegreeName(null);
+                        } else {
+                            student.setDegreeName(degrees.getFirst());
+                        }
+                    }
+                }
+
+                List<StudentCourseType> courseTypes = courseTypeRepository.findByName(courseTypeName,
+                        branchCode);
+                if (CollectionUtils.isEmpty(courseTypes)) {
+                    student.setCourseType(null);
+                } else {
+                    student.setCourseType(courseTypes.getFirst());
+                }
+
+                student.setCreatedByEmail(email);
+                student.setRole(role);
+                student.setBranchCode(branchCode);
+
+                Set<ConstraintViolation<StudentEntity>> violations = validator.validate(student);
+                if (!violations.isEmpty()) {
+                    StringBuilder errorMsg = new StringBuilder();
+                    for (ConstraintViolation<StudentEntity> v : violations) {
+                        errorMsg.append(v.getPropertyPath())
+                                .append(" ")
+                                .append(v.getMessage())
+                                .append("; ");
+                    }
+                    errorMessages.add("Row " + rowNumber + ": " + errorMsg);
+                }
+
+                // If this row has no errors *so far*, add it to the save list
+                // Note: We still accumulate the full list of entities to check everything
+                studentsToSave.add(student);
+            }
+
+            // If any errors were found in ANY row, reject the entire file
+            if (!errorMessages.isEmpty()) {
+                return errorMessages;
+            }
+
+            if (!studentsToSave.isEmpty()) {
+                studentRepository.saveAll(studentsToSave);
+                return List.of("Successfully uploaded and saved " + studentsToSave.size() + " students.");
+            } else {
+                return List.of("The CSV file was empty or contained no valid records.");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse CSV file: " + e.getMessage(), e);
+        }
+    }
+
+    // Checks if the row is entirely empty
+    private boolean isEmptyRow(Map<String, String> values) {
+        return values.values().stream().allMatch(StringUtils::isBlank);
+    }
+
+    private String parseString(String value) {
+        return StringUtils.isNotBlank(value) ? value.trim() : null;
+    }
+
+    private LocalDate parseDate(String value) {
+        if (StringUtils.isBlank(value)) return null;
+        try {
+            return LocalDate.parse(value.trim(), DATE_FORMATTER);
+        } catch (DateTimeParseException e) {
+            return null; // The Validator (@NotNull or similar) will catch this if required
+        }
+    }
+
+    private Long parseLong(String value) {
+        if (StringUtils.isBlank(value)) return null;
+        try {
+            return Long.parseLong(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Integer parseInteger(String value) {
+        if (StringUtils.isBlank(value)) return null;
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private Double parseDouble(String value) {
+        if (StringUtils.isBlank(value)) return null;
+        try {
+            return Double.parseDouble(value.trim());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    private boolean parseBoolean(String value) {
+        if (StringUtils.isBlank(value)) return false;
+        String val = value.trim().toLowerCase();
+        return val.equals("true") || val.equals("yes") || val.equals("1") || val.equals("y");
+    }
+
+    public boolean validatePhoneNumber(String phoneNumber) {
+        if (phoneNumber == null) {
+            return false;
+        }
+        return Pattern.matches(PHONE_REGEX, phoneNumber);
     }
 }

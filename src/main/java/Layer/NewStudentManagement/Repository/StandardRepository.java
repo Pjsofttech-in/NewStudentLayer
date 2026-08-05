@@ -20,6 +20,10 @@ public interface StandardRepository extends JpaRepository<StudentStandard,Long>
             "WHERE TRIM(LOWER(s.standardName)) = TRIM(LOWER(:standardName)) AND s.branchCode=:branchCode")
     List<Long> findIdsByName(@Param("standardName") String standardName,@Param("branchCode") String branchCode);
 
+    @Query("SELECT s FROM StudentStandard s " +
+            "WHERE TRIM(LOWER(s.standardName)) = TRIM(LOWER(:standardName)) AND s.branchCode=:branchCode")
+    List<StudentStandard> findStandardByName(@Param("standardName") String standardName, @Param("branchCode") String branchCode);
+
     boolean existsByStandardNameIgnoreCaseAndBranchCode(String standardName, String branchCode);
 
     @Query("SELECT s FROM StudentStandard s WHERE s.branchCode IN :branchCodes")

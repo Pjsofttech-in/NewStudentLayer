@@ -1,8 +1,6 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.*;
-import Layer.NewStudentManagement.Entity.StudentAssignmentSubmission;
-import Layer.NewStudentManagement.Entity.StudentEntity;
 import Layer.NewStudentManagement.Repository.StudentRepository;
 import Layer.NewStudentManagement.Security.JwtUtil;
 import Layer.NewStudentManagement.Security.LoginRequest;
@@ -10,7 +8,6 @@ import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.S3Service;
 import Layer.NewStudentManagement.Service.StudentService;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -31,6 +28,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 //@CrossOrigin(origins = "http://localhost:3000")
 //@CrossOrigin(origins = "https://pjsofttech.in")
@@ -399,4 +397,30 @@ public class StudentController {
         return studentService.getWatiTemplatesByBranchCode(role, email);
     }
 
+    /**
+     * API to upload a CSV file containing student records.
+     */
+    @PostMapping(value = "/students/bulk-upload", consumes = "multipart/form-data")
+    public ResponseEntity<List<String>> uploadStudentsCsv(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("role") String role,
+            @RequestParam("email") String email) {
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(List.of("Please upload a valid CSV file."));
+        }
+
+        if (!Objects.requireNonNull(file.getOriginalFilename()).endsWith(".csv")) {
+            return ResponseEntity.badRequest().body(List.of("Invalid file format. Only .csv files are allowed."));
+        }
+
+        List<String> resultMessages = studentService.uploadStudentsFromCsv(file, role, email);
+
+        // If the first message contains "Successfully", return 200 OK, else 400 Bad Request
+        if (!resultMessages.isEmpty() && resultMessages.getFirst().startsWith("Successfully")) {
+            return ResponseEntity.ok(resultMessages);
+        } else {
+            return ResponseEntity.badRequest().body(resultMessages);
+        }
+    }
 }

@@ -40,4 +40,9 @@ public interface CertificationRepository extends JpaRepository<StudentCertificat
             "WHERE TRIM(LOWER(s.certification)) = TRIM(LOWER(:certification)) " +
             "AND s.studentStream.id = :streamId AND s.branchCode = :branchCode")
     List<Long> findIdsByBranchCodeAndCertificationAndStudentStreamId(String branchCode, String certification, Long streamId);
+
+    @Query("SELECT s FROM StudentCertification s " +
+            "WHERE TRIM(LOWER(s.certification)) = TRIM(LOWER(:certification)) " +
+            "AND s.studentStream.id = :streamId AND s.branchCode = :branchCode")
+    List<StudentCertification> findByBranchCodeAndCertificationAndStudentStreamId(String branchCode, String certification, Long streamId);
 }

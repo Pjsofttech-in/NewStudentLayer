@@ -16,6 +16,9 @@ public interface CourseTypeRepository extends JpaRepository<StudentCourseType, L
     @Query("SELECT s.id FROM StudentCourseType s WHERE s.courseType =:courseType AND s.branchCode =:branchCode ORDER BY s.id DESC")
     List<Long> findAllIdsByName(@Param("courseType") String courseType, String branchCode);
 
+    @Query("SELECT s FROM StudentCourseType s WHERE s.courseType =:courseType AND s.branchCode =:branchCode ORDER BY s.id DESC")
+    List<StudentCourseType> findByName(@Param("courseType") String courseType, String branchCode);
+
     @Query("SELECT s FROM StudentCourseType s WHERE s.graduationType.id = :graduationTypeId ORDER BY s.id DESC")
     List<StudentCourseType> findAllByGraduationType(@Param("graduationTypeId") Long graduationTypeId);
 }
