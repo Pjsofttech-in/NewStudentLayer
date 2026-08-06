@@ -21,14 +21,12 @@ public class StudentSchoolProfile
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String schoolName;
-    private Long udiseNumber;
     private String schoolLogo;
     private String schoolAddress;
     private Long contactNumber;
     private String schoolEmail;
     private String place;
     private String societyName;
-    private String indexNumber;
     private String board;
     @Column(unique = true)
     private String schoolSlug;
@@ -37,6 +35,12 @@ public class StudentSchoolProfile
     private String facebookLink;
     private String instagramLink;
     private String twitterLink;
+
+    private Long udiseNumber;
+    private String indexNumber;
+    private String dteCode;
+    private String msbteCode;
+    private String aisheCode;
 
 
     @Email

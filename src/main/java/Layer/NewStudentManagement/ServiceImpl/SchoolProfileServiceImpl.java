@@ -128,6 +128,10 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
         existing.setIndexNumber(updatedProfile.getIndexNumber());
         existing.setBoard(updatedProfile.getBoard());
 
+        existing.setDteCode(updatedProfile.getDteCode());
+        existing.setMsbteCode(updatedProfile.getMsbteCode());
+        existing.setAisheCode(updatedProfile.getAisheCode());
+
         if (logo != null && !logo.isEmpty()) {
             existing.setSchoolLogo(s3Service.uploadFile(logo, existing.getBranchCode()));
         }
@@ -203,15 +207,19 @@ public class SchoolProfileServiceImpl implements SchoolProfileService
         dto.setId(profile.getId());
         dto.setSchoolName(profile.getSchoolName());
         dto.setSchoolLogo(profile.getSchoolLogo());
-        dto.setUdiseNumber(profile.getUdiseNumber());
         dto.setSchoolAddress(profile.getSchoolAddress());
         dto.setContactNumber(profile.getContactNumber());
         dto.setSchoolEmail(profile.getSchoolEmail());
         dto.setPlace(profile.getPlace());
         dto.setSocietyName(profile.getSocietyName());
-        dto.setIndexNumber(profile.getIndexNumber());
         dto.setBoard(profile.getBoard());
         dto.setSchoolSlug(profile.getSchoolSlug());
+
+        dto.setUdiseNumber(profile.getUdiseNumber());
+        dto.setIndexNumber(profile.getIndexNumber());
+        dto.setDteCode(profile.getDteCode());
+        dto.setMsbteCode(profile.getMsbteCode());
+        dto.setAisheCode(profile.getAisheCode());
 
         if (profile.getImages() != null) {
             List<String> imageUrls = profile.getImages()

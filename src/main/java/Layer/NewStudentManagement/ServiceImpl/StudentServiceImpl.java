@@ -256,6 +256,11 @@ public class StudentServiceImpl implements StudentService {
             }
             student.setDepartmentName(request.getDepartmentName());
 
+            String semister = request.getStudent().getSemister();
+            if (StringUtils.isBlank(semister)) {
+                throw new RuntimeException("Semester can not be null");
+            }
+            student.setSemister(semister);
 
             student.setGroupName(null);
             student.setStandardName(null);
@@ -456,6 +461,10 @@ public class StudentServiceImpl implements StudentService {
 
         if (request.getStudent().getPassword() != null) {
             existing.setPassword(passwordEncoder.encode(request.getStudent().getPassword()));
+        }
+
+        if (request.getStudent().getParentPassword() != null) {
+            existing.setParentPassword(passwordEncoder.encode(request.getStudent().getParentPassword()));
         }
 
         StudentEntity savedStudent = studentRepository.save(existing);
@@ -735,7 +744,7 @@ public class StudentServiceImpl implements StudentService {
                     String degreeName = filterDTO.getDegreeName().trim();
                     List<Long> degreeIds = degreeNameRepository.findIdsByNameAndGraduationTypeAndBranchCode(degreeName, graduationTypeId, branchCode);
                     if (degreeIds.size() != 1) throw new RuntimeException("Invalid or duplicate degree name");
-                    Long degreeNameId = degreeIds.get(0);
+                    Long degreeNameId = degreeIds.getFirst();
 
                     //  Department
                     String department = filterDTO.getDepartmentName().trim();
