@@ -1,6 +1,5 @@
 package Layer.NewStudentManagement.Entity;
 
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
@@ -15,22 +14,28 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Setter
 @Entity
-public class StudentNotification
-{
+public class StudentNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String noticeName;
+
     @Column(length = 5000)
     private String noticeDescription;
+
     private String institutionType;
+
     private LocalDate createdAt = LocalDate.now();
+
     private Long classRoomId;
 
     @Email
     private String createdByEmail;
 
     private String role;
+
     private String branchCode;
+
+    private Long studentId;
 }

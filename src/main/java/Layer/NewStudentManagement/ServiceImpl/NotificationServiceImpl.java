@@ -1,13 +1,11 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.Entity.StudentNotification;
-
 import Layer.NewStudentManagement.Repository.NotificationRepository;
 import Layer.NewStudentManagement.Service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -25,10 +23,13 @@ public class NotificationServiceImpl implements NotificationService {
         }
         if ("TEACHER".equalsIgnoreCase(role)) {
             if (notification.getClassRoomId() == null || notification.getClassRoomId() <= 0) {
-                throw new IllegalArgumentException("Teacher must provide a classRoomId");
+                if (notification.getStudentId() == null || notification.getStudentId() <= 0) {
+                    throw new IllegalArgumentException("Teacher must provide either a classRoomId or studentId");
+                }
             }
         } else {
             notification.setClassRoomId(null); // only Teacher can set it
+            notification.setStudentId(null); // only Teacher can set it
         }
 
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
@@ -99,7 +100,6 @@ public class NotificationServiceImpl implements NotificationService {
             throw new RuntimeException("You don't have permission to Delete Notification");
         }
         notificationRepository.deleteById(id);
-        System.out.println("Student Notification Row deleted with id " + id);
     }
 
     @Override
@@ -107,8 +107,16 @@ public class NotificationServiceImpl implements NotificationService {
         if (!staffService.hasPermission(role, email, "GET")) {
             throw new RuntimeException("You don't have permission to View Notification");
         }
-        StudentNotification notice = notificationRepository.findById(id)
+        return notificationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Notice not found"));
-        return notice;
+    }
+
+    @Override
+    public List<StudentNotification> getNotificationsByStudentId(Long studentId, String role, String email) {
+        if (!staffService.hasPermission(role, email, "Get")) {
+            throw new RuntimeException("You don't have permission to read notifications.");
+        }
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+        return notificationRepository.findByStudentIdAndBranchCode(studentId, branchCode);
     }
 }

@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Service;
 
+import Layer.NewStudentManagement.DTO.StudentNotificationDTO;
 import Layer.NewStudentManagement.Entity.StudentNotification;
 
 import java.util.List;
@@ -19,4 +20,8 @@ public interface NotificationService {
 
     StudentNotification getNotificationById(Long id, String role, String email);
 
+    /**
+     * Get all notifications sent to a specific student.
+     */
+    List<StudentNotification> getNotificationsByStudentId(Long studentId, String role, String email);
 }

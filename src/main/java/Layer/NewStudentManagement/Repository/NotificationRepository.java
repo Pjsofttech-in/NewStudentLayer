@@ -15,7 +15,6 @@ import java.util.List;
 @Repository
 public interface NotificationRepository extends JpaRepository<StudentNotification,Long>
 {
-
     @Query("SELECT n FROM StudentNotification n WHERE n.branchCode = :branchCode AND n.classRoomId IS NULL")
     List<StudentNotification> getNoticesByBranchCode(@Param("branchCode") String branchCode);
 
@@ -27,8 +26,7 @@ public interface NotificationRepository extends JpaRepository<StudentNotificatio
     @Query("SELECT n FROM StudentNotification n WHERE n.classRoomId = :classId")
     List<StudentNotification> getNoticesByClassId(@Param("classId") Long classId);
 
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM StudentNotification n WHERE n.createdAt < :cutoffDate")
-    int deleteRecordsOlderThan(LocalDate cutoffDate);
+    @Query("SELECT n FROM StudentNotification n WHERE n.branchCode = :branchCode AND n.institutionType IS NULL" +
+            " AND n.classRoomId IS NULL AND n.studentId = :studentId")
+    List<StudentNotification> findByStudentIdAndBranchCode(Long studentId, String branchCode);
 }

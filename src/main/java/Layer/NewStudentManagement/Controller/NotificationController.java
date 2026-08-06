@@ -11,62 +11,66 @@ import java.util.List;
 @RestController
 //@CrossOrigin(origins = "http://localhost:3000")
 //@CrossOrigin(origins = "https://pjsofttech.in")
-public class NotificationController
-{
+public class NotificationController {
 
     @Autowired
     NotificationService notificationService;
 
     @PostMapping("/createNotification")
     public ResponseEntity<StudentNotification> createNotification(@RequestBody StudentNotification notification,
-                                                                  @RequestParam String role, @RequestParam String email)
-    {
+                                                                  @RequestParam String role, @RequestParam String email) {
         StudentNotification notification1 = notificationService.createNotification(notification, role, email);
         return ResponseEntity.ok(notification1);
     }
 
     @GetMapping("/getNotificationById/{id}")
     public ResponseEntity<StudentNotification> getNotificationById(@PathVariable Long id,
-                                                                  @RequestParam String role, @RequestParam String email)
-    {
+                                                                   @RequestParam String role, @RequestParam String email) {
         StudentNotification notification = notificationService.getNotificationById(id, role, email);
         return ResponseEntity.ok(notification);
     }
 
     @PutMapping("/updateNotification/{id}")
-    public ResponseEntity<StudentNotification> updateNotification(@RequestBody StudentNotification notification,@PathVariable Long id,
-                                                                  @RequestParam String role, @RequestParam String email)
-    {
-        StudentNotification notification1 = notificationService.updateNotification(notification, id,role, email);
+    public ResponseEntity<StudentNotification> updateNotification(@RequestBody StudentNotification notification, @PathVariable Long id,
+                                                                  @RequestParam String role, @RequestParam String email) {
+        StudentNotification notification1 = notificationService.updateNotification(notification, id, role, email);
         return ResponseEntity.ok(notification1);
     }
 
     @GetMapping("/getNotificationByClassRoom")
-    public ResponseEntity<List<StudentNotification>> getNotificationByClassroom(@RequestParam String role, @RequestParam String email,@RequestParam Long classId)
-    {
-        List<StudentNotification> notification = notificationService.getNotificationByClassroom(role, email,classId);
+    public ResponseEntity<List<StudentNotification>> getNotificationByClassroom(@RequestParam String role, @RequestParam String email, @RequestParam Long classId) {
+        List<StudentNotification> notification = notificationService.getNotificationByClassroom(role, email, classId);
         return ResponseEntity.ok(notification);
     }
 
     @GetMapping("/getNotificationByBranchCode")
-    public ResponseEntity<List<StudentNotification>> getNotificationByBranchCode(@RequestParam String role, @RequestParam String email)
-    {
+    public ResponseEntity<List<StudentNotification>> getNotificationByBranchCode(@RequestParam String role, @RequestParam String email) {
         List<StudentNotification> notification = notificationService.getNotificationByBranchCode(role, email);
         return ResponseEntity.ok(notification);
     }
 
     @GetMapping("/getNotificationByInsitutionType")
     public ResponseEntity<List<StudentNotification>> getNotificationByBranchCode(@RequestParam String role, @RequestParam String email,
-                                                                                 @RequestParam String institutionType)
-    {
+                                                                                 @RequestParam String institutionType) {
         List<StudentNotification> notification = notificationService.getNotificationByInstitutionType(role, email, institutionType);
         return ResponseEntity.ok(notification);
     }
 
     @DeleteMapping("/deleteNotification/{id}")
-    public ResponseEntity<String> deleteNotification(@PathVariable Long id, @RequestParam String role, @RequestParam String email)
-    {
+    public ResponseEntity<String> deleteNotification(@PathVariable Long id, @RequestParam String role, @RequestParam String email) {
         notificationService.deleteNotification(role, email, id);
         return ResponseEntity.ok("Success");
+    }
+
+    /**
+     * Get all notifications belonging to a specific student.
+     */
+    @GetMapping("/getNotificationByStudent/{studentId}")
+    public ResponseEntity<List<StudentNotification>> getNotificationsForStudent(
+            @PathVariable Long studentId,
+            @RequestParam String role,
+            @RequestParam String email) {
+        List<StudentNotification> notifications = notificationService.getNotificationsByStudentId(studentId, role, email);
+        return ResponseEntity.ok(notifications);
     }
 }
