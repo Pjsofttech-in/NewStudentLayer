@@ -35,8 +35,13 @@ public class PaymentController {
     @PostMapping("/createPaymentOrderId")
     public ResponseEntity<?> startPaymentFlow(@Valid @RequestBody RazorPayOrderCreationDTO requestDTO) {
         try {
-            String razorpayOrderId = razorpayService.createOrder(requestDTO.getRole(), requestDTO.getEmail(),
-                    requestDTO.getAmount(), requestDTO.getStudentFeeScheduleId());
+            String razorpayOrderId = razorpayService.createOrder(
+                    requestDTO.getRole(),
+                    requestDTO.getEmail(),
+                    requestDTO.getAmount(),
+                    requestDTO.getStudentFeeScheduleId(),
+                    requestDTO.getStudentMiscFeeId() // <-- NEW
+            );
             return ResponseEntity.ok(Map.of("orderId", razorpayOrderId));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Failed to initialize payment tracking infrastructure.");

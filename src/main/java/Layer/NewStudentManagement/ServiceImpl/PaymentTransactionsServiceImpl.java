@@ -4,9 +4,9 @@ import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
 import Layer.NewStudentManagement.Repository.PaymentTransactionsRepository;
+import Layer.NewStudentManagement.Repository.StudentMiscFeeRepository;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Util.CryptoUtil;
-import com.razorpay.Order;
 import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import org.springframework.stereotype.Service;
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static Layer.NewStudentManagement.Entity.StudentMiscFee.FeesStatus.*;
 import static Layer.NewStudentManagement.Entity.StudentPaymentTransactions.TransactionStatus.*;
 
 @Service
@@ -27,14 +28,16 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
     private final ClientAdminPaymentGatewayService clientAdminPaymentGatewayService;
     private final FeesRepository feesRepository;
     private final FeesScheduleRepository feesScheduleRepository;
+    private final StudentMiscFeeRepository studentMiscFeeRepository;
     private final StaffService staffService;
     private final CryptoUtil cryptoUtil;
 
-    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService, FeesRepository feesRepository, FeesScheduleRepository feesScheduleRepository, StaffService staffService, CryptoUtil cryptoUtil) {
+    public PaymentTransactionsServiceImpl(PaymentTransactionsRepository paymentTransactionsRepository, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService, FeesRepository feesRepository, FeesScheduleRepository feesScheduleRepository, StudentMiscFeeRepository studentMiscFeeRepository, StaffService staffService, CryptoUtil cryptoUtil) {
         this.paymentTransactionsRepository = paymentTransactionsRepository;
         this.clientAdminPaymentGatewayService = clientAdminPaymentGatewayService;
         this.feesRepository = feesRepository;
         this.feesScheduleRepository = feesScheduleRepository;
+        this.studentMiscFeeRepository = studentMiscFeeRepository;
         this.staffService = staffService;
         this.cryptoUtil = cryptoUtil;
     }
@@ -69,14 +72,13 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
             StudentPaymentTransactions paymentTransactions = byRazorpayOrderId.get();
             paymentTransactions.setRazorpayPaymentId(razorPaymentId);
             paymentTransactions.setUpdatedBy(email);
-//            paymentTransactions.setUpdatedAt(LocalDateTime.now());
             paymentTransactions.setUpdatedByRole(role);
 
             StudentFeesCollect feesCollect = paymentTransactions.getFeesCollect();
             Long feesCollectId = feesCollect.getId();
             feesCollect.setId(feesCollectId);
 
-            String modeOfPayment = "UNKNOWN", bankName = "", errorReason = "";
+            String modeOfPayment = "UNKNOWN", errorReason = "";
             try {
                 String branchCode = staffService.fetchBranchCodeByRole(role, email);
                 PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
@@ -88,9 +90,6 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
                 Payment paymentDetails = razorpayClient.payments.fetch(razorPaymentId);
                 modeOfPayment = paymentDetails.get("method").toString().toUpperCase();
                 errorReason = paymentDetails.get("error_reason").toString();
-                if (paymentDetails.has("bank") && paymentDetails.get("bank") != null) {
-                    bankName = paymentDetails.get("bank").toString();
-                }
                 feesCollect.setPaymentMode(modeOfPayment);
                 feesCollect.setTransactionId(paymentTransactions.getReceiptNo());
                 if (isAuthentic) {
@@ -98,7 +97,7 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
                     feesCollect.setStatus("COMPLETED");
 
                     StudentFeeSchedule feeSchedule = feesCollect.getStudentFeeSchedule();
-                    if(Objects.nonNull(feeSchedule)){
+                    if (Objects.nonNull(feeSchedule)) {
                         feeSchedule.setPaid(true);
                         feesScheduleRepository.save(feeSchedule);
 
@@ -114,13 +113,32 @@ public class PaymentTransactionsServiceImpl implements PaymentTransactionsServic
                             studentFees.setPendingAmount(pendingAmount);
                             studentFees.setPaidAmount(paidAmount);
 
-                            if(paidAmount >= totalAmount){
+                            if (paidAmount >= totalAmount) {
                                 studentFees.setFeesStatus("Completed");
                             }
                             feesRepository.save(studentFees);
                         }
-                    }
+                    } else if (Objects.nonNull(feesCollect.getStudentMiscFee())) {
+                        StudentMiscFee studentMiscFee = feesCollect.getStudentMiscFee();
+                        double totalAmount = studentMiscFee.getAmount();
+                        double paidAmount = studentMiscFee.getPaidAmount();
+                        double pendingAmount = 0.0;
 
+                        paidAmount += feesCollect.getAmount();
+                        pendingAmount = studentMiscFee.getAmount() - paidAmount;
+
+                        studentMiscFee.setPendingAmount(pendingAmount);
+                        studentMiscFee.setPaidAmount(paidAmount);
+
+                        if (paidAmount >= totalAmount) {
+                            studentMiscFee.setStatus(PAID.name());
+                        } else if (paidAmount >= 0) {
+                            studentMiscFee.setStatus(PARTIALLY_PAID.name());
+                        } else {
+                            studentMiscFee.setStatus(PENDING.name());
+                        }
+                        studentMiscFeeRepository.save(studentMiscFee);
+                    }
                 } else {
                     paymentTransactions.setStatus(FAILED);
                     feesCollect.setStatus("FAILED");

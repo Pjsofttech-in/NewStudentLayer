@@ -55,6 +55,9 @@ public class StudentFeesCollect
         @ManyToOne
         @JoinColumn(name = "schedule_id")
         private StudentFeeSchedule studentFeeSchedule;
+        @ManyToOne
+        @JoinColumn(name = "student_misc_fees_id")
+        private StudentMiscFee studentMiscFee;
 
         @Email
         private String createdByEmail;

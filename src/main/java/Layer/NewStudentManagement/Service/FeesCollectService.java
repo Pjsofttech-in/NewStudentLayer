@@ -3,6 +3,7 @@ package Layer.NewStudentManagement.Service;
 import Layer.NewStudentManagement.DTO.*;
 import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
 import Layer.NewStudentManagement.Entity.StudentFeesCollect;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.domain.Page;
 
@@ -13,6 +14,10 @@ import java.util.Map;
 public interface FeesCollectService
 {
     FeesCollectDTO saveFeeCollection(StudentFeesCollect collect, String role, String email);
+
+    @NonNull
+    String getInvoice();
+
     FeesCollectDTO updateFeeCollectionStatus(Long id, String role, String email, String newStatus);
     List<FeesCollectDTO> getAllCollectDataByStudentFeesID(Long fid,String role,String email);
     List<FeesCollectDTO> getCollectedFeesByStudentId(String role, String email,Long studentId);
@@ -33,6 +38,5 @@ public interface FeesCollectService
     Map<String, List<FeesScheduleChartProjection>> getReportByDayInMonth(String role, String email, int year, String monthName,
                                                                                 String branchCodeFilter);
 
-    StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, String receiptId, Long studentFeesScheduleId, PaymentGatewayAccountResponceDTO paymentGatewayDTO);
-
+    StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, String receiptId, Long studentFeesScheduleId, Long studentMiscFeesId, PaymentGatewayAccountResponceDTO paymentGatewayDTO, Double paidAmount);
 }

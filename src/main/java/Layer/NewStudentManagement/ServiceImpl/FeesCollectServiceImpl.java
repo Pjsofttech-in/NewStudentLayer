@@ -1,13 +1,11 @@
 package Layer.NewStudentManagement.ServiceImpl;
 
 import Layer.NewStudentManagement.DTO.*;
-import Layer.NewStudentManagement.Entity.PaymentGatewayAccountResponceDTO;
-import Layer.NewStudentManagement.Entity.StudentFeeSchedule;
-import Layer.NewStudentManagement.Entity.StudentFees;
-import Layer.NewStudentManagement.Entity.StudentFeesCollect;
+import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Repository.FeesCollectRepository;
 import Layer.NewStudentManagement.Repository.FeesRepository;
 import Layer.NewStudentManagement.Repository.FeesScheduleRepository;
+import Layer.NewStudentManagement.Repository.StudentMiscFeeRepository;
 import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Service.FeesService;
 import Layer.NewStudentManagement.Util.HelperUtil;
@@ -42,6 +40,9 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
     @Autowired
     FeesScheduleRepository feesScheduleRepository;
+
+    @Autowired
+    StudentMiscFeeRepository studentMiscFeeRepository;
 
 
     @Override
@@ -109,7 +110,8 @@ public class FeesCollectServiceImpl implements FeesCollectService {
         return mapToDTO(saved);
     }
 
-    private @NonNull String getInvoice() {
+    @Override
+    public @NonNull String getInvoice() {
         Long maxId = feesCollectRepository.findMaxId();
         return String.format("%06d", (maxId != null ? maxId + 1 : 1));
     }
@@ -1005,55 +1007,76 @@ public class FeesCollectServiceImpl implements FeesCollectService {
     }
 
     public StudentFeesCollect createFeeCollectionB4PaymentGateway(String role, String email, String receiptId, Long studentFeesScheduleId,
-                                                                  PaymentGatewayAccountResponceDTO paymentGatewayDTO) {
+                                                                  Long studentFeesMiscId,
+                                                                  PaymentGatewayAccountResponceDTO paymentGatewayDTO, Double paidAmount) {
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
-        Optional<StudentFeeSchedule> feeScheduleOptional = feesScheduleRepository.findById(studentFeesScheduleId);
-        if (feeScheduleOptional.isPresent()) {
-            StudentFeeSchedule studentFeeSchedule = feeScheduleOptional.get();
-            StudentFees studentFees = studentFeeSchedule.getStudentFees();
+        StudentFeesCollect sfc = new StudentFeesCollect();
+        StudentFeeSchedule studentFeeSchedule;
+        StudentMiscFee studentMiscFee;
+        StudentFees studentFees;
+        if (studentFeesMiscId == null) {
+            Optional<StudentFeeSchedule> feeScheduleOptional = feesScheduleRepository.findById(studentFeesScheduleId);
+            if (feeScheduleOptional.isPresent()) {
+                studentFeeSchedule = feeScheduleOptional.get();
+                studentFees = studentFeeSchedule.getStudentFees();
+                sfc.setStudentFeeSchedule(studentFeeSchedule);
+                sfc.setAmount(paidAmount);
+                sfc.setMonth(studentFeeSchedule.getMonth());
+                sfc.setFeesType(studentFeeSchedule.getFeesType());
+                sfc.setDuedate(studentFeeSchedule.getDueDate());
 
-            StudentFeesCollect sfc = new StudentFeesCollect();
-            sfc.setAdmissionFee(studentFees.getAdmissionFee());
-            sfc.setExamFees(studentFees.getExamFees());
-            sfc.setUniformFee(studentFees.getUniformFee());
-            sfc.setTransportBusFee(studentFees.getTransportBusFee());
-            sfc.setTuitionFee(studentFees.getTuitionFee());
-            sfc.setBuildingFundFee(studentFees.getBuildingFundFee());
-            sfc.setComputerClassFee(studentFees.getComputerClassFee());
-            sfc.setSportFees(studentFees.getSportFees());
-            sfc.setLibraryFees(studentFees.getLibraryFees());
-            sfc.setHostelFee(studentFees.getHostelFee());
-            sfc.setPracticalFee(studentFees.getPracticalFee());
 
-            sfc.setStudentFeeSchedule(studentFeeSchedule);
-            sfc.setStudentFees(studentFees);
+                sfc.setAdmissionFee(studentFees.getAdmissionFee());
+                sfc.setExamFees(studentFees.getExamFees());
+                sfc.setUniformFee(studentFees.getUniformFee());
+                sfc.setTransportBusFee(studentFees.getTransportBusFee());
+                sfc.setTuitionFee(studentFees.getTuitionFee());
+                sfc.setBuildingFundFee(studentFees.getBuildingFundFee());
+                sfc.setComputerClassFee(studentFees.getComputerClassFee());
+                sfc.setSportFees(studentFees.getSportFees());
+                sfc.setLibraryFees(studentFees.getLibraryFees());
+                sfc.setHostelFee(studentFees.getHostelFee());
+                sfc.setPracticalFee(studentFees.getPracticalFee());
 
-            sfc.setInvoice("");
-            if (paymentGatewayDTO != null) {
-                sfc.setIfscCode(paymentGatewayDTO.getIfscCode());
-                sfc.setBankBranchName(paymentGatewayDTO.getBankBranchName());
-                sfc.setBankName(paymentGatewayDTO.getBankName());
-                sfc.setAccountHolderName(paymentGatewayDTO.getAccountHolderName());
+                sfc.setFeesPaymentType(studentFees.getFeesCollectionType());
+
+                sfc.setStudentFees(studentFees);
+            } else {
+                throw new RuntimeException("Invalid Fee Schedule Id");
             }
+        } else {
+            Optional<StudentMiscFee> miscFeeOpt = studentMiscFeeRepository.findById(studentFeesMiscId);
+            if (miscFeeOpt.isPresent()) {
+                studentMiscFee = miscFeeOpt.get();
+                sfc.setStudentMiscFee(studentMiscFee);
+                sfc.setAmount(paidAmount);
+                sfc.setMonth(LocalDate.now().getMonth().name());
+                sfc.setFeesType("One-Time");
+                sfc.setDuedate(studentMiscFee.getDueDate());
 
-            sfc.setInvoice(getInvoice());
-
-            sfc.setTransactionId(receiptId);
-            sfc.setAmount(studentFeeSchedule.getCollectAmount());
-            sfc.setMonth(studentFeeSchedule.getMonth());
-            sfc.setPaymentDate(LocalDate.now());
-            sfc.setFeesPaymentType(studentFees.getFeesCollectionType());
-            sfc.setFeesType(studentFeeSchedule.getFeesType());
-            sfc.setDuedate(studentFeeSchedule.getDueDate());
-
-            sfc.setCreatedByEmail(email);
-            sfc.setRole(role);
-            sfc.setBranchCode(branchCode);
-
-            StudentFeeSchedule studentFeeSchedule1 = preCheckFeesCollection(sfc, studentFees.getFeesCollectionType(), studentFees);
-
-            return feesCollectRepository.save(sfc);
+                sfc.setFeesPaymentType("One Time");
+            } else {
+                throw new RuntimeException("Invalid Misc Fee Id");
+            }
         }
-        return null;
+
+        sfc.setInvoice("");
+        if (paymentGatewayDTO != null) {
+            sfc.setIfscCode(paymentGatewayDTO.getIfscCode());
+            sfc.setBankBranchName(paymentGatewayDTO.getBankBranchName());
+            sfc.setBankName(paymentGatewayDTO.getBankName());
+            sfc.setAccountHolderName(paymentGatewayDTO.getAccountHolderName());
+        }
+
+        sfc.setInvoice(getInvoice());
+
+        sfc.setTransactionId(receiptId);
+        sfc.setPaymentDate(LocalDate.now());
+
+        sfc.setCreatedByEmail(email);
+        sfc.setRole(role);
+        sfc.setBranchCode(branchCode);
+
+        return feesCollectRepository.save(sfc);
     }
 }

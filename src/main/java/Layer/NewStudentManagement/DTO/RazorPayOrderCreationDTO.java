@@ -16,6 +16,7 @@ public class RazorPayOrderCreationDTO {
     String email;
     @Positive
     BigDecimal amount;
-    @NotNull
     Long studentFeeScheduleId;
+    // --- NEW: Add this to accept Misc Fee ID from frontend ---
+    Long studentMiscFeeId;
 }

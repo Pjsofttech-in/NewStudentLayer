@@ -7,21 +7,15 @@ import Layer.NewStudentManagement.Service.FeesCollectService;
 import Layer.NewStudentManagement.Service.PaymentTransactionsService;
 import Layer.NewStudentManagement.Service.RazorpayService;
 import Layer.NewStudentManagement.Util.CryptoUtil;
-import com.razorpay.Order;
-import com.razorpay.RazorpayClient;
-import com.razorpay.Utils;
-import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 @Service
 public class RazorpayServiceImpl implements RazorpayService {
-    private final CryptoUtil cryptoUtil;
     private final StaffService staffService;
     private final FeesCollectService feesCollectService;
     private final PaymentTransactionsService paymentTransactionsService;
@@ -31,7 +25,6 @@ public class RazorpayServiceImpl implements RazorpayService {
 
     public RazorpayServiceImpl(CryptoUtil cryptoUtil, StaffService staffService, FeesCollectService feesCollectService,
                                PaymentTransactionsService paymentTransactionsService, ClientAdminPaymentGatewayService clientAdminPaymentGatewayService) {
-        this.cryptoUtil = cryptoUtil;
         this.staffService = staffService;
         this.feesCollectService = feesCollectService;
         this.paymentTransactionsService = paymentTransactionsService;
@@ -39,7 +32,7 @@ public class RazorpayServiceImpl implements RazorpayService {
     }
 
     // 1. Create a transaction order
-    public String createOrder(String role, String email, BigDecimal amountInRupees, Long studentFeeScheduleId) throws Exception {
+    public String createOrder(String role, String email, BigDecimal amountInRupees, Long studentFeeScheduleId, Long studentMiscFeeId) throws Exception {
         if (!staffService.hasPermission(role, email, "POST")) {
             throw new RuntimeException("You don't have permission to create order");
         }
@@ -48,7 +41,8 @@ public class RazorpayServiceImpl implements RazorpayService {
         PaymentGatewayAccountResponceDTO paymentGatewayDetails = getPaymentGatewayDetails(branchCode);
 
         //Creating fee collect entry b4 payment gateway in case payment fails
-        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(role, email, null, studentFeeScheduleId, paymentGatewayDetails);
+        StudentFeesCollect feesCollect = feesCollectService.createFeeCollectionB4PaymentGateway(
+                role, email, null, studentFeeScheduleId, studentMiscFeeId, paymentGatewayDetails, amountInRupees.doubleValue());
 
         //Calling payment gateway for creating order
         Map<String, Object> order = staffService.createOrder(branchCode, SYSTEM, amountInRupees.longValue());
