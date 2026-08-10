@@ -320,8 +320,8 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 request.getDegreeNameId(),
                 request.getCertificationId(),
                 request.getCourseTypeId(),
-                existing.getDepartmentName(),
-                existing.getSemester()
+                request.getDepartmentName(),
+                request.getSemester()
         );
 
         // ✅ Allow update if values are same (avoid self-match issue)

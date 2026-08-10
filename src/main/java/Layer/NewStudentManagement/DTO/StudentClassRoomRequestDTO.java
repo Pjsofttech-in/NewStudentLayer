@@ -34,6 +34,7 @@ public class StudentClassRoomRequestDTO
 
 
     private String semester;
+    private String departmentName;
     private String groupName;
 
     // 🔥 MAIN FIELD
