@@ -31,6 +31,8 @@ public class ClassRoomRequestDTO
     private Long streamId;
     private String groupName; // for Jr. College
 
+    private String semester;
+
     private Long degreeNameId;
 
     private Long certificationId;

@@ -20,6 +20,7 @@ public class StudentClassRoomResponseDTO {
     private LocalTime startTime;
     private LocalTime endTime;
     private String groupName;
+    private String semester;
     private String graduationType;
     private String institutionType;
     private String streamName;

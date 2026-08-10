@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.Entity.*;
 import Layer.NewStudentManagement.Repository.*;
 import Layer.NewStudentManagement.Service.ClassRoomService;
 import Layer.NewStudentManagement.Service.S3Service;
+import io.micrometer.common.util.StringUtils;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -109,6 +110,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
         Long certificationId = null;
         Long courseTypeId = null;
         String departmentName = null;
+        String semesterName = null;
 
         if ("School".equalsIgnoreCase(institutionType)) {
 
@@ -120,6 +122,11 @@ public class ClassRoomServiceImpl implements ClassRoomService {
             if(dto.getCertificationId()==null) {
                 if (dto.getGraduationTypeId() == null)
                     throw new RuntimeException("GraduationType is required for College ClassRoom");
+
+                if (StringUtils.isBlank(dto.getSemester()))
+                    throw new RuntimeException("Semester is required for College ClassRoom");
+
+                semesterName = dto.getSemester();
 
                 StudentGraduationType graduationType = graduationTypeRepository.findById(dto.getGraduationTypeId())
                         .orElseThrow(() -> new RuntimeException("GraduationType not found"));
@@ -186,7 +193,8 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 degreeId,
                 certificationId,
                 courseTypeId,
-                departmentName
+                departmentName,
+                semesterName
         );
 
         if (exists) {
@@ -206,6 +214,8 @@ public class ClassRoomServiceImpl implements ClassRoomService {
         classRoom.setMedium(medium);
         classRoom.setDivision(division);
         classRoom.setCreatedDate(LocalDate.now());
+
+        classRoom.setSemester(semesterName);
 
         if ("School".equalsIgnoreCase(institutionType)) {
 
@@ -310,7 +320,8 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                 request.getDegreeNameId(),
                 request.getCertificationId(),
                 request.getCourseTypeId(),
-                existing.getDepartmentName()
+                existing.getDepartmentName(),
+                existing.getSemester()
         );
 
         // ✅ Allow update if values are same (avoid self-match issue)
@@ -323,7 +334,8 @@ public class ClassRoomServiceImpl implements ClassRoomService {
                         Objects.equals(existing.getStream() != null ? existing.getStream().getId() : null, request.getStreamId()) &&
                         Objects.equals(existing.getCertification() != null ? existing.getCertification().getId() : null, request.getCertificationId()) &&
                         Objects.equals(existing.getCourseType() != null ? existing.getCourseType().getId() : null, request.getCourseTypeId()) &&
-                        Objects.equals(existing.getDegreeName() != null ? existing.getDegreeName().getId() : null, request.getDegreeNameId());
+                        Objects.equals(existing.getDegreeName() != null ? existing.getDegreeName().getId() : null, request.getDegreeNameId()) &&
+                        Objects.equals(StringUtils.isNotBlank(existing.getSemester()) ? existing.getSemester() : null, request.getSemester());
 
         if (exists && !isSameRecord) {
             throw new RuntimeException("ClassRoom already exists for this branch");
@@ -337,6 +349,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
         existing.setStartTime(request.getStartTime());
         existing.setEndTime(request.getEndTime());
         existing.setGroupName(request.getGroupName());
+        existing.setSemester(request.getSemester());
 
         // ===============================
         // 🔗 RELATIONS
@@ -574,6 +587,7 @@ public class ClassRoomServiceImpl implements ClassRoomService {
             dto.setStartTime(classroom.getStartTime());
             dto.setEndTime(classroom.getEndTime());
             dto.setGroupName(classroom.getGroupName());
+            dto.setSemester(classroom.getSemester());
 
             dto.setGraduationType(classroom.getGraduationType() != null
                     ? classroom.getGraduationType().getGraduationType() : null);

@@ -33,6 +33,7 @@ public class StudentClassRoomRequestDTO
     private Long degreeNameId;
 
 
+    private String semester;
     private String groupName;
 
     // 🔥 MAIN FIELD

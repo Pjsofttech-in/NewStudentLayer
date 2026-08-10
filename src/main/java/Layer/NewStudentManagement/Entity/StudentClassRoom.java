@@ -30,6 +30,7 @@ public class StudentClassRoom
     private LocalTime endTime;
     private String groupName;
     private String departmentName;
+    private String semester;
     private String institutionType;
     private LocalDate createdDate;
 

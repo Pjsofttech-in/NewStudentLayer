@@ -58,6 +58,7 @@ public interface ClassRoomRepository extends JpaRepository<StudentClassRoom,Long
     AND (:courseTypeId IS NULL OR c.courseType.id = :courseTypeId)
     AND (:certificationId IS NULL OR c.certification.id = :certificationId)
     AND (:departmentName IS NULL OR c.departmentName = :departmentName)
+    AND (:semester IS NULL OR c.semester = :semester)
 """)
     boolean existsClassRoom(
             @Param("branchCode") String branchCode,
@@ -69,7 +70,8 @@ public interface ClassRoomRepository extends JpaRepository<StudentClassRoom,Long
             @Param("degreeId") Long degreeId,
             @Param("certificationId") Long certificationId,
             @Param("courseTypeId") Long courseTypeId,
-            @Param("departmentName") String departmentName
+            @Param("departmentName") String departmentName,
+            @Param("semester") String semester
     );
 
 
