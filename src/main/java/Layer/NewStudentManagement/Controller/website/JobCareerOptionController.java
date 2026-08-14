@@ -5,6 +5,7 @@ import Layer.NewStudentManagement.Entity.website.StudentWebJobCareerOption;
 import Layer.NewStudentManagement.Service.website.JobCareerOptionService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,8 +29,10 @@ public class JobCareerOptionController {
             @RequestParam String email,
             @RequestParam String url,
             @RequestParam Long webHRDetailsId) throws JsonProcessingException {
-
-        StudentWebJobCareerOption job = new ObjectMapper().readValue(jobJson, StudentWebJobCareerOption.class);
+        // Inside your controller method:
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        StudentWebJobCareerOption job = objectMapper.readValue(jobJson, StudentWebJobCareerOption.class);
         return ResponseEntity.ok(service.create(job, role, email, resumeFile, url, webHRDetailsId));
     }
 

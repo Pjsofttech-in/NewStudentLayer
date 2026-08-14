@@ -28,7 +28,7 @@ public class StudentWebJobCareerOption {
 //    private String JobCareerOptionColor;
     @Column(length = 500)
     private String responsibilities;
-    @JsonFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate postDate;
     private String resumeUrl;
     private String lastDateToApply;
