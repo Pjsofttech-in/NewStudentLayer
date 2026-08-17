@@ -1,5 +1,6 @@
 package Layer.NewStudentManagement.Entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,5 +22,6 @@ public class StudentFeeComponentsMaster {
     private String componentName; // e.g., "Tuition Fee", "Hostel Fee", "Trip", "Gathering"
 
     @Column(nullable = false)
+    @JsonProperty("isAcademic")
     private boolean isAcademic = true; // true = Academic, false = Miscellaneous
 }
