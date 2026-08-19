@@ -20,6 +20,7 @@ public class FeesFilterDTO {
     private String graduationTypeName;
     private String degreeName;
     private String departmentName;
+    private String miscFeeComponentName;
     private String groupName;
     private String institutionType;
     private String academicYear;

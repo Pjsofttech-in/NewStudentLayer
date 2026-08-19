@@ -691,7 +691,8 @@ public class FeesCollectServiceImpl implements FeesCollectService {
 
                 String bankAccountName = filterDTO.getBankAccountName();
                 String paymentMode = filterDTO.getPaymentMode();
-                if (StringUtils.isNotBlank(bankAccountName) || StringUtils.isNotBlank(paymentMode)) {
+                String miscFeeComponentName = filterDTO.getMiscFeeComponentName();
+                if (StringUtils.isNotBlank(bankAccountName) || StringUtils.isNotBlank(paymentMode) || StringUtils.isNotBlank(miscFeeComponentName)) {
                     Subquery<Long> subquery = null;
                     subquery = Objects.requireNonNull(query).subquery(Long.class);
                     Root<StudentFeesCollect> childRoot = subquery.from(StudentFeesCollect.class);
@@ -705,6 +706,14 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                     Predicate bankAccountNamePred = cb.like(childRoot.get("accountHolderName"), "%" + filterDTO.getBankAccountName() + "%");
                     Predicate paymentModePred = cb.like(childRoot.get("paymentMode"), "%" + filterDTO.getPaymentMode() + "%");
 
+                    Join<StudentFeesCollect, StudentMiscFee> miscFeeJoin =
+                            childRoot.join("studentMiscFee", JoinType.INNER);
+
+                    Join<StudentMiscFee, StudentFeeComponentsMaster> componentJoin =
+                            miscFeeJoin.join("feeComponent", JoinType.INNER);
+
+                    Predicate miscFeeComponentNameFilter = cb.like(cb.lower(componentJoin.get("componentName")), "%" + miscFeeComponentName + "%");
+
                     // 4. Configure the subquery to select IDs where conditions match
                     List<Predicate> predArr = new ArrayList<>();
                     predArr.add(parentLink);
@@ -716,6 +725,9 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                     if (StringUtils.isNotBlank(paymentMode)) {
                         predArr.add(paymentModePred);
                     }
+                    if (StringUtils.isNotBlank(miscFeeComponentName)) {
+                        predArr.add(miscFeeComponentNameFilter);
+                    }
                     subquery.select(childRoot.get("id"))
                             .where(predArr.toArray(Predicate[]::new));
                     predicates.add(cb.exists(subquery));
@@ -725,7 +737,6 @@ public class FeesCollectServiceImpl implements FeesCollectService {
             if (finalFromDate != null && finalToDate != null) {
                 predicates.add(cb.between(root.get("approvalDate"), finalFromDate, finalToDate));
             }
-
 
 //             3. Only apply sorting if we are building the Data query (not the Count query)
             if (Objects.requireNonNull(query).getResultType() != Long.class && query.getResultType() != long.class) {
@@ -1053,6 +1064,7 @@ public class FeesCollectServiceImpl implements FeesCollectService {
                 sfc.setMonth(LocalDate.now().getMonth().name());
                 sfc.setFeesType("One-Time");
                 sfc.setDuedate(studentMiscFee.getDueDate());
+                sfc.setStudentFees(studentMiscFee.getStudentFees());
 
                 sfc.setFeesPaymentType("One Time");
             } else {
