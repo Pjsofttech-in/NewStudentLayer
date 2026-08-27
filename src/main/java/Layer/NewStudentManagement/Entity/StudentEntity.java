@@ -64,6 +64,8 @@ public class StudentEntity
     private boolean isTcGenrated = true;
     @Column(unique = true, length = 12)
     private String registrationNumber;
+    @Column(name = "general_registration_number", unique = true, length = 50)
+    private String generalRegistrationNumber;
     private String applicationNumber;
     private String oldRegisterPhoto;
 //    private String university;

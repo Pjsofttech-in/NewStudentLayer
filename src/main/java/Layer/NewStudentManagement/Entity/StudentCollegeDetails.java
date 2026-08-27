@@ -28,9 +28,6 @@ public class StudentCollegeDetails {
     @Column(name = "dte_number", length = 50)
     private String dteNumber;
 
-    @Column(name = "general_registration_number", unique = true, length = 50)
-    private String generalRegistrationNumber;
-
     // 🌟 One-to-One Mapping: Shared Primary Key relation
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId // Forces Hibernate to use 'student_id' as both PK and FK

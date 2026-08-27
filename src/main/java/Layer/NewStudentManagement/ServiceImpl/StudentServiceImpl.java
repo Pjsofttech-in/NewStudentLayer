@@ -847,6 +847,7 @@ public class StudentServiceImpl implements StudentService {
         if (incoming.getInstitutionType() != null) existing.setInstitutionType(incoming.getInstitutionType());
         if (incoming.getScholarshipAmount() != null) existing.setScholarshipAmount(incoming.getScholarshipAmount());
         if (incoming.getAdmissionType() != null) existing.setAdmissionType(incoming.getAdmissionType());
+        if (incoming.getGeneralRegistrationNumber() != null) existing.setGeneralRegistrationNumber(incoming.getGeneralRegistrationNumber());
 //        if (incoming.getCollegeDetails() != null && existing.getCollegeDetails() !=null) {
 //            StudentCollegeDetails collegeDetails = existing.getCollegeDetails();
 ////            collegeDetails.setStudent(existing);
@@ -887,6 +888,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setSemister(student.getSemister());
         dto.setInstitutionType(student.getInstitutionType());
         dto.setRegistrationNumber(student.getRegistrationNumber());
+        dto.setGeneralRegistrationNumber(student.getGeneralRegistrationNumber());
         dto.setFormStatus(student.getFormStatus());
         dto.setReason(student.getReason());
         dto.setTcGenrated(student.isTcGenrated());

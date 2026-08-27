@@ -46,6 +46,7 @@ public class StudentMapper {
         dto.setInstitutionType(student.getInstitutionType());
         dto.setPassword(student.getPassword());
         dto.setRegistrationNumber(student.getRegistrationNumber());
+        dto.setGeneralRegistrationNumber(student.getGeneralRegistrationNumber());
         dto.setFormStatus(student.getFormStatus());
         dto.setReason(student.getReason());
         dto.setFatherEmailId(student.getFatherEmailId());
@@ -141,7 +142,6 @@ public class StudentMapper {
         if (obj != null) {
             dto.setAbcId(obj.getAbcId());
             dto.setDteNumber(obj.getDteNumber());
-            dto.setGeneralRegistrationNumber(obj.getGeneralRegistrationNumber());
             dto.setEnrollmentNumber(obj.getEnrollmentNumber());
             return dto;
         }

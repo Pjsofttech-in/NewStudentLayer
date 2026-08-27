@@ -65,6 +65,7 @@ public class StudentDTO {
     private String departmentName;
     private String password;
     private String registrationNumber;
+    private String generalRegistrationNumber;
     private String formStatus;
     private String reason;
     //    private Double discount;
@@ -81,7 +82,6 @@ public class StudentDTO {
     private String abcId;
     private String enrollmentNumber;
     private String dteNumber;
-    private String generalRegistrationNumber;
 
 
     @Email

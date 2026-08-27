@@ -65,6 +65,7 @@ public class StudentResponseDTO {
     private String castCategory;
     private boolean handicap;
     private String registrationNumber;
+    private String generalRegistrationNumber;
     private String formStatus;
     private String reason;
     private Double discount;
