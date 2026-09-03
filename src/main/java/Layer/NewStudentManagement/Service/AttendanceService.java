@@ -36,4 +36,13 @@ public interface AttendanceService
 
     // Note: We now require the 'scheduledPeriodId' from the frontend to know WHICH lecture is happening
     String markStudentsAttendanceForLecture(List<Integer> rollNos, Long classroomId, Long scheduledPeriodId);
+    Page<StudentAttendaceDTO> getClassroomLectureAttendance(
+            Long classroomId,
+            Long scheduledPeriodId,
+            StudentAttendanceFilterDTO filter,
+            String timeFrame,
+            LocalDate customStartDate,
+            LocalDate customEndDate,
+            Pageable pageable
+    );
 }

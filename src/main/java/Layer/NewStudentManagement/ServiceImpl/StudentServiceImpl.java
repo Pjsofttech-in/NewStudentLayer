@@ -904,6 +904,7 @@ public class StudentServiceImpl implements StudentService {
         dto.setScholarshipAmount(student.getScholarshipAmount());
         dto.setAdmissionType(student.getAdmissionType());
 
+        dto.setAddressDTO(StudentMapper.toStudentAddressDTO(student.getAddress()));
         dto.setCollegeDetailsDTO(StudentMapper.toStudentCollegeDetailsDTO(student.getCollegeDetails()));
         dto.setDocumentDTO(StudentMapper.toStudentDocumentDTO(student.getDocuments()));
 

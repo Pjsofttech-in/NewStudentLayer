@@ -378,47 +378,52 @@ public class AttendanceServiceImpl implements AttendanceService {
 
                 StudentAttendaceDTO dto;
                 if (date.getDayOfWeek() == DayOfWeek.SUNDAY) {
-                    dto = new StudentAttendaceDTO(
-                            null,
-                            student.getRollNo(),
-                            student.getBranchCode(),
-                            student.getClassRoom().getId(),
-                            student.getFullName(),
-                            date,
-                            null,
-                            null,
-                            0L,
-                            "Sunday",
-                            student.getId()
-                    );
+
+                    dto = StudentAttendaceDTO.builder()
+                            .id(null)
+                            .rollNo(student.getRollNo())
+                            .branchCode(student.getBranchCode())
+                            .classroomId(student.getClassRoom().getId())
+                            .studentName(student.getFullName())
+                            .date(date)
+                            .loginTime(null)
+                            .logoutTime(null)
+                            .workingMinutes(0L)
+                            .status("Sunday")
+                            .studentId(student.getId())
+                            .build();
+
                 } else if (att != null) {
-                    dto = new StudentAttendaceDTO(
-                            att.getId(),
-                            att.getRollNo(),
-                            att.getBranchCode(),
-                            att.getClassroomId(),
-                            att.getStudentName(),
-                            att.getDate(),
-                            att.getLoginTime(),
-                            att.getLogoutTime(),
-                            att.getWorkingMinutes(),
-                            att.getStatus(),
-                            student.getId()
-                    );
+
+                    dto = StudentAttendaceDTO.builder()
+                            .id(att.getId())
+                            .rollNo(att.getRollNo())
+                            .branchCode(att.getBranchCode())
+                            .classroomId(att.getClassroomId())
+                            .studentName(att.getStudentName())
+                            .date(att.getDate())
+                            .loginTime(att.getLoginTime())
+                            .logoutTime(att.getLogoutTime())
+                            .workingMinutes(att.getWorkingMinutes())
+                            .status(att.getStatus())
+                            .studentId(student.getId())
+                            .build();
+
                 } else {
-                    dto = new StudentAttendaceDTO(
-                            null,
-                            student.getRollNo(),
-                            student.getBranchCode(),
-                            student.getClassRoom().getId(),
-                            student.getFullName(),
-                            date,
-                            null,
-                            null,
-                            0L,
-                            "Absent",
-                            student.getId()
-                    );
+
+                    dto = StudentAttendaceDTO.builder()
+                            .id(null)
+                            .rollNo(student.getRollNo())
+                            .branchCode(student.getBranchCode())
+                            .classroomId(student.getClassRoom().getId())
+                            .studentName(student.getFullName())
+                            .date(date)
+                            .loginTime(null)
+                            .logoutTime(null)
+                            .workingMinutes(0L)
+                            .status("Absent")
+                            .studentId(student.getId())
+                            .build();
                 }
 
                 combinedList.add(dto);
@@ -743,6 +748,292 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         // Calculate status based on lecture start time
         return now.isAfter(lectureStartTime) ? "Late" : "On Time";
+    }
+
+    @Override
+    public Page<StudentAttendaceDTO> getClassroomLectureAttendance(
+            Long classroomId,
+            Long scheduledPeriodId,
+            StudentAttendanceFilterDTO filter,
+            String timeFrame,
+            LocalDate customStartDate,
+            LocalDate customEndDate,
+            Pageable pageable) {
+
+        LocalDate today = LocalDate.now();
+
+        LocalDate startDate = today;
+        LocalDate endDate = today;
+
+        switch (timeFrame.toLowerCase()) {
+
+            case "7days" ->
+                    startDate = today.minusDays(6);
+
+            case "30days" ->
+                    startDate = today.minusDays(29);
+
+            case "365days" ->
+                    startDate = today.minusDays(364);
+
+            case "custom" -> {
+
+                if (customStartDate == null || customEndDate == null) {
+                    throw new RuntimeException(
+                            "Custom start date and end date are required"
+                    );
+                }
+
+                startDate = customStartDate;
+                endDate = customEndDate;
+            }
+        }
+
+        // 1. Validate classroom
+        StudentClassRoom classroom = classRoomRepository
+                .findById(classroomId)
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Classroom not found with ID: " + classroomId
+                        )
+                );
+
+        // 2. Validate lecture
+        StudentScheduledPeriod lecturePeriod =
+                scheduledPeriodRepository
+                        .findById(scheduledPeriodId)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Lecture period not found with ID: "
+                                                + scheduledPeriodId
+                                )
+                        );
+
+        // 3. Fetch students belonging to classroom
+        List<StudentEntity> students =
+                studentRepository.findAllByClassroomId(classroomId);
+
+        // 4. Apply student filters
+        if (filter != null) {
+
+            if (filter.getRollNo() != null) {
+
+                students = students.stream()
+                        .filter(student ->
+                                Objects.equals(
+                                        student.getRollNo(),
+                                        filter.getRollNo()
+                                )
+                        )
+                        .toList();
+            }
+
+            if (filter.getStudentName() != null
+                    && !filter.getStudentName().isBlank()) {
+
+                String name =
+                        filter.getStudentName()
+                                .toLowerCase();
+
+                students = students.stream()
+                        .filter(student ->
+                                student.getFullName() != null
+                                        && student.getFullName()
+                                        .toLowerCase()
+                                        .contains(name)
+                        )
+                        .toList();
+            }
+        }
+
+        // 5. Fetch attendance ONLY for this lecture
+        List<StudentAttendance> attendanceList =
+                attendanceRepository
+                        .findByClassroomIdAndScheduledPeriodIdAndDateBetween(
+                                classroomId,
+                                scheduledPeriodId,
+                                startDate,
+                                endDate
+                        );
+
+        // 6. Map attendance
+        Map<String, StudentAttendance> attendanceMap =
+                attendanceList.stream()
+                        .collect(Collectors.toMap(
+                                attendance ->
+                                        attendance.getRollNo()
+                                                + "_"
+                                                + attendance.getDate()
+                                                + "_"
+                                                + attendance.getScheduledPeriodId(),
+
+                                attendance -> attendance
+                        ));
+
+        List<StudentAttendaceDTO> combinedList =
+                new ArrayList<>();
+
+        // 7. Generate attendance for every date/student
+        for (LocalDate date = startDate;
+             !date.isAfter(endDate);
+             date = date.plusDays(1)) {
+
+            for (StudentEntity student : students) {
+
+                String key =
+                        student.getRollNo()
+                                + "_"
+                                + date
+                                + "_"
+                                + scheduledPeriodId;
+
+                StudentAttendance attendance =
+                        attendanceMap.get(key);
+
+                StudentAttendaceDTO dto;
+
+                if (date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+
+                    dto = new StudentAttendaceDTO();
+
+                    dto.setRollNo(student.getRollNo());
+                    dto.setBranchCode(student.getBranchCode());
+                    dto.setClassroomId(classroomId);
+                    dto.setStudentName(student.getFullName());
+                    dto.setDate(date);
+                    dto.setStatus("Sunday");
+                    dto.setWorkingMinutes(0L);
+                    dto.setStudentId(student.getId());
+
+                } else if (attendance != null) {
+
+                    dto = new StudentAttendaceDTO();
+
+                    dto.setId(attendance.getId());
+                    dto.setRollNo(attendance.getRollNo());
+                    dto.setBranchCode(attendance.getBranchCode());
+                    dto.setClassroomId(attendance.getClassroomId());
+                    dto.setStudentName(attendance.getStudentName());
+                    dto.setDate(attendance.getDate());
+                    dto.setLoginTime(attendance.getLoginTime());
+                    dto.setLogoutTime(attendance.getLogoutTime());
+                    dto.setWorkingMinutes(
+                            attendance.getWorkingMinutes()
+                    );
+                    dto.setStatus(attendance.getStatus());
+                    dto.setStudentId(student.getId());
+
+                } else {
+
+                    dto = new StudentAttendaceDTO();
+
+                    dto.setRollNo(student.getRollNo());
+                    dto.setBranchCode(student.getBranchCode());
+                    dto.setClassroomId(classroomId);
+                    dto.setStudentName(student.getFullName());
+                    dto.setDate(date);
+                    dto.setStatus("Absent");
+                    dto.setWorkingMinutes(0L);
+                    dto.setStudentId(student.getId());
+                }
+
+                dto.setScheduledPeriodId(scheduledPeriodId);
+
+                dto.setSubjectName(
+                        Optional.ofNullable(
+                                        lecturePeriod.getSubject()
+                                )
+                                .map(StudentSubject::getSubject)
+                                .orElse("")
+                );
+
+                combinedList.add(dto);
+            }
+        }
+
+        // 8. Status filter
+        if (filter != null
+                && filter.getStatus() != null
+                && !filter.getStatus().equalsIgnoreCase("All")) {
+
+            String status =
+                    filter.getStatus().toLowerCase();
+
+            combinedList = combinedList.stream()
+                    .filter(dto ->
+                            dto.getStatus() != null
+                                    && dto.getStatus()
+                                    .toLowerCase()
+                                    .equals(status)
+                    )
+                    .toList();
+        }
+
+        if (pageable.getSort().isSorted()) {
+            List<StudentAttendaceDTO> finalCombinedList = combinedList;
+            pageable.getSort().forEach(order -> {
+
+                Comparator<StudentAttendaceDTO> comparator;
+
+                switch (order.getProperty()) {
+
+                    case "date" ->
+                            comparator = Comparator.comparing(
+                                    StudentAttendaceDTO::getDate,
+                                    Comparator.nullsLast(Comparator.naturalOrder())
+                            );
+
+                    case "studentName" ->
+                            comparator = Comparator.comparing(
+                                    StudentAttendaceDTO::getStudentName,
+                                    Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
+                            );
+
+                    case "rollNo" ->
+                            comparator = Comparator.comparing(
+                                    StudentAttendaceDTO::getRollNo,
+                                    Comparator.nullsLast(Comparator.naturalOrder())
+                            );
+
+                    case "status" ->
+                            comparator = Comparator.comparing(
+                                    StudentAttendaceDTO::getStatus,
+                                    Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)
+                            );
+
+                    default ->
+                            comparator = null;
+                }
+
+                if (comparator != null) {
+                    if (order.isDescending()) {
+                        comparator = comparator.reversed();
+                    }
+
+                    finalCombinedList.sort(comparator);
+                }
+            });
+            combinedList = finalCombinedList.stream().toList();
+        }
+
+        // 9. Manual pagination
+        int start = (int) pageable.getOffset();
+
+        int end = Math.min(
+                start + pageable.getPageSize(),
+                combinedList.size()
+        );
+
+        List<StudentAttendaceDTO> pagedList =
+                (start < end)
+                        ? combinedList.subList(start, end)
+                        : List.of();
+
+        return new PageImpl<>(
+                pagedList,
+                pageable,
+                combinedList.size()
+        );
     }
 
 

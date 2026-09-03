@@ -1,9 +1,6 @@
 package Layer.NewStudentManagement.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,6 +9,7 @@ import java.time.LocalTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Setter
+@Builder
 public class StudentAttendaceDTO
 {
     private Long id;
@@ -25,4 +23,7 @@ public class StudentAttendaceDTO
     private Long workingMinutes;
     private String status;
     private Long studentId;
+
+    private Long scheduledPeriodId;
+    private String subjectName;
 }

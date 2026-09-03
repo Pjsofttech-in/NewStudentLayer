@@ -77,6 +77,38 @@ public class AttendanceController {
         return ResponseEntity.ok(result);
     }
 
+    @PostMapping("/getAttendaceByClassroom/{classroomId}/lecture/{scheduledPeriodId}")
+    public ResponseEntity<Page<StudentAttendaceDTO>> getClassroomLectureAttendance(
+            @PathVariable Long classroomId,
+            @PathVariable Long scheduledPeriodId,
+            @RequestBody StudentAttendanceFilterDTO filter,
+
+            @RequestParam(required = false, defaultValue = "custom")
+            String timeFrame,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate customStartDate,
+
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate customEndDate,
+
+            Pageable pageable) {
+
+        return ResponseEntity.ok(
+                attendanceService.getClassroomLectureAttendance(
+                        classroomId,
+                        scheduledPeriodId,
+                        filter,
+                        timeFrame,
+                        customStartDate,
+                        customEndDate,
+                        pageable
+                )
+        );
+    }
+
     @GetMapping("/cardCountForAttendace")
     public ResponseEntity<AttendanceCountDTO> getAttendanceCount(
             @RequestParam Long classroomId,

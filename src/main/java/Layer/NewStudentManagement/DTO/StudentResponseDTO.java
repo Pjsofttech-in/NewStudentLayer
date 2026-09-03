@@ -96,4 +96,5 @@ public class StudentResponseDTO {
 
     private StudentCollegeDetailsDTO collegeDetailsDTO;
     private StudentDocumentDTO documentDTO;
+    private StudentAddressDTO addressDTO;
 }

@@ -1,21 +1,19 @@
 package Layer.NewStudentManagement.Repository;
 
 import Layer.NewStudentManagement.Entity.StudentAttendance;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 
 @Repository
-public interface AttendanceRepository extends JpaRepository<StudentAttendance,Long>, JpaSpecificationExecutor<StudentAttendance>
-{
+public interface AttendanceRepository extends JpaRepository<StudentAttendance, Long>, JpaSpecificationExecutor<StudentAttendance> {
 
     @Query("SELECT sa FROM StudentAttendance sa WHERE sa.rollNo = :rollNo AND sa.classroomId = :classroomId AND sa.date = :date")
     Optional<StudentAttendance> findAttendanceByRollNoAndClassroomIdAndDate(
@@ -42,10 +40,10 @@ public interface AttendanceRepository extends JpaRepository<StudentAttendance,Lo
     List<Integer> findPresentRollNos(@Param("classroomId") Long classroomId, @Param("date") LocalDate date);
 //
 
-@Query("SELECT COUNT(sa) FROM StudentAttendance sa WHERE sa.classroomId = :classroomId AND sa.date BETWEEN :startDate AND :endDate")
-long countByClassroomIdAndDateRange(@Param("classroomId") Long classroomId,
-                                    @Param("startDate") LocalDate startDate,
-                                    @Param("endDate") LocalDate endDate);
+    @Query("SELECT COUNT(sa) FROM StudentAttendance sa WHERE sa.classroomId = :classroomId AND sa.date BETWEEN :startDate AND :endDate")
+    long countByClassroomIdAndDateRange(@Param("classroomId") Long classroomId,
+                                        @Param("startDate") LocalDate startDate,
+                                        @Param("endDate") LocalDate endDate);
 
     @Query("SELECT a FROM StudentAttendance a WHERE a.rollNo = :rollNo AND a.branchCode = :branchCode AND a.classroomId = :classroomId AND a.date BETWEEN :start AND :end")
     List<StudentAttendance> findAttendanceByStudentAndDateRange(@Param("rollNo") int rollNo,
@@ -62,6 +60,13 @@ long countByClassroomIdAndDateRange(@Param("classroomId") Long classroomId,
                                            @Param("classroomId") Long classroomId,
                                            @Param("startDate") LocalDate startDate,
                                            @Param("endDate") LocalDate endDate);
+
+    List<StudentAttendance> findByClassroomIdAndScheduledPeriodIdAndDateBetween(
+            Long classroomId,
+            Long scheduledPeriodId,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 
 
 }

@@ -148,7 +148,7 @@ public class StudentMapper {
         return dto;
     }
 
-    public StudentAddressDTO toStudentAddressDTO(StudentAddress address) {
+    public static StudentAddressDTO toStudentAddressDTO(StudentAddress address) {
         if (address == null) return null;
 
         StudentAddressDTO dto = new StudentAddressDTO();
