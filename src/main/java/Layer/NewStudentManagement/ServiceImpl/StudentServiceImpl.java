@@ -157,142 +157,7 @@ public class StudentServiceImpl implements StudentService {
 
         student.setParentPassword(passwordEncoder.encode(request.getStudent().getParentPassword()));
 
-        if (request.getGraduationTypeId() != null) {
-            StudentGraduationType gradType = graduationTypeRepository.findById(request.getGraduationTypeId())
-                    .orElseThrow(() -> new RuntimeException("GraduationType not found with ID: " + request.getGraduationTypeId()));
-            student.setGraduationType(gradType);
-        }
-
-        if (request.getCourseTypeId() != null) {
-            StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
-                    .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getGraduationTypeId()));
-            student.setCourseType(courseType);
-        }
-
-        if (request.getStreamId() != null) {
-            StudentStream stream = streamRepository.findById(request.getStreamId())
-                    .orElseThrow(() -> new RuntimeException("Stream not found with ID: " + request.getStreamId()));
-            student.setStream(stream);
-            student.setStreamName(stream.getStream());
-        }
-
-        if (request.getCertificationId() != null) {
-            StudentCertification studentCertification = certificationRepository.findById(request.getCertificationId())
-                    .orElseThrow(() -> new RuntimeException("Certification course not found with ID: " + request.getCertificationId()));
-            student.setCertification(studentCertification);
-        }
-
-        // ---- Upload Photo ----
-        if (oldRegisterPhoto != null && !oldRegisterPhoto.isEmpty()) {
-            String fileUrl = s3Service.uploadFile(oldRegisterPhoto, branchCode);
-            student.setOldRegisterPhoto(fileUrl);
-        }
-        if (entranceMarkSheet != null && !entranceMarkSheet.isEmpty()) {
-            String marksheetUrl = s3Service.uploadFile(entranceMarkSheet, branchCode);
-            student.setEntranceMarkSheet(marksheetUrl);
-        }
-
-        if ("School".equalsIgnoreCase(student.getInstitutionType())) {
-
-            Long standardId = request.getStandardId();
-            if (standardId != null) {
-                StudentStandard standard = standardRepository.findById(standardId)
-                        .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
-                student.setStandard(standard);
-                student.setStandardName(standard.getStandardName());
-            }
-
-            Long mediumId = request.getMediumId();
-            if (mediumId != null) {
-                StudentMedium medium = mediumRepository.findById(mediumId)
-                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
-                student.setMedium(medium);
-                student.setMediumName(medium.getMediumName());
-            }
-
-            student.setDegreeName(null);
-            student.setDepartmentName(null);
-        } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
-                "Jr.College".equalsIgnoreCase(getGraduationType(student))) {
-
-            Long standardId = request.getStandardId();
-            if (standardId != null) {
-                StudentStandard standard = standardRepository.findById(standardId)
-                        .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
-                student.setStandard(standard);
-                student.setStandardName(standard.getStandardName());
-            }
-
-            Long mediumId = request.getMediumId();
-            if (mediumId != null) {
-                StudentMedium medium = mediumRepository.findById(mediumId)
-                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
-                student.setMedium(medium);
-                student.setMediumName(medium.getMediumName());
-            }
-
-            student.setDegreeName(null);
-            student.setDepartmentName(null);
-        } else if ("College".equalsIgnoreCase(student.getInstitutionType()) &&
-                "Diploma".equalsIgnoreCase(getGraduationType(student))) {
-
-            if (request.getCourseTypeId() != null) {
-                StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
-                        .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getCourseTypeId()));
-                student.setCourseType(courseType);
-            }
-
-            Long mediumId = request.getMediumId();
-            if (mediumId != null) {
-                StudentMedium medium = mediumRepository.findById(mediumId)
-                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
-                student.setMedium(medium);
-                student.setMediumName(medium.getMediumName());
-            }
-
-            String departmentName = request.getDepartmentName();
-            if (StringUtils.isBlank(departmentName)) {
-                throw new RuntimeException("Department can not be null");
-            }
-            student.setDepartmentName(request.getDepartmentName());
-
-            String semister = request.getStudent().getSemister();
-            if (StringUtils.isBlank(semister)) {
-                throw new RuntimeException("Semester can not be null");
-            }
-            student.setSemister(semister);
-
-            student.setGroupName(null);
-            student.setStandardName(null);
-            student.setStandard(null);
-        } else {
-
-            if (request.getDegreeNameId() != null) {
-                StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
-                        .orElseThrow(() -> new RuntimeException("DegreeName not found with ID: " + request.getDegreeNameId()));
-                student.setDegreeName(degree);
-            }
-            Long mediumId = request.getMediumId();
-            if (mediumId != null) {
-                StudentMedium medium = mediumRepository.findById(mediumId)
-                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
-                student.setMedium(medium);
-                student.setMediumName(medium.getMediumName());
-            }
-            Long certificationId = request.getCertificationId();
-            if (certificationId != null) {
-                StudentCertification certification = certificationRepository.findById(certificationId)
-                        .orElseThrow(() -> new RuntimeException("Certification not found with ID: " + mediumId));
-                student.setCertification(certification);
-            }
-
-            student.setDepartmentName(request.getDepartmentName());
-
-
-            student.setGroupName(null);
-            student.setStandardName(null);
-            student.setStandard(null);
-        }
+        setAcademicDetails(request, oldRegisterPhoto, entranceMarkSheet, student, branchCode);
 
         StudentEntity savedStudent = studentRepository.save(student);
 
@@ -353,6 +218,148 @@ public class StudentServiceImpl implements StudentService {
         }
 
         return mapToDTO(savedStudent);
+    }
+
+    private void setAcademicDetails(StudentRequest request, MultipartFile oldRegisterPhoto, MultipartFile entranceMarkSheet,
+                                    StudentEntity student, String branchCode) {
+        StudentEntity incomingStudent = request.getStudent();
+
+        if (request.getGraduationTypeId() != null) {
+            StudentGraduationType gradType = graduationTypeRepository.findById(request.getGraduationTypeId())
+                    .orElseThrow(() -> new RuntimeException("GraduationType not found with ID: " + request.getGraduationTypeId()));
+            student.setGraduationType(gradType);
+        }
+
+        if (request.getCourseTypeId() != null) {
+            StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                    .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getGraduationTypeId()));
+            student.setCourseType(courseType);
+        }
+
+        if (request.getStreamId() != null) {
+            StudentStream stream = streamRepository.findById(request.getStreamId())
+                    .orElseThrow(() -> new RuntimeException("Stream not found with ID: " + request.getStreamId()));
+            student.setStream(stream);
+            student.setStreamName(stream.getStream());
+        }
+
+        if (request.getCertificationId() != null) {
+            StudentCertification studentCertification = certificationRepository.findById(request.getCertificationId())
+                    .orElseThrow(() -> new RuntimeException("Certification course not found with ID: " + request.getCertificationId()));
+            student.setCertification(studentCertification);
+        }
+
+        // ---- Upload Photo ----
+        if (oldRegisterPhoto != null && !oldRegisterPhoto.isEmpty()) {
+            String fileUrl = s3Service.uploadFile(oldRegisterPhoto, branchCode);
+            student.setOldRegisterPhoto(fileUrl);
+        }
+        if (entranceMarkSheet != null && !entranceMarkSheet.isEmpty()) {
+            String marksheetUrl = s3Service.uploadFile(entranceMarkSheet, branchCode);
+            student.setEntranceMarkSheet(marksheetUrl);
+        }
+
+        if ("School".equalsIgnoreCase(incomingStudent.getInstitutionType())) {
+
+            Long standardId = request.getStandardId();
+            if (standardId != null) {
+                StudentStandard standard = standardRepository.findById(standardId)
+                        .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
+                student.setStandard(standard);
+                student.setStandardName(standard.getStandardName());
+            }
+
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+
+            student.setDegreeName(null);
+            student.setDepartmentName(null);
+        } else if ("College".equalsIgnoreCase(incomingStudent.getInstitutionType()) &&
+                "Jr.College".equalsIgnoreCase(getGraduationType(incomingStudent))) {
+
+            Long standardId = request.getStandardId();
+            if (standardId != null) {
+                StudentStandard standard = standardRepository.findById(standardId)
+                        .orElseThrow(() -> new RuntimeException("Standard not found with ID: " + standardId));
+                student.setStandard(standard);
+                student.setStandardName(standard.getStandardName());
+            }
+
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+
+            student.setDegreeName(null);
+            student.setDepartmentName(null);
+        } else if ("College".equalsIgnoreCase(incomingStudent.getInstitutionType()) &&
+                "Diploma".equalsIgnoreCase(getGraduationType(incomingStudent))) {
+
+            if (request.getCourseTypeId() != null) {
+                StudentCourseType courseType = courseTypeRepository.findById(request.getCourseTypeId())
+                        .orElseThrow(() -> new RuntimeException("Course not found with ID: " + request.getCourseTypeId()));
+                student.setCourseType(courseType);
+            }
+
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+
+            String departmentName = request.getDepartmentName();
+            if (StringUtils.isBlank(departmentName)) {
+                throw new RuntimeException("Department can not be null");
+            }
+            student.setDepartmentName(request.getDepartmentName());
+
+            String semister = request.getStudent().getSemister();
+            if (StringUtils.isBlank(semister)) {
+                throw new RuntimeException("Semester can not be null");
+            }
+            student.setSemister(semister);
+
+            student.setGroupName(null);
+            student.setStandardName(null);
+            student.setStandard(null);
+        } else {
+
+            if (request.getDegreeNameId() != null) {
+                StudentDegreeName degree = degreeNameRepository.findById(request.getDegreeNameId())
+                        .orElseThrow(() -> new RuntimeException("DegreeName not found with ID: " + request.getDegreeNameId()));
+                student.setDegreeName(degree);
+            }
+            Long mediumId = request.getMediumId();
+            if (mediumId != null) {
+                StudentMedium medium = mediumRepository.findById(mediumId)
+                        .orElseThrow(() -> new RuntimeException("Medium not found with ID: " + mediumId));
+                student.setMedium(medium);
+                student.setMediumName(medium.getMediumName());
+            }
+            Long certificationId = request.getCertificationId();
+            if (certificationId != null) {
+                StudentCertification certification = certificationRepository.findById(certificationId)
+                        .orElseThrow(() -> new RuntimeException("Certification not found with ID: " + mediumId));
+                student.setCertification(certification);
+            }
+
+            student.setDepartmentName(request.getDepartmentName());
+
+
+            student.setGroupName(null);
+            student.setStandardName(null);
+            student.setStandard(null);
+        }
     }
 
     @Override
@@ -452,6 +459,8 @@ public class StudentServiceImpl implements StudentService {
     public StudentResponseDTO updateStudent(Long studentId, String role, String email, StudentRequest request) {
         checkPermission(role, email, "Put");
 
+        String branchCode = staffService.fetchBranchCodeByRole(role, email);
+
         StudentEntity existing = studentRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
 
@@ -466,6 +475,8 @@ public class StudentServiceImpl implements StudentService {
         if (request.getStudent().getParentPassword() != null) {
             existing.setParentPassword(passwordEncoder.encode(request.getStudent().getParentPassword()));
         }
+
+        setAcademicDetails(request, null, null, existing, branchCode);
 
         StudentEntity savedStudent = studentRepository.save(existing);
 
