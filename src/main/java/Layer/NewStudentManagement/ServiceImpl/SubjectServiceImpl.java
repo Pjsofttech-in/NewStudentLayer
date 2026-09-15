@@ -37,7 +37,6 @@ public class SubjectServiceImpl implements SubjectService
         subject.setBranchCode(branchCode);
         subject.setRole(role);
         subject.setCreatedByEmail(email);
-        subject.setInstitutionType(dto.getInstitutionType());
         subject.setSubject(dto.getSubject());
 
         //subject is now stored irrespective of graduation details
@@ -51,7 +50,6 @@ public class SubjectServiceImpl implements SubjectService
         response.setCreatedByEmail(saved.getCreatedByEmail());
         response.setRole(saved.getRole());
         response.setBranchCode(saved.getBranchCode());
-        response.setInstitutionType(saved.getInstitutionType());
 
         return response;
     }
@@ -126,9 +124,7 @@ public class SubjectServiceImpl implements SubjectService
         String branchCode = staffService.fetchBranchCodeByRole(role, email);
 
         List<StudentSubject> subjects = subjectRepository.findSubjectsByFilters(
-                branchCode,
-                institutionType != null && !institutionType.trim().isEmpty() ? institutionType.trim() : null
-        );
+                branchCode);
 
         return subjects.stream()
                 .map(this::mapToSubjectDTO)
@@ -158,7 +154,6 @@ public class SubjectServiceImpl implements SubjectService
         dto.setCreatedByEmail(subject.getCreatedByEmail());
         dto.setRole(subject.getRole());
         dto.setBranchCode(subject.getBranchCode());
-        dto.setInstitutionType(subject.getInstitutionType());
 
         return dto;
     }

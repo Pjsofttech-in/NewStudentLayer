@@ -18,18 +18,6 @@ public class StudentTeacherDTO
     private Long id;
     private String teacherName;
     private String teacherEmail;
-    private String institutionType;
-    private Long graduationTypeId;
-    private String graduationType;
-    private Long courseTypeId;
-    private String courseType;
-    private Long streamId;
-    private String stream;
-    private Long certificationId;
-    private String certification;
-    private String degreeName;
-    private Long degreeId;
-    private String departmentName;
     private String profilePhoto;
     private String education;
     private String experience;

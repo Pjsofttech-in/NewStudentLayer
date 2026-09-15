@@ -12,10 +12,8 @@ import java.util.Optional;
 @Repository
 public interface SubjectRepository extends JpaRepository<StudentSubject, Long> {
     @Query("SELECT s FROM StudentSubject s " +
-            "WHERE (:branchCode IS NULL OR s.branchCode = :branchCode) " +
-            "AND (:institutionType IS NULL OR LOWER(s.institutionType) = LOWER(:institutionType)) ")
-    List<StudentSubject> findSubjectsByFilters(@Param("branchCode") String branchCode,
-                                               @Param("institutionType") String institutionType);
+            "WHERE (:branchCode IS NULL OR s.branchCode = :branchCode) ")
+    List<StudentSubject> findSubjectsByFilters(@Param("branchCode") String branchCode);
 
     @Query("SELECT s FROM StudentSubject s WHERE s.branchCode=:branchCode ORDER BY s.id DESC")
     List<StudentSubject> findAllByBranchCode(@Param("branchCode") String branchCode);
@@ -24,9 +22,8 @@ public interface SubjectRepository extends JpaRepository<StudentSubject, Long> {
     @Query("SELECT s FROM StudentSubject s JOIN s.teachers t WHERE t.id = :teacherId")
     List<StudentSubject> findSubjectsByTeacherId(@Param("teacherId") Long teacherId);
 
-        @Query("SELECT s FROM StudentSubject s WHERE s.subject = :subjectName " +
-            "AND (s.branchCode = :branchCode) AND (s.institutionType = :institutionType) ")
+    @Query("SELECT s FROM StudentSubject s WHERE s.subject = :subjectName " +
+            "AND (s.branchCode = :branchCode) ")
     Optional<StudentSubject> findSubjectByName(@Param("subjectName") String subjectName,
-                                               @Param("branchCode") String branchCode,
-                                               @Param("institutionType") String institutionType);
+                                               @Param("branchCode") String branchCode);
 }

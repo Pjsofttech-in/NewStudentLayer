@@ -1,19 +1,14 @@
 package Layer.NewStudentManagement.Controller;
 
 import Layer.NewStudentManagement.DTO.*;
-import Layer.NewStudentManagement.Entity.StudentTeacher;
-import Layer.NewStudentManagement.Repository.TeacherRepository;
 import Layer.NewStudentManagement.Security.LoginRequest;
 import Layer.NewStudentManagement.Security.LoginResponse;
 import Layer.NewStudentManagement.Service.TeacherService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -24,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 import java.util.List;
+
 //@CrossOrigin(origins = "http://localhost:3000")
 //@CrossOrigin(origins = "https://pjsofttech.in")
 @RestController
@@ -32,6 +28,9 @@ public class TeacherController
     @Autowired
     private TeacherService teacherService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @PostMapping(value = "/createTeacher", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<StudentTeacherDTO> createTeacher(
             @RequestPart("dto") String dtoJson,
@@ -39,10 +38,6 @@ public class TeacherController
             @RequestParam String email,
             @RequestParam String role
     ) throws JsonProcessingException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule()); // support LocalDate
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         TeacherRequestDTO dto = objectMapper.readValue(dtoJson, TeacherRequestDTO.class);
 
@@ -67,10 +62,6 @@ public class TeacherController
             @RequestPart(value = "profilePhoto", required = false) MultipartFile profilePhoto,
             @RequestPart("dto") String dtoJson
     ) throws JsonProcessingException {
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
         TeacherRequestDTO teacherDTO = objectMapper.readValue(dtoJson, TeacherRequestDTO.class);
 

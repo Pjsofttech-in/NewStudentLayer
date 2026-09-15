@@ -1,6 +1,5 @@
 package Layer.NewStudentManagement.Entity;
 
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -36,13 +35,8 @@ public class StudentTeacher
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate joiningDate;
-    private String institutionType;
-    private String streamName;
     private String otp;
     private Long otpRequestedTime;
-    private String graduationTypeName;
-    private String degreeName;
-    private String departmentName;
     private String profilePhoto;
     private String education;
     private String experience;
@@ -65,24 +59,4 @@ public class StudentTeacher
 
     @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
     private List<StudentClassRoomTeacherSubject> assignments;
-
-    @ManyToOne
-    @JoinColumn(name = "graduation_type_id", nullable = true)
-    private StudentGraduationType graduationType;
-
-    @ManyToOne
-    @JoinColumn(name = "course_type_id", nullable = true)
-    private StudentCourseType courseType;
-
-    @ManyToOne
-    @JoinColumn(name = "certification_id", nullable = true)
-    private StudentCertification certification;
-
-    @ManyToOne
-    @JoinColumn(name = "stream_id", nullable = true)
-    private StudentStream stream;
-
-    @ManyToOne
-    @JoinColumn(name = "degree_id", nullable = true)
-    private StudentDegreeName degree;
 }

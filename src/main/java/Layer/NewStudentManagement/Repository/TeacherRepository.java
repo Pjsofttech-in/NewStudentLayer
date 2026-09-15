@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -29,32 +28,11 @@ public interface TeacherRepository extends JpaRepository<StudentTeacher,Long>
     @Query("SELECT t FROM StudentTeacher t JOIN t.subjects s WHERE s.id = :subjectId AND t.active = true")
     List<StudentTeacher> findTeachersBySubjectId(@Param("subjectId") Long subjectId);
 
-    @Query("SELECT t FROM StudentTeacher t WHERE t.institutionType = :institutionType AND t.branchCode = :branchCode AND t.active = true")
-    List<StudentTeacher> findByInstitutionType(@Param("institutionType") String institutionType,
-                                                            @Param("branchCode") String branchCode);
-
-
     @Query("SELECT t FROM StudentTeacher t " +
-            "LEFT JOIN t.courseType ct " + // 🌟 Explicit left join preserves null relationships
-            "LEFT JOIN t.certification cert " + // 🌟 Explicit left join preserves null relationships
             "WHERE t.branchCode = :branchCode " +
-            "AND t.institutionType = :institutionType " +
-            "AND (:graduationTypeName IS NULL OR t.graduationTypeName = :graduationTypeName) " +
-            "AND (:streamName IS NULL OR t.streamName = :streamName) " +
-            "AND (:degreeName IS NULL OR t.degreeName = :degreeName) " +
-            "AND (:courseTypeName IS NULL OR ct.courseType = :courseTypeName) " +
-            "AND (:certification IS NULL OR cert.certification = :certification) " +
-            "AND (:departmentName IS NULL OR t.departmentName = :departmentName) " +
             "AND t.active = true")
     List<StudentTeacher> findTeachersByFilters(
-            @Param("branchCode") String branchCode,
-            @Param("institutionType") String institutionType,
-            @Param("graduationTypeName") String graduationTypeName,
-            @Param("streamName") String streamName,
-            @Param("courseTypeName") String courseTypeName,
-            @Param("certification") String certificationName,
-            @Param("degreeName") String degreeName,
-            @Param("departmentName") String departmentName
+            @Param("branchCode") String branchCode
     );
 
     @Modifying

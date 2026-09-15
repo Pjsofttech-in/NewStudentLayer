@@ -21,7 +21,6 @@ public class StudentSubject
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
     private String subject;
-    private String institutionType;
     @Email
     private String createdByEmail;
 

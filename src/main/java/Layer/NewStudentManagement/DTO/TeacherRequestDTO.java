@@ -15,13 +15,6 @@ public class TeacherRequestDTO
 {
     private String teacherName;
     private String teacherEmail;
-    private String institutionType;
-    private Long graduationTypeId;
-    private Long courseTypeId;
-    private Long certificateId;
-    private Long streamId;
-    private Long degreeId;
-    private String departmentName;          //Frontend year field
 
     private String education;
     private String experience;
